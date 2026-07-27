@@ -8,7 +8,7 @@
    * locally in the browser so the form is fully demoable out of the box.
    * See README.md for step-by-step instructions on wiring a real backend.
    */
-  const WAITLIST_ENDPOINT = ""; // e.g. "https://formspree.io/f/xxxxxxx"
+  const WAITLIST_ENDPOINT = "https://formspree.io/f/mnjelkga";
   const STORAGE_KEY = "autonoma_waitlist";
   const BASE_COUNT = 312; // starting "social proof" number shown before real signups
 
