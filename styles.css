@@ -533,6 +533,153 @@ h1 {
   margin: 0;
 }
 
+/* Transcript demo */
+.transcript-demo {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 32px;
+  align-items: stretch;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+@media (max-width: 800px) {
+  .transcript-demo { grid-template-columns: 1fr; }
+}
+
+.transcript-window {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 380px;
+}
+
+.transcript-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 13px;
+  background: var(--surface-2);
+}
+
+.transcript-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #34d399;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2);
+  flex-shrink: 0;
+}
+
+.transcript-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.transcript-line {
+  max-width: 82%;
+  padding: 11px 15px;
+  border-radius: 14px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: transcript-in 0.4s ease forwards;
+}
+
+@keyframes transcript-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.transcript-line.caller {
+  align-self: flex-start;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-bottom-left-radius: 4px;
+}
+
+.transcript-line.agent {
+  align-self: flex-end;
+  background: linear-gradient(135deg, rgba(124, 92, 255, 0.22), rgba(34, 211, 238, 0.16));
+  border: 1px solid rgba(124, 92, 255, 0.3);
+  color: var(--text);
+  border-bottom-right-radius: 4px;
+}
+
+.transcript-line .line-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  opacity: 0.6;
+}
+
+.transcript-outcome {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-content: center;
+}
+
+.outcome-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.outcome-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.outcome-item strong {
+  display: block;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.outcome-item p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.transcript-cta {
+  text-align: center;
+  margin: 40px 0 0;
+  color: var(--text-dim);
+  font-size: 14.5px;
+}
+
+.transcript-cta a {
+  color: var(--accent-2);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.transcript-cta a:hover { text-decoration: underline; }
+
 /* Waitlist section */
 .waitlist-section {
   text-align: center;
