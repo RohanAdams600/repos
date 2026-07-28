@@ -124,7 +124,53 @@
   updateWaitlistCount();
   revealOnScroll();
   wireLiveDemo();
+  wireTranscriptDemo();
 })();
+
+function wireTranscriptDemo() {
+  const body = document.getElementById("transcript-body");
+  const windowEl = document.getElementById("transcript-window");
+  if (!body || !windowEl) return;
+
+  const lines = [
+    { role: "caller", label: "Caller", text: "Hi, my AC stopped cooling and it's getting pretty warm in here." },
+    { role: "agent", label: "AI agent", text: "Sorry to hear that -- I can get a technician out to you. Can I grab your name and address?" },
+    { role: "caller", label: "Caller", text: "John Smith, 123 Oak Street." },
+    { role: "agent", label: "AI agent", text: "Got it, John. I have openings tomorrow 10am-12pm or 2-4pm -- which works better?" },
+    { role: "caller", label: "Caller", text: "10 to 12 works great." },
+    { role: "agent", label: "AI agent", text: "You're booked for 10am-12pm tomorrow. Sending a confirmation text now -- see you then!" },
+  ];
+
+  let hasPlayed = false;
+
+  function playTranscript() {
+    if (hasPlayed) return;
+    hasPlayed = true;
+    body.innerHTML = "";
+    lines.forEach((line, i) => {
+      setTimeout(() => {
+        const el = document.createElement("div");
+        el.className = `transcript-line ${line.role}`;
+        el.innerHTML = `<span class="line-label">${line.label}</span>${line.text}`;
+        body.appendChild(el);
+        windowEl.scrollTop = windowEl.scrollHeight;
+      }, i * 900);
+    });
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          playTranscript();
+          observer.disconnect();
+        }
+      });
+    },
+    { threshold: 0.4 }
+  );
+  observer.observe(windowEl);
+}
 
 function wireLiveDemo() {
   // Vapi's public key is safe to expose client-side by design (unlike the
