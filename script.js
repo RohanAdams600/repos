@@ -209,6 +209,8 @@ function wireLiveDemo() {
     status.className = "demo-status";
   }
 
+  let lastEndedReason = null;
+
   async function ensureVapiLoaded() {
     if (vapi) return vapi;
     const { default: Vapi } = await import(VAPI_SDK_URL);
@@ -216,13 +218,23 @@ function wireLiveDemo() {
 
     vapi.on("call-start", () => {
       isCallActive = true;
+      lastEndedReason = null;
       btn.classList.add("is-active");
       btn.querySelector(".btn-text").textContent = "End call";
       status.textContent = "Live -- speak naturally, it's listening.";
       status.className = "demo-status live";
     });
 
-    vapi.on("call-end", () => setIdle("Call ended. Click to talk again."));
+    vapi.on("call-end", (event) => {
+      const reason = event && (event.endedReason || (event.call && event.call.endedReason));
+      if (reason && reason.includes("did-not-receive-customer-audio")) {
+        setIdle("Talk to our AI agent");
+        status.textContent = "Connected, but your audio never reached us -- this usually means a firewall/VPN is blocking the call. Try a different network, or disable any VPN, then click again.";
+        status.className = "demo-status error";
+      } else {
+        setIdle("Call ended. Click to talk again.");
+      }
+    });
 
     vapi.on("error", (e) => {
       setIdle("Talk to our AI agent");
@@ -232,6 +244,18 @@ function wireLiveDemo() {
     });
 
     return vapi;
+  }
+
+  async function confirmMicAccess() {
+    // Explicitly resolve the mic permission prompt before handing off to
+    // Vapi's WebRTC setup -- avoids a race where the call tries to start
+    // before the browser has actually granted (or the user has responded
+    // to) the microphone permission request.
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error("This browser doesn't support microphone access.");
+    }
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach((track) => track.stop());
   }
 
   btn.addEventListener("click", async () => {
@@ -244,13 +268,22 @@ function wireLiveDemo() {
 
     try {
       isLoading = true;
-      status.textContent = "Loading...";
+      status.textContent = "Requesting microphone access...";
       status.className = "demo-status";
+      await confirmMicAccess();
+
+      status.textContent = "Loading...";
       const instance = await ensureVapiLoaded();
-      status.textContent = "Connecting -- allow microphone access if prompted.";
+      status.textContent = "Connecting...";
       await instance.start(VAPI_ASSISTANT_ID);
     } catch (e) {
-      status.textContent = "Couldn't connect -- check microphone permissions and try again.";
+      if (e && e.name === "NotAllowedError") {
+        status.textContent = "Microphone access was blocked. Check your browser's site permissions (click the lock icon in the address bar) and allow microphone access, then try again.";
+      } else if (e && e.name === "NotFoundError") {
+        status.textContent = "No microphone was found on this device.";
+      } else {
+        status.textContent = "Couldn't connect -- " + (e && e.message ? e.message : "please try again.");
+      }
       status.className = "demo-status error";
       console.error("Vapi start error:", e);
     } finally {
