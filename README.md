@@ -143,14 +143,16 @@ npm install
 npm run dev    # http://localhost:3000
 ```
 
-- `/` — the sales deck: outcome-based hero (Time/Money/Status), decoy
-  pricing, 14-day guarantee, scarcity module, FAQ
-- `/waitlist` — pre-qualification form → $200 deposit checkout via
-  Stripe
-- `/dashboard` — founder control center: MRR progress toward the
-  $100k target, per-sub-agent health, the heartbeat loop's last run and
-  trust stage, and a live feed of recent agent runs. Gated by
-  `DASHBOARD_TOKEN` (must match `backend/.env`).
+- `/` — the sales deck: outcome-based hero (Time/Money/Status), how it
+  works, the agent bench, an owner-control demo, a **live voice demo**
+  (talk to the actual Vapi assistant in-browser), an integrations grid,
+  decoy pricing, 14-day guarantee, scarcity module, FAQ
+- `/waitlist` — pre-qualification form → $200 deposit checkout (mock or
+  live Stripe)
+- `/dashboard` — founder control center, two tabs: **Agent Status** (MRR
+  progress toward the $100k target, per-sub-agent health, heartbeat loop,
+  recent agent runs) and **Prospects** (the outbound cold-call program —
+  see Part 4 below). Gated by `DASHBOARD_TOKEN` (must match `backend/.env`).
 
 ## Payments: mock mode vs. live
 
@@ -182,9 +184,45 @@ else in the code changes when you switch it:
    `customer.subscription.updated`, `customer.subscription.deleted`,
    `invoice.payment_failed`.
 
+## Part 4 — Outbound sales engine (Vapi voice AI)
+
+Two voice AI touchpoints, both via [Vapi](https://vapi.ai), both hard-scoped
+in code (`backend/src/lib/vapi.ts`) to exactly two assistants — no other
+assistant ID is ever touched, no matter what's passed in:
+
+- **"Autonoma Website Demo"** — the live "Talk to Autonoma" widget on the
+  landing page (`frontend/components/VoiceDemo.tsx`), using Vapi's Web SDK
+  with a **public** key (safe to expose client-side, same idea as a Stripe
+  publishable key). Renders a disabled "coming soon" state until
+  `NEXT_PUBLIC_VAPI_PUBLIC_KEY` + `NEXT_PUBLIC_VAPI_ASSISTANT_ID_DEMO` are
+  set.
+- **"Autonoma Cold Call"** — outbound prospecting calls, using a
+  **private** key that never leaves the backend. Placing a call is always
+  a founder action from the dashboard's Prospects tab
+  (`POST /api/vapi/cold-call/:prospectId`, gated by `DASHBOARD_TOKEN`) —
+  this is identity.md's boundary #6, the same "no agent does this
+  unsupervised" pattern as money and the calendar. Runs in mock mode
+  (logged, nothing actually dialed) until `VAPI_PRIVATE_API_KEY` and
+  `VAPI_PHONE_NUMBER_ID` are set.
+
+**Who to target:** `agents/playbooks/prospecting-playbook.md` defines the
+ICP (low headcount, limited/early hours, phone-dependent intake — flagship
+example: independent auto repair shops that close at 5-6pm with no
+answering service) and the sourcing rule that matters most: every row in
+the `prospects` table has to be a real business from a citable source —
+Scout's playbook explicitly says to report "I don't have a reliable source
+for this city/vertical" rather than produce a plausible-sounding list of
+made-up businesses.
+
+**Signup notifications:** every waitlist signup fires a notification to
+`FOUNDER_NOTIFICATION_EMAIL` (`backend/src/lib/email.ts`, default
+`rohanadams352@gmail.com`) via [Resend](https://resend.com). Logs instead
+of sending until `RESEND_API_KEY` is set — same mock-mode pattern as
+payments and Vapi.
+
 ## Testing & CI
 
-Each package has its own Vitest suite (63 tests total) plus typecheck and
+Each package has its own Vitest suite (86 tests total) plus typecheck and
 lint — no shared root config, each runs independently:
 
 ```bash
@@ -193,11 +231,13 @@ cd backend && npm test && npm run typecheck && npm run lint
 cd frontend && npm test && npm run typecheck && npm run lint
 ```
 
-What's covered: agents' trust/boundary logic and the full
-Diagnose→Assemble→Action→Assess loop (mocked model calls — no live
-Anthropic calls in tests), backend's env validation, auth middleware, and
-the mock-mode checkout funnel end to end (via supertest against the real
-Express app), and frontend's pricing display and waitlist form.
+What's covered: agents' trust/boundary logic (including the cold-call
+boundary) and the full Diagnose→Assemble→Action→Assess loop (mocked model
+calls — no live Anthropic calls in tests); backend's env validation, auth
+middleware, the mock-mode checkout funnel, the Vapi assistant allowlist,
+mock-mode cold-call flow, and prospects CRUD (all via supertest against
+the real Express app); frontend's pricing display, waitlist form, and the
+voice demo widget's unconfigured-state fallback.
 
 `.github/workflows/ci.yml` runs typecheck + lint + test + build for all
 three packages on every push and PR, each as an independent job (no
@@ -245,3 +285,12 @@ push to any container host.
    auth once more than one person needs access.
 4. Rotate every secret in the `.env.example` files — none of the example
    values are usable credentials.
+5. **Verify the Vapi assistant ID mapping.** `VAPI_ASSISTANT_ID_COLD_CALL`
+   / `VAPI_ASSISTANT_ID_WEBSITE_DEMO` in `backend/.env.example` are set to
+   the IDs given at setup time, in the order they were given — double
+   check in your Vapi dashboard that they're actually assigned to "Autonoma
+   Cold Call" and "Autonoma Website Demo" respectively, and swap them in
+   `backend/.env` (and `frontend/.env.local`'s
+   `NEXT_PUBLIC_VAPI_ASSISTANT_ID_DEMO`) if not — this is a one-line fix,
+   but worth confirming before anything goes live given `lib/vapi.ts`
+   trusts these values as the entire allowlist.

@@ -51,6 +51,9 @@ export function crossesHardBoundary(taskSummary: string): boolean {
     /\b(cancel|move|reschedule) .*(calendar|meeting|event)\b/i,
     /\bdelete\b.*\b(production|database|table)\b/i,
     /\bblast\b|\ball clients\b|\bevery client\b/i,
+    /\b(place|start|make|initiate)\b.*\b(cold )?call\b/i,
+    /\bcall\b.*\bprospect\b/i,
+    /\bdial\b/i,
   ];
   return boundaryPatterns.some((pattern) => pattern.test(taskSummary));
 }

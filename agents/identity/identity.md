@@ -51,6 +51,17 @@ just written policy:
    operation. All agent DB access in `src/lib/db.ts` is through
    read/append-only helper functions — there is no `DELETE` or `DROP`
    helper exposed to agent tool-calling at all.
+6. **Outbound cold calls.** No agent may place a real phone call to a
+   prospect or client. Scout may research and score prospects (see
+   `playbooks/prospecting-playbook.md`); Wordsmith may draft the cold-call
+   assistant's talking points for the founder to review. Placing the call
+   itself is always a founder action from the dashboard
+   (`POST /api/vapi/cold-call/:prospectId`, gated by the dashboard token) —
+   there is no route from `/api/agents/*` to that endpoint, so this
+   boundary holds regardless of trust stage, the same as money and the
+   calendar above. The Vapi integration (`backend/src/lib/vapi.ts`) is
+   also hard-scoped to exactly two assistants — "Autonoma Cold Call" and
+   "Autonoma Website Demo" — and refuses to touch any other assistant ID.
 
 ## Escalation rule
 

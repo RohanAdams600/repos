@@ -64,3 +64,7 @@ html.dark .btn-secondary {
 .section-heading {
   @apply font-display text-3xl font-bold tracking-tight sm:text-4xl;
 }
+
+.prospect-input {
+  @apply w-full rounded-xl border border-black/10 bg-transparent px-4 py-2.5 text-sm outline-none focus:border-accent dark:border-white/15;
+}

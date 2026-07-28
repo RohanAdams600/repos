@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { insertLead } from "../lib/db.js";
+import { notifyNewWaitlistLead } from "../lib/email.js";
 import { logger } from "../lib/logger.js";
 
 export const waitlistRouter = Router();
@@ -34,6 +35,14 @@ waitlistRouter.post("/", async (req, res) => {
     });
 
     logger.info({ leadId: lead.id, email: lead.email }, "waitlist signup received");
+    // Fire-and-forget — notifyNewWaitlistLead never throws, and the
+    // signup response shouldn't wait on an email round trip.
+    void notifyNewWaitlistLead({
+      email: lead.email,
+      businessName: parsed.data.businessName,
+      tierInterest: parsed.data.tierInterest,
+      timeSink: parsed.data.timeSink,
+    });
     res.status(201).json({ id: lead.id, email: lead.email });
   } catch (err) {
     logger.error({ err }, "failed to insert waitlist lead");

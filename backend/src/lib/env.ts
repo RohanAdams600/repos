@@ -39,6 +39,29 @@ export const envSchema = z
 
     AGENTS_SERVICE_TOKEN: z.string().min(1),
     DASHBOARD_TOKEN: z.string().min(1),
+
+    // --- Vapi (voice AI) ---
+    // Optional: without VAPI_PRIVATE_API_KEY, cold-call triggers run in
+    // mock mode (logged, never dialed) — see lib/vapi.ts. The two
+    // assistant IDs are a hard allowlist: lib/vapi.ts refuses to touch
+    // any assistant ID other than these two, no matter what a caller
+    // passes in. Defaults below are the IDs given at setup time — verify
+    // they're assigned to the right assistant in your Vapi dashboard.
+    VAPI_PRIVATE_API_KEY: z.string().optional(),
+    VAPI_ASSISTANT_ID_COLD_CALL: z.string().default("477be865-42ea-4b34-bc1c-3e7072ab2b5c"),
+    VAPI_ASSISTANT_ID_WEBSITE_DEMO: z.string().default("7b531751-6325-4faf-8c38-03b1186a7ed8"),
+    // A Vapi phoneNumberId (UUID) is what the outbound call API actually
+    // needs as the "from" number — set this once a number is imported
+    // into Vapi. FOUNDER_PHONE_NUMBER below is kept separately since it
+    // looked like a raw phone number, not a Vapi resource id.
+    VAPI_PHONE_NUMBER_ID: z.string().optional(),
+    FOUNDER_PHONE_NUMBER: z.string().default("4694006197"),
+
+    // --- Email notifications ---
+    // Optional: without RESEND_API_KEY, signup notifications are logged
+    // instead of emailed — see lib/email.ts.
+    RESEND_API_KEY: z.string().optional(),
+    FOUNDER_NOTIFICATION_EMAIL: z.string().email().default("rohanadams352@gmail.com"),
   })
   .superRefine((data, ctx) => {
     if (data.PAYMENTS_MODE !== "live") return;

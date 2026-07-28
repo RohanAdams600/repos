@@ -7,10 +7,13 @@ import { MetricsGrid } from "@/components/dashboard/MetricsGrid";
 import { AgentStatusGrid } from "@/components/dashboard/AgentStatusGrid";
 import { HeartbeatPanel } from "@/components/dashboard/HeartbeatPanel";
 import { RunsTable } from "@/components/dashboard/RunsTable";
+import { ProspectsPanel } from "@/components/dashboard/ProspectsPanel";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const STORAGE_KEY = "autonoma-dashboard-token";
 const POLL_INTERVAL_MS = 30_000;
+
+type Tab = "agents" | "prospects";
 
 export default function DashboardPage() {
   const [token, setToken] = useState<string | null>(null);
@@ -18,6 +21,7 @@ export default function DashboardPage() {
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState<Tab>("agents");
 
   useEffect(() => {
     const stored = window.sessionStorage.getItem(STORAGE_KEY);
@@ -94,16 +98,37 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => void load(token)} className="btn-secondary !px-4 !py-2 text-sm" disabled={loading}>
-              {loading ? "Refreshing…" : "Refresh"}
-            </button>
+            {tab === "agents" && (
+              <button onClick={() => void load(token)} className="btn-secondary !px-4 !py-2 text-sm" disabled={loading}>
+                {loading ? "Refreshing…" : "Refresh"}
+              </button>
+            )}
             <ThemeToggle />
           </div>
         </div>
 
+        <div className="mt-6 flex gap-2 border-b border-black/5 dark:border-white/10">
+          <button
+            onClick={() => setTab("agents")}
+            className={`border-b-2 px-4 py-2.5 text-sm font-medium transition ${
+              tab === "agents" ? "border-accent text-accent" : "border-transparent text-muted hover:text-ink-900 dark:hover:text-ink-50"
+            }`}
+          >
+            Agent Status
+          </button>
+          <button
+            onClick={() => setTab("prospects")}
+            className={`border-b-2 px-4 py-2.5 text-sm font-medium transition ${
+              tab === "prospects" ? "border-accent text-accent" : "border-transparent text-muted hover:text-ink-900 dark:hover:text-ink-50"
+            }`}
+          >
+            Prospects
+          </button>
+        </div>
+
         {error && <p className="mt-4 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-500">{error}</p>}
 
-        {overview && (
+        {tab === "agents" && overview && (
           <div className="mt-8 space-y-8">
             <MetricsGrid metrics={overview.metrics} />
 
@@ -115,6 +140,12 @@ export default function DashboardPage() {
             </div>
 
             <RunsTable runs={overview.recentRuns} />
+          </div>
+        )}
+
+        {tab === "prospects" && (
+          <div className="mt-8">
+            <ProspectsPanel token={token} />
           </div>
         )}
       </div>

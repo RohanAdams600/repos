@@ -86,3 +86,43 @@ CREATE TABLE IF NOT EXISTS stripe_events (
   type         TEXT NOT NULL,
   processed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Outbound Sales Engine: target businesses for the cold-call program.
+-- Scored against the ICP in agents/playbooks/prospecting-playbook.md.
+-- Rows are added by hand (dashboard) or by Scout research — never
+-- fabricated; see the playbook's note on sourcing real businesses only.
+CREATE TABLE IF NOT EXISTS prospects (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  business_name  TEXT NOT NULL,
+  category       TEXT NOT NULL, -- e.g. 'automotive_repair', 'hvac', 'salon'
+  phone          TEXT NOT NULL,
+  city           TEXT,
+  state          TEXT,
+  team_size      TEXT,          -- e.g. '1_4' — same bands as leads.team_size
+  fit_reasoning  TEXT NOT NULL, -- why this business matches the ICP (e.g. "closes 5pm, 1 location, no answering service")
+  source         TEXT NOT NULL, -- how this row was found: 'manual' | 'scout_research' | 'referral'
+  status         TEXT NOT NULL DEFAULT 'new'
+    CHECK (status IN ('new', 'approved', 'calling', 'called', 'interested', 'not_interested', 'converted')),
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_prospects_status ON prospects (status);
+
+-- Audit trail for every outbound call the "Autonoma Cold Call" Vapi
+-- assistant places — one row per call, always tied to an approved
+-- prospect. Placing a call is a hard-boundary action (identity.md #6):
+-- this table is how the founder can always see exactly what was called,
+-- when, and by whom it was authorized.
+CREATE TABLE IF NOT EXISTS cold_calls (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  prospect_id   UUID NOT NULL REFERENCES prospects (id),
+  vapi_call_id  TEXT,
+  assistant_id  TEXT NOT NULL,
+  status        TEXT NOT NULL DEFAULT 'queued'
+    CHECK (status IN ('queued', 'in_progress', 'completed', 'failed')),
+  outcome_notes TEXT,
+  triggered_by  TEXT NOT NULL, -- always 'founder_dashboard' today — see boundary #6
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_cold_calls_prospect ON cold_calls (prospect_id);

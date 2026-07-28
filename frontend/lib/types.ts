@@ -34,3 +34,29 @@ export interface DashboardOverview {
   runCounts: { agent: string; status: string; count: string }[];
   lastHeartbeat: { tasks_processed: number; tasks_failed: number; trust_stage: string; ran_at: string } | null;
 }
+
+export type ProspectStatus = "new" | "approved" | "calling" | "called" | "interested" | "not_interested" | "converted";
+
+export interface Prospect {
+  id: string;
+  business_name: string;
+  category: string;
+  phone: string;
+  city: string | null;
+  state: string | null;
+  team_size: TeamSize | null;
+  fit_reasoning: string;
+  source: "manual" | "scout_research" | "referral";
+  status: ProspectStatus;
+  created_at: string;
+}
+
+export interface NewProspectInput {
+  businessName: string;
+  category: string;
+  phone: string;
+  city?: string;
+  state?: string;
+  teamSize?: TeamSize;
+  fitReasoning: string;
+}

@@ -8,6 +8,9 @@ describe("crossesHardBoundary", () => {
     "Cancel the meeting on the founder's calendar",
     "Delete the production database table",
     "Send this update to all clients",
+    "Place a cold call to this prospect right now",
+    "Start the call with the auto shop we just scored",
+    "Dial the number on file for this business",
   ])("flags %s", (summary) => {
     expect(crossesHardBoundary(summary)).toBe(true);
   });
@@ -17,6 +20,8 @@ describe("crossesHardBoundary", () => {
     "Score this inbound lead against the rubric",
     "Fix the failing test in the checkout route",
     "Review Wordsmith's draft against the style guide",
+    "Research and score prospects matching the automotive shop ICP",
+    "Draft cold-call talking points for the founder to review",
   ])("does not flag %s", (summary) => {
     expect(crossesHardBoundary(summary)).toBe(false);
   });

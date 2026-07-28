@@ -16,6 +16,12 @@ export function Nav() {
           <Link href="/#how-it-works" className="transition hover:text-accent">
             How It Works
           </Link>
+          <Link href="/#agents" className="transition hover:text-accent">
+            The Agents
+          </Link>
+          <Link href="/#integrations" className="transition hover:text-accent">
+            Integrations
+          </Link>
           <Link href="/#pricing" className="transition hover:text-accent">
             Pricing
           </Link>

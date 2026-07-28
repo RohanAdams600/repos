@@ -1,4 +1,4 @@
-import type { DashboardOverview, Tier, WaitlistInput } from "./types";
+import type { DashboardOverview, NewProspectInput, Prospect, ProspectStatus, Tier, WaitlistInput } from "./types";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:4000";
 
@@ -51,5 +51,50 @@ export async function fetchDashboardOverview(token: string): Promise<DashboardOv
     cache: "no-store",
   });
   if (!res.ok) throw new ApiError("Invalid dashboard token or backend unreachable.", res.status);
+  return res.json();
+}
+
+export async function fetchProspects(token: string): Promise<Prospect[]> {
+  const res = await fetch(`${BACKEND_URL}/api/prospects`, {
+    headers: { authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+  if (!res.ok) throw new ApiError("Couldn't load prospects.", res.status);
+  const data = await res.json();
+  return data.prospects;
+}
+
+export async function createProspect(token: string, input: NewProspectInput): Promise<Prospect> {
+  const res = await fetch(`${BACKEND_URL}/api/prospects`, {
+    method: "POST",
+    headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new ApiError("Couldn't add this prospect.", res.status);
+  const data = await res.json();
+  return data.prospect;
+}
+
+export async function setProspectStatus(token: string, id: string, status: ProspectStatus): Promise<void> {
+  const res = await fetch(`${BACKEND_URL}/api/prospects/${id}/status`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new ApiError("Couldn't update this prospect's status.", res.status);
+}
+
+/**
+ * The approval gate: this is a founder-authenticated action (dashboard
+ * token) placing a real outbound call via the Autonoma Cold Call
+ * assistant. There is no lower-friction path to this — see
+ * identity.md boundary #6.
+ */
+export async function startColdCall(token: string, prospectId: string): Promise<{ mock: boolean; vapiCallId: string }> {
+  const res = await fetch(`${BACKEND_URL}/api/vapi/cold-call/${prospectId}`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new ApiError("Couldn't start the call.", res.status);
   return res.json();
 }

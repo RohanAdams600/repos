@@ -163,3 +163,80 @@ export async function getLastHeartbeat() {
   );
   return result.rows[0] ?? null;
 }
+
+export interface Prospect {
+  id: string;
+  business_name: string;
+  category: string;
+  phone: string;
+  city: string | null;
+  state: string | null;
+  team_size: string | null;
+  fit_reasoning: string;
+  source: string;
+  status: "new" | "approved" | "calling" | "called" | "interested" | "not_interested" | "converted";
+  created_at: string;
+}
+
+export async function listProspects(): Promise<Prospect[]> {
+  const result = await pool.query<Prospect>(`SELECT * FROM prospects ORDER BY created_at DESC`);
+  return result.rows;
+}
+
+export async function getProspect(id: string): Promise<Prospect | null> {
+  const result = await pool.query<Prospect>(`SELECT * FROM prospects WHERE id = $1`, [id]);
+  return result.rows[0] ?? null;
+}
+
+export async function insertProspect(input: {
+  businessName: string;
+  category: string;
+  phone: string;
+  city?: string;
+  state?: string;
+  teamSize?: string;
+  fitReasoning: string;
+  source: string;
+}): Promise<Prospect> {
+  const result = await pool.query<Prospect>(
+    `INSERT INTO prospects (business_name, category, phone, city, state, team_size, fit_reasoning, source)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+    [
+      input.businessName,
+      input.category,
+      input.phone,
+      input.city ?? null,
+      input.state ?? null,
+      input.teamSize ?? null,
+      input.fitReasoning,
+      input.source,
+    ]
+  );
+  return result.rows[0];
+}
+
+export async function setProspectStatus(id: string, status: Prospect["status"]): Promise<void> {
+  await pool.query(`UPDATE prospects SET status = $2 WHERE id = $1`, [id, status]);
+}
+
+export async function insertColdCall(input: {
+  prospectId: string;
+  vapiCallId: string;
+  assistantId: string;
+  status: "queued" | "in_progress";
+  triggeredBy: string;
+}): Promise<void> {
+  await pool.query(
+    `INSERT INTO cold_calls (prospect_id, vapi_call_id, assistant_id, status, triggered_by)
+     VALUES ($1,$2,$3,$4,$5)`,
+    [input.prospectId, input.vapiCallId, input.assistantId, input.status, input.triggeredBy]
+  );
+}
+
+export async function listColdCallsForProspect(prospectId: string) {
+  const result = await pool.query(
+    `SELECT * FROM cold_calls WHERE prospect_id = $1 ORDER BY created_at DESC`,
+    [prospectId]
+  );
+  return result.rows;
+}

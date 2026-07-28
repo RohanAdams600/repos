@@ -10,6 +10,8 @@ import { checkoutRouter } from "./routes/checkout.js";
 import { stripeWebhookRouter } from "./routes/stripe-webhook.js";
 import { agentsRouter } from "./routes/agents.js";
 import { dashboardRouter } from "./routes/dashboard.js";
+import { prospectsRouter } from "./routes/prospects.js";
+import { vapiRouter } from "./routes/vapi.js";
 
 /**
  * Builds the Express app without binding a port, so tests can exercise
@@ -41,6 +43,8 @@ export function createApp(): express.Express {
   app.use("/api/checkout", publicRateLimiter, checkoutRouter);
   app.use("/api/agents", agentsRouter);
   app.use("/api/dashboard", dashboardRouter);
+  app.use("/api/prospects", prospectsRouter);
+  app.use("/api/vapi", vapiRouter);
 
   app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     logger.error({ err }, "unhandled error");
