@@ -130,7 +130,7 @@ function wireLiveDemo() {
   // Vapi's public key is safe to expose client-side by design (unlike the
   // private API key) -- it can only start calls against this assistant, not
   // manage the account. Get it from the Vapi dashboard: Settings -> API Keys.
-  const VAPI_PUBLIC_KEY = "REPLACE_WITH_VAPI_PUBLIC_KEY";
+  const VAPI_PUBLIC_KEY = "7b531751-6325-4faf-8c38-03b1186a7ed8";
   // This is the "Autonoma Website Demo" assistant -- deliberately separate from
   // the outbound cold-calling assistant. This one is built for an inbound,
   // invited visitor testing the product, not for cold-calling a prospect.
