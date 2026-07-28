@@ -135,10 +135,14 @@ function wireLiveDemo() {
   // the outbound cold-calling assistant. This one is built for an inbound,
   // invited visitor testing the product, not for cold-calling a prospect.
   const VAPI_ASSISTANT_ID = "ee51480a-f405-4f35-988f-4afabde7ad53";
+  // @vapi-ai/web is built for bundlers and doesn't expose a browser global via
+  // a plain <script> tag, so it's loaded here as an on-demand ES module
+  // (jsDelivr auto-bundles the npm package into browser-ready ESM via +esm).
+  const VAPI_SDK_URL = "https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.6.1/+esm";
 
   const btn = document.getElementById("demo-call-btn");
   const status = document.getElementById("demo-status");
-  if (!btn || typeof Vapi === "undefined") return;
+  if (!btn) return;
 
   if (VAPI_PUBLIC_KEY === "REPLACE_WITH_VAPI_PUBLIC_KEY") {
     status.textContent = "Demo not configured yet.";
@@ -147,41 +151,64 @@ function wireLiveDemo() {
     return;
   }
 
-  const vapi = new Vapi(VAPI_PUBLIC_KEY);
+  let vapi = null;
   let isCallActive = false;
+  let isLoading = false;
 
-  vapi.on("call-start", () => {
-    isCallActive = true;
-    btn.classList.add("is-active");
-    btn.querySelector(".btn-text").textContent = "End call";
-    status.textContent = "Live -- speak naturally, it's listening.";
-    status.className = "demo-status live";
-  });
-
-  vapi.on("call-end", () => {
+  function setIdle(message) {
     isCallActive = false;
     btn.classList.remove("is-active");
     btn.querySelector(".btn-text").textContent = "Talk to our AI agent";
-    status.textContent = "Call ended. Click to talk again.";
+    status.textContent = message;
     status.className = "demo-status";
-  });
+  }
 
-  vapi.on("error", (e) => {
-    isCallActive = false;
-    btn.classList.remove("is-active");
-    btn.querySelector(".btn-text").textContent = "Talk to our AI agent";
-    status.textContent = "Couldn't connect -- check microphone permissions and try again.";
-    status.className = "demo-status error";
-    console.error("Vapi error:", e);
-  });
+  async function ensureVapiLoaded() {
+    if (vapi) return vapi;
+    const { default: Vapi } = await import(VAPI_SDK_URL);
+    vapi = new Vapi(VAPI_PUBLIC_KEY);
 
-  btn.addEventListener("click", () => {
-    if (isCallActive) {
+    vapi.on("call-start", () => {
+      isCallActive = true;
+      btn.classList.add("is-active");
+      btn.querySelector(".btn-text").textContent = "End call";
+      status.textContent = "Live -- speak naturally, it's listening.";
+      status.className = "demo-status live";
+    });
+
+    vapi.on("call-end", () => setIdle("Call ended. Click to talk again."));
+
+    vapi.on("error", (e) => {
+      setIdle("Talk to our AI agent");
+      status.textContent = "Couldn't connect -- check microphone permissions and try again.";
+      status.className = "demo-status error";
+      console.error("Vapi error:", e);
+    });
+
+    return vapi;
+  }
+
+  btn.addEventListener("click", async () => {
+    if (isLoading) return;
+
+    if (isCallActive && vapi) {
       vapi.stop();
-    } else {
-      status.textContent = "Connecting...";
+      return;
+    }
+
+    try {
+      isLoading = true;
+      status.textContent = "Loading...";
       status.className = "demo-status";
-      vapi.start(VAPI_ASSISTANT_ID);
+      const instance = await ensureVapiLoaded();
+      status.textContent = "Connecting -- allow microphone access if prompted.";
+      await instance.start(VAPI_ASSISTANT_ID);
+    } catch (e) {
+      status.textContent = "Couldn't connect -- check microphone permissions and try again.";
+      status.className = "demo-status error";
+      console.error("Vapi start error:", e);
+    } finally {
+      isLoading = false;
     }
   });
 }
