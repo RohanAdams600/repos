@@ -213,7 +213,15 @@ function wireLiveDemo() {
 
   async function ensureVapiLoaded() {
     if (vapi) return vapi;
-    const { default: Vapi } = await import(VAPI_SDK_URL);
+    const mod = await import(VAPI_SDK_URL);
+    // jsDelivr's +esm bundling of this package double-wraps the export --
+    // mod.default is an object like { default: <actual Vapi class> }, not
+    // the class itself, so a plain `new mod.default()` throws "not a
+    // constructor". Unwrap one extra level when that's the shape we get.
+    const Vapi = typeof mod.default === "function" ? mod.default : mod.default.default;
+    if (typeof Vapi !== "function") {
+      throw new Error("Vapi SDK failed to load correctly (unexpected export shape).");
+    }
     vapi = new Vapi(VAPI_PUBLIC_KEY);
 
     vapi.on("call-start", () => {
