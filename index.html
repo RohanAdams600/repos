@@ -76,6 +76,30 @@
     </div>
   </section>
 
+  <section class="live-demo" id="live-demo">
+    <div class="container live-demo-inner">
+      <div class="live-demo-copy">
+        <p class="eyebrow">Live demo</p>
+        <h2>Don't take our word for it. Talk to it.</h2>
+        <p class="section-sub">
+          This is a real AI voice agent, not a recording. Click below, allow
+          microphone access, and have an actual conversation with the same
+          technology that would answer your calls, book your appointments,
+          and follow up with your customers &mdash; live, right now, in your browser.
+        </p>
+      </div>
+      <div class="live-demo-panel">
+        <button id="demo-call-btn" class="btn demo-call-btn" type="button">
+          <span class="mic-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+          </span>
+          <span class="btn-text">Talk to our AI agent</span>
+        </button>
+        <p class="demo-status" id="demo-status">Click to start &mdash; takes about 5 seconds to connect.</p>
+      </div>
+    </div>
+  </section>
+
   <section class="logos" aria-label="Works with your existing tools">
     <div class="container">
       <p class="logos-label">Built to plug into the tools you already use</p>
@@ -239,6 +263,7 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.1.4/dist/vapi.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
