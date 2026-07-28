@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.next/
+out/
+build/
+
+# Env files — never commit real secrets, only .env.example files are tracked
+.env
+.env.local
+.env.*.local
+agents/.env
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts

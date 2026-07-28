@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Manrope", system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-ink-50 text-ink-900 antialiased;
+}
+
+html.dark body {
+  @apply bg-ink-950 text-ink-50;
+}
+
+::selection {
+  @apply bg-accent/30;
+}
+
+.container-page {
+  @apply mx-auto w-full max-w-6xl px-6;
+}
+
+.card-surface {
+  @apply rounded-2xl border border-black/5 bg-white shadow-sm;
+}
+
+html.dark .card-surface {
+  @apply border-white/10 bg-ink-800 shadow-none;
+}
+
+.text-muted {
+  @apply text-ink-600;
+}
+
+html.dark .text-muted {
+  @apply text-ink-400;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white
+    shadow-glow transition hover:bg-accent-bright active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-black/10 px-6 py-3 text-sm font-semibold
+    text-ink-900 transition hover:border-black/20 hover:bg-black/[0.03];
+}
+
+html.dark .btn-secondary {
+  @apply border-white/15 text-ink-50 hover:border-white/25 hover:bg-white/5;
+}
+
+.eyebrow {
+  @apply text-xs font-semibold uppercase tracking-[0.2em] text-accent;
+}
+
+.section-heading {
+  @apply font-display text-3xl font-bold tracking-tight sm:text-4xl;
+}
