@@ -11,9 +11,11 @@ This repo is the whole stack: the business logic, the agent system that
 operates it, and the website that sells it.
 
 ```
-/agents     Multi-agent orchestration system (Kai + 4 sub-agents), heartbeat loop
-/backend    Stripe checkout/webhooks, waitlist API, dashboard/agent-status API, Postgres schema
-/frontend   Next.js + Tailwind site: landing page, waitlist/checkout, founder dashboard
+/agents               Multi-agent orchestration system (Kai + 4 sub-agents), heartbeat loop
+/backend              Checkout (mock or live Stripe), waitlist API, dashboard/agent-status API, Postgres schema
+/frontend             Next.js + Tailwind site: landing page, waitlist/checkout, founder dashboard
+/.github/workflows    CI: typecheck + lint + test + build for all three packages
+docker-compose.yml    One-command local/demo stack (Postgres + backend + agents + frontend)
 ```
 
 ## Part 1 — The business
@@ -66,10 +68,28 @@ places a wrong call is expensive.
 - Node.js 20+
 - A Postgres database (only `/backend` connects to it directly — see
   "Why agents have no DB credentials" below)
-- An [Anthropic API key](https://console.anthropic.com/)
-- A [Stripe](https://dashboard.stripe.com/) account (test mode is fine
-  to start) with 4 Prices created: one one-time deposit price and three
-  recurring monthly prices (Starter/Core/Scale)
+- An [Anthropic API key](https://console.anthropic.com/) — only needed to
+  run `/agents`; the site and backend work without it
+- **Stripe is optional to start.** `PAYMENTS_MODE=mock` (the default) runs
+  the entire waitlist → deposit → subscription funnel with zero Stripe
+  setup — see "Payments: mock mode vs. live" below. Add Stripe whenever
+  you're ready to take real money.
+
+### Fastest path: Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Brings up Postgres, runs the migration, and starts backend
+(`localhost:4000`) + frontend (`localhost:3000`) in `PAYMENTS_MODE=mock`
+— nothing to configure, no Stripe or Anthropic key required. The `agents`
+service also comes up in that stack; it needs `ANTHROPIC_API_KEY` set in a
+root `.env` file (copy `.env.example`) or it will exit — comment it out of
+`docker-compose.yml` if you just want the site + backend running.
+
+The steps below are the manual, per-service path (useful for active
+development, where `npm run dev` gives you hot reload).
 
 ### 1. Database
 
@@ -80,21 +100,16 @@ npm install
 npm run migrate         # applies db/schema.sql
 ```
 
-### 2. Backend (Stripe, waitlist, dashboard API)
+### 2. Backend (checkout, waitlist, dashboard API)
 
-Fill in the rest of `backend/.env`: your Stripe secret key, webhook
-secret, the 4 Price IDs, `AGENTS_SERVICE_TOKEN` (shared secret with
-`/agents`), and `DASHBOARD_TOKEN` (shared secret with the founder
-dashboard).
+`backend/.env`'s defaults (`PAYMENTS_MODE=mock`) need nothing beyond
+`DATABASE_URL`, `AGENTS_SERVICE_TOKEN`, and `DASHBOARD_TOKEN` to run the
+full funnel. See "Payments: mock mode vs. live" below for switching to
+real Stripe later.
 
 ```bash
 npm run dev    # http://localhost:4000
 ```
-
-Point a Stripe webhook (or the Stripe CLI: `stripe listen --forward-to
-localhost:4000/api/stripe/webhook`) at `/api/stripe/webhook`, subscribed
-to `checkout.session.completed`, `customer.subscription.updated`,
-`customer.subscription.deleted`, `invoice.payment_failed`.
 
 ### 3. Agents (Kai + sub-agent bench)
 
@@ -137,21 +152,87 @@ npm run dev    # http://localhost:3000
   trust stage, and a live feed of recent agent runs. Gated by
   `DASHBOARD_TOKEN` (must match `backend/.env`).
 
+## Payments: mock mode vs. live
+
+`backend/.env`'s `PAYMENTS_MODE` (default `mock`) controls this — nothing
+else in the code changes when you switch it:
+
+- **`mock`** — `backend/src/lib/payments.ts` completes the deposit or
+  subscription checkout synchronously (the same DB write a real Stripe
+  webhook would eventually trigger) and redirects straight to the success
+  page. No Stripe account, keys, or webhook needed. The success page shows
+  a small "Demo mode" note so it's never mistaken for a real charge. This
+  is what the site runs on until Stripe is wired up.
+- **`live`** — real Stripe Checkout Sessions and webhook-driven
+  fulfillment (`backend/src/routes/stripe-webhook.ts`).
+
+**Going live with Stripe**, whenever you're ready:
+
+1. Create a Stripe account, then 4 Prices: one one-time deposit price and
+   three recurring monthly prices (Starter $500, Core $1,000, Scale
+   $10,000).
+2. Fill in the 6 `STRIPE_*` vars in `backend/.env` (secret key, webhook
+   secret, 4 price IDs).
+3. Set `PAYMENTS_MODE=live`. `backend/src/lib/env.ts` will refuse to start
+   if any of the 6 vars are missing once you do — it fails loud, not
+   silently.
+4. Point a Stripe webhook (or the Stripe CLI: `stripe listen
+   --forward-to localhost:4000/api/stripe/webhook`) at
+   `/api/stripe/webhook`, subscribed to `checkout.session.completed`,
+   `customer.subscription.updated`, `customer.subscription.deleted`,
+   `invoice.payment_failed`.
+
+## Testing & CI
+
+Each package has its own Vitest suite (63 tests total) plus typecheck and
+lint — no shared root config, each runs independently:
+
+```bash
+cd agents && npm test && npm run typecheck && npm run lint
+cd backend && npm test && npm run typecheck && npm run lint
+cd frontend && npm test && npm run typecheck && npm run lint
+```
+
+What's covered: agents' trust/boundary logic and the full
+Diagnose→Assemble→Action→Assess loop (mocked model calls — no live
+Anthropic calls in tests), backend's env validation, auth middleware, and
+the mock-mode checkout funnel end to end (via supertest against the real
+Express app), and frontend's pricing display and waitlist form.
+
+`.github/workflows/ci.yml` runs typecheck + lint + test + build for all
+three packages on every push and PR, each as an independent job (no
+Postgres service container needed — backend tests mock the DB layer).
+
 ## Deploying
 
-- **Backend & agents:** any long-running Node host (Render, Railway,
-  Fly.io, a plain VM). Both are stateless aside from their Postgres/HTTP
-  connections, so they scale horizontally without extra work. Run
-  `npm run build && npm start` in each.
+Each service has a production `Dockerfile` (multi-stage, non-root
+runtime image) — `docker-compose.yml` at the repo root wires all of them
+together with Postgres for local use, and the same images are what you'd
+push to any container host.
+
+- **Backend & agents:** any long-running Node/container host (Render,
+  Railway, Fly.io, a plain VM). Both are stateless aside from their
+  Postgres/HTTP connections, so they scale horizontally without extra
+  work. Build from each service's `Dockerfile`, or run
+  `npm run build && npm start` directly.
 - **Frontend:** Vercel is the path of least resistance for Next.js App
-  Router; set `NEXT_PUBLIC_BACKEND_URL` to your deployed backend's public
-  URL.
+  Router (zero config — import the repo, set root directory to
+  `frontend`); `frontend/Dockerfile` (Next's `output: "standalone"`) is
+  the option if you'd rather run it alongside the rest on your own
+  container host. Either way, set `NEXT_PUBLIC_BACKEND_URL` to your
+  deployed backend's public URL — it's inlined into the browser bundle at
+  build time, so it can't be a docker-internal hostname.
 - **Database:** any managed Postgres (Supabase, Neon, RDS). Run
   `npm run migrate` from `/backend` once against the production
   `DATABASE_URL`.
-- **Stripe:** switch from test to live keys/Price IDs in `backend/.env`
-  and re-point the webhook endpoint at your deployed backend's
-  `/api/stripe/webhook`.
+- **Payments:** ships in `PAYMENTS_MODE=mock` — the whole funnel works in
+  production before Stripe is connected. Flip to `live` per "Going live
+  with Stripe" above whenever you're ready to take real money; nothing
+  else about the deploy changes.
+- **Security baseline already in place:** `helmet` response headers and a
+  rate limiter on the public waitlist/checkout routes
+  (`backend/src/lib/rate-limit.ts`) ship by default — nothing extra to
+  turn on for a production deploy.
 
 ## Customizing for a real launch
 

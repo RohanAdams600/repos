@@ -95,8 +95,11 @@ export function WaitlistForm() {
       )}
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium">Work email</label>
+        <label htmlFor="wf-email" className="mb-1.5 block text-sm font-medium">
+          Work email
+        </label>
         <input
+          id="wf-email"
           name="email"
           type="email"
           required
@@ -106,8 +109,11 @@ export function WaitlistForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium">Business name</label>
+        <label htmlFor="wf-business-name" className="mb-1.5 block text-sm font-medium">
+          Business name
+        </label>
         <input
+          id="wf-business-name"
           name="businessName"
           type="text"
           required
@@ -119,8 +125,11 @@ export function WaitlistForm() {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1.5 block text-sm font-medium">Monthly revenue</label>
+          <label htmlFor="wf-revenue-band" className="mb-1.5 block text-sm font-medium">
+            Monthly revenue
+          </label>
           <select
+            id="wf-revenue-band"
             name="revenueBand"
             required
             defaultValue=""
@@ -138,8 +147,11 @@ export function WaitlistForm() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium">Team size</label>
+          <label htmlFor="wf-team-size" className="mb-1.5 block text-sm font-medium">
+            Team size
+          </label>
           <select
+            id="wf-team-size"
             name="teamSize"
             required
             defaultValue=""
@@ -158,10 +170,11 @@ export function WaitlistForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium">
+        <label htmlFor="wf-time-sink" className="mb-1.5 block text-sm font-medium">
           What&apos;s the one recurring task eating the most of your week?
         </label>
         <textarea
+          id="wf-time-sink"
           name="timeSink"
           required
           minLength={10}
@@ -172,8 +185,11 @@ export function WaitlistForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium">Which tier are you leaning toward?</label>
+        <label htmlFor="wf-tier-interest" className="mb-1.5 block text-sm font-medium">
+          Which tier are you leaning toward?
+        </label>
         <select
+          id="wf-tier-interest"
           name="tierInterest"
           required
           defaultValue="core"
@@ -187,8 +203,8 @@ export function WaitlistForm() {
         </select>
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-muted">
-        <input name="referredByClient" type="checkbox" className="h-4 w-4 rounded border-black/20" />
+      <label htmlFor="wf-referred" className="flex items-center gap-2 text-sm text-muted">
+        <input id="wf-referred" name="referredByClient" type="checkbox" className="h-4 w-4 rounded border-black/20" />
         I was referred by an existing client
       </label>
 

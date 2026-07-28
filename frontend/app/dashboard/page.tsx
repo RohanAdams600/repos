@@ -63,7 +63,11 @@ export default function DashboardPage() {
           <h1 className="font-display text-xl font-bold">Founder Dashboard</h1>
           <p className="mt-1 text-sm text-muted">Enter the dashboard token to continue.</p>
           {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+          <label htmlFor="dashboard-token" className="sr-only">
+            Dashboard token
+          </label>
           <input
+            id="dashboard-token"
             type="password"
             required
             value={tokenInput}

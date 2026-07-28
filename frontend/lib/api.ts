@@ -21,7 +21,7 @@ export async function submitWaitlist(input: WaitlistInput): Promise<{ id: string
   return res.json();
 }
 
-export async function createDepositCheckout(email: string): Promise<{ url: string }> {
+export async function createDepositCheckout(email: string): Promise<{ url: string; mock: boolean }> {
   const res = await fetch(`${BACKEND_URL}/api/checkout/deposit`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -35,7 +35,7 @@ export async function createSubscriptionCheckout(input: {
   email: string;
   businessName: string;
   tier: Tier;
-}): Promise<{ url: string }> {
+}): Promise<{ url: string; mock: boolean }> {
   const res = await fetch(`${BACKEND_URL}/api/checkout/subscription`, {
     method: "POST",
     headers: { "content-type": "application/json" },

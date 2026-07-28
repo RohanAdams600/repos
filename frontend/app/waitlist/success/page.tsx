@@ -6,7 +6,13 @@ export const metadata = {
   title: "You're In — Autonoma",
 };
 
-export default function WaitlistSuccessPage() {
+export default function WaitlistSuccessPage({
+  searchParams,
+}: {
+  searchParams: { mock?: string; kind?: string };
+}) {
+  const isMock = searchParams.mock === "1";
+
   return (
     <>
       <Nav />
@@ -23,6 +29,14 @@ export default function WaitlistSuccessPage() {
               You&apos;ll get a kickoff call invite from the founder within one business day. Keep an
               eye on the inbox you signed up with.
             </p>
+
+            {isMock && (
+              <p className="mx-auto mt-6 max-w-sm rounded-xl border border-signal-status/30 bg-signal-status/10 px-4 py-3 text-xs text-signal-status">
+                Demo mode: this checkout completed without a real charge — payments go live once
+                Stripe is connected.
+              </p>
+            )}
+
             <Link href="/" className="btn-primary mt-8 inline-flex">
               Back to the site
             </Link>

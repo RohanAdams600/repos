@@ -19,6 +19,12 @@ export const stripeWebhookRouter = Router();
  * signature verification needs the exact raw request body bytes.
  */
 stripeWebhookRouter.post("/", async (req, res) => {
+  if (!stripe || !env.STRIPE_WEBHOOK_SECRET) {
+    // Only reachable if this router got mounted without PAYMENTS_MODE=live, which server.ts prevents.
+    res.status(503).json({ error: "payments_not_configured" });
+    return;
+  }
+
   const signature = req.headers["stripe-signature"];
   if (!signature || typeof signature !== "string") {
     res.status(400).send("Missing Stripe signature.");

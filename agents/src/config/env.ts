@@ -2,7 +2,7 @@ import "dotenv/config";
 import { z } from "zod";
 import type { TrustStage } from "../types.js";
 
-const envSchema = z.object({
+export const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1, "ANTHROPIC_API_KEY is required"),
   BACKEND_BASE_URL: z.string().url(),
   AGENTS_SERVICE_TOKEN: z.string().min(1),

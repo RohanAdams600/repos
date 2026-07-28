@@ -1,0 +1,76 @@
+name: autonoma
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: autonoma
+      POSTGRES_USER: autonoma
+      POSTGRES_PASSWORD: autonoma
+    ports:
+      - "5432:5432"
+    volumes:
+      - autonoma-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autonoma"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: ./backend
+    command: ["npm", "run", "migrate"]
+    environment: &backend-env
+      DATABASE_URL: postgres://autonoma:autonoma@postgres:5432/autonoma
+      AGENTS_SERVICE_TOKEN: local-dev-agents-token
+      DASHBOARD_TOKEN: local-dev-dashboard-token
+      FRONTEND_ORIGIN: http://localhost:3000
+      PAYMENTS_MODE: mock
+      CHECKOUT_SUCCESS_URL: http://localhost:3000/waitlist/success
+      CHECKOUT_CANCEL_URL: http://localhost:3000/waitlist
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  backend:
+    build: ./backend
+    ports:
+      - "4000:4000"
+    environment:
+      <<: *backend-env
+      PORT: "4000"
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # Requires a real ANTHROPIC_API_KEY (see agents/.env.example) — set it in
+  # a root .env file before running `docker compose up`, or comment this
+  # service out if you just want the site + backend running for a demo.
+  agents:
+    build: ./agents
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?Set ANTHROPIC_API_KEY in a .env file to run the agents service}
+      BACKEND_BASE_URL: http://backend:4000
+      AGENTS_SERVICE_TOKEN: local-dev-agents-token
+      TRUST_STAGE: manual
+      HEARTBEAT_INTERVAL_MINUTES: "15"
+    depends_on:
+      - backend
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Browser-reachable, not the docker-internal "backend" hostname —
+        # see the comment in frontend/Dockerfile.
+        NEXT_PUBLIC_BACKEND_URL: http://localhost:4000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  autonoma-postgres-data:

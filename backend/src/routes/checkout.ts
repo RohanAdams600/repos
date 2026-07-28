@@ -1,8 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
-import { stripe, priceIdForTier } from "../lib/stripe.js";
+import { createDepositCheckout, createSubscriptionCheckout } from "../lib/payments.js";
 import { findLeadByEmail } from "../lib/db.js";
-import { env } from "../lib/env.js";
 import { logger } from "../lib/logger.js";
 
 export const checkoutRouter = Router();
@@ -11,8 +10,9 @@ const depositSchema = z.object({ email: z.string().email() });
 
 /**
  * Pre-Sell & Validation strategy: a $200 one-time deposit (credited
- * against the client's first month, see checkout metadata) reserves their
- * onboarding slot before any client-specific backend work starts.
+ * against the client's first month) reserves their onboarding slot
+ * before any client-specific backend work starts. Runs against a mock
+ * checkout in PAYMENTS_MODE=mock (the default) — see lib/payments.ts.
  */
 checkoutRouter.post("/deposit", async (req, res) => {
   const parsed = depositSchema.safeParse(req.body);
@@ -28,16 +28,8 @@ checkoutRouter.post("/deposit", async (req, res) => {
   }
 
   try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      customer_email: parsed.data.email,
-      line_items: [{ price: env.STRIPE_PRICE_DEPOSIT, quantity: 1 }],
-      success_url: env.STRIPE_SUCCESS_URL,
-      cancel_url: env.STRIPE_CANCEL_URL,
-      metadata: { kind: "deposit", leadId: lead.id, leadEmail: lead.email },
-    });
-
-    res.status(200).json({ url: session.url });
+    const session = await createDepositCheckout({ email: parsed.data.email, leadId: lead.id });
+    res.status(200).json(session);
   } catch (err) {
     logger.error({ err }, "failed to create deposit checkout session");
     res.status(500).json({ error: "internal_error" });
@@ -65,21 +57,8 @@ checkoutRouter.post("/subscription", async (req, res) => {
   }
 
   try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer_email: parsed.data.email,
-      line_items: [{ price: priceIdForTier(parsed.data.tier), quantity: 1 }],
-      success_url: env.STRIPE_SUCCESS_URL,
-      cancel_url: env.STRIPE_CANCEL_URL,
-      metadata: {
-        kind: "subscription",
-        tier: parsed.data.tier,
-        businessName: parsed.data.businessName,
-        leadEmail: parsed.data.email,
-      },
-    });
-
-    res.status(200).json({ url: session.url });
+    const session = await createSubscriptionCheckout(parsed.data);
+    res.status(200).json(session);
   } catch (err) {
     logger.error({ err }, "failed to create subscription checkout session");
     res.status(500).json({ error: "internal_error" });
