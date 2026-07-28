@@ -123,4 +123,62 @@
   wireForm("waitlist-form-main", "form-note-main");
   updateWaitlistCount();
   revealOnScroll();
+  wireLiveDemo();
 })();
+
+function wireLiveDemo() {
+  // Vapi's public key is safe to expose client-side by design (unlike the
+  // private API key) -- it can only start calls against this assistant, not
+  // manage the account. Get it from the Vapi dashboard: Settings -> API Keys.
+  const VAPI_PUBLIC_KEY = "REPLACE_WITH_VAPI_PUBLIC_KEY";
+  const VAPI_ASSISTANT_ID = "c70c81b5-bf40-4753-a528-3ebc859c6878";
+
+  const btn = document.getElementById("demo-call-btn");
+  const status = document.getElementById("demo-status");
+  if (!btn || typeof Vapi === "undefined") return;
+
+  if (VAPI_PUBLIC_KEY === "REPLACE_WITH_VAPI_PUBLIC_KEY") {
+    status.textContent = "Demo not configured yet.";
+    btn.disabled = true;
+    btn.style.opacity = "0.6";
+    return;
+  }
+
+  const vapi = new Vapi(VAPI_PUBLIC_KEY);
+  let isCallActive = false;
+
+  vapi.on("call-start", () => {
+    isCallActive = true;
+    btn.classList.add("is-active");
+    btn.querySelector(".btn-text").textContent = "End call";
+    status.textContent = "Live -- speak naturally, it's listening.";
+    status.className = "demo-status live";
+  });
+
+  vapi.on("call-end", () => {
+    isCallActive = false;
+    btn.classList.remove("is-active");
+    btn.querySelector(".btn-text").textContent = "Talk to our AI agent";
+    status.textContent = "Call ended. Click to talk again.";
+    status.className = "demo-status";
+  });
+
+  vapi.on("error", (e) => {
+    isCallActive = false;
+    btn.classList.remove("is-active");
+    btn.querySelector(".btn-text").textContent = "Talk to our AI agent";
+    status.textContent = "Couldn't connect -- check microphone permissions and try again.";
+    status.className = "demo-status error";
+    console.error("Vapi error:", e);
+  });
+
+  btn.addEventListener("click", () => {
+    if (isCallActive) {
+      vapi.stop();
+    } else {
+      status.textContent = "Connecting...";
+      status.className = "demo-status";
+      vapi.start(VAPI_ASSISTANT_ID);
+    }
+  });
+}
