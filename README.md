@@ -278,6 +278,43 @@ push to any container host.
   (`backend/src/lib/rate-limit.ts`) ship by default — nothing extra to
   turn on for a production deploy.
 
+### Deploying the frontend to GitHub Pages
+
+`.github/workflows/deploy-pages.yml` builds `frontend/` as a fully static
+export and publishes it — scoped to this branch only, so it never
+touches or interacts with anything else in the repo (including the
+separate, unrelated static site that lives on `main`).
+
+**One manual step required** (can't be done from a git push): go to this
+repo's **Settings → Pages**, and under "Build and deployment," set
+**Source** to **GitHub Actions**. After that, every push to this branch
+that touches `frontend/` deploys automatically — or trigger it manually
+from the **Actions** tab → "Deploy to GitHub Pages" → **Run workflow**.
+
+The published URL will be `https://<your-github-username>.github.io/repos/`
+(a project-page subpath, since the repo isn't named
+`<username>.github.io`) — `frontend/next.config.js` sets the matching
+`basePath` automatically for this build via `NEXT_PUBLIC_DEPLOY_TARGET`,
+set only inside that workflow; every other build target (`npm run dev`,
+Docker, Vercel) is unaffected.
+
+**What works out of the box vs. what needs configuring:**
+- The full page renders immediately — hero, stats, ROI calculator,
+  pricing, agents showcase, everything static.
+- The waitlist form and voice demo need real values wired up as repository
+  variables/secrets (**Settings → Secrets and variables → Actions**) to
+  actually work: `NEXT_PUBLIC_BACKEND_URL` (var, once `/backend` is
+  deployed somewhere — Render/Railway per above), `NEXT_PUBLIC_VAPI_PUBLIC_KEY`
+  (secret) and `NEXT_PUBLIC_VAPI_ASSISTANT_ID_DEMO` (var) for the live
+  voice widget. Without these the page still renders correctly — the
+  waitlist form will fail to submit and the voice demo shows its
+  "coming soon" state, exactly like running locally without a `.env.local`.
+- GitHub Pages is static-hosting only — there's no server, so this can
+  never run `/backend`, `/agents`, or the founder dashboard's data fetch
+  (the dashboard page itself loads, it just has nothing to show without
+  a reachable backend). That's inherent to Pages, not something to
+  configure around; use the Docker/Render/Railway path above for those.
+
 ## Customizing for a real launch
 
 1. Fill in the bracketed founder/company fields in `agents/identity/user.md`.
