@@ -143,10 +143,13 @@ npm install
 npm run dev    # http://localhost:3000
 ```
 
-- `/` — the sales deck: outcome-based hero (Time/Money/Status), how it
-  works, the agent bench, an owner-control demo, a **live voice demo**
-  (talk to the actual Vapi assistant in-browser), an integrations grid,
-  decoy pricing, 14-day guarantee, scarcity module, FAQ
+- `/` — the sales deck: outcome-based hero, an animated stats bar, how it
+  works, the agent bench, a two-view (owner/customer) owner-control demo,
+  a **live voice demo** (talk to the actual Vapi assistant in-browser), an
+  **interactive ROI calculator** (`frontend/lib/roi.ts` — a stated
+  assumption, not a fabricated "average client" number), an integrations
+  grid, decoy pricing, 14-day guarantee, scarcity module, FAQ, and a
+  dismissible sticky CTA bar that appears after scrolling past the hero
 - `/waitlist` — pre-qualification form → $200 deposit checkout (mock or
   live Stripe)
 - `/dashboard` — founder control center, two tabs: **Agent Status** (MRR
@@ -222,7 +225,7 @@ payments and Vapi.
 
 ## Testing & CI
 
-Each package has its own Vitest suite (86 tests total) plus typecheck and
+Each package has its own Vitest suite (95 tests total) plus typecheck and
 lint — no shared root config, each runs independently:
 
 ```bash
@@ -236,7 +239,8 @@ boundary) and the full Diagnose→Assemble→Action→Assess loop (mocked model
 calls — no live Anthropic calls in tests); backend's env validation, auth
 middleware, the mock-mode checkout funnel, the Vapi assistant allowlist,
 mock-mode cold-call flow, and prospects CRUD (all via supertest against
-the real Express app); frontend's pricing display, waitlist form, and the
+the real Express app); frontend's pricing display, waitlist form, the ROI
+calculator's math, the sticky CTA's scroll/dismiss behavior, and the
 voice demo widget's unconfigured-state fallback.
 
 `.github/workflows/ci.yml` runs typecheck + lint + test + build for all
