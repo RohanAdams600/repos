@@ -131,7 +131,10 @@ function wireLiveDemo() {
   // private API key) -- it can only start calls against this assistant, not
   // manage the account. Get it from the Vapi dashboard: Settings -> API Keys.
   const VAPI_PUBLIC_KEY = "REPLACE_WITH_VAPI_PUBLIC_KEY";
-  const VAPI_ASSISTANT_ID = "c70c81b5-bf40-4753-a528-3ebc859c6878";
+  // This is the "Autonoma Website Demo" assistant -- deliberately separate from
+  // the outbound cold-calling assistant. This one is built for an inbound,
+  // invited visitor testing the product, not for cold-calling a prospect.
+  const VAPI_ASSISTANT_ID = "ee51480a-f405-4f35-988f-4afabde7ad53";
 
   const btn = document.getElementById("demo-call-btn");
   const status = document.getElementById("demo-status");
