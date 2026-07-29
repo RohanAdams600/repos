@@ -12,6 +12,10 @@ import { agentsRouter } from "./routes/agents.js";
 import { dashboardRouter } from "./routes/dashboard.js";
 import { prospectsRouter } from "./routes/prospects.js";
 import { vapiRouter } from "./routes/vapi.js";
+import { inboxRouter } from "./routes/inbox.js";
+import { calendarRouter } from "./routes/calendar.js";
+import { invoicesRouter } from "./routes/invoices.js";
+import { smsRouter, smsWebhookRouter } from "./routes/sms.js";
 
 /**
  * Builds the Express app without binding a port, so tests can exercise
@@ -35,6 +39,11 @@ export function createApp(): express.Express {
     app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), stripeWebhookRouter);
   }
 
+  // Twilio sends webhooks as application/x-www-form-urlencoded, not JSON —
+  // mounted with its own parser before the global express.json() below,
+  // same reasoning as the Stripe webhook above.
+  app.use("/api/webhooks/twilio/sms", express.urlencoded({ extended: false }), smsWebhookRouter);
+
   app.use(express.json());
 
   app.get("/healthz", (_req, res) => res.status(200).json({ ok: true, paymentsMode: env.PAYMENTS_MODE }));
@@ -45,6 +54,10 @@ export function createApp(): express.Express {
   app.use("/api/dashboard", dashboardRouter);
   app.use("/api/prospects", prospectsRouter);
   app.use("/api/vapi", vapiRouter);
+  app.use("/api/inbox", inboxRouter);
+  app.use("/api/calendar", calendarRouter);
+  app.use("/api/invoices", invoicesRouter);
+  app.use("/api/sms", smsRouter);
 
   app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     logger.error({ err }, "unhandled error");

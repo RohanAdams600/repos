@@ -57,11 +57,44 @@ export const envSchema = z
     VAPI_PHONE_NUMBER_ID: z.string().optional(),
     FOUNDER_PHONE_NUMBER: z.string().default("4694006197"),
 
-    // --- Email notifications ---
+    // --- Email notifications (founder alerts, via Resend) ---
     // Optional: without RESEND_API_KEY, signup notifications are logged
     // instead of emailed — see lib/email.ts.
     RESEND_API_KEY: z.string().optional(),
     FOUNDER_NOTIFICATION_EMAIL: z.string().email().default("rohanadams352@gmail.com"),
+
+    // --- Gmail (inbox management) ---
+    // Optional: without these three, inbox sync/send run in mock mode —
+    // see lib/gmail.ts. Create an OAuth2 client in Google Cloud Console,
+    // grant it the gmail.modify scope, and generate a refresh token for
+    // the business's Gmail account (not a personal one) via the OAuth2
+    // consent flow.
+    GMAIL_CLIENT_ID: z.string().optional(),
+    GMAIL_CLIENT_SECRET: z.string().optional(),
+    GMAIL_REFRESH_TOKEN: z.string().optional(),
+    GMAIL_USER_EMAIL: z.string().email().optional(),
+
+    // --- Google Calendar ---
+    // Optional: without these, calendar sync/booking run in mock mode —
+    // see lib/calendar.ts. Same Google Cloud OAuth2 client as Gmail above
+    // works here too — add the calendar scope to it and reuse the same
+    // refresh token, or generate a separate one.
+    GOOGLE_CALENDAR_CLIENT_ID: z.string().optional(),
+    GOOGLE_CALENDAR_CLIENT_SECRET: z.string().optional(),
+    GOOGLE_CALENDAR_REFRESH_TOKEN: z.string().optional(),
+    GOOGLE_CALENDAR_ID: z.string().default("primary"),
+
+    // --- Invoicing (Stripe Invoices — reuses the Stripe client above) ---
+    // No separate credentials: uses STRIPE_SECRET_KEY. Only meaningful
+    // once PAYMENTS_MODE=live; drafting/sending invoices in mock mode
+    // just logs — see lib/invoicing.ts.
+
+    // --- SMS (Twilio) ---
+    // Optional: without these three, SMS sends run in mock mode — see
+    // lib/sms.ts.
+    TWILIO_ACCOUNT_SID: z.string().optional(),
+    TWILIO_AUTH_TOKEN: z.string().optional(),
+    TWILIO_FROM_NUMBER: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.PAYMENTS_MODE !== "live") return;

@@ -126,3 +126,86 @@ CREATE TABLE IF NOT EXISTS cold_calls (
 );
 
 CREATE INDEX IF NOT EXISTS idx_cold_calls_prospect ON cold_calls (prospect_id);
+
+-- One row per day, sent at most once (idempotency guard) — the nightly
+-- digest emailed to the founder. Fully real: built entirely from data
+-- already in this database, no third-party credentials required.
+CREATE TABLE IF NOT EXISTS nightly_reports (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  report_date DATE NOT NULL UNIQUE,
+  summary     TEXT NOT NULL,
+  sent_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Inbox management: incoming client/prospect emails and Wordsmith's
+-- drafted replies. Sending is trust-stage gated like any other content
+-- task (see agents/src/orchestrator/trust.ts) — nothing here is a hard
+-- boundary the way money or the calendar are.
+CREATE TABLE IF NOT EXISTS inbox_messages (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  external_id     TEXT UNIQUE,     -- Gmail message id once wired to a real inbox
+  from_email      TEXT NOT NULL,
+  subject         TEXT NOT NULL,
+  body            TEXT NOT NULL,
+  category        TEXT,            -- Scout's triage label, e.g. 'booking_request' | 'billing_question' | 'spam'
+  drafted_reply   TEXT,
+  status          TEXT NOT NULL DEFAULT 'new'
+    CHECK (status IN ('new', 'triaged', 'drafted', 'approved', 'sent', 'ignored')),
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_inbox_messages_status ON inbox_messages (status);
+
+-- Calendar: agents may only ever PROPOSE times (identity.md boundary #2 —
+-- "no agent may accept, decline, or move a calendar event on the
+-- founder's behalf"). Actually creating the event on the real calendar
+-- happens only via the founder-gated booking route.
+CREATE TABLE IF NOT EXISTS calendar_proposals (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  contact_name      TEXT NOT NULL,
+  contact_email     TEXT,
+  contact_phone     TEXT,
+  purpose           TEXT NOT NULL,     -- e.g. "kickoff call", "AC repair appointment"
+  proposed_slots    JSONB NOT NULL,    -- array of ISO 8601 datetime strings
+  status            TEXT NOT NULL DEFAULT 'proposed'
+    CHECK (status IN ('proposed', 'booked', 'declined')),
+  google_event_id   TEXT,              -- set once actually booked on the real calendar
+  booked_slot       TIMESTAMPTZ,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Invoicing: agents may only DRAFT (identity.md boundary #1 — "no agent
+-- may issue refunds, change prices, or move funds... may draft a Stripe
+-- action for the founder to approve"). Actually sending the invoice
+-- (which creates a real Stripe Invoice a client can pay) is always a
+-- founder-gated action, the same pattern as the cold-call trigger.
+CREATE TABLE IF NOT EXISTS invoices (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id           UUID REFERENCES clients (id),
+  client_email        TEXT NOT NULL,
+  line_items          JSONB NOT NULL,  -- array of { description, amount_cents }
+  amount_cents        INTEGER NOT NULL,
+  stripe_invoice_id   TEXT,
+  status              TEXT NOT NULL DEFAULT 'draft'
+    CHECK (status IN ('draft', 'approved', 'sent', 'paid', 'void')),
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- SMS: same trust-stage-gated pattern as inbox_messages — texting a
+-- single contact back is not a hard boundary, just risk-scored content.
+-- Inbound rows carry their own reply lifecycle (drafted_reply +
+-- status); outbound rows are the audit log of what was actually sent,
+-- created only at send time — mirrors inbox_messages' shape closely on
+-- purpose, since it's the same "draft against an inbound item, founder
+-- approves the send" pattern.
+CREATE TABLE IF NOT EXISTS sms_messages (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  phone          TEXT NOT NULL,
+  direction      TEXT NOT NULL CHECK (direction IN ('inbound', 'outbound')),
+  body           TEXT NOT NULL,
+  drafted_reply  TEXT,
+  twilio_sid     TEXT UNIQUE,
+  status         TEXT NOT NULL DEFAULT 'received'
+    CHECK (status IN ('received', 'drafted', 'sent', 'failed')),
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

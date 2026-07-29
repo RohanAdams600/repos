@@ -105,19 +105,27 @@ describe("runLoop — Diagnose -> Assemble -> Action -> Assess", () => {
     expect(outcome.finalStatus).toBe("completed");
   });
 
-  it("short-circuits into the approval queue for high-risk work without dispatching", async () => {
+  it("still dispatches and drafts high-risk work — trust stage only holds it for review, per identity.md's 'may draft... for the founder to approve'", async () => {
     routerMock.routeTask.mockReturnValue({ agent: "patch", riskLevel: "high" });
+    routerMock.dispatch.mockResolvedValue(actionResult({ agent: "patch", output: "diff: +12 -3" }));
+    reviewMock.runWarden.mockResolvedValue(actionResult({ agent: "warden", output: "VERDICT: PASS" }));
+    reviewMock.parseWardenVerdict.mockReturnValue({ passed: true, notes: "looks good", retryRecommended: false });
 
     const outcome = await runLoop(task({ type: "code", summary: "Implement the new pricing component" }));
 
-    expect(routerMock.dispatch).not.toHaveBeenCalled();
+    expect(routerMock.dispatch).toHaveBeenCalledTimes(1);
+    expect(outcome.result.output).toBe("diff: +12 -3");
     expect(outcome.finalStatus).toBe("queued_for_review");
   });
 
-  it("alerts the founder when a hard boundary is hit, in addition to queuing for review", async () => {
+  it("alerts the founder when a hard boundary is hit, in addition to still drafting and queuing for review", async () => {
+    routerMock.dispatch.mockResolvedValue(actionResult());
+    reviewMock.runWarden.mockResolvedValue(actionResult({ agent: "warden", output: "VERDICT: PASS" }));
+    reviewMock.parseWardenVerdict.mockReturnValue({ passed: true, notes: "fine", retryRecommended: false });
+
     const outcome = await runLoop(task({ summary: "Issue a refund to this client for last month" }));
 
-    expect(routerMock.dispatch).not.toHaveBeenCalled();
+    expect(routerMock.dispatch).toHaveBeenCalledTimes(1); // drafts the proposed action; only the real send is gated
     expect(outcome.finalStatus).toBe("queued_for_review");
     expect(alertsMock.alertFounder).toHaveBeenCalledOnce();
     expect(alertsMock.alertFounder.mock.calls[0][0]).toMatch(/hard boundary/i);

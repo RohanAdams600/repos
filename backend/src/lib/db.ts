@@ -240,3 +240,222 @@ export async function listColdCallsForProspect(prospectId: string) {
   );
   return result.rows;
 }
+
+// ---------------------------------------------------------------------
+// Inbox management (Gmail)
+// ---------------------------------------------------------------------
+
+export interface InboxMessage {
+  id: string;
+  external_id: string | null;
+  from_email: string;
+  subject: string;
+  body: string;
+  category: string | null;
+  drafted_reply: string | null;
+  status: "new" | "triaged" | "drafted" | "approved" | "sent" | "ignored";
+  created_at: string;
+}
+
+/** Inserts a synced email if its external_id isn't already known — the sync step is idempotent. */
+export async function insertInboxMessageIfNew(input: {
+  externalId: string;
+  fromEmail: string;
+  subject: string;
+  body: string;
+}): Promise<void> {
+  await pool.query(
+    `INSERT INTO inbox_messages (external_id, from_email, subject, body)
+     VALUES ($1,$2,$3,$4) ON CONFLICT (external_id) DO NOTHING`,
+    [input.externalId, input.fromEmail, input.subject, input.body]
+  );
+}
+
+export async function listInboxMessages(): Promise<InboxMessage[]> {
+  const result = await pool.query<InboxMessage>(`SELECT * FROM inbox_messages ORDER BY created_at DESC LIMIT 100`);
+  return result.rows;
+}
+
+export async function getInboxMessage(id: string): Promise<InboxMessage | null> {
+  const result = await pool.query<InboxMessage>(`SELECT * FROM inbox_messages WHERE id = $1`, [id]);
+  return result.rows[0] ?? null;
+}
+
+export async function listNewInboxMessages(limit = 25): Promise<InboxMessage[]> {
+  const result = await pool.query<InboxMessage>(
+    `SELECT * FROM inbox_messages WHERE status = 'new' ORDER BY created_at ASC LIMIT $1`,
+    [limit]
+  );
+  return result.rows;
+}
+
+export async function setInboxDraft(id: string, draftedReply: string): Promise<void> {
+  await pool.query(`UPDATE inbox_messages SET drafted_reply = $2, status = 'drafted' WHERE id = $1`, [
+    id,
+    draftedReply,
+  ]);
+}
+
+export async function setInboxStatus(id: string, status: InboxMessage["status"]): Promise<void> {
+  await pool.query(`UPDATE inbox_messages SET status = $2 WHERE id = $1`, [id, status]);
+}
+
+// ---------------------------------------------------------------------
+// Calendar (Google Calendar) — agents may only ever propose, never book.
+// ---------------------------------------------------------------------
+
+export interface CalendarProposal {
+  id: string;
+  contact_name: string;
+  contact_email: string | null;
+  contact_phone: string | null;
+  purpose: string;
+  proposed_slots: string[];
+  status: "proposed" | "booked" | "declined";
+  google_event_id: string | null;
+  booked_slot: string | null;
+  created_at: string;
+}
+
+export async function insertCalendarProposal(input: {
+  contactName: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  purpose: string;
+  proposedSlots: string[];
+}): Promise<CalendarProposal> {
+  const result = await pool.query<CalendarProposal>(
+    `INSERT INTO calendar_proposals (contact_name, contact_email, contact_phone, purpose, proposed_slots)
+     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+    [input.contactName, input.contactEmail ?? null, input.contactPhone ?? null, input.purpose, JSON.stringify(input.proposedSlots)]
+  );
+  return result.rows[0];
+}
+
+export async function listCalendarProposals(): Promise<CalendarProposal[]> {
+  const result = await pool.query<CalendarProposal>(`SELECT * FROM calendar_proposals ORDER BY created_at DESC LIMIT 100`);
+  return result.rows;
+}
+
+export async function getCalendarProposal(id: string): Promise<CalendarProposal | null> {
+  const result = await pool.query<CalendarProposal>(`SELECT * FROM calendar_proposals WHERE id = $1`, [id]);
+  return result.rows[0] ?? null;
+}
+
+export async function markCalendarProposalBooked(
+  id: string,
+  input: { googleEventId: string | null; bookedSlot: string }
+): Promise<void> {
+  await pool.query(
+    `UPDATE calendar_proposals SET status = 'booked', google_event_id = $2, booked_slot = $3 WHERE id = $1`,
+    [id, input.googleEventId, input.bookedSlot]
+  );
+}
+
+export async function markCalendarProposalDeclined(id: string): Promise<void> {
+  await pool.query(`UPDATE calendar_proposals SET status = 'declined' WHERE id = $1`, [id]);
+}
+
+// ---------------------------------------------------------------------
+// Invoicing (Stripe Invoices) — agents may only ever draft.
+// ---------------------------------------------------------------------
+
+export interface InvoiceLineItem {
+  description: string;
+  amountCents: number;
+}
+
+export interface Invoice {
+  id: string;
+  client_id: string | null;
+  client_email: string;
+  line_items: InvoiceLineItem[];
+  amount_cents: number;
+  stripe_invoice_id: string | null;
+  status: "draft" | "approved" | "sent" | "paid" | "void";
+  created_at: string;
+}
+
+export async function insertInvoiceDraft(input: {
+  clientId?: string;
+  clientEmail: string;
+  lineItems: InvoiceLineItem[];
+}): Promise<Invoice> {
+  const amountCents = input.lineItems.reduce((sum, item) => sum + item.amountCents, 0);
+  const result = await pool.query<Invoice>(
+    `INSERT INTO invoices (client_id, client_email, line_items, amount_cents)
+     VALUES ($1,$2,$3,$4) RETURNING *`,
+    [input.clientId ?? null, input.clientEmail, JSON.stringify(input.lineItems), amountCents]
+  );
+  return result.rows[0];
+}
+
+export async function listInvoices(): Promise<Invoice[]> {
+  const result = await pool.query<Invoice>(`SELECT * FROM invoices ORDER BY created_at DESC LIMIT 100`);
+  return result.rows;
+}
+
+export async function getInvoice(id: string): Promise<Invoice | null> {
+  const result = await pool.query<Invoice>(`SELECT * FROM invoices WHERE id = $1`, [id]);
+  return result.rows[0] ?? null;
+}
+
+export async function markInvoiceSent(id: string, stripeInvoiceId: string | null): Promise<void> {
+  await pool.query(`UPDATE invoices SET status = 'sent', stripe_invoice_id = $2 WHERE id = $1`, [id, stripeInvoiceId]);
+}
+
+// ---------------------------------------------------------------------
+// SMS (Twilio)
+// ---------------------------------------------------------------------
+
+export interface SmsMessage {
+  id: string;
+  phone: string;
+  direction: "inbound" | "outbound";
+  body: string;
+  drafted_reply: string | null;
+  twilio_sid: string | null;
+  status: "received" | "drafted" | "sent" | "failed";
+  created_at: string;
+}
+
+/** Inserts an inbound text if this Twilio message sid isn't already recorded. */
+export async function insertInboundSms(input: { phone: string; body: string; twilioSid: string }): Promise<void> {
+  await pool.query(
+    `INSERT INTO sms_messages (phone, direction, body, twilio_sid)
+     VALUES ($1,'inbound',$2,$3) ON CONFLICT (twilio_sid) DO NOTHING`,
+    [input.phone, input.body, input.twilioSid]
+  );
+}
+
+export async function listNewSms(limit = 25): Promise<SmsMessage[]> {
+  const result = await pool.query<SmsMessage>(
+    `SELECT * FROM sms_messages WHERE direction = 'inbound' AND status = 'received' ORDER BY created_at ASC LIMIT $1`,
+    [limit]
+  );
+  return result.rows;
+}
+
+/** Wordsmith's draft goes onto the inbound row it's replying to — mirrors setInboxDraft. */
+export async function setSmsDraft(id: string, draftedReply: string): Promise<void> {
+  await pool.query(`UPDATE sms_messages SET drafted_reply = $2, status = 'drafted' WHERE id = $1`, [id, draftedReply]);
+}
+
+export async function getSmsMessage(id: string): Promise<SmsMessage | null> {
+  const result = await pool.query<SmsMessage>(`SELECT * FROM sms_messages WHERE id = $1`, [id]);
+  return result.rows[0] ?? null;
+}
+
+export async function listSmsMessages(): Promise<SmsMessage[]> {
+  const result = await pool.query<SmsMessage>(`SELECT * FROM sms_messages ORDER BY created_at DESC LIMIT 100`);
+  return result.rows;
+}
+
+/** Records the outbound send as its own audit-log row and marks the inbound message replied-to. */
+export async function recordSmsSent(inboundId: string, input: { phone: string; body: string; twilioSid: string | null }): Promise<void> {
+  await pool.query(
+    `INSERT INTO sms_messages (phone, direction, body, twilio_sid, status) VALUES ($1,'outbound',$2,$3,'sent')`,
+    [input.phone, input.body, input.twilioSid]
+  );
+  await pool.query(`UPDATE sms_messages SET status = 'sent' WHERE id = $1`, [inboundId]);
+}

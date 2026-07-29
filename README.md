@@ -223,9 +223,61 @@ made-up businesses.
 of sending until `RESEND_API_KEY` is set — same mock-mode pattern as
 payments and Vapi.
 
+## Part 5 — Real office work, not just marketing copy
+
+Everything the landing page claims Autonoma "does" is backed by working
+code in `backend/src/lib/` + `backend/src/routes/`, wired into the
+heartbeat loop in `agents/src/heartbeat/scheduler.ts`. Every one of these
+follows the same mock-mode pattern as payments/Vapi above: safe, logged
+behavior by default, real behavior the moment credentials are set —
+nothing requires Stripe, Twilio, or Google to be configured to see it work
+end to end.
+
+- **Inbox management** (`backend/src/lib/gmail.ts`) — the heartbeat syncs
+  unread mail, Wordsmith drafts a reply for each new message (routed
+  through the same Diagnose→Assemble→Action→Assess loop as everything
+  else), and the draft sits in `/api/inbox` for the founder to review and
+  send from the dashboard. Nothing sends automatically — sending is the
+  one `/api/inbox/:id/send` route, founder-gated. Mock mode returns two
+  canned emails instead of calling Gmail; set `GMAIL_CLIENT_ID/SECRET/
+  REFRESH_TOKEN/USER_EMAIL` to go live.
+- **Calendar management** (`backend/src/lib/calendar.ts`) — when an inbox
+  or SMS message looks like a scheduling request (keyword heuristic in
+  the scheduler), Scout proposes open slots via a real Google Calendar
+  freeBusy query. Proposing is all any agent ever does — booking is a
+  separate founder action (`/api/calendar/:id/book`), matching
+  identity.md boundary #2 exactly. Mock mode returns canned future
+  weekday slots; set `GOOGLE_CALENDAR_CLIENT_ID/SECRET/REFRESH_TOKEN` to
+  go live.
+- **Invoicing** (`backend/src/lib/invoicing.ts`) — drafts an invoice from
+  line items via `/api/agents/invoices/draft`, founder approves and sends
+  from `/api/invoices/:id/send`, which creates/reuses the Stripe customer,
+  adds line items, finalizes, and sends the real Stripe invoice. Reuses
+  the same `stripe` client and `PAYMENTS_MODE` flag as checkout — no new
+  env vars, no separate live/mock toggle to remember.
+- **Text messages** (`backend/src/lib/sms.ts`) — inbound SMS lands on a
+  Twilio-signature-verified webhook (`/api/webhooks/twilio/sms`), Wordsmith
+  drafts a reply the same way as inbox mail, founder sends from
+  `/api/sms/:id/send`. Mock mode logs instead of dispatching; set
+  `TWILIO_ACCOUNT_SID/AUTH_TOKEN/FROM_NUMBER` to go live.
+- **Nightly report** (`backend/src/lib/reports.ts`) — fully real today,
+  no credentials needed: once per day the heartbeat compiles a digest
+  (leads scored, messages drafted, invoices sent, guarantee SLA status)
+  and emails it to the founder via the same Resend/mock path as signup
+  notifications. An atomic `INSERT ... ON CONFLICT DO NOTHING` against a
+  `report_date` unique column is what makes it idempotent under a cron
+  that fires every `HEARTBEAT_INTERVAL_MINUTES` — not a separate
+  check-then-write, which would race.
+
+Agents still hold zero database credentials for any of this — inbox
+sync/drafting, calendar proposals, and invoice drafts all go through the
+same narrow `/api/agents/*` surface as lead scoring, authenticated with
+`AGENTS_SERVICE_TOKEN`. See `backend/.env.example` for every optional
+credential above.
+
 ## Testing & CI
 
-Each package has its own Vitest suite (95 tests total) plus typecheck and
+Each package has its own Vitest suite (145 tests total) plus typecheck and
 lint — no shared root config, each runs independently:
 
 ```bash
@@ -236,12 +288,18 @@ cd frontend && npm test && npm run typecheck && npm run lint
 
 What's covered: agents' trust/boundary logic (including the cold-call
 boundary) and the full Diagnose→Assemble→Action→Assess loop (mocked model
-calls — no live Anthropic calls in tests); backend's env validation, auth
+calls — no live Anthropic calls in tests), including the regression test
+for manual trust stage actually producing a draft rather than silently
+skipping the sub-agent, plus the heartbeat scheduler's inbox/SMS drafting
+and reactive calendar-proposal wiring; backend's env validation, auth
 middleware, the mock-mode checkout funnel, the Vapi assistant allowlist,
-mock-mode cold-call flow, and prospects CRUD (all via supertest against
-the real Express app); frontend's pricing display, waitlist form, the ROI
-calculator's math, the sticky CTA's scroll/dismiss behavior, and the
-voice demo widget's unconfigured-state fallback.
+mock-mode cold-call flow, prospects CRUD, the Gmail/Calendar/Twilio/
+invoicing libraries and their founder-gated send/book routes in both
+mock and (mocked-client) live mode, and the nightly report's atomic
+idempotency claim (all via supertest against the real Express app);
+frontend's pricing display, waitlist form, the ROI calculator's math, the
+sticky CTA's scroll/dismiss behavior, and the voice demo widget's
+unconfigured-state fallback.
 
 `.github/workflows/ci.yml` runs typecheck + lint + test + build for all
 three packages on every push and PR, each as an independent job (no

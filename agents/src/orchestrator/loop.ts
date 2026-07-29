@@ -56,22 +56,15 @@ function assemble(
   };
 }
 
-/** Step 3 — Action: dispatch to the assigned sub-agent, or short-circuit into the approval queue. */
+/**
+ * Step 3 — Action: dispatch to the assigned sub-agent. This always runs,
+ * trust stage or not — identity.md is explicit that agents "may draft a
+ * Stripe action... for the founder to approve," which only makes sense
+ * if the draft actually gets produced. What requiresApproval gates is
+ * whether the result counts as done automatically or waits for a human
+ * to look at it — decided in runLoop below, after the draft exists.
+ */
 async function action(task: IncomingTask, assembly: AgentAssembly): Promise<AgentActionResult> {
-  if (assembly.requiresApproval) {
-    logger.info({ taskId: task.id, agent: assembly.agent }, "queued for founder review (trust stage / boundary)");
-    return {
-      taskId: task.id,
-      agent: assembly.agent,
-      status: "queued_for_review",
-      output: "",
-      tokensIn: 0,
-      tokensOut: 0,
-      model: assembly.model,
-      durationMs: 0,
-      blockedReason: "Requires founder approval under current trust stage or hard boundary.",
-    };
-  }
   return dispatch(assembly.agent, task);
 }
 
@@ -117,12 +110,18 @@ export async function runLoop(task: IncomingTask): Promise<LoopResult> {
     assessment = await assess(task, result);
   }
 
+  // The draft/analysis/code-change always gets produced above regardless
+  // of trust stage — requiresApproval only decides whether a genuinely
+  // completed, Warden-approved result still needs a human look before it
+  // counts as "done" (e.g. before anything downstream acts on it).
   const finalStatus: AgentActionResult["status"] =
-    result.status === "queued_for_review"
-      ? "queued_for_review"
-      : assessment && !assessment.passed
+    result.status !== "completed"
+      ? result.status
+      : assembly.requiresApproval
         ? "queued_for_review"
-        : result.status;
+        : assessment && !assessment.passed
+          ? "queued_for_review"
+          : "completed";
 
   const record: LoopRunRecord = {
     taskId: task.id,
