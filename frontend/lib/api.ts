@@ -45,6 +45,18 @@ export async function createSubscriptionCheckout(input: {
   return res.json();
 }
 
+/** Resolves the session id from the checkout success redirect to the actual agent download — see backend/src/routes/downloads.ts. */
+export async function resolveAgentDownload(sessionId: string): Promise<{ token: string; tier: Tier }> {
+  const res = await fetch(`${BACKEND_URL}/api/downloads/agent/by-session/${encodeURIComponent(sessionId)}`);
+  if (!res.ok) throw new ApiError("Couldn't find a download for this checkout session.", res.status);
+  return res.json();
+}
+
+/** The actual download link — a direct browser navigation target, not a fetch call (it's a file download). */
+export function agentDownloadUrl(token: string): string {
+  return `${BACKEND_URL}/api/downloads/agent/${encodeURIComponent(token)}`;
+}
+
 export async function fetchDashboardOverview(token: string): Promise<DashboardOverview> {
   const res = await fetch(`${BACKEND_URL}/api/dashboard/overview`, {
     headers: { authorization: `Bearer ${token}` },

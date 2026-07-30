@@ -18,7 +18,9 @@ services:
       retries: 10
 
   migrate:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     command: ["npm", "run", "migrate"]
     environment: &backend-env
       DATABASE_URL: postgres://autonoma:autonoma@postgres:5432/autonoma
@@ -33,7 +35,9 @@ services:
         condition: service_healthy
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     ports:
       - "4000:4000"
     environment:

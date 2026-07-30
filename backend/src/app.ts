@@ -16,6 +16,7 @@ import { inboxRouter } from "./routes/inbox.js";
 import { calendarRouter } from "./routes/calendar.js";
 import { invoicesRouter } from "./routes/invoices.js";
 import { smsRouter, smsWebhookRouter } from "./routes/sms.js";
+import { downloadsRouter } from "./routes/downloads.js";
 
 /**
  * Builds the Express app without binding a port, so tests can exercise
@@ -58,6 +59,7 @@ export function createApp(): express.Express {
   app.use("/api/calendar", calendarRouter);
   app.use("/api/invoices", invoicesRouter);
   app.use("/api/sms", smsRouter);
+  app.use("/api/downloads", publicRateLimiter, downloadsRouter);
 
   app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     logger.error({ err }, "unhandled error");

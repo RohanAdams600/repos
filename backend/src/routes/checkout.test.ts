@@ -9,7 +9,8 @@ const dbMock = vi.hoisted(() => ({
   findLeadByEmail: vi.fn(),
   attachStripeCustomerToLead: vi.fn(),
   markDepositPaid: vi.fn(),
-  upsertClientFromSubscription: vi.fn(),
+  upsertClientFromSubscription: vi.fn().mockResolvedValue("client-1"),
+  issueAgentDownloadToken: vi.fn().mockResolvedValue({ token: "tok_test", agent_key: "key_test" }),
 }));
 vi.mock("../lib/db.js", () => dbMock);
 
@@ -58,6 +59,10 @@ describe("POST /api/checkout/subscription (PAYMENTS_MODE=mock)", () => {
     expect(dbMock.upsertClientFromSubscription).toHaveBeenCalledWith(
       expect.objectContaining({ tier: "core", mrrCents: 100_000 })
     );
+    expect(dbMock.issueAgentDownloadToken).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: "client-1", tier: "core" })
+    );
+    expect(res.body.url).toMatch(/session_id=sess_mock_/);
   });
 
   it("rejects a tier outside the decoy-pricing stack", async () => {

@@ -13,8 +13,9 @@ operates it, and the website that sells it.
 ```
 /agents               Multi-agent orchestration system (Kai + 4 sub-agents), heartbeat loop
 /backend              Checkout (mock or live Stripe), waitlist API, dashboard/agent-status API, Postgres schema
+/desktop-agent        Tier-gated agent a paying customer downloads and runs on their own machine
 /frontend             Next.js + Tailwind site: landing page, waitlist/checkout, founder dashboard
-/.github/workflows    CI: typecheck + lint + test + build for all three packages
+/.github/workflows    CI: typecheck + lint + test + build for all four packages
 docker-compose.yml    One-command local/demo stack (Postgres + backend + agents + frontend)
 ```
 
@@ -275,14 +276,91 @@ same narrow `/api/agents/*` surface as lead scoring, authenticated with
 `AGENTS_SERVICE_TOKEN`. See `backend/.env.example` for every optional
 credential above.
 
+## Part 6 — Tier-gated desktop agent (the actual subscription deliverable)
+
+Every paid subscription unlocks a real, downloadable copy of the agent
+(`/desktop-agent`) that runs on the customer's own machine — not a demo,
+the actual product. What tier they bought decides what it can do:
+
+| Plan | Runs | Daily task cap |
+|---|---|---|
+| Starter | Front Desk (calls/texts/inbox drafting) | 40 |
+| Core | + Sales Ledger, Back Office (calendar, invoicing, CRM notes) | 150 |
+| Scale | + Night Report (daily/weekly summaries) | 500 |
+
+Both numbers live in exactly one place logically —
+`backend/src/lib/tiers.ts` — mirrored by hand into
+`desktop-agent/src/config/tiers.ts` and `frontend/lib/types.ts` since
+these are independent npm packages with no shared-lib mechanism in this
+monorepo; a test in each package's own `tiers.test.ts` pins the exact
+shape so a drift between them fails a test rather than shipping silently.
+
+**The flow, end to end:**
+
+1. `POST /api/checkout/subscription` completes (mock or live Stripe) →
+   `backend/src/lib/payments.ts` (mock) or
+   `backend/src/routes/stripe-webhook.ts` (live) both call the same
+   `issueAgentDownloadToken()`, which writes one row to
+   `agent_download_tokens`: a URL-facing `token`, a separate
+   `agent_key` that only ever gets embedded inside the downloaded
+   package (kept distinct on purpose — a URL can end up in browser
+   history or a referrer header, the embedded key never should have been
+   the same secret), and the tier.
+2. The success page (`/waitlist/success?kind=subscription&session_id=...`)
+   calls `GET /api/downloads/agent/by-session/:sessionId` to resolve the
+   actual token, then renders a "Download your agent" button pointing at
+   `GET /api/downloads/agent/:token`.
+3. That route (`backend/src/routes/downloads.ts` +
+   `backend/src/lib/agent-package.ts`) zips together
+   `desktop-agent`'s **already-built** `dist/` (test files filtered out —
+   see `agent-package.ts`'s `archive.directory()` filter — a customer
+   download is not the place for `*.test.js`), a trimmed `package.json`
+   (production dependencies and a single `start` script only — no
+   devDependencies, no build/test/lint scripts a customer doesn't need),
+   the package's `README.md`, and a generated `.env` with the tier and
+   `agent_key` stamped in. `ANTHROPIC_API_KEY` is deliberately left
+   blank — the customer's agent runs on their own Anthropic usage, so
+   that key never passes through Autonoma's servers.
+4. **`desktop-agent` has to be built (`npm run build`) before this route
+   can serve anything** — `isDesktopAgentBuilt()` checks for
+   `desktop-agent/dist` and the route 503s with a clear log line if it's
+   missing, rather than serving a broken zip.
+
+**What the customer actually runs:** `npm install && npm start`. First
+run finds no saved business profile, so it starts a tiny local Express
+server (`desktop-agent/src/wizard/`) and opens a setup form — business
+hours, services, tone, pricing notes, and an Anthropic API key field.
+Everything typed there stays on their machine (`data/business-profile.json`,
+`.env`) — it's never sent back to Autonoma. Stop the wizard, run
+`npm start` again, and this time it launches the actual agent
+(`desktop-agent/src/heartbeat.ts`): on an interval, for each lane the
+tier unlocks, it drafts a reply to anything in
+`data/inbound/<lane>.json` that doesn't have one yet, using
+`data/state.json` to enforce the tier's daily cap (resets at local
+midnight) and to log what it did for `data/reports/<date>.md`'s nightly
+summary. Every draft is written back to the same JSON file for the
+owner to review — nothing sends itself, matching the "agent drafts, a
+human sends" boundary the hosted product holds to everywhere else. A
+failed Anthropic call (bad key, rate limit) is caught per-item and
+logged, not left to crash the whole process — this runs unattended on
+someone's own desktop with nobody watching it the way a hosted service
+would be.
+
+This package doesn't wire up real Gmail/Calendar/Twilio/Stripe
+integrations on its own (that's what the hosted backend does) — it's a
+local drafting loop against JSON files the owner edits directly. See
+`desktop-agent/README.md`'s "Connecting real inboxes" section for how to
+extend it.
+
 ## Testing & CI
 
-Each package has its own Vitest suite (145 tests total) plus typecheck and
+Each package has its own Vitest suite (198 tests total) plus typecheck and
 lint — no shared root config, each runs independently:
 
 ```bash
 cd agents && npm test && npm run typecheck && npm run lint
 cd backend && npm test && npm run typecheck && npm run lint
+cd desktop-agent && npm test && npm run typecheck && npm run lint
 cd frontend && npm test && npm run typecheck && npm run lint
 ```
 
@@ -292,17 +370,32 @@ calls — no live Anthropic calls in tests), including the regression test
 for manual trust stage actually producing a draft rather than silently
 skipping the sub-agent, plus the heartbeat scheduler's inbox/SMS drafting
 and reactive calendar-proposal wiring; backend's env validation, auth
-middleware, the mock-mode checkout funnel, the Vapi assistant allowlist,
-mock-mode cold-call flow, prospects CRUD, the Gmail/Calendar/Twilio/
-invoicing libraries and their founder-gated send/book routes in both
-mock and (mocked-client) live mode, and the nightly report's atomic
-idempotency claim (all via supertest against the real Express app);
-frontend's pricing display, waitlist form, the ROI calculator's math, the
-sticky CTA's scroll/dismiss behavior, and the voice demo widget's
-unconfigured-state fallback.
+middleware, the mock-mode checkout funnel and its agent-download-token
+issuance, the Vapi assistant allowlist, mock-mode cold-call flow,
+prospects CRUD, the Gmail/Calendar/Twilio/invoicing libraries and their
+founder-gated send/book routes in both mock and (mocked-client) live
+mode, the nightly report's atomic idempotency claim, and the download
+route's zip contents — a trimmed package.json, a correctly-stamped
+`.env`, and confirmation that test files never make it into a customer's
+zip (all via supertest against the real Express app); desktop-agent's
+tier-gating (capability lanes and the shared daily cap enforced across
+lanes, including the day-rollover reset), the setup wizard's validation
+and `.env`-patching, and a per-item catch around every Anthropic call so
+one failed draft can't crash the whole local process; frontend's pricing
+display, waitlist form, the ROI calculator's math, the sticky CTA's
+scroll/dismiss behavior, the voice demo widget's unconfigured-state
+fallback, and the subscription success page's tier-aware download flow.
+
+Beyond the automated suite, the whole downloadable-agent path has been
+run for real at least once: a live Postgres, a real `POST
+/api/checkout/subscription` call, a real zip streamed from
+`GET /api/downloads/agent/:token`, unzipped and run with
+`npm install && npm start` exactly as a customer would — through the
+setup wizard, into the heartbeat loop, correctly gated to the tier that
+was purchased.
 
 `.github/workflows/ci.yml` runs typecheck + lint + test + build for all
-three packages on every push and PR, each as an independent job (no
+four packages on every push and PR, each as an independent job (no
 Postgres service container needed — backend tests mock the DB layer).
 
 ## Deploying
@@ -316,7 +409,13 @@ push to any container host.
   Railway, Fly.io, a plain VM). Both are stateless aside from their
   Postgres/HTTP connections, so they scale horizontally without extra
   work. Build from each service's `Dockerfile`, or run
-  `npm run build && npm start` directly.
+  `npm run build && npm start` directly. **Backend's `Dockerfile` builds
+  from the repo root** (not `backend/` alone, unlike every other service
+  here) because it bundles a built copy of `desktop-agent/` into every
+  subscription download — see Part 6. Running outside Docker, build
+  `desktop-agent` (`cd desktop-agent && npm ci && npm run build`) before
+  starting backend, or `/api/downloads/agent/:token` 503s with a clear
+  log line telling you to.
 - **Frontend:** Vercel is the path of least resistance for Next.js App
   Router (zero config — import the repo, set root directory to
   `frontend`); `frontend/Dockerfile` (Next's `output: "standalone"`) is

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Set up your Autonoma agent</title>
+<style>
+  :root {
+    --ink: #0b0a08;
+    --ink-raised: #16130e;
+    --paper: #f2e9d8;
+    --paper-dim: #b7a788;
+    --brass: #c98a42;
+    --brass-bright: #e3a75e;
+    --line: rgba(242, 233, 216, 0.14);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 56px 24px 80px; }
+  .eyebrow {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+  h1 { font-size: 30px; font-weight: 700; margin: 10px 0 6px; }
+  .sub { color: var(--paper-dim); font-size: 15px; margin-bottom: 8px; }
+  #tier-banner {
+    margin-top: 20px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--ink-raised);
+    font-size: 13.5px;
+    color: var(--paper-dim);
+  }
+  #tier-banner b { color: var(--brass-bright); }
+  form { margin-top: 32px; display: flex; flex-direction: column; gap: 18px; }
+  label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px; }
+  .hint { font-size: 12px; color: var(--paper-dim); font-weight: 400; margin-top: 2px; }
+  input, textarea {
+    width: 100%;
+    background: var(--ink-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 13px;
+    color: var(--paper);
+    font-size: 14.5px;
+    font-family: inherit;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--brass); }
+  textarea { resize: vertical; min-height: 64px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 560px) { .row2 { grid-template-columns: 1fr; } }
+  fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 16px 16px 6px; margin: 6px 0 0; }
+  legend { padding: 0 6px; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brass); }
+  button {
+    margin-top: 8px;
+    background: var(--brass);
+    color: var(--ink);
+    border: none;
+    border-radius: 8px;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  button:hover { background: var(--brass-bright); }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+  #result {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    font-size: 14px;
+    display: none;
+  }
+  #result.ok { background: color-mix(in srgb, var(--brass) 10%, transparent); display: block; }
+  #result.err { background: rgba(220, 90, 70, 0.12); border-color: rgba(220, 90, 70, 0.4); display: block; }
+  code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 12.5px; color: var(--brass-bright); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Autonoma Desktop Agent — Setup</p>
+  <h1>Tell it about your business.</h1>
+  <p class="sub">This runs once. Everything below stays on this machine — nothing is sent to Autonoma's servers.</p>
+
+  <div id="tier-banner">Loading your plan…</div>
+
+  <form id="setup-form">
+    <div>
+      <label for="businessName">Business name</label>
+      <input id="businessName" name="businessName" required />
+    </div>
+
+    <div>
+      <label for="hours">Hours</label>
+      <input id="hours" name="hours" placeholder="Mon–Fri 8am–6pm, closed weekends" required />
+    </div>
+
+    <div>
+      <label for="services">Services</label>
+      <textarea id="services" name="services" placeholder="What you do, in plain language — this is what the agent draws on to answer questions." required></textarea>
+    </div>
+
+    <div>
+      <label for="pricingNotes">Pricing notes <span class="hint">(optional — general ranges only, never a firm quote)</span></label>
+      <textarea id="pricingNotes" name="pricingNotes" placeholder="e.g. service calls start around $150, exact quote after a look"></textarea>
+    </div>
+
+    <div>
+      <label for="tone">Tone</label>
+      <input id="tone" name="tone" placeholder="e.g. friendly and direct, no corporate jargon" required />
+    </div>
+
+    <div class="row2">
+      <div>
+        <label for="contactEmail">Your contact email</label>
+        <input id="contactEmail" name="contactEmail" type="email" required />
+      </div>
+      <div>
+        <label for="contactPhone">Your contact phone</label>
+        <input id="contactPhone" name="contactPhone" required />
+      </div>
+    </div>
+
+    <fieldset>
+      <legend>Anthropic API key</legend>
+      <label for="anthropicApiKey">Paste your key <span class="hint">(this agent runs on your own Claude usage — get a key at console.anthropic.com if you don't have one yet)</span></label>
+      <input id="anthropicApiKey" name="anthropicApiKey" placeholder="sk-ant-..." autocomplete="off" />
+    </fieldset>
+
+    <button type="submit" id="submit-btn">Save and finish setup</button>
+  </form>
+
+  <div id="result"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  fetch("/api/status")
+    .then(function (r) { return r.json(); })
+    .then(function (status) {
+      var banner = document.getElementById("tier-banner");
+      banner.innerHTML =
+        "You're on the <b>" + status.label + "</b> plan — this agent will run: " +
+        status.capabilityLanes.join(", ") +
+        ". Want more lanes? Upgrade your plan and re-download.";
+    })
+    .catch(function () {
+      document.getElementById("tier-banner").textContent = "Couldn't read your plan — the wizard server may still be starting.";
+    });
+
+  var form = document.getElementById("setup-form");
+  var resultEl = document.getElementById("result");
+  var submitBtn = document.getElementById("submit-btn");
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Saving…";
+
+    var data = Object.fromEntries(new FormData(form).entries());
+
+    fetch("/api/setup", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(data),
+    })
+      .then(function (r) { return r.json().then(function (body) { return { ok: r.ok, body: body }; }); })
+      .then(function (res) {
+        if (!res.ok) {
+          resultEl.className = "err";
+          resultEl.textContent = "Couldn't save — check that every required field is filled in and try again.";
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Save and finish setup";
+          return;
+        }
+        resultEl.className = "ok";
+        resultEl.innerHTML =
+          "Saved. Go back to your terminal, stop this wizard (<code>Ctrl+C</code>), and run " +
+          "<code>npm start</code> again — it'll launch the agent itself this time instead of the wizard.";
+        submitBtn.textContent = "Saved";
+      })
+      .catch(function () {
+        resultEl.className = "err";
+        resultEl.textContent = "Couldn't reach the local setup server — make sure it's still running and try again.";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save and finish setup";
+      });
+  });
+})();
+</script>
+</body>
+</html>

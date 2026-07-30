@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const dbMock = vi.hoisted(() => ({
   attachStripeCustomerToLead: vi.fn(),
   markDepositPaid: vi.fn(),
-  upsertClientFromSubscription: vi.fn(),
+  upsertClientFromSubscription: vi.fn().mockResolvedValue("client-1"),
+  issueAgentDownloadToken: vi.fn().mockResolvedValue({ token: "tok_test", agent_key: "key_test" }),
 }));
 
 vi.mock("./db.js", () => dbMock);
@@ -48,6 +49,10 @@ describe("payments (mock mode)", () => {
     );
     expect(result.mock).toBe(true);
     expect(result.url).toContain("tier=core");
+    expect(result.url).toMatch(/session_id=sess_mock_/);
+    expect(dbMock.issueAgentDownloadToken).toHaveBeenCalledWith(
+      expect.objectContaining({ clientId: "client-1", tier: "core" })
+    );
   });
 
   it("generates distinct mock customer/subscription ids per call", async () => {
@@ -57,5 +62,8 @@ describe("payments (mock mode)", () => {
     const [firstCall, secondCall] = dbMock.upsertClientFromSubscription.mock.calls;
     expect(firstCall[0].stripeCustomerId).not.toBe(secondCall[0].stripeCustomerId);
     expect(firstCall[0].stripeSubscriptionId).not.toBe(secondCall[0].stripeSubscriptionId);
+
+    const [firstToken, secondToken] = dbMock.issueAgentDownloadToken.mock.calls;
+    expect(firstToken[0].stripeCheckoutSessionId).not.toBe(secondToken[0].stripeCheckoutSessionId);
   });
 });

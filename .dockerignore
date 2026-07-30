@@ -1,0 +1,11 @@
+# Applies to any Dockerfile built with the repo root as context (see
+# backend/Dockerfile, which needs the sibling desktop-agent/ package in
+# its build context — every other service still builds from its own
+# subdirectory and uses that subdirectory's own .dockerignore).
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+**/*.log
+desktop-agent/data
+.git

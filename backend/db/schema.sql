@@ -209,3 +209,26 @@ CREATE TABLE IF NOT EXISTS sms_messages (
     CHECK (status IN ('received', 'drafted', 'sent', 'failed')),
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Desktop agent downloads: one row per subscription, issued the moment a
+-- client's checkout completes (mock or real Stripe webhook — see
+-- lib/payments.ts and routes/stripe-webhook.ts). `token` is the opaque
+-- value embedded in the download URL sent to the customer; `agent_key`
+-- is a *separate* random value stamped into the downloaded package's own
+-- .env, kept distinct from `token` on purpose so a URL that ends up in a
+-- browser history or referrer header was never the same secret as the
+-- one shipped inside the package. See backend/src/lib/tiers.ts for what
+-- `tier` actually unlocks in the downloaded agent.
+CREATE TABLE IF NOT EXISTS agent_download_tokens (
+  id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id                   UUID NOT NULL REFERENCES clients (id),
+  token                       TEXT NOT NULL UNIQUE,
+  agent_key                   TEXT NOT NULL UNIQUE,
+  tier                        TEXT NOT NULL CHECK (tier IN ('starter', 'core', 'scale')),
+  stripe_checkout_session_id  TEXT NOT NULL UNIQUE,
+  download_count              INTEGER NOT NULL DEFAULT 0,
+  downloaded_at               TIMESTAMPTZ,
+  created_at                  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_download_tokens_client ON agent_download_tokens (client_id);

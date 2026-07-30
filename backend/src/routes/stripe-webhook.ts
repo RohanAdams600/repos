@@ -10,6 +10,7 @@ import {
   markSubscriptionStatus,
   hasProcessedStripeEvent,
   recordStripeEvent,
+  issueAgentDownloadToken,
 } from "../lib/db.js";
 
 export const stripeWebhookRouter = Router();
@@ -79,7 +80,7 @@ async function handleEvent(event: Stripe.Event): Promise<void> {
         const email = session.metadata?.leadEmail;
         const businessName = session.metadata?.businessName;
         if (tier && email && businessName) {
-          await upsertClientFromSubscription({
+          const clientId = await upsertClientFromSubscription({
             leadEmail: email,
             businessName,
             tier,
@@ -87,7 +88,8 @@ async function handleEvent(event: Stripe.Event): Promise<void> {
             stripeSubscriptionId: session.subscription,
             mrrCents: TIER_MRR_CENTS[tier],
           });
-          logger.info({ email, tier }, "new subscription — client onboarding record created");
+          await issueAgentDownloadToken({ clientId, tier, stripeCheckoutSessionId: session.id });
+          logger.info({ email, tier }, "new subscription — client onboarding record created, agent download issued");
         }
       }
       break;

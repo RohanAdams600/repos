@@ -12,7 +12,7 @@ import { randomUUID } from "node:crypto";
 import { stripe, priceIdForTier, TIER_MRR_CENTS, type Tier } from "./stripe.js";
 import { env } from "./env.js";
 import { logger } from "./logger.js";
-import { attachStripeCustomerToLead, markDepositPaid, upsertClientFromSubscription } from "./db.js";
+import { attachStripeCustomerToLead, markDepositPaid, upsertClientFromSubscription, issueAgentDownloadToken } from "./db.js";
 
 export interface CheckoutSession {
   url: string;
@@ -53,7 +53,8 @@ export async function createSubscriptionCheckout(input: {
   if (env.PAYMENTS_MODE === "mock") {
     const fakeCustomerId = `cus_mock_${randomUUID().slice(0, 12)}`;
     const fakeSubscriptionId = `sub_mock_${randomUUID().slice(0, 12)}`;
-    await upsertClientFromSubscription({
+    const fakeSessionId = `sess_mock_${randomUUID().slice(0, 12)}`;
+    const clientId = await upsertClientFromSubscription({
       leadEmail: input.email,
       businessName: input.businessName,
       tier: input.tier,
@@ -61,11 +62,21 @@ export async function createSubscriptionCheckout(input: {
       stripeSubscriptionId: fakeSubscriptionId,
       mrrCents: TIER_MRR_CENTS[input.tier],
     });
+    // Real Stripe checkout redirects with the actual session id in the
+    // {CHECKOUT_SESSION_ID} placeholder (see the live branch below) — the
+    // success page always resolves a download via /api/downloads/agent/
+    // by-session/:sessionId, so mock mode has to hand it an equally real
+    // session id, not skip straight to a token, or the two code paths
+    // would diverge on the one thing that actually matters here.
+    await issueAgentDownloadToken({ clientId, tier: input.tier, stripeCheckoutSessionId: fakeSessionId });
     logger.info(
       { email: input.email, tier: input.tier },
       "[mock payments] subscription activated instantly — no real charge occurred, PAYMENTS_MODE=mock"
     );
-    return { url: `${env.CHECKOUT_SUCCESS_URL}?mock=1&kind=subscription&tier=${input.tier}`, mock: true };
+    return {
+      url: `${env.CHECKOUT_SUCCESS_URL}?mock=1&kind=subscription&tier=${input.tier}&session_id=${fakeSessionId}`,
+      mock: true,
+    };
   }
 
   if (!stripe) throw new Error("PAYMENTS_MODE=live but the Stripe client failed to initialize.");
@@ -74,7 +85,7 @@ export async function createSubscriptionCheckout(input: {
     mode: "subscription",
     customer_email: input.email,
     line_items: [{ price: priceIdForTier(input.tier), quantity: 1 }],
-    success_url: env.CHECKOUT_SUCCESS_URL,
+    success_url: `${env.CHECKOUT_SUCCESS_URL}?kind=subscription&tier=${input.tier}&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: env.CHECKOUT_CANCEL_URL,
     metadata: {
       kind: "subscription",

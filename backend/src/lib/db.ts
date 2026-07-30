@@ -1,4 +1,5 @@
 import pg from "pg";
+import { randomUUID } from "node:crypto";
 import { env } from "./env.js";
 
 export const pool = new pg.Pool({ connectionString: env.DATABASE_URL });
@@ -111,6 +112,64 @@ export async function markSubscriptionStatus(
 export async function hasProcessedStripeEvent(eventId: string): Promise<boolean> {
   const result = await pool.query(`SELECT 1 FROM stripe_events WHERE id = $1`, [eventId]);
   return (result.rowCount ?? 0) > 0;
+}
+
+// --- Desktop agent downloads ---
+
+export interface AgentDownloadToken {
+  id: string;
+  client_id: string;
+  token: string;
+  agent_key: string;
+  tier: "starter" | "core" | "scale";
+  stripe_checkout_session_id: string;
+  download_count: number;
+  downloaded_at: string | null;
+  created_at: string;
+}
+
+/** Called once per completed subscription checkout — mock path (payments.ts) and live path (stripe-webhook.ts) both call this, so a client only ever gets one token per checkout session. */
+export async function issueAgentDownloadToken(input: {
+  clientId: string;
+  tier: "starter" | "core" | "scale";
+  stripeCheckoutSessionId: string;
+}): Promise<AgentDownloadToken> {
+  const token = randomToken();
+  const agentKey = randomToken();
+  const result = await pool.query<AgentDownloadToken>(
+    `INSERT INTO agent_download_tokens (client_id, token, agent_key, tier, stripe_checkout_session_id)
+     VALUES ($1,$2,$3,$4,$5)
+     ON CONFLICT (stripe_checkout_session_id) DO UPDATE SET tier = EXCLUDED.tier
+     RETURNING *`,
+    [input.clientId, token, agentKey, input.tier, input.stripeCheckoutSessionId]
+  );
+  return result.rows[0];
+}
+
+export async function findDownloadTokenBySession(sessionId: string): Promise<AgentDownloadToken | null> {
+  const result = await pool.query<AgentDownloadToken>(
+    `SELECT * FROM agent_download_tokens WHERE stripe_checkout_session_id = $1`,
+    [sessionId]
+  );
+  return result.rows[0] ?? null;
+}
+
+export async function findDownloadToken(token: string): Promise<AgentDownloadToken | null> {
+  const result = await pool.query<AgentDownloadToken>(`SELECT * FROM agent_download_tokens WHERE token = $1`, [
+    token,
+  ]);
+  return result.rows[0] ?? null;
+}
+
+export async function markTokenDownloaded(token: string): Promise<void> {
+  await pool.query(
+    `UPDATE agent_download_tokens SET downloaded_at = NOW(), download_count = download_count + 1 WHERE token = $1`,
+    [token]
+  );
+}
+
+function randomToken(): string {
+  return randomUUID().replace(/-/g, "") + randomUUID().replace(/-/g, "").slice(0, 8);
 }
 
 export async function recordStripeEvent(eventId: string, type: string): Promise<void> {

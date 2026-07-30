@@ -51,6 +51,25 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  desktop-agent:
+    name: desktop-agent — typecheck, lint, test, build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: desktop-agent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: desktop-agent/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
   frontend:
     name: frontend — typecheck, lint, test, build
     runs-on: ubuntu-latest
