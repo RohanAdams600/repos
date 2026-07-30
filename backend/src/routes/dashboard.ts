@@ -5,6 +5,9 @@ import { getDashboardMetrics, getRecentAgentRuns, getAgentRunCountsByAgent, getL
 export const dashboardRouter = Router();
 dashboardRouter.use(requireDashboardToken);
 
+/** 100 clients at Core's $4,000/mo (see lib/stripe.ts's TIER_MRR_CENTS) — the "Target unit economics" figure from the root README's Part 1. */
+const MRR_TARGET_DOLLARS = 400_000;
+
 dashboardRouter.get("/overview", async (_req, res) => {
   const [metrics, recentRuns, runCounts, lastHeartbeat] = await Promise.all([
     getDashboardMetrics(),
@@ -17,7 +20,7 @@ dashboardRouter.get("/overview", async (_req, res) => {
     metrics: {
       activeClients: metrics.activeClients,
       mrr: metrics.mrrCents / 100,
-      mrrTargetProgressPct: Math.round((metrics.mrrCents / 100 / 100_000) * 100),
+      mrrTargetProgressPct: Math.round((metrics.mrrCents / 100 / MRR_TARGET_DOLLARS) * 100),
       waitlistCount: metrics.waitlistCount,
       averageLeadScore: metrics.averageLeadScore,
     },

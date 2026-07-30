@@ -21,19 +21,19 @@ docker-compose.yml    One-command local/demo stack (Postgres + backend + agents 
 
 ## Part 1 — The business
 
-**Target unit economics:** $100,000 MRR from 100 clients paying
-$1,000/mo on the Core tier — not 1 client at $100k (concentration risk),
-not 10 clients at $10k (high friction to sell and service), not 1,000
-clients at $100 (support nightmare).
+**Target unit economics:** $400,000 MRR from 100 clients paying
+$4,000/mo on the Core tier — not 1 client at $400k (concentration risk),
+not 10 clients at $40k (high friction to sell and service), not 1,000
+clients at $400 (support nightmare).
 
 **Decoy pricing** (`frontend/components/PricingTiers.tsx`,
 `agents/identity/user.md`):
 
 | Tier | Price | Role |
 |---|---|---|
-| Starter | $500/mo | Decoy — DIY playbooks, makes Core look like the obvious step up |
-| **Core** | **$1,000/mo** | **The offer we actually sell** — done-with-you |
-| Scale | $10,000/mo | Anchor — done-for-you, makes Core look inexpensive |
+| Starter | $1,000/mo | Decoy — DIY playbooks, makes Core look like the obvious step up |
+| **Core** | **$4,000/mo** | **The offer we actually sell** — done-with-you |
+| Scale | $20,000/mo | Anchor — done-for-you, makes Core look inexpensive |
 
 **Pre-sell & validation:** nothing client-specific gets built until a
 $200 deposit is collected (`backend/src/routes/checkout.ts`, mode:
@@ -175,8 +175,8 @@ else in the code changes when you switch it:
 **Going live with Stripe**, whenever you're ready:
 
 1. Create a Stripe account, then 4 Prices: one one-time deposit price and
-   three recurring monthly prices (Starter $500, Core $1,000, Scale
-   $10,000).
+   three recurring monthly prices (Starter $1,000, Core $4,000, Scale
+   $20,000).
 2. Fill in the 6 `STRIPE_*` vars in `backend/.env` (secret key, webhook
    secret, 4 price IDs).
 3. Set `PAYMENTS_MODE=live`. `backend/src/lib/env.ts` will refuse to start

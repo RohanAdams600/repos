@@ -34,9 +34,9 @@ going live — everything else is the actual operating model.
 
 | Tier | Price | What it is | Role in the stack |
 |---|---|---|---|
-| Starter | $500/mo | DIY agent playbooks + templates, self-serve, community support only | Decoy — makes Core look like the obvious next step up |
-| **Core** | **$1,000/mo** | Done-with-you: we build and operate 1 orchestrator + up to 4 sub-agents inside the client's stack, biweekly working sessions | **Target — this is the offer we sell** |
-| Scale | $10,000/mo | Fully done-for-you, dedicated build team, custom integrations, weekly strategy calls | Anchor — makes Core look inexpensive by comparison |
+| Starter | $1,000/mo | DIY agent playbooks + templates, self-serve, community support only | Decoy — makes Core look like the obvious next step up |
+| **Core** | **$4,000/mo** | Done-with-you: we build and operate 1 orchestrator + up to 4 sub-agents inside the client's stack, biweekly working sessions | **Target — this is the offer we sell** |
+| Scale | $20,000/mo | Fully done-for-you, dedicated build team, custom integrations, weekly strategy calls | Anchor — makes Core look inexpensive by comparison |
 
 ## Priority-client rules
 
@@ -51,7 +51,7 @@ going live — everything else is the actual operating model.
 
 ## Non-negotiables agents must always apply
 
-- Never discount Core below $1,000/mo in any draft without explicit
+- Never discount Core below $4,000/mo in any draft without explicit
   founder approval.
 - Never promise a delivery timeline agents don't have data to support —
   check `playbooks/onboarding-playbook.md` for actual build timelines

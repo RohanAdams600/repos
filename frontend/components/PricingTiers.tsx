@@ -4,7 +4,7 @@ const tiers = [
   {
     id: "starter",
     name: "Starter",
-    price: "$500",
+    price: "$1,000",
     cadence: "/mo",
     tagline: "DIY playbooks & templates",
     description:
@@ -21,7 +21,7 @@ const tiers = [
   {
     id: "core",
     name: "Core",
-    price: "$1,000",
+    price: "$4,000",
     cadence: "/mo",
     tagline: "Done-with-you — the target offer",
     description:
@@ -39,7 +39,7 @@ const tiers = [
   {
     id: "scale",
     name: "Scale",
-    price: "$10,000",
+    price: "$20,000",
     cadence: "/mo",
     tagline: "Fully done-for-you",
     description:

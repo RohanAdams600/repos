@@ -57,7 +57,7 @@ describe("POST /api/checkout/subscription (PAYMENTS_MODE=mock)", () => {
     expect(res.status).toBe(200);
     expect(res.body.mock).toBe(true);
     expect(dbMock.upsertClientFromSubscription).toHaveBeenCalledWith(
-      expect.objectContaining({ tier: "core", mrrCents: 100_000 })
+      expect.objectContaining({ tier: "core", mrrCents: 400_000 })
     );
     expect(dbMock.issueAgentDownloadToken).toHaveBeenCalledWith(
       expect.objectContaining({ clientId: "client-1", tier: "core" })

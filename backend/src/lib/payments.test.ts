@@ -44,7 +44,7 @@ describe("payments (mock mode)", () => {
         leadEmail: "founder@acme.com",
         businessName: "Acme Services LLC",
         tier: "core",
-        mrrCents: 100_000,
+        mrrCents: 400_000,
       })
     );
     expect(result.mock).toBe(true);

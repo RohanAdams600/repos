@@ -21,9 +21,9 @@ const teamSizes: { value: TeamSize; label: string }[] = [
 ];
 
 const tiers: { value: Tier; label: string }[] = [
-  { value: "starter", label: "Starter — $500/mo (DIY)" },
-  { value: "core", label: "Core — $1,000/mo (done-with-you)" },
-  { value: "scale", label: "Scale — $10,000/mo (done-for-you)" },
+  { value: "starter", label: "Starter — $1,000/mo (DIY)" },
+  { value: "core", label: "Core — $4,000/mo (done-with-you)" },
+  { value: "scale", label: "Scale — $20,000/mo (done-for-you)" },
 ];
 
 export function WaitlistForm() {

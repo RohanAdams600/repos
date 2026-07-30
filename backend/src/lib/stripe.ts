@@ -19,9 +19,9 @@ export const TIER_PRICE_IDS: Record<Tier, string | undefined> = {
 };
 
 export const TIER_MRR_CENTS: Record<Tier, number> = {
-  starter: 50_000,
-  core: 100_000,
-  scale: 1_000_000,
+  starter: 100_000,
+  core: 400_000,
+  scale: 2_000_000,
 };
 
 export function priceIdForTier(tier: Tier): string {

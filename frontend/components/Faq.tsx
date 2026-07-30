@@ -1,6 +1,6 @@
 const faqs = [
   {
-    q: "What exactly do I get for $1,000/month on Core?",
+    q: "What exactly do I get for $4,000/month on Core?",
     a: "An orchestrator agent plus up to 4 sub-agents, configured inside your actual inbox, CRM, and calendar — not a demo. Biweekly working sessions to expand scope as you see what's working.",
   },
   {

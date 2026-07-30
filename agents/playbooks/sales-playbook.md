@@ -21,8 +21,8 @@ built product exists before a deposit is collected.
    brief before the call (`generateLeadBrief`) summarizing the
    pre-qualification answers so the founder never opens a call cold.
 5. **Subscription conversion** — after the call, the client is sent the
-   tier checkout link matching what was agreed (`$500`, `$1,000`, or
-   `$10,000` recurring Stripe Price).
+   tier checkout link matching what was agreed (`$1,000`, `$4,000`, or
+   `$20,000` recurring Stripe Price).
 
 ## Lead scoring rubric (used by Scout)
 
@@ -43,7 +43,7 @@ their answers.
 ## Decoy pricing framing (what Wordsmith should always do in copy)
 
 Always present all three tiers together. Never quote Core in isolation.
-The Scale tier ($10,000/mo) exists to anchor — Wordsmith should describe
+The Scale tier ($20,000/mo) exists to anchor — Wordsmith should describe
 its scope generously (dedicated team, weekly calls, custom integration)
 so Core reads as the obvious value pick, not the cheap option.
 
