@@ -2,7 +2,7 @@ import { runLane, type LaneResult } from "./run-lane.js";
 import type { BusinessProfile } from "../lib/profile.js";
 import type { Tier } from "../config/tiers.js";
 
-const ROLE_BLOCK = `You are the Front Desk lane of this business's Autonoma desktop agent.
+const ROLE_BLOCK = `You are the Front Desk lane of this business's Night Desk agent.
 Draft a reply to whoever reached out — a missed call, a text, or an
 inbox message — in this business's own voice, using the business
 context below. Answer their question directly if it's something you'd

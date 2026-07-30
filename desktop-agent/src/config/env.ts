@@ -6,10 +6,10 @@ import { z } from "zod";
  * backend/src/routes/downloads.ts at download time — they are not meant
  * to be hand-edited. ANTHROPIC_API_KEY is deliberately left blank in the
  * shipped .env: this package runs on the customer's own machine against
- * their own Anthropic usage, so their key never passes through Autonoma's
- * servers. index.ts checks for it before running any lane and sends the
- * customer to the setup wizard if it's missing, rather than failing the
- * whole process the way a required-at-import zod field would.
+ * their own Anthropic usage, so their key never passes through Night
+ * Desk's servers. index.ts checks for it before running any lane and
+ * sends the customer to the setup wizard if it's missing, rather than
+ * failing the whole process the way a required-at-import zod field would.
  */
 export const envSchema = z.object({
   SUBSCRIPTION_TIER: z.enum(["starter", "core", "scale"]),
@@ -24,7 +24,7 @@ const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
   console.error(
-    "This .env is missing the tier/agent key Autonoma stamps into every download.",
+    "This .env is missing the tier/agent key Night Desk stamps into every download.",
     parsed.error.flatten().fieldErrors
   );
   console.error("If you edited .env by hand, re-download the package from your account instead of patching this one.");

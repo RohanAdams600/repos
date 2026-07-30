@@ -3,7 +3,7 @@ import { MODELS } from "../lib/anthropic-client.js";
 import type { BusinessProfile } from "../lib/profile.js";
 import type { Tier } from "../config/tiers.js";
 
-const ROLE_BLOCK = `You are the Back Office lane of this business's Autonoma desktop agent.
+const ROLE_BLOCK = `You are the Back Office lane of this business's Night Desk agent.
 Draft the admin item described — an invoice line-item summary, a
 calendar-slot proposal, or a CRM note — clearly and precisely, using the
 business context below. Never state a final invoice total as sent or a

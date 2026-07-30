@@ -1,7 +1,7 @@
 {
-  "name": "@autonoma/desktop-agent",
+  "name": "night-desk-agent",
   "version": "1.0.0",
-  "description": "The Autonoma agent, packaged to run on a customer's own desktop. Capabilities and daily task volume are gated by the subscription tier stamped into .env at download time.",
+  "description": "The Night Desk agent, packaged to run on a customer's own desktop. Capabilities and daily task volume are gated by the subscription tier stamped into .env at download time.",
   "private": true,
   "type": "module",
   "main": "dist/index.js",

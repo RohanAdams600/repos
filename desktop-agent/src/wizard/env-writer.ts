@@ -8,7 +8,7 @@ const ENV_PATH = path.join(PACKAGE_ROOT, ".env");
  * Patches just the ANTHROPIC_API_KEY line in .env, leaving
  * SUBSCRIPTION_TIER/AGENT_KEY (stamped in at download time) untouched.
  * The key never leaves this machine — it's written straight to the
- * local .env file, never sent back to Autonoma's backend.
+ * local .env file, never sent anywhere else.
  */
 export function writeApiKeyToEnvFile(apiKey: string): void {
   let contents = fs.existsSync(ENV_PATH) ? fs.readFileSync(ENV_PATH, "utf8") : "";
