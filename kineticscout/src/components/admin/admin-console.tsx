@@ -6,6 +6,8 @@ import { CoachAdmin } from '@/components/admin/admin-coaches'
 import { MessageReportsAdmin } from '@/components/admin/admin-message-reports'
 import { NormsAdmin } from '@/components/admin/admin-norms'
 import { TeamAdmin } from '@/components/admin/admin-teams'
+import { CalendarAdmin, EventsAdmin } from '@/components/admin/admin-events'
+import { DrillsAdmin } from '@/components/admin/admin-drills'
 import { ProgramDataAdmin } from '@/components/admin/admin-programs'
 import { ReferenceClipAdmin } from '@/components/admin/admin-reference-clips'
 import { VerificationQueue } from '@/components/admin/admin-verification'
@@ -156,6 +158,9 @@ export function AdminConsole() {
       <CoachAdmin />
       <TeamAdmin />
       <MessageReportsAdmin />
+      <EventsAdmin />
+      <CalendarAdmin />
+      <DrillsAdmin />
       <VerificationQueue />
       <ProgramDataAdmin />
       <NormsAdmin />

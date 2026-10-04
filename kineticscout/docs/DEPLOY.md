@@ -64,6 +64,7 @@ and names the variable in the error. `.env.example` lists every variable with a 
 - [ ] Sign in with the staff test account; the dashboard loads; sign out works.
 - [ ] Open a known public test profile at `/p/<slug>` and download its PDF.
 - [ ] The worker logged its startup line and the heartbeat monitor is green.
+- [ ] `/events` and `/recruiting-calendar` load signed out.
 - [ ] No new alerts fired in the 15 minutes after release.
 
 ## 3. Monitoring
@@ -89,6 +90,7 @@ Files are in `infra/monitoring/`. CI validates and unit tests the alert rules wi
 | `MetricVerificationBacklogBreached`, `CoachVerificationBacklogBreached` | Users have waited longer than we tell them. Add reviewer time; do not bulk-approve. |
 | `VideoAnalysisQueueStalled` | No worker is consuming `video-analysis`. Check that the worker is running and its heartbeat; restart it. Queued analyses resume on their own. |
 | `MessageReportUnresolvedLong` | A reported message has waited 3 days. Review it in the admin console (Message reports); end the conversation and suspend the coach if it breaks the Terms. |
+| `EventReviewBacklog` (warning) | An event listing has waited 3 days. Check it against the organizer's page in the admin console (Event listings); reject anything that promises scholarships or exposure. |
 | `TeamVerificationBacklogBreached` | Team coaches have waited longer than we tell them. Add reviewer time; check each coach on the linked staff page. |
 | `AiBudgetNearlyExhausted` | AI features stop at 100% until the 1st (UTC). Check `kineticscout_ai_spend_usd` by feature for a runaway before raising `AI_GLOBAL_MONTHLY_BUDGET_USD`. |
 

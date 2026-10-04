@@ -7,6 +7,8 @@ import {
   canUseVideoAnalysis,
   hasProAccess,
   isAdmin,
+  isGuardian,
+  isGuardianOf,
   type GuardianConsentState,
   type SessionUser,
 } from '@/lib/auth/permissions'
@@ -124,4 +126,34 @@ export async function requireAdmin(): Promise<SessionUser> {
   const state = await getAuthState()
   if (state.status !== 'ready' || !isAdmin(state.user)) notFound()
   return state.user
+}
+
+/** Parent or guardian pages. Other roles go to their own dashboard. */
+export async function requireGuardian(nextPath = '/dashboard/family'): Promise<SessionUser> {
+  const user = await requireUser(nextPath)
+  if (!isGuardian(user)) redirect('/dashboard')
+  return user
+}
+
+export type GuardedAthlete = {
+  consentId: string
+  athleteId: string
+  firstName: string
+  lastName: string
+  consentStatus: 'PENDING' | 'GRANTED' | 'REVOKED'
+}
+
+/**
+ * The athlete a guardian account may act for, or null. Used by every guardian page, action and
+ * route before touching an athlete's data; callers answer 404 on null so other athletes' ids
+ * reveal nothing.
+ */
+export async function guardedAthlete(user: SessionUser, athleteId: string): Promise<GuardedAthlete | null> {
+  if (!isGuardian(user) || !/^[0-9a-f-]{36}$/i.test(athleteId)) return null
+  const consent = await db.guardianConsent.findUnique({
+    where: { userId: athleteId },
+    select: { id: true, guardianEmail: true, status: true, user: { select: { role: true, athleteProfile: { select: { firstName: true, lastName: true } } } } },
+  })
+  if (!consent || !isGuardianOf(user, consent) || consent.user.role !== 'ATHLETE' || !consent.user.athleteProfile) return null
+  return { consentId: consent.id, athleteId, firstName: consent.user.athleteProfile.firstName, lastName: consent.user.athleteProfile.lastName, consentStatus: consent.status }
 }

@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CoachHome } from '@/components/coach/coach-home'
+import { PeriodToday } from '@/components/events/period-today'
+import { verifiedCoach } from '@/lib/coach/verification'
+import { periodToday } from '@/lib/events/service'
 import { GuardianBanner } from '@/components/dashboard/guardian-banner'
 import { MetricLogForm } from '@/components/dashboard/metric-log-form'
 import { ProgressionChart } from '@/components/dashboard/progression-chart'
@@ -29,13 +32,18 @@ export default async function DashboardPage({ searchParams }: PageProps<'/dashbo
   const notice = typeof params.notice === 'string' ? NOTICES[params.notice] : undefined
 
   if (user.role === 'TEAM_COACH') redirect('/dashboard/team')
+  if (user.role === 'GUARDIAN') redirect('/dashboard/family')
 
   if (user.role === 'COACH') {
+    const coach = await verifiedCoach(user.id)
+    const college = coach?.college
+    const period = college ? await periodToday(college.sport, college.division) : null
     return (
       <div className="flex flex-col gap-6">
         <Breadcrumbs items={[{ label: 'Dashboard' }]} />
         <h1 className="text-3xl font-bold">Coach dashboard</h1>
         <CoachHome />
+        {college && <PeriodToday sport={college.sport} division={college.division} period={period} />}
       </div>
     )
   }

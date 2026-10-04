@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { AnalysisDetail } from '@/components/dashboard/analysis-detail'
@@ -19,6 +20,9 @@ export default async function AnalysisDetailPage({ params }: PageProps<'/dashboa
         <h1 className="text-3xl font-bold">Analysis report</h1>
       </div>
       <AnalysisDetail id={id} />
+      <p>
+        <Link href="/dashboard/training">Build a training plan</Link> from this analysis&apos;s focus areas.
+      </p>
     </div>
   )
 }

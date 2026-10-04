@@ -1,6 +1,6 @@
 import 'server-only'
 import { activeDeletionRequest, cancelDeletion, scheduleDeletion } from '@/lib/account/deletion'
-import type { DeletionRequester } from '@/generated/prisma/client'
+import type { DeletionRequester, Prisma } from '@/generated/prisma/client'
 import { audit } from '@/lib/audit'
 import { endContactOperations } from '@/lib/coach/contact'
 import { endTeamOperations } from '@/lib/teams/service'
@@ -94,24 +94,33 @@ export type ManageContext = {
   cancelAtPeriodEnd: boolean
 }
 
+const manageSelect = {
+  id: true,
+  userId: true,
+  status: true,
+  manageTokenExpiresAt: true,
+  user: {
+    select: {
+      athleteProfile: { select: { firstName: true } },
+      subscriptions: { where: { status: { in: ['ACTIVE', 'TRIALING', 'PAST_DUE'] } }, select: { id: true, cancelAtPeriodEnd: true }, take: 1 },
+    },
+  },
+} satisfies Prisma.GuardianConsentSelect
+
 export async function lookupManageToken(token: string): Promise<ManageContext | null> {
   if (token.length < 20 || token.length > 100) return null
-  const consent = await db.guardianConsent.findUnique({
-    where: { manageTokenHash: sha256Hex(token) },
-    select: {
-      id: true,
-      userId: true,
-      status: true,
-      manageTokenExpiresAt: true,
-      user: {
-        select: {
-          athleteProfile: { select: { firstName: true } },
-          subscriptions: { where: { status: { in: ['ACTIVE', 'TRIALING', 'PAST_DUE'] } }, select: { id: true, cancelAtPeriodEnd: true }, take: 1 },
-        },
-      },
-    },
-  })
+  const consent = await db.guardianConsent.findUnique({ where: { manageTokenHash: sha256Hex(token) }, select: manageSelect })
   if (!consent || !consent.manageTokenExpiresAt || consent.manageTokenExpiresAt.getTime() < Date.now()) return null
+  return manageContext(consent)
+}
+
+/** For a signed-in guardian account. The caller has already checked guardedAthlete(). */
+export async function manageContextForConsent(consentId: string): Promise<ManageContext | null> {
+  const consent = await db.guardianConsent.findUnique({ where: { id: consentId }, select: manageSelect })
+  return consent ? manageContext(consent) : null
+}
+
+async function manageContext(consent: { id: string; userId: string; status: ManageContext['status']; user: { athleteProfile: { firstName: string } | null; subscriptions: { id: string; cancelAtPeriodEnd: boolean }[] } }): Promise<ManageContext> {
   const live = consent.user.subscriptions[0]
   const deletion = await activeDeletionRequest(consent.userId)
   return {
@@ -132,7 +141,7 @@ export async function lookupManageToken(token: string): Promise<ManageContext | 
  * addresses already shared are removed from coaches' pages, and team memberships end. Optionally
  * stops the subscription from renewing.
  */
-export async function revokeConsent(ctx: ManageContext, options: { cancelSubscription: boolean }): Promise<void> {
+export async function revokeConsent(ctx: ManageContext, options: { cancelSubscription: boolean; guardianUserId?: string }): Promise<void> {
   const now = new Date()
   await db.$transaction([
     db.guardianConsent.update({ where: { id: ctx.consentId }, data: { status: 'REVOKED', revokedAt: now } }),
@@ -144,7 +153,7 @@ export async function revokeConsent(ctx: ManageContext, options: { cancelSubscri
     await stripe().subscriptions.update(ctx.liveSubscriptionId, { cancel_at_period_end: true }, { idempotencyKey: `guardian-cancel-${ctx.liveSubscriptionId}` })
     await db.subscription.update({ where: { id: ctx.liveSubscriptionId }, data: { cancelAtPeriodEnd: true } })
   }
-  await audit('guardian.consent_revoked', { targetType: 'guardian_consent', targetId: ctx.consentId, metadata: { cancelSubscription: options.cancelSubscription } })
+  await audit('guardian.consent_revoked', { actorId: options.guardianUserId, targetType: 'guardian_consent', targetId: ctx.consentId, metadata: { cancelSubscription: options.cancelSubscription, via: options.guardianUserId ? 'account' : 'link' } })
   const user = await db.user.findUnique({ where: { id: ctx.userId }, select: { email: true } })
   if (user) {
     await safeSend(
@@ -159,9 +168,22 @@ export async function revokeConsent(ctx: ManageContext, options: { cancelSubscri
   }
 }
 
-export async function regrantConsent(ctx: ManageContext): Promise<void> {
+export async function regrantConsent(ctx: ManageContext, guardianUserId?: string): Promise<void> {
   await db.guardianConsent.update({ where: { id: ctx.consentId }, data: { status: 'GRANTED', grantedAt: new Date(), revokedAt: null } })
-  await audit('guardian.consent_granted', { targetType: 'guardian_consent', targetId: ctx.consentId, metadata: { via: 'manage-link' } })
+  await audit('guardian.consent_granted', { actorId: guardianUserId, targetType: 'guardian_consent', targetId: ctx.consentId, metadata: { via: guardianUserId ? 'account' : 'manage-link' } })
+}
+
+/**
+ * First consent given from a guardian account rather than the emailed link. Same effect as the
+ * link: the request's single-use token stops working and the confirmation email (with the
+ * management link, for use without signing in) is sent.
+ */
+export async function grantConsentFromAccount(ctx: ManageContext, guardianUserId: string): Promise<boolean> {
+  const result = await db.guardianConsent.updateMany({ where: { id: ctx.consentId, status: 'PENDING' }, data: { status: 'GRANTED', grantedAt: new Date(), tokenHash: sha256Hex(randomToken()), expiresAt: new Date() } })
+  if (result.count !== 1) return false
+  await audit('guardian.consent_granted', { actorId: guardianUserId, targetType: 'guardian_consent', targetId: ctx.consentId, metadata: { via: 'account' } })
+  await sendConsentConfirmation(ctx.consentId)
+  return true
 }
 
 export async function guardianRequestDeletion(ctx: ManageContext): Promise<Date> {

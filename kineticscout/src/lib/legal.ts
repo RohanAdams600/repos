@@ -7,16 +7,15 @@ import { env } from '@/lib/env'
  * page or API call (requireUser and the tRPC protectedProcedure enforce it), and account holders are
  * emailed before the change takes effect, as the Privacy Policy promises.
  */
-export const CURRENT_TERMS_VERSION = '2026-10-05.1'
+export const CURRENT_TERMS_VERSION = '2026-10-05.2'
 export const LEGAL_LAST_UPDATED = 'October 5, 2026'
 
 /** Plain-language summary shown on /terms-update for the current version. */
 export const TERMS_HIGHLIGHTS: readonly string[] = [
-  'New: message college coaches inside KineticScout once you accept their request. If you are under 18, your parent or guardian gets a copy of every message and can end the conversation. Our staff read messages only when someone reports them.',
-  'New: join your high school or travel team with a code from your coach. The coach sees your name, class and position, and results they record appear on your profile, marked coach-recorded, only if you accept them. Under 18, a parent or guardian approves first.',
-  'New: when a licensed national table covers your age and build, you also see where you stand nationally, with the table and publisher named. Nothing about you is sent to the publisher.',
-  'New: install KineticScout on your phone, log measurements offline, and turn on notifications per device. Notifications never show names or message text.',
-  'If a parent or guardian withdraws consent, coach contact requests are declined, conversations and team memberships end, and shared email addresses are removed from coaches\' pages.',
+  'New: parent and guardian accounts. A parent who signs up with the email address an athlete under 18 gave us can give or withdraw consent, approve team and coach contact requests, read copies of conversations with college coaches, see the athlete\'s events and training plans, download their data, or delete the account.',
+  'New: showcases, camps and combines, checked by our staff against the organizer\'s page. Mark the events you are going to; verified college coaches see that only if you choose to show it and your profile is public.',
+  'New: a recruiting calendar copied from the published calendars, with each source linked. It is a summary, not rules advice.',
+  'New for Pro: four-week training plans built from your video analysis, with drills from our staff coaches. Plans show the measurements you log next to your starting value, without claiming the drills caused a change.',
   'You can download all of your data, or delete your account, yourself from Settings. Deletion happens after a 7-day window in which you can cancel.',
   'We never sell personal information, and published statistics always describe groups of at least 25 athletes.',
 ]

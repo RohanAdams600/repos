@@ -66,6 +66,14 @@ Not collected: location, contacts, device identifiers, advertising identifiers, 
 - **Tracking beta** is opt-in per upload, costs more (included in the budget reservation), and its speed is labelled a lower bound in the product and the Terms.
 - **Exports** include contact requests received, blocks and reports (athletes) and the coach profile, saved athletes with notes, and requests sent (coaches).
 
+## Phase 7 privacy notes
+
+- **Parent accounts** show only what the guardian already receives by email (requests, conversation copies), plus the athlete's events and training plans and a data download, and only for athletes who named the account's confirmed address. They add no new data about the athlete.
+- **Events**: which events an athlete goes to is private unless they opt in, and even then only verified college coaches see it, only with a public profile (guardian consent for minors). It is deleted a year after the event. Listings contain organizer facts, not personal data, except the submitting account, which only staff see.
+- **Training plans** are visible to the athlete, their guardian account and nobody else. Progress is shown as logged numbers, never as a claim that the drills worked.
+- **Recruiting calendar** contains no personal data. It is a summary with the source linked and a statement that it is not rules advice.
+- **Exports** now include parent links (for guardian accounts), events marked and submitted, and training plans with practice days. Guardians can download their athlete's export from the Family page.
+
 ## Phase 6 privacy notes
 
 - **National norms** are aggregate tables the business licenses. The comparison runs on our servers; nothing about an athlete is sent to a publisher. Every figure names the table, publisher, edition, population and band sample size, and a table stops being used the day after its licence ends.
@@ -130,3 +138,6 @@ No third-party script, pixel or font is loaded in the browser except Google Anal
 13. Staff time for team reviews (promised "usually within 2 business days") and for message reports (alert after 24 hours, page after 3 days). Message reports involve minors: decide who may read them and how quickly.
 14. Before deploying Phase 6: email account holders about the updated Privacy Policy, Terms and Cookie Policy (messaging with guardian copies, teams, national norms, notifications, offline storage). `CURRENT_TERMS_VERSION` is bumped to `2026-10-05.1`.
 15. VAPID keys for Web Push per environment, if notifications should be offered.
+16. Drill content for training plans, written by named, qualified staff coaches (or licensed, with the licence on file), and a second staff member to review each drill. Without published drills, athletes see that the library does not cover their focus areas yet.
+17. Staff time to review event listings (alert after 3 days) and to enter recruiting periods from the published calendars each year, with the source document linked.
+18. Before deploying Phase 7: email account holders about the updated Privacy Policy and Terms (parent accounts, events and attendance visibility, training plans). `CURRENT_TERMS_VERSION` is bumped to `2026-10-05.2`. Set `LEGAL_LAST_UPDATED` to the actual publication date.

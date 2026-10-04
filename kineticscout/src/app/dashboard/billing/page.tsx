@@ -64,6 +64,8 @@ export default async function BillingPage({ searchParams }: PageProps<'/dashboar
           </div>
         ) : canPurchase(user) ? (
           <ProCheckoutForms />
+        ) : user.role === 'GUARDIAN' || user.role === 'TEAM_COACH' ? (
+          <Alert tone="info">Pro unlocks athlete tools, so it is bought on the athlete&apos;s own account. A parent or guardian can complete the payment there once consent is given.</Alert>
         ) : (
           <Alert tone="info">A parent or guardian must give consent before a purchase can be made. They should also be the one to complete the payment.</Alert>
         )}

@@ -3,6 +3,7 @@ import { ageBand } from '@/lib/auth/age'
 import { audit } from '@/lib/audit'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
+import { notifyGuardianAccount } from '@/lib/family/notify'
 import { renderEmail } from '@/lib/email/templates'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
@@ -122,6 +123,7 @@ export async function respondAsAthlete(athleteId: string, requestId: string, dec
       `contact-guardian-${requestId}`,
       { label: 'Review the request', url: `${env().APP_URL}/consent/guardian/contact?token=${encodeURIComponent(token)}` },
     )
+    await notifyGuardianAccount(athleteId, { title: `${request.athlete.firstName} would like to share contact details with a college coach`, body: 'Review the request on your Family page. Nothing is shared unless you approve.', dedupeKey: `contact-guardian-${requestId}` })
     return 'awaiting-guardian'
   }
 
@@ -151,8 +153,18 @@ export async function lookupGuardianContact(token: string, now: Date = new Date(
 }
 
 export async function guardianDecideContact(token: string, approve: boolean, now: Date = new Date()): Promise<'approved' | 'declined' | 'invalid'> {
+  if (token.length < 20 || token.length > 100) return 'invalid'
+  const found = await db.contactRequest.findFirst({ where: { guardianTokenHash: sha256Hex(token), status: 'ATHLETE_ACCEPTED', guardianTokenExpiresAt: { gt: now } }, select: { id: true } })
+  return found ? guardianDecideContactRequest(found.id, approve, now) : 'invalid'
+}
+
+/**
+ * The guardian's decision on a contact request, from the emailed link or a guardian account.
+ * Callers establish the guardian's authority first; `guardianUserId` is set for the account path.
+ */
+export async function guardianDecideContactRequest(requestId: string, approve: boolean, now: Date = new Date(), guardianUserId?: string): Promise<'approved' | 'declined' | 'invalid'> {
   const request = await db.contactRequest.findFirst({
-    where: { guardianTokenHash: sha256Hex(token), status: 'ATHLETE_ACCEPTED', guardianTokenExpiresAt: { gt: now } },
+    where: { id: requestId, status: 'ATHLETE_ACCEPTED', guardianTokenExpiresAt: { gt: now } },
     select: { id: true, coachId: true, athleteId: true, athlete: { select: { firstName: true, lastName: true, user: { select: { email: true, guardianConsent: { select: { guardianEmail: true, status: true } } } } } }, coach: { select: { user: { select: { email: true } } } } },
   })
   if (!request) return 'invalid'
@@ -160,13 +172,13 @@ export async function guardianDecideContact(token: string, approve: boolean, now
   const athleteName = `${request.athlete.firstName} ${request.athlete.lastName}`
   if (!approve || guardian?.status !== 'GRANTED') {
     await db.contactRequest.update({ where: { id: request.id }, data: { status: 'DECLINED', guardianRespondedAt: now, guardianTokenHash: null, guardianTokenExpiresAt: null } })
-    await audit('contact.guardian_declined', { targetType: 'contact_request', targetId: request.id })
+    await audit('contact.guardian_declined', { actorId: guardianUserId, targetType: 'contact_request', targetId: request.id, metadata: { via: guardianUserId ? 'account' : 'link' } })
     await notify({ userId: request.athleteId, kind: 'CONTACT_UPDATE', title: 'Your parent or guardian declined a contact request', body: 'No contact details were shared with the coach.', href: '/dashboard/contact-requests', dedupeKey: `contact-guardian-declined:${request.id}` })
     await notify({ userId: request.coachId, kind: 'CONTACT_UPDATE', title: `Your request to ${request.athlete.firstName} was declined`, body: 'No contact details were shared.', href: '/dashboard/contact-requests', dedupeKey: `contact-declined:${request.id}` })
     return 'declined'
   }
   await shareContact(request.id, [request.athlete.user.email, guardian.guardianEmail], now)
-  await audit('contact.guardian_approved', { targetType: 'contact_request', targetId: request.id })
+  await audit('contact.guardian_approved', { actorId: guardianUserId, targetType: 'contact_request', targetId: request.id, metadata: { via: guardianUserId ? 'account' : 'link' } })
   await notify({ userId: request.athleteId, kind: 'CONTACT_UPDATE', title: 'Your parent or guardian approved a contact request', body: 'The coach now has your email address and your parent or guardian’s.', href: '/dashboard/contact-requests', dedupeKey: `contact-guardian-approved:${request.id}` })
   await notify({ userId: request.coachId, kind: 'CONTACT_UPDATE', title: `${athleteName} accepted your request`, body: 'Their email address and their parent or guardian’s are on your contact requests page. Include the parent or guardian in your messages.', href: '/dashboard/contact-requests', dedupeKey: `contact-accepted:${request.id}` })
   await email(request.coach.user.email, `${athleteName} accepted your contact request`, [`${athleteName} and their parent or guardian accepted your request on KineticScout. Both email addresses are on your contact requests page; please include the parent or guardian in your messages.`], `contact-accepted-${request.id}`, { label: 'Open contact requests', url: `${env().APP_URL}/dashboard/contact-requests` })

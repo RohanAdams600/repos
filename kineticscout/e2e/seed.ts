@@ -24,6 +24,10 @@ export type E2EState = {
   requestId: string
   /** Guardian links for a minor: a team approval and a copied conversation. */
   guardian: { teamToken: string; threadId: string; threadToken: string }
+  /** Parent account for Jamie (consent given) and Sam (consent not yet given). */
+  parent: { id: string; cookie: string; jamieId: string; samId: string }
+  /** A listed event Avery is going to (shared with coaches), another listed one, and one waiting for review. */
+  events: { going: string; open: string; pending: string }
 }
 
 const root = path.resolve(HERE, '..')
@@ -56,6 +60,9 @@ export default async function globalSetup(): Promise<void> {
     await db.query(`DELETE FROM users WHERE email LIKE '%@e2e.example.test'`)
     await db.query(`DELETE FROM college_programs WHERE school_name LIKE 'E2E %'`)
     await db.query(`DELETE FROM norm_datasets WHERE publisher LIKE 'E2E %'`)
+    await db.query(`DELETE FROM events WHERE name LIKE 'E2E %'`)
+    await db.query(`DELETE FROM recruiting_periods WHERE source_title LIKE 'E2E %'`)
+    await db.query(`DELETE FROM drills WHERE author LIKE 'E2E %'`)
 
     const [athlete, prospect, coach, admin] = [randomUUID(), randomUUID(), randomUUID(), randomUUID()]
     // Real slug shape (first name, then 8 characters from the slug alphabet) so isProfileSlug accepts it.
@@ -157,6 +164,77 @@ export default async function globalSetup(): Promise<void> {
     await db.query(`INSERT INTO message_threads (id, contact_request_id, coach_id, athlete_id, guardian_copy) VALUES ($1, $2, $3, $4, true)`, [minorThread, minorRequest, recruiter, minor])
     await db.query(`INSERT INTO messages (id, thread_id, sender_id, body) VALUES ($1, $2, $3, $4)`, [randomUUID(), minorThread, recruiter, 'Could we set up a call with you and a parent next week?'])
 
+    // Parent account under Jamie's guardian address, plus a second child waiting for consent.
+    const parent = randomUUID()
+    await insertUser(parent, 'parent@e2e.example.test', 'GUARDIAN', '1979-06-20')
+    const sam = randomUUID()
+    await insertUser(sam, 'sam@e2e.example.test', 'ATHLETE', `${new Date().getUTCFullYear() - 14}-03-02`)
+    await db.query(`INSERT INTO athlete_profiles (user_id, first_name, last_name, grad_year, primary_position, updated_at) VALUES ($1, 'Sam', 'Juniorcase', 2030, 'CATCHER', now())`, [sam])
+    await db.query(
+      `INSERT INTO guardian_consents (id, user_id, guardian_email, token_hash, status, expires_at, updated_at) VALUES ($1, $2, 'parent@e2e.example.test', $3, 'PENDING', now() + interval '7 days', now())`,
+      [randomUUID(), sam, createHash('sha256').update(randomUUID()).digest('hex')],
+    )
+
+    // Events: clearly labelled fixtures. Avery is going to one and shares it with coaches.
+    const [goingEvent, openEvent, pendingEvent] = [randomUUID(), randomUUID(), randomUUID()]
+    const insertEvent = (id: string, name: string, status: string, days: number) =>
+      db.query(
+        `INSERT INTO events (id, name, kind, sport, organizer, official_url, start_date, end_date, city, state, description, status, submitted_by, reviewed_by, reviewed_at, updated_at)
+         VALUES ($1, $2, 'SHOWCASE', 'BASEBALL', 'E2E Fixture Events (test data)', 'https://e2e.example.test/events', current_date + $3::int, current_date + $3::int + 1, 'Austin', 'TX',
+                 'Fixture event used only by automated tests. Not a real event.', $4::"EventStatus", $5, $6, $7, now())`,
+        [id, name, days, status, parent, status === 'PENDING' ? null : admin, status === 'PENDING' ? null : new Date()],
+      )
+    await insertEvent(goingEvent, 'E2E Fall Showcase', 'PUBLISHED', 20)
+    await insertEvent(openEvent, 'E2E Winter Camp', 'PUBLISHED', 40)
+    await insertEvent(pendingEvent, 'E2E Spring Combine', 'PENDING', 60)
+    await db.query(`INSERT INTO event_attendance (event_id, athlete_id, share_with_coaches, updated_at) VALUES ($1, $2, true, now())`, [goingEvent, athlete])
+    await db.query(
+      `INSERT INTO recruiting_periods (id, sport, division, kind, start_date, end_date, source_url, source_title, note, created_by)
+       VALUES ($1, 'BASEBALL', 'D1', 'CONTACT', current_date - 5, current_date + 5, 'https://e2e.example.test/calendar', 'E2E fixture calendar (not a real calendar)', 'Test data only.', $2)`,
+      [randomUUID(), admin],
+    )
+
+    // Training: two published fixture drills and a completed swing analysis for Avery.
+    const insertDrill = (title: string, focus: string) =>
+      db.query(
+        `INSERT INTO drills (id, title, sport, motion_types, focus_codes, summary, steps, minutes, safety_note, source, author, status, reviewed_by, published_at, updated_at)
+         VALUES ($1, $2, 'BASEBALL', ARRAY['SWING']::"MotionType"[], ARRAY[$3], 'Fixture drill used only by automated tests.', ARRAY['Fixture step one.', 'Fixture step two.'], 10,
+                 'Fixture safety note.', 'STAFF', 'E2E fixture coach (test data)', 'PUBLISHED', $4, now(), now())`,
+        [randomUUID(), title, focus, admin],
+      )
+    await insertDrill('E2E hip lead drill', 'TRUNK_LEADS_PELVIS')
+    await insertDrill('E2E separation drill', 'LOW_HIP_SHOULDER_SEPARATION')
+    const report = {
+      algorithm: 'kseq-2d-v1',
+      motionType: 'SWING',
+      handedness: 'RIGHT',
+      frameRate: 120,
+      durationSec: 1.2,
+      footStrikeTime: 0.42,
+      peaks: [
+        { segment: 'torso', time: 0.55, speedDegPerSec: 620 },
+        { segment: 'pelvis', time: 0.58, speedDegPerSec: 540 },
+        { segment: 'arm', time: 0.63, speedDegPerSec: 980 },
+        { segment: 'hand', time: 0.66, speedDegPerSec: 1450 },
+      ],
+      observedOrder: ['torso', 'pelvis', 'arm', 'hand'],
+      sequenceIsIdeal: false,
+      gapsMs: { pelvisToTorso: -30, torsoToArm: 80, armToHand: 30 },
+      separationAtFootStrikeDeg: 12,
+      maxSeparationDeg: 18,
+      findings: [
+        { code: 'TRUNK_LEADS_PELVIS', severity: 'high', title: 'Shoulders turn before the hips', detail: 'Fixture finding.', focus: 'Let the hips start the turn.' },
+        { code: 'LOW_HIP_SHOULDER_SEPARATION', severity: 'medium', title: 'Little hip and shoulder separation', detail: 'Fixture finding.', focus: 'Create stretch between hips and shoulders.' },
+      ],
+      warnings: [],
+      confidence: 0.9,
+    }
+    await db.query(
+      `INSERT INTO video_analyses (id, athlete_id, motion_type, handedness, status, object_key, content_type, size_bytes, report, algorithm, completed_at)
+       VALUES ($1, $2, 'SWING', 'RIGHT', 'COMPLETE', $3, 'video/mp4', 1000, $4, 'kseq-2d-v1', now())`,
+      [randomUUID(), athlete, `e2e/${randomUUID()}.mp4`, JSON.stringify(report)],
+    )
+
     // Fixture norm table covering Avery's age and build. Clearly labelled as test data.
     const normId = randomUUID()
     await db.query(
@@ -179,6 +257,8 @@ export default async function globalSetup(): Promise<void> {
       admin: { id: admin, cookie: cookieFor(admin, env.HASH_PEPPER) },
       requestId,
       guardian: { teamToken, threadId: minorThread, threadToken: createHmac('sha256', env.HASH_PEPPER).update(`thread-guardian-v1\u0000${minorThread}`, 'utf8').digest('base64url') },
+      parent: { id: parent, cookie: cookieFor(parent, env.HASH_PEPPER), jamieId: minor, samId: sam },
+      events: { going: goingEvent, open: openEvent, pending: pendingEvent },
     }
     writeFileSync(path.join(HERE, '.state.json'), JSON.stringify(state, null, 2))
   } finally {

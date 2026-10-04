@@ -10,7 +10,7 @@ test.describe('athlete', () => {
     test(`dashboard pages are accessible (${scheme})`, async ({ page }) => {
       await page.emulateMedia({ colorScheme: scheme })
       const problems = watchProblems(page)
-      for (const path of ['/dashboard', '/dashboard/profile', '/dashboard/metrics', '/dashboard/insights', '/dashboard/analysis', '/dashboard/matchmaker', '/dashboard/recruiting', '/dashboard/contact-requests', '/dashboard/teams', '/dashboard/messages', `/dashboard/messages/${state().recruiter.threadId}`, '/dashboard/notifications', '/dashboard/billing', '/dashboard/settings']) {
+      for (const path of ['/dashboard', '/dashboard/profile', '/dashboard/metrics', '/dashboard/insights', '/dashboard/analysis', '/dashboard/matchmaker', '/dashboard/recruiting', '/dashboard/contact-requests', '/dashboard/teams', '/dashboard/events', '/dashboard/training', '/dashboard/messages', `/dashboard/messages/${state().recruiter.threadId}`, '/dashboard/notifications', '/dashboard/billing', '/dashboard/settings']) {
         const response = await page.goto(path)
         expect(response?.status(), path).toBe(200)
         await expect(page.locator('h1').first()).toBeVisible()
@@ -79,5 +79,25 @@ test.describe('athlete', () => {
     await page.getByRole('button', { name: 'Send' }).click()
     await expect(page.getByText('Thursday after practice works for me.')).toBeVisible()
     await expectAccessible(page, 'conversation after a reply')
+  })
+
+  test('marks an event as going', async ({ page }) => {
+    await page.goto(`/events/${state().events.open}`)
+    await page.getByRole('button', { name: 'I am going' }).click()
+    await expect(page.getByText('Saved. This event is on your Events page.')).toBeVisible()
+    await page.goto('/dashboard/events')
+    await expect(page.getByRole('link', { name: 'E2E Winter Camp' })).toBeVisible()
+    await expectAccessible(page, '/dashboard/events with events')
+  })
+
+  test('builds a training plan from an analysis and logs practice', async ({ page }) => {
+    await page.goto('/dashboard/training')
+    await page.getByRole('button', { name: 'Build a four-week plan' }).click()
+    await expect(page.getByRole('heading', { level: 1, name: 'Swing plan' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'E2E hip lead drill' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'E2E separation drill' })).toBeVisible()
+    await page.getByRole('button', { name: 'I practiced E2E hip lead drill today' }).click()
+    await expect(page.getByText('Marked as practiced today.')).toBeVisible()
+    await expectAccessible(page, 'training plan')
   })
 })

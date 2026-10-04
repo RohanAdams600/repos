@@ -2,6 +2,8 @@ import { processDueDeletions } from '@/lib/account/deletion'
 import { expireContactRequests } from '@/lib/coach/contact'
 import { expireTeamRequests } from '@/lib/teams/service'
 import { purgeClosedThreads } from '@/lib/messaging/service'
+import { purgeOldEvents } from '@/lib/events/service'
+import { archiveFinishedPlans } from '@/lib/training/service'
 import { db } from '@/lib/db'
 import { errorFields, logger } from '@/lib/logger'
 import { enqueueEvidenceCheck, enqueueProgramChange, enqueueVideoAnalysis } from '@/lib/queue/queues'
@@ -18,7 +20,9 @@ import { workerEnv } from '@worker/env'
  *   - carries out account deletions whose 7-day cancellation window has ended;
  *   - re-enqueues stuck verification checks and deletes evidence clips past their retention;
  *   - re-enqueues program changes Agent 3 has not processed (an enqueue that failed at write time);
- *   - expires unanswered coach contact requests.
+ *   - expires unanswered coach contact requests;
+ *   - deletes event attendance a year after the event, and old events;
+ *   - archives training plans two weeks after they end.
  * Every step is idempotent, so overlapping sweeps on several replicas are harmless.
  */
 export async function sweepStuckWork(
@@ -36,6 +40,8 @@ export async function sweepStuckWork(
   contactRequestsExpired: number
   teamRequestsExpired: number
   conversationsPurged: number
+  eventsPurged: number
+  plansArchived: number
 }> {
   const stuck = await db.videoAnalysis.findMany({
     where: { status: 'QUEUED', createdAt: { lt: new Date(now.getTime() - 10 * 60_000) } },
@@ -115,5 +121,7 @@ export async function sweepStuckWork(
     contactRequestsExpired: await expireContactRequests(now),
     teamRequestsExpired: await expireTeamRequests(now),
     conversationsPurged: await purgeClosedThreads(now),
+    eventsPurged: await purgeOldEvents(now),
+    plansArchived: await archiveFinishedPlans(now),
   }
 }

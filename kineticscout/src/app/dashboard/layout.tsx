@@ -17,7 +17,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const coach = user.role === 'COACH' ? await verifiedCoach(user.id) : null
   const athlete = user.role === 'ATHLETE' && user.hasAthleteProfile
   const links: { href: string; label: string; pro?: boolean }[] =
-    user.role === 'TEAM_COACH'
+    user.role === 'GUARDIAN'
+      ? [
+          { href: '/dashboard/family', label: 'Family' },
+          { href: '/dashboard/notifications', label: 'Notifications' },
+          { href: '/dashboard/settings', label: 'Settings' },
+        ]
+      : user.role === 'TEAM_COACH'
       ? [
           { href: '/dashboard/team', label: 'Your teams' },
           { href: '/dashboard/notifications', label: 'Notifications' },
@@ -47,11 +53,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
               ]
             : []),
           { href: '/dashboard/analysis', label: 'Video analysis', pro: true },
+          { href: '/dashboard/training', label: 'Training plans', pro: true },
           { href: '/dashboard/matchmaker', label: 'College matchmaker', pro: true },
           { href: '/dashboard/recruiting', label: 'Recruiting assistant', pro: true },
           ...(athlete
             ? [
                 { href: '/dashboard/teams', label: 'Teams' },
+                { href: '/dashboard/events', label: 'Events' },
                 { href: '/dashboard/contact-requests', label: 'Contact requests' },
                 { href: '/dashboard/messages', label: 'Messages' },
               ]

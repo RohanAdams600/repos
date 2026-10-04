@@ -19,7 +19,7 @@ const MESSAGES: Record<string, { tone: 'success' | 'error' | 'info'; text: strin
   'export-limit': { tone: 'error', text: 'You have downloaded your data several times in the last hour. Try again later.' },
 }
 
-const ROLE_LABEL = { ATHLETE: 'Athlete', COACH: 'College coach', TEAM_COACH: 'High school or travel coach', ADMIN: 'Staff' } as const
+const ROLE_LABEL = { ATHLETE: 'Athlete', COACH: 'College coach', TEAM_COACH: 'High school or travel coach', GUARDIAN: 'Parent or guardian', ADMIN: 'Staff' } as const
 const CONSENT_LABEL = { PENDING: 'Waiting for consent', GRANTED: 'Consent given', REVOKED: 'Consent withdrawn' } as const
 
 function formatDate(date: Date): string {

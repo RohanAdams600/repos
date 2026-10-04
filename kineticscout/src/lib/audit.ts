@@ -71,6 +71,19 @@ export type AuditAction =
   | 'message.reported'
   | 'message.report_resolved'
   | 'message.staff_viewed'
+  | 'message.guardian_viewed'
+  | 'guardian.data_exported'
+  | 'event.submitted'
+  | 'event.published'
+  | 'event.rejected'
+  | 'event.updated'
+  | 'event.canceled'
+  | 'calendar.period_added'
+  | 'calendar.period_removed'
+  | 'training.drill_created'
+  | 'training.drill_published'
+  | 'training.drill_retired'
+  | 'training.plan_created'
 
 /** Records a security-relevant event. Never throws: auditing must not break the user flow. */
 export async function audit(

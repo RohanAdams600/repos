@@ -19,6 +19,9 @@ const PUSH_TITLES: Record<NotificationKind, string> = {
   METRIC_REJECTED: 'Verification result',
   COACH_CHANGE: 'Recruiting alert',
   ROSTER_NEED: 'Recruiting alert',
+  FAMILY: 'Something needs your attention',
+  EVENT: 'Event update',
+  TRAINING: 'Training plan update',
 }
 
 export function pushPayload(kind: NotificationKind, href: string | null): { title: string; body: string; url: string; tag: string } {

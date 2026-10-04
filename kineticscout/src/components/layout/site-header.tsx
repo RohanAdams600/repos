@@ -14,6 +14,7 @@ export async function SiteHeader() {
   const identity = await getAuthIdentity().catch(() => null)
   const links: NavLink[] = [
     { href: '/pricing', label: 'Pricing' },
+    { href: '/events', label: 'Events' },
     { href: '/faq', label: 'FAQ' },
     { href: '/blog', label: 'Data reports' },
     ...(identity ? [{ href: '/dashboard', label: 'Dashboard' }] : []),

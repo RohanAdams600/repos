@@ -17,6 +17,16 @@ test.describe('verified coach', () => {
     expect(problems).toEqual([])
   })
 
+  test('sees athletes going to an event and today\'s recruiting period', async ({ page }) => {
+    await page.goto(`/events/${state().events.going}`)
+    await expect(page.getByRole('heading', { name: 'Athletes going' })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Avery Testcase' })).toBeVisible()
+    await expectAccessible(page, 'event with attendees')
+    await page.goto('/dashboard')
+    await expect(page.getByRole('heading', { name: 'Recruiting calendar today' })).toBeVisible()
+    await expect(page.getByText('Contact period', { exact: true })).toBeVisible()
+  })
+
   test('finds a public athlete, saves them and keeps a private note', async ({ page }) => {
     await page.goto('/dashboard')
     await expect(page.getByText('Verified coach')).toBeVisible()

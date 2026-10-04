@@ -51,6 +51,18 @@ export default function PrivacyPage() {
         <li>
           If you turn on notifications for a device: the push address your browser gives us for that device, and when we last delivered to it.
         </li>
+        <li>
+          Parent and guardian accounts (adults only): the account email and date of birth, and the actions taken from the account, such as giving or
+          withdrawing consent, approving a team or coach contact request, reporting a message or ending a conversation.
+        </li>
+        <li>
+          Events: listings that coaches and parents submit (event details copied from the organizer&apos;s page, and which account submitted it),
+          and the events an athlete marks as going to, with whether they chose to show that to verified college coaches.
+        </li>
+        <li>
+          Training plans: the plans you build from a video analysis, the drills in them, the days you mark a drill as practiced, and the
+          measurement the plan follows with its starting value.
+        </li>
         <li>Billing: your Stripe customer identifier and subscription status. Card details go directly to Stripe; we never see or store card numbers.</li>
         <li>Security data: request IP addresses are used to prevent abuse and are stored only as keyed hashes, never in readable form. We log security events such as failed sign-ins.</li>
         <li>Contact form: your name, email, topic and message, used only to answer you and deleted after 12 months.</li>
@@ -93,6 +105,23 @@ export default function PrivacyPage() {
           To run teams. A team coach sees the names, graduating classes and positions of the athletes on their roster, and the results they record.
           They do not see your email address or the measurements you log yourself. A result the coach records appears on your profile, marked
           coach-recorded, only if you accept it. Athletes under 18 join a team only after a parent or guardian approves by email.
+        </li>
+        <li>
+          To run parent and guardian accounts. An athlete under 18 names a parent or guardian email address at sign-up. A parent account with that
+          same, confirmed address sees that athlete on its Family page: their name, class, sport and profile setting, the team and coach contact
+          requests waiting for approval, copies of conversations with college coaches, their events and training plans, and can download their
+          data, withdraw or give consent, or delete their account. Nothing else about the athlete is shown, and the account sees no other
+          athlete. If the parent or guardian address on the athlete&apos;s account changes, access moves with it.
+        </li>
+        <li>
+          To list events. Our staff check each submitted listing against the organizer&apos;s own page before anyone else can see it. If you mark an
+          event as going and choose to show coaches, verified college coaches see your name, class, position and a link to your public profile on
+          that event&apos;s page, only while your profile is public; for athletes under 18 that also requires a parent or guardian&apos;s consent. A coach
+          you blocked never sees it. Otherwise nobody else sees which events you go to, except your parent or guardian&apos;s account.
+        </li>
+        <li>
+          To build training plans from your analysis findings with drills our staff coaches wrote or licensed. Plans show the measurements you log
+          after starting next to your starting value; we do not claim the drills caused any change.
         </li>
         <li>
           To send notifications to devices where you turned them on. A notification only says what kind of update it is, for example &ldquo;New
@@ -157,6 +186,11 @@ export default function PrivacyPage() {
           account is deleted. A result you accepted becomes one of your own measurements.
         </li>
         <li>Notification devices: until you turn notifications off, sign out on that device, or the push service tells us the device is gone.</li>
+        <li>
+          Events: which events you are going to is deleted 12 months after the event ends. Events themselves are deleted 24 months after they end,
+          and listings our staff did not publish 90 days after the decision.
+        </li>
+        <li>Training plans and practice records: until you delete your account. Plans are marked finished two weeks after their end date.</li>
         <li>Security logs: up to 24 months.</li>
         <li>Contact form messages: 12 months.</li>
         <li>Billing records: as long as tax and accounting law requires, held by Stripe.</li>
@@ -174,6 +208,10 @@ export default function PrivacyPage() {
           Deletion: request it from Settings, confirmed with your password. We email you immediately, keep your profile private, and carry
           out the deletion after 7 days, during which you can cancel. If you cannot sign in, email{' '}
           <a href={`mailto:${b.supportEmail}`}>{b.supportEmail}</a> from your account address and we will schedule the same deletion.
+        </li>
+        <li>
+          Parents and guardians can also create a parent account with the email address their athlete gave us, and do everything below, plus
+          download the athlete&apos;s data, from its Family page.
         </li>
         <li>
           Parents and guardians of athletes under 18 receive a private link when they consent. With it they can withdraw consent (the profile

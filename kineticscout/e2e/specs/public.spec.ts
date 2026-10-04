@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { expectAccessible, signIn, state, watchProblems } from '../helpers'
 
-const PAGES = ['/', '/pricing', '/faq', '/about', '/contact', '/reviews', '/case-studies', '/blog', '/search', '/legal/privacy', '/legal/terms', '/legal/refunds', '/legal/cookies', '/legal/your-data', '/tools/percentile-calculator', '/sign-in', '/sign-up', '/forgot-password', '/consent/guardian/manage', '/offline']
+const PAGES = ['/', '/pricing', '/faq', '/about', '/contact', '/reviews', '/case-studies', '/blog', '/search', '/legal/privacy', '/legal/terms', '/legal/refunds', '/legal/cookies', '/legal/your-data', '/tools/percentile-calculator', '/events', '/recruiting-calendar', '/sign-in', '/sign-up', '/forgot-password', '/consent/guardian/manage', '/offline']
 
 for (const scheme of ['light', 'dark'] as const) {
   test.describe(`public pages (${scheme})`, () => {
@@ -67,4 +67,18 @@ test('the app can be installed: manifest, icons and service worker', async ({ re
   const worker = await request.get('/sw.js')
   expect(worker.headers()['cache-control']).toContain('no-cache')
   expect(worker.headers()['content-security-policy']).toBe("default-src 'self'; script-src 'self'")
+})
+
+test('a listed event has its details, source link and structured data, and pending ones stay private', async ({ page, context, baseURL }) => {
+  await signIn(context, null, baseURL!)
+  await page.goto(`/events/${state().events.going}`)
+  await expect(page.getByRole('heading', { level: 1, name: 'E2E Fall Showcase' })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Organizer.s page for this event/ })).toHaveAttribute('href', 'https://e2e.example.test/events')
+  const ld = JSON.parse((await page.locator('script[type="application/ld+json"]').last().textContent())!)
+  expect(ld).toMatchObject({ '@type': 'SportsEvent', name: 'E2E Fall Showcase' })
+  await expectAccessible(page, 'event page')
+  const pending = await page.goto(`/events/${state().events.pending}`)
+  expect(pending?.status()).toBe(404)
+  await page.goto('/recruiting-calendar?sport=BASEBALL&division=D1')
+  await expect(page.getByRole('link', { name: /E2E fixture calendar/ })).toBeVisible()
 })

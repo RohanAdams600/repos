@@ -137,6 +137,14 @@ groups:
           summary: '{{ $value }} national norm table licence(s) end within 30 days'
           description: A table stops being used the day after its licence ends, and athletes then see only KineticScout comparisons. Renew the licence or import the new edition.
 
+      - alert: EventReviewBacklog
+        expr: kineticscout_events_oldest_age_seconds > 72 * 3600
+        labels:
+          severity: warning
+        annotations:
+          summary: An event listing has waited over 3 days for review
+          description: Submitters wait for listings to appear, and upcoming events lose their value. Check it against the organizer's page in the admin console, Event listings.
+
   - name: kineticscout-jobs
     rules:
       - alert: VideoAnalysisQueueStalled

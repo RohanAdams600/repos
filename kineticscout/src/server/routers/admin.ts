@@ -9,6 +9,10 @@ import { decideEvidence } from '@/lib/verification/service'
 import { decideCoach } from '@/lib/coach/verification'
 import { decideTeam } from '@/lib/teams/service'
 import { messageReportQueue, resolveMessageReport } from '@/lib/messaging/service'
+import { calendar, cancelEvent, createPeriod, deletePeriod, EventError, eventReviewQueue, reviewEvent, upcomingListedForStaff } from '@/lib/events/service'
+import { periodInputSchema } from '@/lib/events/rules'
+import { drillInputSchema } from '@/lib/training/rules'
+import { createDrill, deleteDraftDrill, drillLibrary, publishDrill, retireDrill, TrainingError } from '@/lib/training/service'
 import { completeReferenceUpload, createReferenceUpload, deleteReferenceClip, setReferenceClipActive } from '@/lib/reference/service'
 import { Handedness, MetricType, MotionType } from '@/generated/prisma/enums'
 import { activateNormDataset, deleteDraftNormDataset, listNormDatasets, NormAdminError, previewNorm, retireNormDataset } from '@/lib/insights/norm-admin'
@@ -436,6 +440,71 @@ export const adminRouter = createRouter({
       return { ok: true }
     }),
 
+  // Events and the recruiting calendar (Phase 7).
+  eventQueue: adminProcedure.query(async () => {
+    const [waiting, listed] = await Promise.all([eventReviewQueue(), upcomingListedForStaff()])
+    return {
+      waiting: waiting.map((e) => ({ ...e, startDate: e.startDate.toISOString().slice(0, 10), endDate: e.endDate.toISOString().slice(0, 10), createdAt: e.createdAt.toISOString(), updatedAt: e.updatedAt.toISOString(), reviewedAt: null })),
+      listed: listed.map(({ _count, ...e }) => ({ ...e, startDate: e.startDate.toISOString().slice(0, 10), endDate: e.endDate.toISOString().slice(0, 10), going: _count.attendance })),
+    }
+  }),
+
+  reviewEvent: adminProcedure
+    .input(z.object({ eventId: z.uuid(), decision: z.enum(['PUBLISHED', 'REJECTED']), note: z.string().trim().max(500).nullable() }))
+    .mutation(async ({ ctx, input }) => {
+      if (input.decision === 'REJECTED' && !input.note) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Add a note explaining why; the person who submitted it sees it.' })
+      await eventCall(() => reviewEvent(ctx.user.id, input.eventId, input.decision, input.note))
+      revalidatePath('/events')
+      return { ok: true }
+    }),
+
+  cancelEvent: adminProcedure.input(z.object({ eventId: z.uuid(), note: z.string().trim().min(5).max(500) })).mutation(async ({ ctx, input }) => {
+    await eventCall(() => cancelEvent(ctx.user.id, input.eventId, input.note))
+    revalidatePath('/events')
+    return { ok: true }
+  }),
+
+  recruitingPeriods: adminProcedure.query(async () =>
+    (await calendar({})).map((p) => ({ ...p, startDate: p.startDate.toISOString().slice(0, 10), endDate: p.endDate.toISOString().slice(0, 10) })),
+  ),
+
+  addRecruitingPeriod: adminProcedure.input(z.object({ sport: z.string(), division: z.string(), kind: z.string(), startDate: z.string(), endDate: z.string(), sourceUrl: z.string(), sourceTitle: z.string(), note: z.string().optional() })).mutation(async ({ ctx, input }) => {
+    const parsed = periodInputSchema.safeParse(input)
+    if (!parsed.success) throw new TRPCError({ code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Check the fields.', cause: parsed.error })
+    const id = await eventCall(() => createPeriod(ctx.user.id, parsed.data))
+    revalidatePath('/recruiting-calendar')
+    return { id }
+  }),
+
+  removeRecruitingPeriod: adminProcedure.input(z.object({ periodId: z.uuid() })).mutation(async ({ ctx, input }) => {
+    await eventCall(() => deletePeriod(ctx.user.id, input.periodId))
+    revalidatePath('/recruiting-calendar')
+    return { ok: true }
+  }),
+
+  // Drill library (Phase 7). A drill is published by a different staff member than its writer.
+  drills: adminProcedure.query(async ({ ctx }) =>
+    (await drillLibrary()).map((d) => ({ ...d, createdAt: d.createdAt.toISOString(), licenceExpiresAt: d.licenceExpiresAt?.toISOString().slice(0, 10) ?? null, mine: d.createdById === ctx.user.id })),
+  ),
+
+  createDrill: adminProcedure.input(z.record(z.string(), z.unknown())).mutation(async ({ ctx, input }) => {
+    const parsed = drillInputSchema.safeParse(input)
+    if (!parsed.success) throw new TRPCError({ code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Check the fields.', cause: parsed.error })
+    return { id: await createDrill(ctx.user.id, parsed.data) }
+  }),
+
+  setDrillStatus: adminProcedure.input(z.object({ drillId: z.uuid(), action: z.enum(['publish', 'retire', 'delete']) })).mutation(async ({ ctx, input }) => {
+    try {
+      if (input.action === 'publish') await publishDrill(ctx.user.id, input.drillId)
+      else if (input.action === 'retire') await retireDrill(ctx.user.id, input.drillId)
+      else await deleteDraftDrill(ctx.user.id, input.drillId)
+    } catch (error) {
+      if (error instanceof TrainingError) throw new TRPCError({ code: error.code === 'NOT_FOUND' ? 'NOT_FOUND' : 'CONFLICT', message: error.message })
+      throw error
+    }
+    return { ok: true }
+  }),
+
   // In-app messaging reports (Phase 6). Loading the queue is audited.
   messageReports: adminProcedure.query(async ({ ctx }) =>
     (await messageReportQueue(ctx.user.id)).map((r) => ({ ...r, createdAt: r.createdAt.toISOString(), context: r.context.map((m) => ({ ...m, createdAt: m.createdAt.toISOString() })) })),
@@ -486,3 +555,12 @@ export const adminRouter = createRouter({
     )
     .query(({ input }) => previewNorm(input.datasetId, input)),
 })
+
+async function eventCall<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (error) {
+    if (error instanceof EventError) throw new TRPCError({ code: error.code === 'NOT_FOUND' ? 'NOT_FOUND' : 'CONFLICT', message: error.message })
+    throw error
+  }
+}

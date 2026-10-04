@@ -87,7 +87,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     return { status: 'error', message: AGE_SCREEN_MESSAGE }
   }
   if (input.accountType !== 'ATHLETE' && band !== 'ADULT') {
-    return { status: 'error', message: 'Coach accounts are for adults.', fieldErrors: { accountType: 'Choose Athlete' }, values }
+    return { status: 'error', message: 'Coach and parent accounts are for adults.', fieldErrors: { accountType: 'Choose Athlete' }, values }
   }
   if (band === 'MINOR' && !input.guardianEmail) {
     return {
@@ -277,7 +277,7 @@ export async function completeAccountAction(_prev: FormState, formData: FormData
     redirect('/sign-up?notice=unavailable')
   }
   if (input.accountType !== 'ATHLETE' && band !== 'ADULT') {
-    return { status: 'error', message: 'Coach accounts are for adults.', fieldErrors: { accountType: 'Choose Athlete' }, values }
+    return { status: 'error', message: 'Coach and parent accounts are for adults.', fieldErrors: { accountType: 'Choose Athlete' }, values }
   }
   if (band === 'MINOR' && !input.guardianEmail) {
     return { status: 'error', message: 'Check the highlighted fields.', fieldErrors: { guardianEmail: "Enter a parent or guardian's email address" }, values }

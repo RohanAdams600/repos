@@ -24,7 +24,9 @@ export function AccountCompletionForm() {
         {(p) => (
           <select {...p} defaultValue={values.accountType ?? 'ATHLETE'} className="block min-h-11 w-full rounded-sm border-2 border-border-strong bg-bg px-3">
             <option value="ATHLETE">Athlete</option>
-            <option value="COACH">Coach (adults only)</option>
+            <option value="COACH">College coach (adults only)</option>
+            <option value="TEAM_COACH">High school or travel coach (adults only)</option>
+            <option value="GUARDIAN">Parent or guardian (adults only)</option>
           </select>
         )}
       </Field>

@@ -5,7 +5,7 @@ import type { AgeBand } from '@/lib/auth/age'
  * the same rule is applied in pages, Server Actions, Route Handlers and tRPC procedures.
  */
 
-export type Role = 'ATHLETE' | 'COACH' | 'TEAM_COACH' | 'ADMIN'
+export type Role = 'ATHLETE' | 'COACH' | 'TEAM_COACH' | 'GUARDIAN' | 'ADMIN'
 export type Tier = 'FREE' | 'PRO'
 export type GuardianConsentState = 'NOT_REQUIRED' | 'PENDING' | 'GRANTED' | 'REVOKED'
 
@@ -38,8 +38,12 @@ export function hasAdultOrGuardianApproval(user: SessionUser): boolean {
   return user.ageBand === 'ADULT' || user.guardianConsent === 'GRANTED'
 }
 
+/**
+ * Pro unlocks athlete tools, so it is sold to accounts that can use them. Parent and team coach
+ * accounts have none; a parent completes the purchase on their athlete's account instead.
+ */
 export function canPurchase(user: SessionUser): boolean {
-  return hasAdultOrGuardianApproval(user)
+  return user.role !== 'GUARDIAN' && user.role !== 'TEAM_COACH' && hasAdultOrGuardianApproval(user)
 }
 
 export function canPublishProfile(user: SessionUser): boolean {
@@ -57,6 +61,19 @@ export function canUseVideoAnalysis(user: SessionUser): boolean {
 
 export function canUseMatchmaker(user: SessionUser): boolean {
   return user.role !== 'COACH' && user.hasAthleteProfile && hasProAccess(user)
+}
+
+export function isGuardian(user: SessionUser): boolean {
+  return user.role === 'GUARDIAN' && user.ageBand === 'ADULT'
+}
+
+/**
+ * A guardian account acts for an athlete when the athlete's guardian consent names the account's
+ * email address. Sign-in requires a confirmed address, so this is the same proof of control as the
+ * emailed consent and management links. If the athlete changes the address, access moves with it.
+ */
+export function isGuardianOf(user: SessionUser, consent: { guardianEmail: string } | null | undefined): boolean {
+  return isGuardian(user) && !!consent && consent.guardianEmail.toLowerCase() === user.email.toLowerCase()
 }
 
 export function isTeamCoach(user: SessionUser): boolean {

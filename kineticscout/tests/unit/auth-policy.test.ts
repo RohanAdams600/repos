@@ -6,6 +6,8 @@ import {
   canPurchase,
   canUseMatchmaker,
   canUseVideoAnalysis,
+  isGuardian,
+  isGuardianOf,
   metricLoggingQuota,
   type SessionUser,
 } from '@/lib/auth/permissions'
@@ -109,5 +111,28 @@ describe('athlete profile validation', () => {
     expect(athleteProfileSchema.safeParse({ ...base, gpa: '4.123' }).success).toBe(false)
     expect(athleteProfileSchema.safeParse({ ...base, gpa: '5.5' }).success).toBe(false)
     expect(athleteProfileSchema.safeParse({ ...base, primaryPosition: 'GOALIE' }).success).toBe(false)
+  })
+})
+
+describe('guardian accounts', () => {
+  const parent = user({ role: 'GUARDIAN', email: 'parent@example.com', hasAthleteProfile: false })
+  it('act only for athletes whose consent names their address', () => {
+    expect(isGuardian(parent)).toBe(true)
+    expect(isGuardianOf(parent, { guardianEmail: 'parent@example.com' })).toBe(true)
+    expect(isGuardianOf(parent, { guardianEmail: 'PARENT@example.com' })).toBe(true)
+    expect(isGuardianOf(parent, { guardianEmail: 'other@example.com' })).toBe(false)
+    expect(isGuardianOf(parent, null)).toBe(false)
+  })
+  it('are adults with the guardian role only', () => {
+    expect(isGuardianOf(user({ email: 'parent@example.com' }), { guardianEmail: 'parent@example.com' })).toBe(false)
+    expect(isGuardian({ ...parent, ageBand: 'MINOR' })).toBe(false)
+    expect(canPublishProfile(parent)).toBe(false)
+    expect(canUseVideoAnalysis(parent)).toBe(false)
+    expect(canPurchase(parent)).toBe(false)
+    expect(canPurchase(user({ role: 'TEAM_COACH', hasAthleteProfile: false }))).toBe(false)
+  })
+  it('sign up as adults', () => {
+    const base = { accountType: 'GUARDIAN', email: 'p@example.com', password: 'a long enough passphrase', dateOfBirth: '1980-01-01', acceptTerms: 'on' }
+    expect(signUpSchema.safeParse(base).success).toBe(true)
   })
 })

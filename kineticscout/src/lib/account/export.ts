@@ -70,6 +70,11 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
             select: { status: true, message: true, createdAt: true, athleteRespondedAt: true, guardianRespondedAt: true, coach: { select: { firstName: true, lastName: true, title: true, college: { select: { schoolName: true } } } } },
           },
           coachBlocks: { select: { createdAt: true, coach: { select: { firstName: true, lastName: true } } } },
+          trainingPlans: {
+            orderBy: { createdAt: 'asc' },
+            select: { motionType: true, focusCodes: true, metricType: true, baselineValue: true, baselineDate: true, status: true, startsOn: true, endsOn: true, createdAt: true, items: { select: { focusCode: true, timesPerWeek: true, drill: { select: { title: true } }, logs: { select: { day: true } } } } },
+          },
+          eventAttendance: { orderBy: { createdAt: 'asc' }, select: { shareWithCoaches: true, createdAt: true, event: { select: { name: true, startDate: true, endDate: true, city: true, state: true } } } },
           teamMemberships: {
             orderBy: { requestedAt: 'asc' },
             select: { status: true, requestedAt: true, coachDecidedAt: true, guardianRespondedAt: true, endedAt: true, team: { select: { name: true, organization: true, coachName: true } } },
@@ -117,6 +122,7 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
       },
       coachReports: { select: { reason: true, createdAt: true, resolvedAt: true } },
       pushSubscriptions: { select: { endpoint: true, createdAt: true, lastSuccessAt: true } },
+      eventsSubmitted: { orderBy: { createdAt: 'asc' }, select: { name: true, status: true, officialUrl: true, startDate: true, endDate: true, reviewNote: true, createdAt: true } },
       teams: {
         select: {
           name: true,
@@ -138,9 +144,14 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
     },
   })
 
-  const [contactMessages, securityEvents] = await Promise.all([
+  const [contactMessages, securityEvents, linkedAthletes] = await Promise.all([
     db.contactMessage.findMany({ where: { email: user.email }, orderBy: { createdAt: 'asc' }, select: { topic: true, message: true, createdAt: true, repliedAt: true } }),
     db.auditLog.findMany({ where: { actorId: userId }, orderBy: { createdAt: 'asc' }, select: { action: true, createdAt: true } }),
+    // A parent or guardian account: which athletes name this address, and the consent state. Their
+    // own data is in each athlete's export, which the guardian can download from the Family page.
+    user.role === 'GUARDIAN'
+      ? db.guardianConsent.findMany({ where: { guardianEmail: user.email.toLowerCase() }, select: { status: true, grantedAt: true, revokedAt: true, user: { select: { athleteProfile: { select: { firstName: true, lastName: true } } } } } })
+      : Promise.resolve(null),
   ])
 
   const profile = user.athleteProfile
@@ -169,6 +180,7 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
       hasStripeCustomer: user.stripeCustomerId !== null,
     },
     guardianConsent: user.guardianConsent,
+    linkedAthletes: linkedAthletes?.map((c) => ({ firstName: c.user.athleteProfile?.firstName ?? null, lastName: c.user.athleteProfile?.lastName ?? null, consent: c.status, grantedAt: c.grantedAt, revokedAt: c.revokedAt })) ?? null,
     athleteProfile: profile
       ? {
           firstName: profile.firstName,
@@ -211,6 +223,18 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
       ...(user.coachProfile?.messageThreads ?? []).map((t) => ({ with: `${t.athlete.firstName} ${t.athlete.lastName}`, status: t.status, createdAt: t.createdAt, closedAt: t.closedAt, closedBy: t.closedBy, messages: t.messages.map((m) => ({ from: m.senderId === userId ? 'you' : 'athlete', body: m.body, sentAt: m.createdAt })) })),
     ],
     teamMemberships: profile?.teamMemberships ?? [],
+    trainingPlans: (profile?.trainingPlans ?? []).map((p) => ({
+      motion: p.motionType,
+      focus: p.focusCodes,
+      measurementFollowed: p.metricType,
+      baseline: p.baselineValue === null ? null : { value: Number(p.baselineValue), date: p.baselineDate?.toISOString().slice(0, 10) ?? null },
+      status: p.status,
+      startsOn: p.startsOn.toISOString().slice(0, 10),
+      endsOn: p.endsOn.toISOString().slice(0, 10),
+      drills: p.items.map((i) => ({ drill: i.drill.title, focus: i.focusCode, timesPerWeek: i.timesPerWeek, practiced: i.logs.map((l) => l.day.toISOString().slice(0, 10)) })),
+    })),
+    eventsGoing: (profile?.eventAttendance ?? []).map((a) => ({ event: a.event.name, dates: `${a.event.startDate.toISOString().slice(0, 10)} to ${a.event.endDate.toISOString().slice(0, 10)}`, place: `${a.event.city}, ${a.event.state}`, shownToCoaches: a.shareWithCoaches, markedAt: a.createdAt })),
+    eventsYouSubmitted: user.eventsSubmitted.map((e) => ({ ...e, startDate: e.startDate.toISOString().slice(0, 10), endDate: e.endDate.toISOString().slice(0, 10) })),
     // The push address itself is a credential for that device; the export names the service only.
     notificationDevices: user.pushSubscriptions.map((d) => ({ pushService: new URL(d.endpoint).hostname, turnedOnAt: d.createdAt, lastDeliveredAt: d.lastSuccessAt })),
     teamResults: (profile?.teamEntries ?? []).map((e) => ({ ...e, value: Number(e.value), session: { label: e.session.label, date: e.session.date.toISOString().slice(0, 10) } })),

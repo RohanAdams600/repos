@@ -4,6 +4,7 @@ import { sendConsentConfirmation } from '@/lib/auth/guardian-manage'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
 import { env } from '@/lib/env'
+import { notifyGuardianAccount } from '@/lib/family/notify'
 import { randomToken, sha256Hex } from '@/lib/security/hash'
 import { escapeHtml } from '@/lib/security/sanitize'
 
@@ -57,6 +58,8 @@ export async function sendGuardianConsentRequest(userId: string): Promise<'sent'
     '',
     `Privacy policy: ${appUrl}/legal/privacy`,
     '',
+    `If you have a KineticScout parent account under this email address, you can also answer from your Family page: ${appUrl}/dashboard/family`,
+    '',
     'If you do not recognise this request, ignore this email. Nothing becomes public without your consent.',
   ]
 
@@ -70,6 +73,7 @@ export async function sendGuardianConsentRequest(userId: string): Promise<'sent'
     idempotencyKey: `guardian-consent-${tokenHash.slice(0, 32)}`,
   })
   await audit('guardian.consent_requested', { actorId: userId, targetType: 'guardian_consent', targetId: userId })
+  await notifyGuardianAccount(userId, { title: `${athleteName} listed you as their parent or guardian`, body: 'Review what we collect and give or decline consent on your Family page.', dedupeKey: `guardian-consent-${tokenHash.slice(0, 32)}` })
   return 'sent'
 }
 

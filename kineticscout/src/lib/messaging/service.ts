@@ -203,32 +203,81 @@ export async function reportMessage(user: SessionUser, messageId: string, reason
 
 export async function guardianThread(threadId: string, token: string) {
   if (!validGuardianToken(threadId, token)) return null
-  const thread = await db.messageThread.findFirst({ where: { id: threadId, guardianCopy: true }, select: threadSelect })
+  return guardianThreadView({ id: threadId })
+}
+
+export async function guardianCloseThread(threadId: string, token: string, now: Date = new Date()): Promise<boolean> {
+  if (!validGuardianToken(threadId, token)) return false
+  return closeAsGuardian({ id: threadId }, now)
+}
+
+export async function guardianReport(threadId: string, token: string, messageId: string, reason: string): Promise<boolean> {
+  if (!validGuardianToken(threadId, token)) return false
+  return reportAsGuardian({ id: threadId }, messageId, reason)
+}
+
+// ---------------------------------------------------------------------------------------------
+// Parent or guardian, signed in. Callers check guardedAthlete() first; the athlete id is part of
+// every query so a thread id belonging to another athlete finds nothing.
+// ---------------------------------------------------------------------------------------------
+
+/** Conversations copied to the guardian for one athlete, newest activity first. */
+export async function guardianThreadsFor(athleteId: string) {
+  const threads = await db.messageThread.findMany({
+    where: { athleteId, guardianCopy: true },
+    orderBy: { lastMessageAt: 'desc' },
+    take: 50,
+    select: { ...threadSelect, lastMessageAt: true, _count: { select: { messages: true } } },
+  })
+  return threads.map((t) => ({ id: t.id, status: t.status, lastMessageAt: t.lastMessageAt, messageCount: t._count.messages, coachLabel: coachLabel(t.coach) }))
+}
+
+export async function guardianAccountThread(guardianUserId: string, athleteId: string, threadId: string) {
+  if (!/^[0-9a-f-]{36}$/i.test(threadId)) return null
+  const view = await guardianThreadView({ id: threadId, athleteId })
+  if (view) await audit('message.guardian_viewed', { actorId: guardianUserId, targetType: 'message_thread', targetId: threadId })
+  return view
+}
+
+export async function guardianAccountCloseThread(guardianUserId: string, athleteId: string, threadId: string, now: Date = new Date()): Promise<boolean> {
+  return /^[0-9a-f-]{36}$/i.test(threadId) && closeAsGuardian({ id: threadId, athleteId }, now, guardianUserId)
+}
+
+export async function guardianAccountReport(guardianUserId: string, athleteId: string, threadId: string, messageId: string, reason: string): Promise<boolean> {
+  return /^[0-9a-f-]{36}$/i.test(threadId) && /^[0-9a-f-]{36}$/i.test(messageId) && reportAsGuardian({ id: threadId, athleteId }, messageId, reason, guardianUserId)
+}
+
+type GuardianThreadWhere = { id: string; athleteId?: string }
+
+function coachLabel(coach: { firstName: string; lastName: string; title: string; college: { schoolName: string } | null }) {
+  return `${coachName(coach)}, ${coach.title}${coach.college ? `, ${coach.college.schoolName}` : ''}`
+}
+
+async function guardianThreadView(where: GuardianThreadWhere) {
+  const thread = await db.messageThread.findFirst({ where: { ...where, guardianCopy: true }, select: threadSelect })
   if (!thread) return null
-  const messages = await db.message.findMany({ where: { threadId }, orderBy: { createdAt: 'asc' }, take: 500, select: { id: true, senderId: true, body: true, createdAt: true } })
+  const messages = await db.message.findMany({ where: { threadId: thread.id }, orderBy: { createdAt: 'asc' }, take: 500, select: { id: true, senderId: true, body: true, createdAt: true } })
   return {
     id: thread.id,
     status: thread.status,
     closedBy: thread.closedBy,
     athleteFirstName: thread.athlete.firstName,
-    coachLabel: `${coachName(thread.coach)}, ${thread.coach.title}${thread.coach.college ? `, ${thread.coach.college.schoolName}` : ''}`,
+    coachLabel: coachLabel(thread.coach),
     messages: messages.map((m) => ({ id: m.id, fromCoach: m.senderId === thread.coachId, body: m.body, createdAt: m.createdAt })),
   }
 }
 
-export async function guardianCloseThread(threadId: string, token: string, now: Date = new Date()): Promise<boolean> {
-  if (!validGuardianToken(threadId, token)) return false
-  const result = await db.messageThread.updateMany({ where: { id: threadId, guardianCopy: true, status: 'OPEN' }, data: { status: 'CLOSED', closedBy: 'guardian', closedAt: now } })
-  if (result.count) await audit('message.thread_closed', { targetType: 'message_thread', targetId: threadId, metadata: { by: 'guardian' } })
+async function closeAsGuardian(where: GuardianThreadWhere, now: Date, guardianUserId?: string): Promise<boolean> {
+  const result = await db.messageThread.updateMany({ where: { ...where, guardianCopy: true, status: 'OPEN' }, data: { status: 'CLOSED', closedBy: 'guardian', closedAt: now } })
+  if (result.count) await audit('message.thread_closed', { actorId: guardianUserId, targetType: 'message_thread', targetId: where.id, metadata: { by: 'guardian', via: guardianUserId ? 'account' : 'link' } })
   return result.count > 0
 }
 
-export async function guardianReport(threadId: string, token: string, messageId: string, reason: string): Promise<boolean> {
-  if (!validGuardianToken(threadId, token)) return false
-  const message = await db.message.findFirst({ where: { id: messageId, threadId, thread: { guardianCopy: true } }, select: { id: true } })
+async function reportAsGuardian(where: GuardianThreadWhere, messageId: string, reason: string, guardianUserId?: string): Promise<boolean> {
+  const message = await db.message.findFirst({ where: { id: messageId, threadId: where.id, thread: { ...(where.athleteId ? { athleteId: where.athleteId } : {}), guardianCopy: true } }, select: { id: true } })
   if (!message) return false
-  await db.messageReport.create({ data: { messageId, reporterKind: 'GUARDIAN', reporterId: null, reason: sanitizeText(reason).slice(0, 1000) } })
-  await audit('message.reported', { targetType: 'message', targetId: messageId, metadata: { by: 'guardian' } })
+  await db.messageReport.create({ data: { messageId, reporterKind: 'GUARDIAN', reporterId: guardianUserId ?? null, reason: sanitizeText(reason).slice(0, 1000) } })
+  await audit('message.reported', { actorId: guardianUserId, targetType: 'message', targetId: messageId, metadata: { by: 'guardian', via: guardianUserId ? 'account' : 'link' } })
   return true
 }
 

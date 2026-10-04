@@ -5,6 +5,8 @@ import { db } from '@/lib/db'
 import { CURRENT_TERMS_VERSION } from '@/lib/legal'
 
 const TABLES = [
+  'training_logs', 'training_plan_items', 'training_plans', 'drills',
+  'event_attendance', 'events', 'recruiting_periods',
   'push_subscriptions',
   'message_reports', 'messages', 'message_threads',
   'team_entries', 'testing_sessions', 'team_members', 'teams',

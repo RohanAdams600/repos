@@ -115,6 +115,42 @@ export default function TermsPage() {
         </li>
       </ul>
 
+      <h2>Parent and guardian accounts</h2>
+      <ul>
+        <li>
+          Parent and guardian accounts are for adults. Create one only with the email address an athlete gave us for you, and only if you are that
+          athlete&apos;s parent or legal guardian. The account acts for every athlete under 18 who named that address.
+        </li>
+        <li>
+          Decisions you make from the account (consent, team and coach contact approvals, ending a conversation, deletion) have the same effect as
+          the emailed links.
+        </li>
+      </ul>
+
+      <h2>Events and the recruiting calendar</h2>
+      <ul>
+        <li>
+          Coaches and parents can submit showcases, camps, combines and tournaments. Copy the facts from the organizer&apos;s own page and link it. Do
+          not submit an event you have no reason to believe is real, and do not add promises about scholarships, exposure, rankings or results. We
+          list an event only after our staff check it, and may refuse, edit or remove any listing.
+        </li>
+        <li>
+          KineticScout lists events; it does not organize, endorse or rank them and is not responsible for them. Register, pay and confirm details
+          with the organizer.
+        </li>
+        <li>
+          The recruiting calendar is copied by our staff from the governing body&apos;s published calendar, with the source linked. It is a summary,
+          not rules advice: the source document and the college&apos;s compliance office decide what is allowed.
+        </li>
+      </ul>
+
+      <h2>Training plans</h2>
+      <p>
+        Training plans suggest drills for the focus areas in your video analysis. Drills are written or licensed by our staff coaches and checked by
+        a second staff member, but they are general guidance, not medical advice or a substitute for your own coach. Warm up, follow the safety
+        notes, and stop if anything hurts. We do not promise any change in speed, velocity or other measurements.
+      </p>
+
       <h2>What KineticScout does and does not do</h2>
       <p>
         Percentiles, fit scores and video analysis are estimates based on the data available. Video analysis uses a single 2D camera view and

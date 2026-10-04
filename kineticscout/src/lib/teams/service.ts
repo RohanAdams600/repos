@@ -7,6 +7,7 @@ import { canJoinTeam, isTeamCoach, type SessionUser } from '@/lib/auth/permissio
 import { audit } from '@/lib/audit'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
+import { notifyGuardianAccount } from '@/lib/family/notify'
 import { renderEmail } from '@/lib/email/templates'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
@@ -238,6 +239,7 @@ export async function decideJoin(coachId: string, memberId: string, approve: boo
       `team-guardian-${memberId}`,
       { label: 'Review the request', url: `${env().APP_URL}/consent/guardian/team?token=${encodeURIComponent(token)}` },
     )
+    await notifyGuardianAccount(member.athleteId, { title: `${member.athlete.firstName} would like to join ${member.team.name}`, body: 'The coach approved. Review the request on your Family page.', dedupeKey: `team-guardian-${memberId}` })
     await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: `${member.team.name} approved your request`, body: 'We emailed your parent or guardian to approve it too.', href: '/dashboard/teams', dedupeKey: `team-approved-${memberId}` })
     return 'awaiting-guardian'
   }
@@ -258,8 +260,17 @@ export async function lookupGuardianTeam(token: string, now: Date = new Date()) 
 
 export async function guardianDecideTeam(token: string, approve: boolean, now: Date = new Date()): Promise<'approved' | 'declined' | 'invalid'> {
   if (token.length < 20 || token.length > 100) return 'invalid'
+  const member = await db.teamMember.findFirst({ where: { guardianTokenHash: sha256Hex(token), status: 'AWAITING_GUARDIAN', guardianTokenExpiresAt: { gt: now } }, select: { id: true } })
+  return member ? guardianDecideTeamMember(member.id, approve, now) : 'invalid'
+}
+
+/**
+ * The guardian's decision on a team join, from the emailed link or a guardian account. Callers
+ * establish the guardian's authority first; `guardianUserId` is set for the account path.
+ */
+export async function guardianDecideTeamMember(memberId: string, approve: boolean, now: Date = new Date(), guardianUserId?: string): Promise<'approved' | 'declined' | 'invalid'> {
   const member = await db.teamMember.findFirst({
-    where: { guardianTokenHash: sha256Hex(token), status: 'AWAITING_GUARDIAN', guardianTokenExpiresAt: { gt: now } },
+    where: { id: memberId, status: 'AWAITING_GUARDIAN', guardianTokenExpiresAt: { gt: now } },
     select: { id: true, athleteId: true, team: { select: { coachId: true, name: true } }, athlete: { select: { firstName: true, lastName: true, user: { select: { guardianConsent: { select: { status: true } } } } } } },
   })
   if (!member) return 'invalid'
@@ -267,7 +278,7 @@ export async function guardianDecideTeam(token: string, approve: boolean, now: D
   const status = approve && granted ? 'ACTIVE' : 'DECLINED'
   const updated = await db.teamMember.updateMany({ where: { id: member.id, status: 'AWAITING_GUARDIAN' }, data: { status, guardianRespondedAt: now, guardianTokenHash: null, guardianTokenExpiresAt: null } })
   if (updated.count === 0) return 'invalid'
-  await audit('team.guardian_decided', { targetType: 'team_member', targetId: member.id, metadata: { approved: status === 'ACTIVE' } })
+  await audit('team.guardian_decided', { actorId: guardianUserId, targetType: 'team_member', targetId: member.id, metadata: { approved: status === 'ACTIVE', via: guardianUserId ? 'account' : 'link' } })
   const name = `${member.athlete.firstName} ${member.athlete.lastName}`
   if (status === 'ACTIVE') {
     await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: `You joined ${member.team.name}`, body: 'Your parent or guardian approved. Your coach can now record test results for you to accept.', href: '/dashboard/teams', dedupeKey: `team-guardian-${member.id}` })
