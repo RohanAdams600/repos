@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { expectAccessible, signIn, state, watchProblems } from '../helpers'
 
-const PAGES = ['/', '/pricing', '/faq', '/about', '/contact', '/reviews', '/case-studies', '/blog', '/search', '/legal/privacy', '/legal/terms', '/legal/refunds', '/legal/cookies', '/legal/your-data', '/tools/percentile-calculator', '/sign-in', '/sign-up', '/forgot-password', '/consent/guardian/manage']
+const PAGES = ['/', '/pricing', '/faq', '/about', '/contact', '/reviews', '/case-studies', '/blog', '/search', '/legal/privacy', '/legal/terms', '/legal/refunds', '/legal/cookies', '/legal/your-data', '/tools/percentile-calculator', '/sign-in', '/sign-up', '/forgot-password', '/consent/guardian/manage', '/offline']
 
 for (const scheme of ['light', 'dark'] as const) {
   test.describe(`public pages (${scheme})`, () => {
@@ -39,4 +39,32 @@ test('signed-out visitors are sent to sign in from the dashboard', async ({ page
   await signIn(context, null, baseURL!)
   await page.goto('/dashboard/settings')
   await expect(page).toHaveURL(/\/sign-in\?next=%2Fdashboard%2Fsettings/)
+})
+
+test('a guardian can review a team request and read a copied conversation through their private links', async ({ page, context, baseURL }) => {
+  await signIn(context, null, baseURL!)
+  const { teamToken, threadId, threadToken } = state().guardian
+  await page.goto(`/consent/guardian/team?token=${encodeURIComponent(teamToken)}`)
+  await expect(page.getByRole('heading', { level: 1, name: 'Jamie would like to join a team' })).toBeVisible()
+  await expect(page.getByText('Pat Teamcoach, Head Coach')).toBeVisible()
+  await expectAccessible(page, 'guardian team approval')
+
+  await page.goto(`/consent/guardian/messages?thread=${threadId}&token=${encodeURIComponent(threadToken)}`)
+  await expect(page.getByText('Could we set up a call with you and a parent next week?')).toBeVisible()
+  await page.getByText('Report this message').click()
+  await expectAccessible(page, 'guardian conversation')
+  // A wrong token shows nothing.
+  await page.goto(`/consent/guardian/messages?thread=${threadId}&token=wrong`)
+  await expect(page.getByText('This link is not valid')).toBeVisible()
+})
+
+test('the app can be installed: manifest, icons and service worker', async ({ request }) => {
+  const manifest = await request.get('/manifest.webmanifest')
+  expect(manifest.ok()).toBe(true)
+  const body = await manifest.json()
+  expect(body).toMatchObject({ name: 'KineticScout', start_url: '/dashboard', display: 'standalone' })
+  for (const icon of body.icons as { src: string }[]) expect((await request.get(icon.src)).headers()['content-type']).toBe('image/png')
+  const worker = await request.get('/sw.js')
+  expect(worker.headers()['cache-control']).toContain('no-cache')
+  expect(worker.headers()['content-security-policy']).toBe("default-src 'self'; script-src 'self'")
 })

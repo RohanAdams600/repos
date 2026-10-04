@@ -6,6 +6,7 @@ import { sendEmail } from '@/lib/email/send'
 import { renderEmail } from '@/lib/email/templates'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
+import { closeThreadsOperation } from '@/lib/messaging/service'
 import { notify } from '@/lib/notifications/service'
 import { isPubliclyVisible } from '@/lib/profile/public'
 import { randomToken, sha256Hex } from '@/lib/security/hash'
@@ -180,8 +181,9 @@ export async function withdrawContactRequest(coachId: string, requestId: string)
 
 /**
  * Ends contact between an athlete and one coach (a block) or every coach (a guardian withdrawing
- * consent): open requests are declined, and email addresses already shared are removed from the
- * coaches' pages. Returned as operations so the caller runs them inside its own transaction.
+ * consent): open requests are declined, email addresses already shared are removed from the
+ * coaches' pages, and open conversations are closed. Returned as operations so the caller runs them
+ * inside its own transaction.
  */
 export function endContactOperations(athleteId: string, by: 'athlete' | 'guardian', now: Date, coachId?: string) {
   const scope = coachId ? { athleteId, coachId } : { athleteId }
@@ -191,6 +193,7 @@ export function endContactOperations(athleteId: string, by: 'athlete' | 'guardia
       data: { status: 'DECLINED', ...(by === 'athlete' ? { athleteRespondedAt: now } : { guardianRespondedAt: now }), guardianTokenHash: null, guardianTokenExpiresAt: null },
     }),
     db.contactRequest.updateMany({ where: { ...scope, status: 'ACCEPTED', NOT: { sharedEmails: { isEmpty: true } } }, data: { sharedEmails: [] } }),
+    closeThreadsOperation(scope, by === 'athlete' ? 'block' : 'consent', now),
   ]
 }
 

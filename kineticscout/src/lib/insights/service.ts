@@ -4,8 +4,9 @@ import { ageOn } from '@/lib/auth/age'
 import { cached } from '@/lib/cache'
 import { db } from '@/lib/db'
 import { birthDateWindow, cohortBands, describeBands, K_MIN, rankInCohort, type BuildInput, type CohortBands } from '@/lib/insights/build-cohort'
+import { nationalPercentile, nationalQuantiles, type NationalResult, type NormSource } from '@/lib/insights/national'
 import { projectAcrossSports, type Projection } from '@/lib/insights/projection'
-import { METRIC_DEFINITIONS, metricDbValue, type MetricType } from '@/lib/metrics/definitions'
+import { METRIC_DEFINITIONS, METRIC_TYPES, metricDbValue, type MetricType } from '@/lib/metrics/definitions'
 import type { Quantiles } from '@/lib/metrics/percentile'
 import { bestMetrics } from '@/lib/metrics/service'
 
@@ -66,9 +67,12 @@ export async function biometricPercentile(
   return { status: 'insufficient', metricType: input.metricType, value: input.value, largestCohort: largest }
 }
 
+/** KineticScout build cohort, plus the national figure when a licensed table covers the athlete. */
+export type AthleteMetricInsight = BiometricResult & { national: NationalResult | null }
+
 export type AthleteInsights =
   | { status: 'needs-build'; missing: ('height' | 'weight')[] }
-  | { status: 'ok'; age: number; heightInches: number; weightLbs: number; results: BiometricResult[] }
+  | { status: 'ok'; age: number; heightInches: number; weightLbs: number; results: AthleteMetricInsight[] }
 
 export async function athleteBiometrics(athleteId: string, today: Date = new Date()): Promise<AthleteInsights> {
   const profile = await db.athleteProfile.findUniqueOrThrow({
@@ -79,16 +83,21 @@ export async function athleteBiometrics(athleteId: string, today: Date = new Dat
   if (missing.length) return { status: 'needs-build', missing }
   const age = ageOn(profile.user.dateOfBirth, today)
   const best = await bestMetrics(athleteId, LOOKBACK_MONTHS, today)
+  const build = { age, heightInches: profile.heightInches!, weightLbs: profile.weightLbs! }
   const results = await Promise.all(
-    (Object.entries(best) as [MetricType, number][]).map(([metricType, value]) =>
-      biometricPercentile({ metricType, value, age, heightInches: profile.heightInches!, weightLbs: profile.weightLbs!, excludeAthleteId: athleteId }, today),
-    ),
+    (Object.entries(best) as [MetricType, number][]).map(async ([metricType, value]) => {
+      const [cohort, national] = await Promise.all([
+        biometricPercentile({ metricType, value, ...build, excludeAthleteId: athleteId }, today),
+        nationalPercentile({ metricType, value, ...build }, today),
+      ])
+      return { ...cohort, national }
+    }),
   )
   return { status: 'ok', age, heightInches: profile.heightInches!, weightLbs: profile.weightLbs!, results }
 }
 
-export type CohortScope = 'class' | 'all-classes'
-export type ProjectionWithScope = Projection & { scope: CohortScope; gradYear: number }
+export type CohortScope = 'class' | 'all-classes' | 'national'
+export type ProjectionWithScope = Projection & { scope: CohortScope; gradYear: number; source: NormSource | null }
 
 /** Latest weekly snapshot per metric: the athlete's class when that cohort exists, otherwise all classes. */
 async function latestQuantiles(gradYear: number, today: Date): Promise<{ quantiles: Partial<Record<MetricType, Quantiles>>; scope: Partial<Record<MetricType, CohortScope>> }> {
@@ -112,11 +121,31 @@ async function latestQuantiles(gradYear: number, today: Date): Promise<{ quantil
   return { quantiles, scope }
 }
 
-/** Projections into sports other than the athlete's own, from their measured metrics. */
+/**
+ * Projections into sports other than the athlete's own, from their measured metrics. When licensed
+ * national tables cover the athlete's build for the target metric, the projection is read entirely
+ * from national tables (never mixing a national source with a KineticScout target); otherwise it
+ * uses the weekly KineticScout snapshots.
+ */
 export async function athleteProjections(athleteId: string, today: Date = new Date()): Promise<ProjectionWithScope[]> {
-  const profile = await db.athleteProfile.findUniqueOrThrow({ where: { userId: athleteId }, select: { gradYear: true, sport: true } })
+  const profile = await db.athleteProfile.findUniqueOrThrow({
+    where: { userId: athleteId },
+    select: { gradYear: true, sport: true, heightInches: true, weightLbs: true, user: { select: { dateOfBirth: true } } },
+  })
   const [best, { quantiles, scope }] = await Promise.all([bestMetrics(athleteId, LOOKBACK_MONTHS, today), latestQuantiles(profile.gradYear, today)])
-  return projectAcrossSports(best, quantiles)
-    .filter((p) => METRIC_DEFINITIONS[p.target].sport !== profile.sport)
-    .map((p) => ({ ...p, scope: scope[p.target] ?? 'all-classes', gradYear: profile.gradYear }))
+  const otherSport = (p: Projection) => METRIC_DEFINITIONS[p.target].sport !== profile.sport
+
+  const national = new Map<MetricType, ProjectionWithScope>()
+  if (profile.heightInches && profile.weightLbs) {
+    const norms = await nationalQuantiles({ age: ageOn(profile.user.dateOfBirth, today), heightInches: profile.heightInches, weightLbs: profile.weightLbs }, METRIC_TYPES, today)
+    const nationalMap = Object.fromEntries(Object.entries(norms).map(([type, n]) => [type, n.quantiles])) as Partial<Record<MetricType, Quantiles>>
+    for (const p of projectAcrossSports(best, nationalMap).filter(otherSport)) {
+      national.set(p.target, { ...p, scope: 'national', gradYear: profile.gradYear, source: norms[p.target]!.source })
+    }
+  }
+  const local = projectAcrossSports(best, quantiles)
+    .filter(otherSport)
+    .filter((p) => !national.has(p.target))
+    .map((p): ProjectionWithScope => ({ ...p, scope: scope[p.target] ?? 'all-classes', gradYear: profile.gradYear, source: null }))
+  return [...national.values(), ...local]
 }

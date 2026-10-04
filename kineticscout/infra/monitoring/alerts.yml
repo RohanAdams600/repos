@@ -99,6 +99,44 @@ groups:
         annotations:
           summary: A coach account review has waited longer than we tell coaches
 
+      - alert: TeamVerificationBacklog
+        expr: kineticscout_team_verifications_oldest_age_seconds > 36 * 3600
+        labels:
+          severity: warning
+        annotations:
+          summary: Team reviews are falling behind
+          description: The oldest team has waited {{ $value | humanizeDuration }}. Team coaches are told "usually within 2 business days".
+
+      - alert: TeamVerificationBacklogBreached
+        expr: kineticscout_team_verifications_oldest_age_seconds > 96 * 3600
+        labels:
+          severity: page
+        annotations:
+          summary: A team review has waited longer than we tell coaches
+
+      - alert: MessageReportUnresolved
+        expr: kineticscout_message_reports_oldest_age_seconds > 24 * 3600
+        labels:
+          severity: warning
+        annotations:
+          summary: A reported message has waited over a day
+          description: Conversations can involve minors and are copied to their parents. Review it in the admin console, Message reports.
+
+      - alert: MessageReportUnresolvedLong
+        expr: kineticscout_message_reports_oldest_age_seconds > 72 * 3600
+        labels:
+          severity: page
+        annotations:
+          summary: A reported message has waited over 3 days
+
+      - alert: NormLicenceExpiring
+        expr: kineticscout_norm_licences_expiring_30d > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $value }} national norm table licence(s) end within 30 days'
+          description: A table stops being used the day after its licence ends, and athletes then see only KineticScout comparisons. Renew the licence or import the new edition.
+
   - name: kineticscout-jobs
     rules:
       - alert: VideoAnalysisQueueStalled

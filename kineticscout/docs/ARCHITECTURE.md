@@ -48,7 +48,8 @@ kineticscout/
 ├── infra/
 │   ├── gcs-cors.json              Upload bucket CORS (PUT from APP_URL only)
 │   └── monitoring/                Prometheus scrape config, alert rules + promtool tests, Grafana dashboard (Phase 5)
-├── next.config.ts                 Static security headers, image policy, body limits
+├── next.config.ts                 Static security headers, image policy, body limits, service worker headers
+├── public/                        sw.js (offline page and push only), icons/ (Phase 6)
 ├── prisma.config.ts               Prisma 7 CLI config (direct URL for migrations)
 ├── prisma/
 │   ├── schema.prisma              All tables, enums, relations, indexes
@@ -67,28 +68,37 @@ kineticscout/
 │   │   ├── onboarding/            account completion + athlete profile
 │   │   ├── consent/guardian/      parent or guardian consent; manage/ (withdraw, re-grant, delete via private link); contact/ (approve a coach request)
 │   │   ├── coach/verify-email/    POST-confirmed school email confirmation for coach accounts (Phase 5)
+│   │   ├── consent/guardian/team, consent/guardian/messages   guardian approval of a team join; read, report or end a copied conversation (Phase 6)
+│   │   ├── offline/               page the service worker shows when the network is unreachable (Phase 6)
+│   │   ├── manifest.ts, apple-icon.png   installable app manifest and icons (Phase 6)
 │   │   ├── email/preferences/     token-authenticated email preference centre (Phase 3)
 │   │   ├── terms-update/          re-acceptance gate when CURRENT_TERMS_VERSION changes (Phase 3)
 │   │   ├── dashboard/             overview, profile and sharing, measurements, insights, analysis (+ compare), matchmaker,
 │   │   │                          recruiting assistant, contact requests, notifications, billing, settings (auth required);
-│   │   │                          coaches: prospects, saved, contact requests (Phase 5)
+│   │   │                          coaches: prospects, saved, contact requests (Phase 5); messages, teams (athletes),
+│   │   │                          team/ (team coaches: roster, record a testing day, sessions) (Phase 6)
 │   │   ├── p/[slug]/              public athlete profile, share image and PDF (Phase 4)
 │   │   ├── tools/                 public percentile calculator by build (Phase 4)
 │   │   ├── admin/                 growth agent output + article drafts (ADMIN, else 404)
 │   │   ├── blog/                  articles published by the Data and SEO agent
 │   │   ├── faq/ search/ contact/ about/ reviews/ case-studies/   marketing site (Phase 2)
 │   │   ├── legal/                 privacy, terms, refunds, cookies, your-data
-│   │   └── api/                   trpc, webhooks/stripe, billing/*, account/export, profile/pdf, email/unsubscribe, health, internal/revalidate, internal/metrics
+│   │   └── api/                   trpc, webhooks/stripe, billing/*, account/export, profile/pdf, email/unsubscribe, health, internal/revalidate, internal/metrics,
+│   │                              admin/norms (norm table upload), push/subscription (Phase 6)
 │   ├── components/                ui/ primitives, layout/, auth/, account/, dashboard/, admin/, brand/
 │   ├── lib/
 │   │   ├── auth/                  Supabase clients, DAL (session.ts), policy (permissions.ts), age rules, guardian consent and management, re-auth, actions,
 │   │   │                          e2e-stub.ts (test-only sign-in, refused outside DEPLOY_ENV=local)
 │   │   ├── coach/                 coach verification, prospect search and boards, contact requests (guardian approval, block, report), rules
 │   │   ├── ops/                   operational gauges and Prometheus text format (Phase 5)
+│   │   ├── teams/                 team rules, join codes, guardian approval, testing days, coach-recorded results (Phase 6)
+│   │   ├── messaging/             conversations after an accepted contact, guardian copies, reports, retention (Phase 6)
+│   │   ├── push/                  Web Push encryption and VAPID (node:crypto), endpoint allowlist, delivery (Phase 6)
+│   │   ├── pwa/                   offline outbox and device helpers for the installable app (Phase 6)
 │   │   ├── account/               data export, scheduled deletion (grace period, resumable steps, receipts), settings actions
 │   │   ├── profile/               public profile data and visibility, slugs, view counters, PDF renderer
 │   │   ├── verification/          evidence policy, MP4 metadata reader, automated checks, reviewer decisions, retention
-│   │   ├── insights/              biometric (build-cohort) percentiles, cross-sport equivalents, public calculator
+│   │   ├── insights/              biometric (build-cohort) percentiles, licensed national norms (import, bands, precedence), cross-sport equivalents, public calculator
 │   │   ├── recruiting/            Agent 3: program changes and feed import, watcher fan-out, grounded outreach drafts
 │   │   ├── reference/             licensed reference clip library
 │   │   ├── notifications/         in-app notifications (idempotent by dedupe key)
@@ -127,6 +137,7 @@ kineticscout/
 `User` 1–n `Subscription`, `CheckoutSession`, `AiUsage`; 1–1 `GuardianConsent`.
 Agent tables: `AgentRun` 1–n `MarketingAsset`, `BlogPost`; `PercentileBaseline` holds weekly snapshots.
 Coaches (Phase 5): `User` 1–1 `CoachProfile` n–1 `CollegeProgram`; `CoachProfile` 1–n `SavedProspect`, `ContactRequest`, `CoachReport` (each also n–1 the athlete); `CoachBlock` joins athlete and coach.
+Phase 6: `NormDataset` 1–n `NormRow` (licensed quantile bands; rows immutable by trigger). `User` (TEAM_COACH) 1–n `Team` 1–n `TeamMember`, `TestingSession` 1–n `TeamEntry`; an accepted entry becomes a `Metric` with `source = TEAM` and a stored attribution. `ContactRequest` 1–1 `MessageThread` 1–n `Message` 1–n `MessageReport`. `User` 1–n `PushSubscription`. `Metric.clientRef` makes offline resends idempotent.
 Ledgers: `StripeEvent` (webhook idempotency), `AuditLog` (security events), `DataDeletionReceipt` (proof a deletion was requested and completed; keyed hash of the user id only).
 
 Column names follow the brief exactly (`stripe_customer_id`, `subscription_tier`, `grad_year`, `primary_position`, `height`, `weight`, `gpa`, `high_school`, `twitter_handle`, `metric_type`, `value`, `verified`, `video_url`, `average_recruiting_metrics`, `head_coach_email`, `last_contact_date`). Where the brief named a column without a unit, the Prisma field carries it (`heightInches @map("height")`). `60_YARD_DASH` is not a valid identifier, so the enum key is `SIXTY_YARD_DASH @map("60_YARD_DASH")`; the stored value matches the brief.
@@ -161,6 +172,14 @@ Column names follow the brief exactly (`stripe_customer_id`, `subscription_tier`
 
 **Coach verification and contact (Phase 5).** A coach account is adults-only. The coach names their program and a school or program email address; a hashed, expiring link confirms the inbox (POST-confirmed so mail scanners cannot click it), then staff match the person to the program's public staff directory. A database CHECK refuses `VERIFIED` without a confirmed email and a review. Verified coaches search public profiles with the same visibility rules as `/p/<slug>` applied in SQL (consent for minors, no pending deletion, blocks excluded) and see only the public card. A contact request carries a first message without links or phone numbers and an attestation that the coach's association allows contact now; one open request per pair (partial unique index), 20 per coach per day, 90 days' wait after a decline, expiry after 30 days. The athlete accepts or declines; for a minor, acceptance emails the guardian a hashed 14-day link, and only their approval shares both addresses (a CHECK keeps `shared_emails` empty unless accepted). Blocking a coach, or a guardian withdrawing consent, declines open requests and clears shared addresses from the coach's page. Reports go to the admin console; suspension withdraws the coach's open requests.
 
+**National norms (Phase 6).** Staff upload a licensed table as CSV through `POST /api/admin/norms` (a route handler, because tables exceed the 64 KB API cap). `norms.ts` parses and checks it: known metrics, plausible values, ascending quantiles, a sample of at least 25 per band, and bands per metric that are separate or fully nested, so the lookup never depends on row order. A table is stored as a draft; staff preview it against a sample athlete, then activate it. For each metric, the most recently activated table with a band covering the athlete wins, and its narrowest covering band is used; a table whose licence has ended stops being used the next day. Insights and the public calculator show the national figure (with publisher, edition, population and sample size) next to the KineticScout cohort, and cross-sport equivalents are read entirely from national tables when they cover both metrics.
+
+**Team accounts (Phase 6).** A `TEAM_COACH` account registers a team; staff match the coach to the school or club staff page before the team can take players. An athlete asks to join with the team's code; the coach approves; for a minor, a guardian then approves through a hashed 14-day link. Coaches see roster names, classes and positions only. A testing day records results for active members in the team's sport, all or nothing; each athlete accepts or declines every result. Accepting creates a `Metric` with `source = TEAM` and a stored attribution ("coach-recorded", shown with an outline badge, never the volt Verified fill), dated on the testing day and outside the free logging limit. Leaving, removal, guardian withdrawal and suspension withdraw pending results; staff can also strip a suspended team's labels.
+
+**Messaging (Phase 6).** A conversation opens for an accepted contact request while contact is still shared. Messages are plain text (no automatic links), 2,000 characters, 30 per hour per sender, and a coach can send three in a row before the athlete replies; a database trigger rejects a sender outside the thread. For athletes under 18 every message is emailed to the guardian with a signed link (HMAC of the thread id) to read the thread, report a message or end it. Blocks, guardian withdrawal and coach suspension close conversations. Reports go to staff, who see five messages either side; every load of that queue is audited. Closed conversations are purged after 12 months unless a report is open.
+
+**Installable app (Phase 6).** `manifest.ts` and icons make the site installable. `public/sw.js` serves the offline page when a navigation fails and shows push notifications; it caches nothing personal. Measurements logged offline go to a `localStorage` outbox with a random `clientRef`; `OutboxSync` sends them when the device reconnects, and the server returns the first result for a repeated `clientRef` (unique per athlete). Push is opt-in per device from Settings: `notify()` queues a delivery when the user has subscriptions; the worker encrypts the payload (RFC 8291) and signs VAPID (RFC 8292) with `node:crypto`, only to allowlisted push services, and the payload is a generic line with no names or message text. Signing out clears the outbox and removes the device's push subscription.
+
 **Agents.** node-cron ticks in `AGENT_TIMEZONE`: Growth runs Tuesday and Thursday at 10:00, Data/SEO runs Sunday at 00:00. Each tick enqueues a BullMQ job with id `<agent>-<slot>`, and `AgentRun(agent, slot)` is unique, so every slot runs once across all replicas. Failed runs can be retried.
 
 ## Delivery phases
@@ -172,3 +191,4 @@ Column names follow the brief exactly (`stripe_customer_id`, `subscription_tier`
 | 3 | Settings page; data export (JSON); self-serve account deletion with a 7-day cancellable window, renewal pause, resumable external steps and anonymous receipts; staff entry for emailed requests; one-click unsubscribe (RFC 8058) and token preference centre; guardian management link (withdraw, re-grant, cancel renewal, request or cancel deletion); profile editing; terms re-acceptance gate; public Your data page | **Done** |
 | 4 | Public profiles with private share links, one-page PDF and share image; verified metric badges (evidence upload, automated checks, staff review); biometric percentile engine and public calculator; cross-sport equivalents; Agent 3 recruiting assistant (program change feed and admin entry, alerts, grounded outreach drafts); side-by-side comparison synced at foot strike with a licensed reference clip library; notifications | **Done**. Needs from the business: licensed reference footage and a licensed program data source |
 | 5 | Hockey shot and football throw analysis (sport-aware motions, comparison anchored at foot strike or hand peak); puck and ball tracking beta (Video Intelligence object tracking, launch angle and lower-bound speed scaled by athlete height); coach tools (school email and staff directory verification, prospect search over public profiles, saved boards with private notes, contact requests with athlete acceptance and guardian approval for minors, block and report, admin review); hardening (Playwright + axe e2e suite with a local auth stub, CI e2e and alert-rule jobs, load simulation by route group, `/api/internal/metrics`, alert rules, Grafana dashboard, deploy checklist) | **Done**. Needs from the business: staff time for coach reviews and reports, and the policy-change email |
+| 6 | Licensed national norms (staff CSV import, validation, draft and activation, band precedence, licence expiry) in insights, the public calculator and cross-sport equivalents; team accounts for high school and travel coaches (staff-checked teams, join codes, guardian approval, testing days, athlete-accepted coach-recorded results); messaging after an accepted contact (guardian copies for minors, reports, staff review, retention); installable app (manifest, offline page, offline measurement outbox with idempotent resend, opt-in Web Push with generic payloads, camera capture) | **Done**. Needs from the business: a licensed national norms source, VAPID keys, staff time for team reviews and message reports, and the policy-change email |

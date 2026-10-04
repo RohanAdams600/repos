@@ -45,6 +45,19 @@ export default function CookiesPage() {
           </tbody>
         </table>
       </div>
+      <h2>Storage on your device</h2>
+      <p>The installable app also uses browser storage that is not a cookie. None of it is used for tracking.</p>
+      <ul>
+        <li>
+          <span className="tabular">ks_outbox_v1</span> (local storage): measurements you log while offline, kept until they are sent, for at most 30
+          days, and deleted when you sign out.
+        </li>
+        <li>
+          <span className="tabular">ks-shell-v1</span> (app cache): the offline page and app icons, so the app can tell you it is offline. It contains
+          nothing about your account and is replaced when the app updates.
+        </li>
+        <li>Notification registration: only if you turn on notifications for a device in Settings. Removed when you turn them off or sign out.</li>
+      </ul>
       <h2>Optional, only if you accept analytics</h2>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[560px] text-left">

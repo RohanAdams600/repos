@@ -83,6 +83,11 @@ export const serverEnvSchema = z
     /** e.g. "the State of Texas". Used in the Terms of Service governing-law clause. */
     BUSINESS_GOVERNING_LAW: optionalString(z.string().min(3).max(80)),
 
+    /** Web Push (installable app). All three or none; without them the notification toggle is hidden. */
+    VAPID_PUBLIC_KEY: optionalString(z.string().regex(/^[A-Za-z0-9_-]{87}$/, 'must be the base64url uncompressed P-256 public key')),
+    VAPID_PRIVATE_KEY: optionalString(z.string().regex(/^[A-Za-z0-9_-]{43}$/, 'must be the base64url P-256 private key')),
+    VAPID_SUBJECT: optionalString(z.string().regex(/^(mailto:|https:\/\/)/, 'must start with mailto: or https://')),
+
     /** Google Analytics 4 measurement id (G-XXXXXXX). Loaded only after consent, on marketing pages only. */
     GA_MEASUREMENT_ID: optionalString(z.string().regex(/^G-[A-Z0-9]{4,12}$/, 'must look like G-XXXXXXX')),
 
@@ -95,6 +100,8 @@ export const serverEnvSchema = z
     const deployed = env.DEPLOY_ENV !== 'local'
     const issue = (path: string, message: string) => ctx.addIssue({ code: 'custom', path: [path], message })
     if (env.E2E_AUTH_STUB && deployed) issue('E2E_AUTH_STUB', 'is only allowed when DEPLOY_ENV=local')
+    const vapid = [env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY, env.VAPID_SUBJECT].filter(Boolean).length
+    if (vapid !== 0 && vapid !== 3) issue('VAPID_PUBLIC_KEY', 'set VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT together')
 
     if (env.SERVICE_ROLE === 'web') {
       if (!env.SUPABASE_URL) issue('SUPABASE_URL', 'required for the web app')

@@ -2,6 +2,7 @@
 
 import { z } from 'zod'
 import { MetricType } from '@/generated/prisma/enums'
+import { nationalPercentile } from '@/lib/insights/national'
 import { biometricPercentile } from '@/lib/insights/service'
 import { METRIC_DEFINITIONS, isPlausibleMetricValue } from '@/lib/metrics/definitions'
 import { fieldErrorsFrom, formValues } from '@/lib/forms'
@@ -12,7 +13,15 @@ import { hashedClientIp } from '@/lib/security/request'
 export type CalculatorState =
   | { status: 'idle' }
   | { status: 'error'; message: string; fieldErrors?: Partial<Record<string, string>>; values: Record<string, string> }
-  | { status: 'result'; metricLabel: string; valueLabel: string; percentile: number; cohortSize: number; bandsLabel: string; values: Record<string, string> }
+  | {
+      status: 'result'
+      metricLabel: string
+      valueLabel: string
+      /** From a licensed national table, when one covers this age and build. */
+      national: { percentile: number; bandLabel: string; sampleSize: number; publisher: string; name: string; edition: string; sourceUrl: string } | null
+      cohort: { percentile: number; cohortSize: number; bandsLabel: string } | null
+      values: Record<string, string>
+    }
   | { status: 'insufficient'; metricLabel: string; values: Record<string, string> }
 
 const schema = z
@@ -30,9 +39,9 @@ const schema = z
   })
 
 /**
- * Anonymous calculator. Nothing typed here is stored. Results are rounded to the nearest 5 points
- * and need a cohort of at least K_MIN athletes, so the tool cannot be used to read off individual
- * athletes' numbers.
+ * Anonymous calculator. Nothing typed here is stored. KineticScout results are rounded to the
+ * nearest 5 points and need a cohort of at least K_MIN athletes, so the tool cannot be used to read
+ * off individual athletes' numbers. National results come from licensed published tables.
  */
 export async function calculatePercentileAction(_prev: CalculatorState, formData: FormData): Promise<CalculatorState> {
   const values = formValues(formData)
@@ -41,21 +50,18 @@ export async function calculatePercentileAction(_prev: CalculatorState, formData
   if (!(await rateLimit('calculator', await hashedClientIp())).success) return { status: 'error', message: 'Too many calculations. Try again in an hour.', values }
   const input = parsed.data
   const def = METRIC_DEFINITIONS[input.metricType]
-  const result = await biometricPercentile({
-    metricType: input.metricType,
-    value: input.value,
-    age: input.age,
-    heightInches: input.heightFeet * 12 + input.heightInches,
-    weightLbs: input.weightLbs,
-  })
-  if (result.status === 'insufficient') return { status: 'insufficient', metricLabel: def.label, values }
+  const query = { metricType: input.metricType, value: input.value, age: input.age, heightInches: input.heightFeet * 12 + input.heightInches, weightLbs: input.weightLbs }
+  const [cohort, national] = await Promise.all([biometricPercentile(query), nationalPercentile(query)])
+  if (cohort.status === 'insufficient' && !national) return { status: 'insufficient', metricLabel: def.label, values }
+  const round5 = (p: number) => Math.min(95, Math.max(5, Math.round(p / 5) * 5))
   return {
     status: 'result',
     metricLabel: def.label,
     valueLabel: `${input.value.toFixed(def.decimals)} ${def.unit}`,
-    percentile: Math.min(95, Math.max(5, Math.round(result.percentile / 5) * 5)),
-    cohortSize: result.cohortSize,
-    bandsLabel: result.bandsLabel,
+    national: national
+      ? { percentile: round5(national.percentile), bandLabel: national.bandLabel, sampleSize: national.sampleSize, publisher: national.source.publisher, name: national.source.name, edition: national.source.edition, sourceUrl: national.source.sourceUrl }
+      : null,
+    cohort: cohort.status === 'ok' ? { percentile: round5(cohort.percentile), cohortSize: cohort.cohortSize, bandsLabel: cohort.bandsLabel } : null,
     values,
   }
 }

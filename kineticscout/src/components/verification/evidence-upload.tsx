@@ -12,6 +12,10 @@ import { isAllowedVideoType } from '@/lib/storage/video-files'
 import { EVIDENCE_POLICY } from '@/lib/verification/policy'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
+/** Label styled as a button for a visually hidden file input; shows focus when the input has it. */
+const PICKER =
+  'inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-sm border-2 border-border-strong px-5 font-bold hover:border-fg hover:bg-fg hover:text-bg [&:has(+input:focus-visible)]:outline-2 [&:has(+input:focus-visible)]:outline-offset-2 [&:has(+input:focus-visible)]:outline-fg'
+
 type Phase = 'idle' | 'uploading' | 'finalizing' | 'done' | 'error'
 
 export function EvidenceUpload({ metricId, metricLabel, onDone }: { metricId: string; metricLabel: string; onDone: () => void }) {
@@ -75,12 +79,17 @@ export function EvidenceUpload({ metricId, metricLabel, onDone }: { metricId: st
       {phase === 'uploading' && <ProgressBar value={progress} label="Uploading video" />}
       {phase === 'finalizing' && <Spinner label="Checking the upload" />}
       {(phase === 'idle' || phase === 'error') && (
-        <div>
-          <label htmlFor={inputId} className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-sm border-2 border-border-strong px-5 font-bold hover:border-fg hover:bg-fg hover:text-bg">
+        <div className="flex flex-wrap gap-3">
+          <label htmlFor={inputId} className={PICKER}>
             <UploadIcon />
             Choose video
           </label>
           <input id={inputId} type="file" accept="video/mp4,video/quicktime" className="sr-only" onChange={(e) => void upload(e.target.files?.[0])} />
+          {/* On phones and tablets this opens the camera directly; elsewhere it behaves like Choose video. */}
+          <label htmlFor={`${inputId}-camera`} className={PICKER}>
+            Record now
+          </label>
+          <input id={`${inputId}-camera`} type="file" accept="video/*" capture="environment" className="sr-only" onChange={(e) => void upload(e.target.files?.[0])} />
         </div>
       )}
       {phase === 'uploading' && (

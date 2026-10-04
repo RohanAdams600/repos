@@ -7,8 +7,11 @@ import { METRIC_DEFINITIONS } from '@/lib/metrics/definitions'
 import { createSignedPlaybackUrl } from '@/lib/storage/gcs'
 import { decideEvidence } from '@/lib/verification/service'
 import { decideCoach } from '@/lib/coach/verification'
+import { decideTeam } from '@/lib/teams/service'
+import { messageReportQueue, resolveMessageReport } from '@/lib/messaging/service'
 import { completeReferenceUpload, createReferenceUpload, deleteReferenceClip, setReferenceClipActive } from '@/lib/reference/service'
-import { Handedness, MotionType } from '@/generated/prisma/enums'
+import { Handedness, MetricType, MotionType } from '@/generated/prisma/enums'
+import { activateNormDataset, deleteDraftNormDataset, listNormDatasets, NormAdminError, previewNorm, retireNormDataset } from '@/lib/insights/norm-admin'
 import { postRosterNeed, rosterNeedSchema, staffUpdateSchema, updateProgramStaff } from '@/lib/recruiting/changes'
 import { parseDateOnly } from '@/lib/auth/age'
 import { slugify } from '@/lib/content/fact-check'
@@ -412,4 +415,74 @@ export const adminRouter = createRouter({
     if (!result.count) throw new TRPCError({ code: 'NOT_FOUND', message: 'Report already resolved.' })
     return { ok: true }
   }),
+
+  // Team accounts (Phase 6): staff match the coach to the school or club staff page before players can join.
+  teamQueue: adminProcedure.query(async () => {
+    const select = { id: true, name: true, sport: true, orgType: true, organization: true, state: true, coachName: true, coachTitle: true, directoryUrl: true, status: true, createdAt: true, reviewedAt: true, coach: { select: { email: true } } } as const
+    const [waiting, verified] = await Promise.all([
+      db.team.findMany({ where: { status: 'PENDING' }, orderBy: { updatedAt: 'asc' }, take: 50, select }),
+      db.team.findMany({ where: { status: 'VERIFIED' }, orderBy: { reviewedAt: 'desc' }, take: 50, select: { ...select, _count: { select: { members: { where: { status: 'ACTIVE' } } } } } }),
+    ])
+    return { waiting, verified: verified.map(({ _count, ...t }) => ({ ...t, activeMembers: _count.members })) }
+  }),
+
+  decideTeam: adminProcedure
+    .input(z.object({ teamId: z.uuid(), decision: z.enum(['VERIFIED', 'REJECTED', 'SUSPENDED']), note: z.string().trim().max(500).nullable(), revokeRecorded: z.boolean().default(false) }))
+    .mutation(async ({ ctx, input }) => {
+      if (input.decision !== 'VERIFIED' && !input.note) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Add a note explaining the decision; the coach sees it.' })
+      if (!(await decideTeam(ctx.user.id, input.teamId, input.decision, input.note, { revokeRecorded: input.revokeRecorded }))) {
+        throw new TRPCError({ code: 'CONFLICT', message: 'This team is not in a state that allows that decision.' })
+      }
+      return { ok: true }
+    }),
+
+  // In-app messaging reports (Phase 6). Loading the queue is audited.
+  messageReports: adminProcedure.query(async ({ ctx }) =>
+    (await messageReportQueue(ctx.user.id)).map((r) => ({ ...r, createdAt: r.createdAt.toISOString(), context: r.context.map((m) => ({ ...m, createdAt: m.createdAt.toISOString() })) })),
+  ),
+
+  resolveMessageReport: adminProcedure
+    .input(z.object({ reportId: z.uuid(), resolution: z.string().trim().min(5).max(500), closeThread: z.boolean().default(false) }))
+    .mutation(async ({ ctx, input }) => {
+      if (!(await resolveMessageReport(ctx.user.id, input.reportId, input.resolution, { closeThread: input.closeThread }))) throw new TRPCError({ code: 'NOT_FOUND', message: 'Report already resolved.' })
+      return { ok: true }
+    }),
+
+  // National norms (Phase 6). Upload goes through POST /api/admin/norms (tables exceed the API body cap).
+  normDatasets: adminProcedure.query(async () =>
+    (await listNormDatasets()).map((d) => ({
+      ...d,
+      licenceExpiresAt: d.licenceExpiresAt?.toISOString().slice(0, 10) ?? null,
+      activatedAt: d.activatedAt?.toISOString() ?? null,
+      retiredAt: d.retiredAt?.toISOString() ?? null,
+      createdAt: d.createdAt.toISOString(),
+    })),
+  ),
+
+  setNormDatasetStatus: adminProcedure
+    .input(z.object({ datasetId: z.uuid(), action: z.enum(['activate', 'retire', 'delete']) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        if (input.action === 'activate') await activateNormDataset(ctx.user.id, input.datasetId)
+        else if (input.action === 'retire') await retireNormDataset(ctx.user.id, input.datasetId)
+        else await deleteDraftNormDataset(ctx.user.id, input.datasetId)
+        return { ok: true }
+      } catch (error) {
+        if (error instanceof NormAdminError) throw new TRPCError({ code: 'CONFLICT', message: error.message })
+        throw error
+      }
+    }),
+
+  previewNorm: adminProcedure
+    .input(
+      z.object({
+        datasetId: z.uuid(),
+        metricType: z.enum(MetricType),
+        value: z.number().finite(),
+        age: z.number().int().min(12).max(25),
+        heightInches: z.number().int().min(48).max(90),
+        weightLbs: z.number().int().min(70).max(400),
+      }),
+    )
+    .query(({ input }) => previewNorm(input.datasetId, input)),
 })

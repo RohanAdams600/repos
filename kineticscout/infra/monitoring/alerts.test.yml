@@ -120,3 +120,43 @@ tests:
             exp_annotations:
               summary: Jobs are failing on queue video-analysis
               description: More than 5 jobs exhausted their 3 attempts in the last hour.
+
+  # Message reports: warning after a day, page after three.
+  - interval: 1h
+    input_series:
+      - series: 'kineticscout_message_reports_oldest_age_seconds{job="kineticscout"}'
+        values: '0+3600x100'
+    alert_rule_test:
+      - eval_time: 20h
+        alertname: MessageReportUnresolved
+        exp_alerts: []
+      - eval_time: 30h
+        alertname: MessageReportUnresolved
+        exp_alerts:
+          - exp_labels: { severity: warning, job: kineticscout }
+            exp_annotations:
+              summary: A reported message has waited over a day
+              description: Conversations can involve minors and are copied to their parents. Review it in the admin console, Message reports.
+      - eval_time: 80h
+        alertname: MessageReportUnresolvedLong
+        exp_alerts:
+          - exp_labels: { severity: page, job: kineticscout }
+            exp_annotations:
+              summary: A reported message has waited over 3 days
+
+  # A norm licence ending within 30 days warns once there is at least one.
+  - interval: 1h
+    input_series:
+      - series: 'kineticscout_norm_licences_expiring_30d{job="kineticscout"}'
+        values: '0 0 1'
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: NormLicenceExpiring
+        exp_alerts: []
+      - eval_time: 2h
+        alertname: NormLicenceExpiring
+        exp_alerts:
+          - exp_labels: { severity: warning, job: kineticscout }
+            exp_annotations:
+              summary: '1 national norm table licence(s) end within 30 days'
+              description: A table stops being used the day after its licence ends, and athletes then see only KineticScout comparisons. Renew the licence or import the new edition.

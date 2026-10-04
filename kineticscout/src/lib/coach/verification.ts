@@ -2,6 +2,7 @@ import 'server-only'
 import { z } from 'zod'
 import { audit } from '@/lib/audit'
 import { db } from '@/lib/db'
+import { closeThreadsOperation } from '@/lib/messaging/service'
 import { sendEmail } from '@/lib/email/send'
 import { renderEmail } from '@/lib/email/templates'
 import { env } from '@/lib/env'
@@ -110,8 +111,11 @@ export async function decideCoach(reviewerId: string, coachId: string, decision:
   })
   if (result.count === 0) return false
   if (decision === 'SUSPENDED') {
-    // A suspended coach's open requests are withdrawn so athletes are not left waiting.
-    await db.contactRequest.updateMany({ where: { coachId, status: { in: ['PENDING', 'ATHLETE_ACCEPTED'] } }, data: { status: 'WITHDRAWN', guardianTokenHash: null } })
+    // A suspended coach's open requests are withdrawn so athletes are not left waiting, and their conversations end.
+    await db.$transaction([
+      db.contactRequest.updateMany({ where: { coachId, status: { in: ['PENDING', 'ATHLETE_ACCEPTED'] } }, data: { status: 'WITHDRAWN', guardianTokenHash: null } }),
+      closeThreadsOperation({ coachId }, 'suspended', new Date()),
+    ])
   }
   await audit(decision === 'VERIFIED' ? 'coach.verified' : decision === 'REJECTED' ? 'coach.rejected' : 'coach.suspended', { actorId: reviewerId, targetType: 'coach_profile', targetId: coachId })
   const titles = { VERIFIED: 'Your coach account is verified', REJECTED: 'We could not verify your coach account', SUSPENDED: 'Your coach account is suspended' } as const

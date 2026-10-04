@@ -5,7 +5,7 @@ import type { AgeBand } from '@/lib/auth/age'
  * the same rule is applied in pages, Server Actions, Route Handlers and tRPC procedures.
  */
 
-export type Role = 'ATHLETE' | 'COACH' | 'ADMIN'
+export type Role = 'ATHLETE' | 'COACH' | 'TEAM_COACH' | 'ADMIN'
 export type Tier = 'FREE' | 'PRO'
 export type GuardianConsentState = 'NOT_REQUIRED' | 'PENDING' | 'GRANTED' | 'REVOKED'
 
@@ -57,6 +57,18 @@ export function canUseVideoAnalysis(user: SessionUser): boolean {
 
 export function canUseMatchmaker(user: SessionUser): boolean {
   return user.role !== 'COACH' && user.hasAthleteProfile && hasProAccess(user)
+}
+
+export function isTeamCoach(user: SessionUser): boolean {
+  return user.role === 'TEAM_COACH'
+}
+
+/**
+ * Joining a team gives an adult coach the athlete's name and the values the coach records, so it
+ * needs the same approval as other coach contact. Each team join also needs a guardian's approval.
+ */
+export function canJoinTeam(user: SessionUser): boolean {
+  return user.role === 'ATHLETE' && user.hasAthleteProfile && hasAdultOrGuardianApproval(user) && !user.deletionScheduledFor
 }
 
 export type MetricQuota = { allowed: boolean; limit: number | null; remaining: number | null }

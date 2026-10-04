@@ -19,12 +19,20 @@ export const contactRequestsRouter = createRouter({
         createdAt: true,
         expiresAt: true,
         guardianRequired: true,
+        sharedEmails: true,
         coach: { select: { userId: true, firstName: true, lastName: true, title: true, reviewedAt: true, college: { select: { schoolName: true, division: true } } } },
       },
     })
     const blocks = await db.coachBlock.findMany({ where: { athleteId: ctx.user.id }, select: { coachId: true } })
     const blocked = new Set(blocks.map((b) => b.coachId))
-    return rows.map((r) => ({ ...r, createdAt: r.createdAt.toISOString(), expiresAt: r.expiresAt.toISOString(), coach: { ...r.coach, reviewedAt: r.coach.reviewedAt?.toISOString() ?? null, blocked: blocked.has(r.coach.userId) } }))
+    // The athlete only needs to know whether contact is still shared, not the addresses themselves.
+    return rows.map(({ sharedEmails, ...r }) => ({
+      ...r,
+      contactShared: r.status === 'ACCEPTED' && sharedEmails.length > 0,
+      createdAt: r.createdAt.toISOString(),
+      expiresAt: r.expiresAt.toISOString(),
+      coach: { ...r.coach, reviewedAt: r.coach.reviewedAt?.toISOString() ?? null, blocked: blocked.has(r.coach.userId) },
+    }))
   }),
 
   respond: athleteProcedure

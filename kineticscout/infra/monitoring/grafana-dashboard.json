@@ -764,8 +764,268 @@
       }
     },
     {
-      "type": "timeseries",
+      "type": "stat",
       "id": 13,
+      "title": "Teams in review",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(kineticscout_team_verifications_in_review{job=\"kineticscout\"})",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 14,
+      "title": "Oldest team waiting",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max(kineticscout_team_verifications_oldest_age_seconds{job=\"kineticscout\"})",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 129600
+              },
+              {
+                "color": "red",
+                "value": 345600
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 15,
+      "title": "Open message reports",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(kineticscout_message_reports_open{job=\"kineticscout\"})",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 16,
+      "title": "Oldest message report",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max(kineticscout_message_reports_oldest_age_seconds{job=\"kineticscout\"})",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 86400
+              },
+              {
+                "color": "red",
+                "value": 259200
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 17,
       "title": "Oldest item waiting, by queue",
       "description": "Hours. Warning line at 36 hours, page at 96 (2 business days plus a weekend).",
       "datasource": {
@@ -776,7 +1036,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 14
       },
       "targets": [
         {
@@ -801,6 +1061,24 @@
           "refId": "C",
           "expr": "max(kineticscout_coach_reports_oldest_age_seconds{job=\"kineticscout\"}) / 3600",
           "legendFormat": "Coach report",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        },
+        {
+          "refId": "D",
+          "expr": "max(kineticscout_team_verifications_oldest_age_seconds{job=\"kineticscout\"}) / 3600",
+          "legendFormat": "Team",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        },
+        {
+          "refId": "E",
+          "expr": "max(kineticscout_message_reports_oldest_age_seconds{job=\"kineticscout\"}) / 3600",
+          "legendFormat": "Message report",
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
@@ -857,20 +1135,20 @@
     },
     {
       "type": "row",
-      "id": 14,
+      "id": 18,
       "title": "Privacy",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 22
       },
       "panels": []
     },
     {
       "type": "stat",
-      "id": 15,
+      "id": 19,
       "title": "Deletions in grace period",
       "description": "",
       "datasource": {
@@ -881,7 +1159,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 19
+        "y": 23
       },
       "targets": [
         {
@@ -930,7 +1208,7 @@
     },
     {
       "type": "stat",
-      "id": 16,
+      "id": 20,
       "title": "Deletions overdue",
       "description": "Must be 0. Accounts are deleted within 10 minutes of the 7-day grace period ending.",
       "datasource": {
@@ -941,7 +1219,7 @@
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 19
+        "y": 23
       },
       "targets": [
         {
@@ -994,7 +1272,7 @@
     },
     {
       "type": "stat",
-      "id": 17,
+      "id": 21,
       "title": "Contact requests waiting on athletes",
       "description": "",
       "datasource": {
@@ -1005,7 +1283,7 @@
         "h": 4,
         "w": 5,
         "x": 8,
-        "y": 19
+        "y": 23
       },
       "targets": [
         {
@@ -1054,7 +1332,7 @@
     },
     {
       "type": "stat",
-      "id": 18,
+      "id": 22,
       "title": "Contact requests waiting on guardians",
       "description": "",
       "datasource": {
@@ -1065,7 +1343,7 @@
         "h": 4,
         "w": 5,
         "x": 13,
-        "y": 19
+        "y": 23
       },
       "targets": [
         {
@@ -1114,7 +1392,7 @@
     },
     {
       "type": "stat",
-      "id": 19,
+      "id": 23,
       "title": "Longest wait for a guardian",
       "description": "Since the athlete accepted. Requests expire after 30 days; this is a family decision, so it has no alert.",
       "datasource": {
@@ -1125,7 +1403,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 19
+        "y": 23
       },
       "targets": [
         {
@@ -1174,20 +1452,20 @@
     },
     {
       "type": "row",
-      "id": 20,
+      "id": 24,
       "title": "Background jobs",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 27
       },
       "panels": []
     },
     {
       "type": "stat",
-      "id": 21,
+      "id": 25,
       "title": "Video analyses queued",
       "description": "",
       "datasource": {
@@ -1198,7 +1476,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 24
+        "y": 28
       },
       "targets": [
         {
@@ -1247,7 +1525,7 @@
     },
     {
       "type": "stat",
-      "id": 22,
+      "id": 26,
       "title": "Oldest queued analysis",
       "description": "",
       "datasource": {
@@ -1258,7 +1536,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 24
+        "y": 28
       },
       "targets": [
         {
@@ -1315,7 +1593,7 @@
     },
     {
       "type": "stat",
-      "id": 23,
+      "id": 27,
       "title": "Analyses stuck processing",
       "description": "",
       "datasource": {
@@ -1326,7 +1604,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 24
+        "y": 28
       },
       "targets": [
         {
@@ -1379,7 +1657,7 @@
     },
     {
       "type": "stat",
-      "id": 24,
+      "id": 28,
       "title": "Analyses failed (24 h)",
       "description": "",
       "datasource": {
@@ -1390,7 +1668,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 24
+        "y": 28
       },
       "targets": [
         {
@@ -1447,7 +1725,7 @@
     },
     {
       "type": "timeseries",
-      "id": 25,
+      "id": 29,
       "title": "Jobs waiting or running, by queue",
       "description": "",
       "datasource": {
@@ -1458,7 +1736,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 28
+        "y": 32
       },
       "targets": [
         {
@@ -1513,7 +1791,7 @@
     },
     {
       "type": "timeseries",
-      "id": 26,
+      "id": 30,
       "title": "Jobs failed per hour, by queue",
       "description": "",
       "datasource": {
@@ -1524,7 +1802,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 28
+        "y": 32
       },
       "targets": [
         {
@@ -1583,7 +1861,7 @@
     },
     {
       "type": "timeseries",
-      "id": 27,
+      "id": 31,
       "title": "Unprocessed program changes",
       "description": "",
       "datasource": {
@@ -1594,7 +1872,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 36
+        "y": 40
       },
       "targets": [
         {
@@ -1649,7 +1927,7 @@
     },
     {
       "type": "table",
-      "id": 28,
+      "id": 32,
       "title": "Agents",
       "datasource": {
         "type": "prometheus",
@@ -1659,7 +1937,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 36
+        "y": 40
       },
       "targets": [
         {
@@ -1727,20 +2005,217 @@
     },
     {
       "type": "row",
-      "id": 29,
+      "id": 33,
+      "title": "National norms and devices",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 48
+      },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "id": 34,
+      "title": "Norm tables in use",
+      "description": "Licensed national tables athletes are compared with. 0 means KineticScout comparisons only.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 0,
+        "y": 49
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(kineticscout_norm_datasets_active{job=\"kineticscout\"})",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 35,
+      "title": "Norm licences ending within 30 days",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 8,
+        "y": 49
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(kineticscout_norm_licences_expiring_30d{job=\"kineticscout\"})",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "stat",
+      "id": 36,
+      "title": "Devices with notifications on",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 49
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(kineticscout_push_devices{job=\"kineticscout\"})",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "row",
+      "id": 37,
       "title": "AI spend (this UTC month)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 44
+        "y": 53
       },
       "panels": []
     },
     {
       "type": "gauge",
-      "id": 30,
+      "id": 38,
       "title": "Spend against budget",
       "datasource": {
         "type": "prometheus",
@@ -1750,7 +2225,7 @@
         "h": 8,
         "w": 6,
         "x": 0,
-        "y": 45
+        "y": 54
       },
       "targets": [
         {
@@ -1805,7 +2280,7 @@
     },
     {
       "type": "timeseries",
-      "id": 31,
+      "id": 39,
       "title": "Spend by feature",
       "description": "",
       "datasource": {
@@ -1816,7 +2291,7 @@
         "h": 8,
         "w": 12,
         "x": 6,
-        "y": 45
+        "y": 54
       },
       "targets": [
         {
@@ -1871,7 +2346,7 @@
     },
     {
       "type": "stat",
-      "id": 32,
+      "id": 40,
       "title": "Monthly budget",
       "description": "",
       "datasource": {
@@ -1882,7 +2357,7 @@
         "h": 8,
         "w": 6,
         "x": 18,
-        "y": 45
+        "y": 54
       },
       "targets": [
         {

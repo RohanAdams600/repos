@@ -82,4 +82,10 @@ describe('server environment validation', () => {
     expect(() => parseServerEnv({ ...production, E2E_AUTH_STUB: 'true' })).toThrow(/E2E_AUTH_STUB/)
     expect(() => parseServerEnv({ ...production, DEPLOY_ENV: 'staging', E2E_AUTH_STUB: 'true' })).toThrow(EnvValidationError)
   })
+  it('needs all three Web Push settings or none', () => {
+    const keys = { VAPID_PUBLIC_KEY: 'B'.repeat(87), VAPID_PRIVATE_KEY: 'a'.repeat(43), VAPID_SUBJECT: 'mailto:support@kineticscout.com' }
+    expect(parseServerEnv({ ...local, ...keys }).VAPID_SUBJECT).toBe('mailto:support@kineticscout.com')
+    expect(() => parseServerEnv({ ...local, VAPID_PUBLIC_KEY: keys.VAPID_PUBLIC_KEY })).toThrow(/VAPID_PUBLIC_KEY/)
+    expect(() => parseServerEnv({ ...local, ...keys, VAPID_SUBJECT: 'support@kineticscout.com' })).toThrow(/VAPID_SUBJECT/)
+  })
 })

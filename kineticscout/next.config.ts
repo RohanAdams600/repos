@@ -46,6 +46,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       { source: '/:path*', headers: staticSecurityHeaders },
+      // The service worker must be revalidated on every load, or browsers keep an old one for a day.
+      {
+        source: '/sw.js',
+        headers: [
+          { key: 'Content-Type', value: 'application/javascript; charset=utf-8' },
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          // The worker loads no other scripts and only talks to this origin.
+          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self'" },
+        ],
+      },
       {
         source: '/api/:path*',
         headers: [

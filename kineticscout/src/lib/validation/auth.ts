@@ -34,7 +34,7 @@ export const dateOfBirthSchema = z
 
 export const signUpSchema = z
   .object({
-    accountType: z.enum(['ATHLETE', 'COACH'], { error: 'Choose an account type' }),
+    accountType: z.enum(['ATHLETE', 'COACH', 'TEAM_COACH'], { error: 'Choose an account type' }),
     email: emailSchema,
     password: passwordSchema,
     dateOfBirth: dateOfBirthSchema,
@@ -63,7 +63,7 @@ export const passwordUpdateSchema = z
   })
 
 export const accountCompletionSchema = z.object({
-  accountType: z.enum(['ATHLETE', 'COACH'], { error: 'Choose an account type' }),
+  accountType: z.enum(['ATHLETE', 'COACH', 'TEAM_COACH'], { error: 'Choose an account type' }),
   dateOfBirth: dateOfBirthSchema,
   guardianEmail: z.preprocess(emptyToUndefined, emailSchema.optional()),
   acceptTerms: z.literal('on', { error: 'Accept the Terms of Service and Privacy Policy to continue' }),

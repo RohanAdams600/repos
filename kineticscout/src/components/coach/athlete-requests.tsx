@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { OpenThreadButton } from '@/components/messages/open-thread-button'
 import { ConfirmDialog } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Modal } from '@/components/ui/modal'
@@ -109,6 +110,7 @@ export function AthleteRequests() {
             ) : (
               <div className="flex flex-wrap items-center gap-3">
                 <p className="text-sm font-bold">{STATUS[r.status]}</p>
+                {r.contactShared && !r.coach.blocked && <OpenThreadButton contactRequestId={r.id} label={`Message ${coachName}`} />}
                 {r.coach.blocked ? (
                   <Button size="sm" variant="ghost" onClick={() => unblock.mutate({ coachId: r.coach.userId })}>
                     Unblock coach

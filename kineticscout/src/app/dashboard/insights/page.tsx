@@ -32,9 +32,9 @@ export default async function InsightsPage() {
           Compared with athletes your size
         </h2>
         <p className="text-fg-muted">
-          Each best value from the last 18 months is ranked against KineticScout athletes of a similar age, height and weight who logged the
-          same measurement. We start with a narrow group and widen it until at least {K_MIN} other athletes are included, and we show the range
-          used. Values are mostly self-reported, and this is not a national ranking.
+          Each best value from the last 18 months is compared two ways. When a licensed national table covers your age and build, we show where
+          you stand in it and name its publisher. We also rank you against KineticScout athletes of a similar age, height and weight who logged
+          the same measurement, widening the group until at least {K_MIN} others are included. Your own values are mostly self-reported.
         </p>
         {bio.status === 'needs-build' ? (
           <Alert tone="info">
@@ -50,15 +50,29 @@ export default async function InsightsPage() {
                   <span className="font-bold">{METRIC_DEFINITIONS[r.metricType].label}</span>
                   <span className="tabular text-lg font-bold">{formatMetric(r.metricType, r.value)}</span>
                 </div>
+                {r.national && (
+                  <div className="flex flex-col gap-1">
+                    <p>
+                      <span className="font-bold">National:</span> better than <span className="tabular font-bold">{r.national.percentile}%</span> of the{' '}
+                      {r.national.source.publisher} sample for {r.national.bandLabel} (<span className="tabular">n = {r.national.sampleSize.toLocaleString('en-US')}</span>).
+                    </p>
+                    <p className="text-sm text-fg-muted">
+                      {r.national.source.name}, {r.national.source.edition}. {r.national.source.population}{' '}
+                      <a href={r.national.source.sourceUrl} target="_blank" rel="noopener noreferrer nofollow">
+                        Source
+                      </a>
+                    </p>
+                  </div>
+                )}
                 {r.status === 'ok' ? (
                   <p className="text-fg-muted">
-                    Better than <span className="tabular font-bold text-fg">{r.percentile}%</span> of{' '}
+                    <span className="font-bold text-fg">KineticScout:</span> better than <span className="tabular font-bold text-fg">{r.percentile}%</span> of{' '}
                     <span className="tabular">{r.cohortSize}</span> athletes ({r.bandsLabel}).
                   </p>
                 ) : (
                   <p className="text-fg-muted">
-                    Not enough athletes with a similar build have logged this yet (largest group found: <span className="tabular">{r.largestCohort}</span>,
-                    we need {K_MIN}).
+                    <span className="font-bold text-fg">KineticScout:</span> not enough athletes with a similar build have logged this yet (largest group
+                    found: <span className="tabular">{r.largestCohort}</span>, we need {K_MIN}).
                   </p>
                 )}
               </li>
@@ -104,8 +118,10 @@ export default async function InsightsPage() {
                         {METRIC_DEFINITIONS[s.metricType].label.toLowerCase()} ({ordinal(s.standing)} percentile)
                       </span>
                     ))}{' '}
-                    {p.sources.length > 1 ? 'average' : 'is'} the <span className="tabular">{ordinal(p.standing)}</span> percentile. Compared with{' '}
-                    {p.scope === 'class' ? `the class of ${p.gradYear}` : 'all classes'} on KineticScout.
+                    {p.sources.length > 1 ? 'average' : 'is'} the <span className="tabular">{ordinal(p.standing)}</span> percentile.{' '}
+                    {p.scope === 'national' && p.source
+                      ? `Read from national tables for your build (${p.source.publisher}, ${p.source.name}, ${p.source.edition}).`
+                      : `Compared with ${p.scope === 'class' ? `the class of ${p.gradYear}` : 'all classes'} on KineticScout.`}
                   </p>
                 </li>
               )

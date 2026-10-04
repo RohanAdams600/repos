@@ -184,6 +184,18 @@ export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; spo
           onChange={(e) => onFileChosen(e.target.files?.[0])}
           className="block w-full text-base file:mr-4 file:min-h-11 file:cursor-pointer file:border-2 file:border-border-strong file:bg-transparent file:px-4 file:font-bold file:text-fg hover:file:border-fg"
         />
+        <label htmlFor="video-camera" className="font-bold">
+          Or record now <span className="font-normal text-fg-muted">(opens the camera on phones and tablets)</span>
+        </label>
+        <input
+          id="video-camera"
+          type="file"
+          accept="video/*"
+          capture="environment"
+          disabled={busy}
+          onChange={(e) => onFileChosen(e.target.files?.[0])}
+          className="block w-full text-base file:mr-4 file:min-h-11 file:cursor-pointer file:border-2 file:border-border-strong file:bg-transparent file:px-4 file:font-bold file:text-fg hover:file:border-fg"
+        />
         {phase === 'checking' && <Spinner label="Checking video" />}
         {error && (
           <div id="video-error">

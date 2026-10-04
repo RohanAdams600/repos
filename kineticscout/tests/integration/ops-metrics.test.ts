@@ -32,6 +32,9 @@ describe('operational metrics', () => {
     expect(value(gauges, 'kineticscout_ai_spend_usd', { feature: 'VIDEO_ANALYSIS' })).toBe(0)
     expect(value(gauges, 'kineticscout_contact_requests_open', { stage: 'guardian' })).toBe(0)
     for (const agent of ['GROWTH', 'SEO', 'RECRUITING']) expect(value(gauges, 'kineticscout_agent_last_success_timestamp_seconds', { agent })).toBe(0)
+    for (const name of ['kineticscout_team_verifications_in_review', 'kineticscout_message_reports_open', 'kineticscout_norm_datasets_active', 'kineticscout_norm_licences_expiring_30d', 'kineticscout_push_devices']) {
+      expect(value(gauges, name), name).toBe(0)
+    }
     // No Redis in tests: the queue is reported unreachable rather than silently omitted.
     expect(value(gauges, 'kineticscout_queue_reachable')).toBe(0)
   })
@@ -60,7 +63,17 @@ describe('operational metrics', () => {
     await db.agentRun.create({ data: { agent: 'SEO', slot: 'test-slot', status: 'SUCCEEDED', finishedAt: finished } })
     await db.agentRun.create({ data: { agent: 'GROWTH', slot: 'test-slot', status: 'FAILED', startedAt: new Date(NOW.getTime() - 3600_000) } })
 
+    const coach = await createAthlete()
+    await db.user.update({ where: { id: coach.id }, data: { role: 'TEAM_COACH' } })
+    await db.team.create({ data: { coachId: coach.id, name: 'Test Team', sport: 'BASEBALL', orgType: 'CLUB', organization: 'Test Club', state: 'TX', coachName: 'Sam Coach', coachTitle: 'Head Coach', directoryUrl: 'https://club.example.org/staff', joinCode: 'abcdefghjk', updatedAt: new Date(NOW.getTime() - 3600_000) } })
+    const expiring = new Date(Date.UTC(NOW.getUTCFullYear(), NOW.getUTCMonth(), NOW.getUTCDate() + 10))
+    await db.normDataset.create({ data: { name: 'Norms', publisher: 'Example', edition: '2026', population: 'Test population of athletes.', sourceUrl: 'https://example.org/n', licence: 'Test licence text.', licenceExpiresAt: expiring, status: 'ACTIVE', activatedAt: NOW, rowCount: 0 } })
+
     const gauges = await collectOperationalMetrics(NOW)
+    expect(value(gauges, 'kineticscout_team_verifications_in_review')).toBe(1)
+    expect(value(gauges, 'kineticscout_team_verifications_oldest_age_seconds')).toBeGreaterThanOrEqual(3599)
+    expect(value(gauges, 'kineticscout_norm_datasets_active')).toBe(1)
+    expect(value(gauges, 'kineticscout_norm_licences_expiring_30d')).toBe(1)
     expect(value(gauges, 'kineticscout_video_analyses_queued')).toBe(1)
     expect(value(gauges, 'kineticscout_video_analyses_queued_oldest_age_seconds')).toBeGreaterThanOrEqual(20 * 60 - 1)
     expect(value(gauges, 'kineticscout_video_analyses_processing_stuck')).toBe(1)

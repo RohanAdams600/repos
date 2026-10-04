@@ -1,4 +1,4 @@
-import { createHmac, randomUUID } from 'node:crypto'
+import { createHash, createHmac, randomBytes, randomUUID } from 'node:crypto'
 import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -17,8 +17,13 @@ export type E2EState = {
   /** A second public athlete with no contact history, so the contact-dialog test does not depend on test order. */
   prospect: { id: string; slug: string }
   coach: { id: string; cookie: string }
+  /** A second college coach whose request Avery already accepted, with a conversation open. */
+  recruiter: { id: string; cookie: string; threadId: string }
+  teamCoach: { id: string; cookie: string; teamId: string; sessionId: string }
   admin: { id: string; cookie: string }
   requestId: string
+  /** Guardian links for a minor: a team approval and a copied conversation. */
+  guardian: { teamToken: string; threadId: string; threadToken: string }
 }
 
 const root = path.resolve(HERE, '..')
@@ -50,6 +55,7 @@ export default async function globalSetup(): Promise<void> {
   try {
     await db.query(`DELETE FROM users WHERE email LIKE '%@e2e.example.test'`)
     await db.query(`DELETE FROM college_programs WHERE school_name LIKE 'E2E %'`)
+    await db.query(`DELETE FROM norm_datasets WHERE publisher LIKE 'E2E %'`)
 
     const [athlete, prospect, coach, admin] = [randomUUID(), randomUUID(), randomUUID(), randomUUID()]
     // Real slug shape (first name, then 8 characters from the slug alphabet) so isProfileSlug accepts it.
@@ -90,12 +96,89 @@ export default async function globalSetup(): Promise<void> {
       `INSERT INTO contact_requests (id, coach_id, athlete_id, message, guardian_required, expires_at) VALUES ($1, $2, $3, $4, false, now() + interval '30 days')`,
       [requestId, coach, athlete, 'Hi Avery, I watched your season numbers and would like to talk about our program and your plans.'],
     )
+    // Second college coach with an accepted request and an open conversation.
+    const recruiter = randomUUID()
+    await insertUser(recruiter, 'recruiter@e2e.example.test', 'COACH', '1979-08-21')
+    await db.query(
+      `INSERT INTO coach_profiles (user_id, first_name, last_name, title, college_id, work_email, work_email_verified_at, staff_directory_url, status, reviewed_at, updated_at)
+       VALUES ($1, 'Morgan', 'Recruiter', 'Recruiting Coordinator', $2, 'mrecruiter@e2e-state.edu', now(), 'https://e2e-state.edu/staff', 'VERIFIED', now(), now())`,
+      [recruiter, college],
+    )
+    const acceptedId = randomUUID()
+    await db.query(
+      `INSERT INTO contact_requests (id, coach_id, athlete_id, message, status, guardian_required, athlete_responded_at, shared_emails, expires_at)
+       VALUES ($1, $2, $3, $4, 'ACCEPTED', false, now(), ARRAY['athlete@e2e.example.test'], now() + interval '30 days')`,
+      [acceptedId, recruiter, athlete, 'Hi Avery, our staff would like to learn more about your season and your plans after graduation.'],
+    )
+    const threadId = randomUUID()
+    await db.query(`INSERT INTO message_threads (id, contact_request_id, coach_id, athlete_id, guardian_copy) VALUES ($1, $2, $3, $4, false)`, [threadId, acceptedId, recruiter, athlete])
+    await db.query(`INSERT INTO messages (id, thread_id, sender_id, body) VALUES ($1, $2, $3, $4)`, [randomUUID(), threadId, recruiter, 'Thanks for accepting. When is a good time for a call this week?'])
+
+    // Verified high school team with Avery on the roster and one result waiting for Avery.
+    const teamCoach = randomUUID()
+    await insertUser(teamCoach, 'teamcoach@e2e.example.test', 'TEAM_COACH', '1982-03-14')
+    const teamId = randomUUID()
+    await db.query(
+      `INSERT INTO teams (id, coach_id, name, sport, org_type, organization, state, coach_name, coach_title, directory_url, status, reviewed_at, join_code, updated_at)
+       VALUES ($1, $2, 'E2E High School Varsity Baseball', 'BASEBALL', 'HIGH_SCHOOL', 'E2E High School', 'TX', 'Pat Teamcoach', 'Head Coach', 'https://e2e-high.example.org/athletics/staff', 'VERIFIED', now(), $3, now())`,
+      [teamId, teamCoach, Array.from(randomBytes(10), (b) => 'abcdefghjkmnpqrstuvwxyz23456789'[b % 31]).join('')],
+    )
+    await db.query(`INSERT INTO team_members (id, team_id, athlete_id, status, guardian_required, coach_decided_at) VALUES ($1, $2, $3, 'ACTIVE', false, now())`, [randomUUID(), teamId, athlete])
+    const sessionId = randomUUID()
+    await db.query(`INSERT INTO testing_sessions (id, team_id, date, label, location) VALUES ($1, $2, current_date - 2, 'Fall testing', 'E2E High School field')`, [sessionId, teamId])
+    await db.query(`INSERT INTO team_entries (id, session_id, team_id, athlete_id, metric_type, value) VALUES ($1, $2, $3, $4, 'EXIT_VELOCITY', 93.0)`, [randomUUID(), sessionId, teamId, athlete])
+
+    // A minor with a team approval and a copied conversation waiting on their guardian.
+    const minor = randomUUID()
+    const minorDob = `${new Date().getUTCFullYear() - 16}-01-15`
+    await insertUser(minor, 'minor@e2e.example.test', 'ATHLETE', minorDob)
+    await db.query(
+      `INSERT INTO athlete_profiles (user_id, first_name, last_name, grad_year, primary_position, height, weight, is_public, public_slug, public_since, updated_at)
+       VALUES ($1, 'Jamie', 'Juniorcase', 2028, 'OUTFIELD', 69, 160, true, $2, now(), now())`,
+      [minor, makeProfileSlug('Jamie')],
+    )
+    await db.query(
+      `INSERT INTO guardian_consents (id, user_id, guardian_email, token_hash, status, expires_at, granted_at, updated_at) VALUES ($1, $2, 'parent@e2e.example.test', $3, 'GRANTED', now() + interval '1 day', now(), now())`,
+      [randomUUID(), minor, createHash('sha256').update(randomUUID()).digest('hex')],
+    )
+    const teamToken = randomBytes(32).toString('base64url')
+    await db.query(
+      `INSERT INTO team_members (id, team_id, athlete_id, status, guardian_required, coach_decided_at, guardian_token_hash, guardian_token_expires_at)
+       VALUES ($1, $2, $3, 'AWAITING_GUARDIAN', true, now(), $4, now() + interval '14 days')`,
+      [randomUUID(), teamId, minor, createHash('sha256').update(teamToken).digest('hex')],
+    )
+    const minorRequest = randomUUID()
+    await db.query(
+      `INSERT INTO contact_requests (id, coach_id, athlete_id, message, status, guardian_required, athlete_responded_at, guardian_responded_at, shared_emails, expires_at)
+       VALUES ($1, $2, $3, $4, 'ACCEPTED', true, now(), now(), ARRAY['minor@e2e.example.test', 'parent@e2e.example.test'], now() + interval '30 days')`,
+      [minorRequest, recruiter, minor, 'Hi Jamie, I would like to talk with you and your parents about our summer camp schedule.'],
+    )
+    const minorThread = randomUUID()
+    await db.query(`INSERT INTO message_threads (id, contact_request_id, coach_id, athlete_id, guardian_copy) VALUES ($1, $2, $3, $4, true)`, [minorThread, minorRequest, recruiter, minor])
+    await db.query(`INSERT INTO messages (id, thread_id, sender_id, body) VALUES ($1, $2, $3, $4)`, [randomUUID(), minorThread, recruiter, 'Could we set up a call with you and a parent next week?'])
+
+    // Fixture norm table covering Avery's age and build. Clearly labelled as test data.
+    const normId = randomUUID()
+    await db.query(
+      `INSERT INTO norm_datasets (id, name, publisher, edition, population, source_url, licence, status, row_count, activated_at, updated_at)
+       VALUES ($1, 'End-to-end fixture table', 'E2E Fixture Norms (not real data)', '2026', 'Synthetic values used only by automated tests.', 'https://e2e.example.test/norms', 'Test fixture, never shown in production.', 'ACTIVE', 1, now(), now())`,
+      [normId],
+    )
+    await db.query(
+      `INSERT INTO norm_rows (id, dataset_id, metric_type, age_min, age_max, height_min, height_max, sample_size, p10, p25, p50, p75, p90)
+       VALUES ($1, $2, 'EXIT_VELOCITY', 18, 22, 70, 74, 500, 78, 83, 88, 92, 96)`,
+      [randomUUID(), normId],
+    )
+
     const state: E2EState = {
       athlete: { id: athlete, cookie: cookieFor(athlete, env.HASH_PEPPER), slug },
       prospect: { id: prospect, slug: prospectSlug },
       coach: { id: coach, cookie: cookieFor(coach, env.HASH_PEPPER) },
+      recruiter: { id: recruiter, cookie: cookieFor(recruiter, env.HASH_PEPPER), threadId },
+      teamCoach: { id: teamCoach, cookie: cookieFor(teamCoach, env.HASH_PEPPER), teamId, sessionId },
       admin: { id: admin, cookie: cookieFor(admin, env.HASH_PEPPER) },
       requestId,
+      guardian: { teamToken, threadId: minorThread, threadToken: createHmac('sha256', env.HASH_PEPPER).update(`thread-guardian-v1\u0000${minorThread}`, 'utf8').digest('base64url') },
     }
     writeFileSync(path.join(HERE, '.state.json'), JSON.stringify(state, null, 2))
   } finally {

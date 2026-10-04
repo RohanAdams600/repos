@@ -18,6 +18,13 @@ function isClientError(error: unknown): boolean {
   return status >= 400 && status < 500
 }
 
+/** The request never got an answer (offline, connection dropped, timeout), as opposed to a server refusal. */
+export function isNetworkError(error: unknown): boolean {
+  if (error instanceof DOMException && (error.name === 'TimeoutError' || error.name === 'AbortError')) return true
+  if (error instanceof TRPCClientError) return error.data === undefined && (error.cause instanceof TypeError || error.cause instanceof DOMException || error.message.toLowerCase().includes('fetch'))
+  return error instanceof TypeError
+}
+
 export function errorMessage(error: unknown): string {
   if (error instanceof TRPCClientError) return error.message
   if (error instanceof DOMException && error.name === 'TimeoutError') return 'The request took too long. Check your connection and try again.'

@@ -32,6 +32,7 @@ export function SignUpForm() {
           [
             ['ATHLETE', 'Athlete', 'Track your numbers and find programs that fit.'],
             ['COACH', 'College coach', 'Adults only. We verify your school email and staff listing before you can search or contact athletes.'],
+            ['TEAM_COACH', 'High school or travel coach', 'Adults only. We check your school or club staff page before players can join your team.'],
           ] as const
         ).map(([value, label, description]) => (
           <label key={value} className="flex cursor-pointer items-start gap-3 border-2 border-border-strong p-3 has-[:checked]:border-fg">

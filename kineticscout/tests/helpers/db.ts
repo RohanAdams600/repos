@@ -5,6 +5,10 @@ import { db } from '@/lib/db'
 import { CURRENT_TERMS_VERSION } from '@/lib/legal'
 
 const TABLES = [
+  'push_subscriptions',
+  'message_reports', 'messages', 'message_threads',
+  'team_entries', 'testing_sessions', 'team_members', 'teams',
+  'norm_rows', 'norm_datasets',
   'coach_reports', 'coach_blocks', 'contact_requests', 'saved_prospects', 'coach_profiles',
   'reference_clips', 'program_changes', 'roster_needs', 'outreach_drafts', 'notifications', 'metric_verifications', 'profile_view_days',
   'data_deletion_receipts', 'testimonials', 'contact_messages',

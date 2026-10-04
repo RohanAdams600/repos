@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { CoachRecordedBadge } from '@/components/profile/coach-recorded-badge'
 import { VerifiedBadge } from '@/components/profile/verified-badge'
 import type { ProfileCard } from '@/lib/profile/public'
 
@@ -24,7 +25,7 @@ export function ProspectCard({ card, actions }: { card: ProfileCard; actions?: R
               <span className="tabular font-bold">
                 {m.best.toFixed(m.decimals)} {m.unit}
               </span>
-              {m.bestVerified && <VerifiedBadge />}
+              {m.bestVerified ? <VerifiedBadge /> : m.bestCoachRecorded ? <CoachRecordedBadge /> : null}
             </li>
           ))}
         </ul>

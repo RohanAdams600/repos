@@ -18,7 +18,7 @@ export default function TermsPage() {
       <ul>
         <li>You must be at least 13 and give accurate information, including your date of birth.</li>
         <li>Keep your password private. You are responsible for activity on your account.</li>
-        <li>One person per account. Coach accounts are for adults.</li>
+        <li>One person per account. Coach and team accounts are for adults.</li>
       </ul>
 
       <h2>Acceptable use</h2>
@@ -86,12 +86,43 @@ export default function TermsPage() {
         </li>
       </ul>
 
+      <h2>Team accounts</h2>
+      <ul>
+        <li>
+          Team accounts are for adults who coach the team they register, at the school or club named, and who are listed on its public staff page. We
+          check that page before players can join.
+        </li>
+        <li>
+          Record only results you measured yourself, on the date entered, for athletes who were there. Do not record estimates or values given to you
+          by someone else. Athletes accept or decline each result before it counts.
+        </li>
+        <li>
+          Use roster information only to run your team. If we find a team recorded misleading values, we may suspend it and remove the
+          coach-recorded label from every value it recorded.
+        </li>
+      </ul>
+
+      <h2>Messages</h2>
+      <ul>
+        <li>
+          Messages open between an athlete and a college coach once the athlete accepts a contact request. Keep them about recruiting, honest and
+          respectful. Do not pressure an athlete, ask for personal information beyond what recruiting needs, or arrange to meet a minor without a
+          parent or guardian.
+        </li>
+        <li>
+          For athletes under 18, a parent or guardian receives a copy of every message and can end the conversation. Either participant can end it
+          too, and anyone in it can report a message. Our staff read reported messages and may end a conversation or suspend an account.
+        </li>
+      </ul>
+
       <h2>What KineticScout does and does not do</h2>
       <p>
         Percentiles, fit scores and video analysis are estimates based on the data available. Video analysis uses a single 2D camera view and
         is not medical, injury or professional coaching advice. Puck and ball tracking is a beta feature: its speed and angle figures are
         estimates from the video (the speed is a lower bound), are not radar or official measurements, and may be missing when the object
-        cannot be followed. KineticScout does not guarantee recruiting interest, roster spots, scholarships
+        cannot be followed. National figures come from licensed tables published by third parties, for the population and band they describe,
+        and are shown as published. Measurements logged offline are stored on your device until they are sent; if the device&apos;s storage is
+        cleared first, they are lost. KineticScout does not guarantee recruiting interest, roster spots, scholarships
         or offers, and is not affiliated with any college, league or governing body.
       </p>
 

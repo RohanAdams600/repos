@@ -22,6 +22,10 @@ export type ProfileMetric = {
   bestVerified: boolean
   /** Best reviewer-confirmed value, shown when it differs from the overall best. */
   verifiedBest: number | null
+  /** True when the best value was recorded by a staff-checked team coach and accepted by the athlete. */
+  bestCoachRecorded: boolean
+  /** Who recorded it and when, for example "J. Lee, Westlake High School, Fall testing on 2026-10-04". */
+  bestRecordedBy: string | null
   classPercentile: number | null
   cohortSize: number | null
 }
@@ -81,25 +85,29 @@ export async function buildProfileCard(athleteId: string, audience: 'public' | '
   const rows = await db.metric.findMany({
     where: { athleteId, date: { gte: since } },
     orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
-    select: { metricType: true, value: true, date: true, verified: true },
+    select: { metricType: true, value: true, date: true, verified: true, source: true, recordedBy: true },
   })
 
-  type Acc = { best: number; bestDate: Date; bestVerified: boolean; verifiedBest: number | null }
+  type Acc = { best: number; bestDate: Date; bestVerified: boolean; bestCoachRecorded: boolean; bestRecordedBy: string | null; verifiedBest: number | null }
+  // On equal values the better-evidenced row wins: verified, then coach-recorded, then self-reported.
+  const trust = (row: { verified: boolean; source: string }) => (row.verified ? 2 : row.source === 'TEAM' ? 1 : 0)
   const byType = new Map<MetricType, Acc>()
   for (const row of rows) {
     const def = METRIC_DEFINITIONS[row.metricType]
     const value = Number(row.value)
     const better = (a: number, b: number) => (def.higherIsBetter ? a > b : a < b)
     const acc = byType.get(row.metricType)
+    const coach = row.source === 'TEAM'
     if (!acc) {
-      byType.set(row.metricType, { best: value, bestDate: row.date, bestVerified: row.verified, verifiedBest: row.verified ? value : null })
+      byType.set(row.metricType, { best: value, bestDate: row.date, bestVerified: row.verified, bestCoachRecorded: coach, bestRecordedBy: coach ? row.recordedBy : null, verifiedBest: row.verified ? value : null })
       continue
     }
-    // Ties keep the verified row, so an equal verified measurement earns the badge.
-    if (better(value, acc.best) || (value === acc.best && row.verified && !acc.bestVerified)) {
+    if (better(value, acc.best) || (value === acc.best && trust(row) > trust({ verified: acc.bestVerified, source: acc.bestCoachRecorded ? 'TEAM' : 'SELF' }))) {
       acc.best = value
       acc.bestDate = row.date
       acc.bestVerified = row.verified
+      acc.bestCoachRecorded = coach
+      acc.bestRecordedBy = coach ? row.recordedBy : null
     }
     if (row.verified && (acc.verifiedBest === null || better(value, acc.verifiedBest))) acc.verifiedBest = value
   }
@@ -119,6 +127,8 @@ export async function buildProfileCard(athleteId: string, audience: 'public' | '
         best: acc.best,
         bestDate: acc.bestDate.toISOString().slice(0, 10),
         bestVerified: acc.bestVerified,
+        bestCoachRecorded: acc.bestCoachRecorded,
+        bestRecordedBy: acc.bestRecordedBy,
         verifiedBest: acc.verifiedBest !== null && acc.verifiedBest !== acc.best ? acc.verifiedBest : null,
         classPercentile: standings[metricType]?.percentile ?? null,
         cohortSize: standings[metricType]?.cohortSize ?? null,

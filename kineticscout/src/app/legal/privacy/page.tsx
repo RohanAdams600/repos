@@ -40,16 +40,35 @@ export default function PrivacyPage() {
           Contact requests between verified coaches and athletes: the coach&apos;s message, the responses of the athlete and, for athletes under 18, the
           parent or guardian, and the email addresses shared once a request is accepted. Also blocks, and reports athletes make about coaches.
         </li>
+        <li>
+          Messages between an athlete and a college coach after a contact request is accepted, when each was read, and reports about messages.
+        </li>
+        <li>
+          Team accounts for high school and travel coaches (adults only): name and title as they appear on the team&apos;s staff page, the team,
+          school or club and state, a link to that staff page, and our staff&apos;s decision. For each team: who asked to join and when, the roster,
+          testing days, and the results the coach recorded, with whether each athlete accepted or declined them.
+        </li>
+        <li>
+          If you turn on notifications for a device: the push address your browser gives us for that device, and when we last delivered to it.
+        </li>
         <li>Billing: your Stripe customer identifier and subscription status. Card details go directly to Stripe; we never see or store card numbers.</li>
         <li>Security data: request IP addresses are used to prevent abuse and are stored only as keyed hashes, never in readable form. We log security events such as failed sign-ins.</li>
         <li>Contact form: your name, email, topic and message, used only to answer you and deleted after 12 months.</li>
         <li>Analytics, only if you accept analytics cookies: Google Analytics measures visits to our public pages (never your dashboard), and we remember the campaign link (UTM tags) you first arrived from, for up to 30 days, so we know which outreach works.</li>
       </ul>
       <p>We do not collect location, contacts, or advertising identifiers, and we do not use advertising cookies. Analytics stays off unless you choose Accept.</p>
+      <p>
+        Measurements you log while your device is offline are kept in your browser on that device until they are sent, and are deleted from it when
+        you sign out. The app also stores a copy of its offline page on the device; it contains nothing about your account.
+      </p>
 
       <h2>How we use it</h2>
       <ul>
         <li>To run your account and the features you use: percentiles (including comparisons with athletes of a similar age, height and weight), progression charts, video analysis, side-by-side comparisons and college matching.</li>
+        <li>
+          To compare your measurements with licensed national tables when one covers your age and build. The comparison runs on our servers; nothing
+          about you is sent to the table&apos;s publisher.
+        </li>
         <li>
           To show your public profile and PDF to anyone you share the link with, only if you make the profile public. Public profiles are never
           listed in search engines, and you can change the link or make the profile private at any time.
@@ -64,6 +83,20 @@ export default function PrivacyPage() {
           To pass on contact requests. A coach&apos;s first message cannot contain links or phone numbers. Your email address is shared with the coach
           only if you accept; for athletes under 18, only after a parent or guardian also approves by email, and then the coach receives both
           addresses. You can decline, block or report any coach.
+        </li>
+        <li>
+          To carry messages once a request is accepted. For athletes under 18, we email a parent or guardian a copy of every message in the
+          conversation, with a private link to read it, report a message or end the conversation. When someone reports a message, our staff read it
+          with the messages around it to decide what to do, and we keep a record of every time staff open reports.
+        </li>
+        <li>
+          To run teams. A team coach sees the names, graduating classes and positions of the athletes on their roster, and the results they record.
+          They do not see your email address or the measurements you log yourself. A result the coach records appears on your profile, marked
+          coach-recorded, only if you accept it. Athletes under 18 join a team only after a parent or guardian approves by email.
+        </li>
+        <li>
+          To send notifications to devices where you turned them on. A notification only says what kind of update it is, for example &ldquo;New
+          message&rdquo;; names, numbers and message text appear only inside the app.
         </li>
         <li>
           To run the recruiting assistant if you use it: we watch coaching changes and roster needs at programs in your pipeline and draft
@@ -81,7 +114,11 @@ export default function PrivacyPage() {
         <li>Google Cloud: private storage of analysis and verification videos, pose detection and, when you turn on tracking, puck and ball tracking (Video Intelligence API).</li>
         <li>Stripe: payments and subscriptions.</li>
         <li>Upstash: rate limiting and short-lived caching.</li>
-        <li>Resend: delivery of account emails, including contact request emails to athletes, coaches and parents or guardians.</li>
+        <li>Resend: delivery of account emails, including contact request and team emails to athletes, coaches and parents or guardians, and the copies of messages sent to parents or guardians.</li>
+        <li>
+          Browser push services (Google, Mozilla, Apple or Microsoft, depending on your browser): delivery of notifications to devices where you
+          turned them on. The content is encrypted so the push service cannot read it, and it is only a generic line.
+        </li>
         <li>
           OpenAI: drafting marketing copy and data reports from aggregate statistics, and, only when you use the recruiting assistant, drafting
           outreach messages. For a draft we send your name, graduating class, position, best measurements and, if you entered them, height,
@@ -111,6 +148,15 @@ export default function PrivacyPage() {
           cannot recall a copy the coach already made.
         </li>
         <li>Reports about coaches: until the coach&apos;s or the reporting athlete&apos;s account is deleted.</li>
+        <li>
+          Messages: until the athlete or the coach deletes their account. A conversation that has ended is deleted 12 months after it ended, unless a
+          report about it is still being reviewed.
+        </li>
+        <li>
+          Teams, rosters and testing days: until the team coach deletes their account; an athlete&apos;s membership and results end when either
+          account is deleted. A result you accepted becomes one of your own measurements.
+        </li>
+        <li>Notification devices: until you turn notifications off, sign out on that device, or the push service tells us the device is gone.</li>
         <li>Security logs: up to 24 months.</li>
         <li>Contact form messages: 12 months.</li>
         <li>Billing records: as long as tax and accounting law requires, held by Stripe.</li>
@@ -131,8 +177,8 @@ export default function PrivacyPage() {
         </li>
         <li>
           Parents and guardians of athletes under 18 receive a private link when they consent. With it they can withdraw consent (the profile
-          returns to private, purchases and coach outreach stop immediately, open coach contact requests are declined, and email addresses
-          already shared are removed from coaches&apos; pages), stop a subscription from renewing, or have the account deleted. A deletion a guardian requests can only be canceled by that guardian. A new link can be requested at any time.
+          returns to private, purchases and coach outreach stop immediately, open coach contact requests are declined, conversations with coaches
+          end, team memberships end, and email addresses already shared are removed from coaches&apos; pages), stop a subscription from renewing, or have the account deleted. A deletion a guardian requests can only be canceled by that guardian. A new link can be requested at any time.
         </li>
       </ul>
       <p>

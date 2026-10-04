@@ -56,6 +56,8 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
               date: true,
               metricType: true,
               value: true,
+              source: true,
+              recordedBy: true,
               verified: true,
               createdAt: true,
               verification: { select: { status: true, rejectionReason: true, reviewerNote: true, recordedAt: true, durationMs: true, reviewedAt: true, createdAt: true, videoDeletedAt: true } },
@@ -68,6 +70,17 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
             select: { status: true, message: true, createdAt: true, athleteRespondedAt: true, guardianRespondedAt: true, coach: { select: { firstName: true, lastName: true, title: true, college: { select: { schoolName: true } } } } },
           },
           coachBlocks: { select: { createdAt: true, coach: { select: { firstName: true, lastName: true } } } },
+          teamMemberships: {
+            orderBy: { requestedAt: 'asc' },
+            select: { status: true, requestedAt: true, coachDecidedAt: true, guardianRespondedAt: true, endedAt: true, team: { select: { name: true, organization: true, coachName: true } } },
+          },
+          messageThreads: {
+            select: { status: true, createdAt: true, closedAt: true, closedBy: true, coach: { select: { firstName: true, lastName: true } }, messages: { orderBy: { createdAt: 'asc' }, select: { senderId: true, body: true, createdAt: true } } },
+          },
+          teamEntries: {
+            orderBy: { createdAt: 'asc' },
+            select: { metricType: true, value: true, status: true, createdAt: true, respondedAt: true, session: { select: { label: true, date: true } }, team: { select: { name: true } } },
+          },
           pipeline: {
             orderBy: { createdAt: 'asc' },
             select: { status: true, lastContactDate: true, createdAt: true, college: { select: { schoolName: true, division: true, state: true } } },
@@ -97,9 +110,31 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
           college: { select: { schoolName: true } },
           savedProspects: { select: { note: true, createdAt: true, updatedAt: true, athlete: { select: { firstName: true, lastName: true, gradYear: true } } } },
           contactRequests: { select: { status: true, message: true, createdAt: true, sharedEmails: true, athlete: { select: { firstName: true, lastName: true } } } },
+          messageThreads: {
+            select: { status: true, createdAt: true, closedAt: true, closedBy: true, athlete: { select: { firstName: true, lastName: true } }, messages: { orderBy: { createdAt: 'asc' }, select: { senderId: true, body: true, createdAt: true } } },
+          },
         },
       },
       coachReports: { select: { reason: true, createdAt: true, resolvedAt: true } },
+      pushSubscriptions: { select: { endpoint: true, createdAt: true, lastSuccessAt: true } },
+      teams: {
+        select: {
+          name: true,
+          sport: true,
+          orgType: true,
+          organization: true,
+          state: true,
+          coachName: true,
+          coachTitle: true,
+          directoryUrl: true,
+          status: true,
+          reviewNote: true,
+          reviewedAt: true,
+          createdAt: true,
+          members: { select: { status: true, requestedAt: true, endedAt: true, athlete: { select: { firstName: true, lastName: true, gradYear: true } } } },
+          sessions: { select: { date: true, label: true, location: true, entries: { select: { metricType: true, value: true, status: true, athlete: { select: { firstName: true, lastName: true } } } } } },
+        },
+      },
     },
   })
 
@@ -170,7 +205,19 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
     notifications: user.notifications,
     contactRequestsReceived: (profile?.contactRequests ?? []).map((r) => ({ ...r, coach: { name: `${r.coach.firstName} ${r.coach.lastName}`, title: r.coach.title, school: r.coach.college?.schoolName ?? null } })),
     blockedCoaches: (profile?.coachBlocks ?? []).map((b) => ({ coach: `${b.coach.firstName} ${b.coach.lastName}`, blockedAt: b.createdAt })),
-    coachAccount: user.coachProfile,
+    coachAccount: user.coachProfile ? (({ messageThreads: _threads, ...rest }) => rest)(user.coachProfile) : null,
+    conversations: [
+      ...(profile?.messageThreads ?? []).map((t) => ({ with: `Coach ${t.coach.firstName} ${t.coach.lastName}`, status: t.status, createdAt: t.createdAt, closedAt: t.closedAt, closedBy: t.closedBy, messages: t.messages.map((m) => ({ from: m.senderId === userId ? 'you' : 'coach', body: m.body, sentAt: m.createdAt })) })),
+      ...(user.coachProfile?.messageThreads ?? []).map((t) => ({ with: `${t.athlete.firstName} ${t.athlete.lastName}`, status: t.status, createdAt: t.createdAt, closedAt: t.closedAt, closedBy: t.closedBy, messages: t.messages.map((m) => ({ from: m.senderId === userId ? 'you' : 'athlete', body: m.body, sentAt: m.createdAt })) })),
+    ],
+    teamMemberships: profile?.teamMemberships ?? [],
+    // The push address itself is a credential for that device; the export names the service only.
+    notificationDevices: user.pushSubscriptions.map((d) => ({ pushService: new URL(d.endpoint).hostname, turnedOnAt: d.createdAt, lastDeliveredAt: d.lastSuccessAt })),
+    teamResults: (profile?.teamEntries ?? []).map((e) => ({ ...e, value: Number(e.value), session: { label: e.session.label, date: e.session.date.toISOString().slice(0, 10) } })),
+    teamsYouCoach: user.teams.map((t) => ({
+      ...t,
+      sessions: t.sessions.map((s) => ({ ...s, date: s.date.toISOString().slice(0, 10), entries: s.entries.map((e) => ({ ...e, value: Number(e.value) })) })),
+    })),
     reportsYouMade: user.coachReports,
     aiFeatureUse: user.aiUsage,
     securityEvents,

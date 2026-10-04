@@ -24,11 +24,12 @@ export class MetricValidationError extends Error {
  *
  * The quota check and insert run in one transaction holding a per-athlete advisory lock, so
  * simultaneous submissions (double clicks, scripted requests, several tabs) cannot exceed the
- * limit. See tests/integration/metric-quota.test.ts.
+ * limit. See tests/integration/metric-quota.test.ts. With a clientRef (sent by the offline outbox)
+ * the call is idempotent per athlete.
  */
 export async function logMetric(
   user: SessionUser,
-  input: { metricType: MetricType; value: number; date: Date },
+  input: { metricType: MetricType; value: number; date: Date; clientRef?: string | null },
   now: Date = new Date(),
 ): Promise<{ id: string; remaining: number | null }> {
   const def = METRIC_DEFINITIONS[input.metricType]
@@ -42,7 +43,16 @@ export async function logMetric(
 
   return db.$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`metrics:${user.id}`}, 0))`
-    const loggedThisMonth = await tx.metric.count({ where: { athleteId: user.id, createdAt: { gte: startOfUtcMonth(now) } } })
+    // A retry from a device that went offline mid-request returns the first result instead of a duplicate.
+    if (input.clientRef) {
+      const existing = await tx.metric.findUnique({ where: { athleteId_clientRef: { athleteId: user.id, clientRef: input.clientRef } }, select: { id: true } })
+      if (existing) {
+        const quota = metricLoggingQuota(user, await tx.metric.count({ where: { athleteId: user.id, source: 'SELF', createdAt: { gte: startOfUtcMonth(now) } } }))
+        return { id: existing.id, remaining: quota.remaining }
+      }
+    }
+    // Coach-recorded values the athlete accepted do not use up the free plan's logging allowance.
+    const loggedThisMonth = await tx.metric.count({ where: { athleteId: user.id, source: 'SELF', createdAt: { gte: startOfUtcMonth(now) } } })
     const quota = metricLoggingQuota(user, loggedThisMonth)
     if (!quota.allowed) throw new MetricQuotaError(quota.limit ?? 0)
 
@@ -52,6 +62,7 @@ export async function logMetric(
         metricType: input.metricType,
         value: Number(input.value.toFixed(def.decimals)),
         date: input.date,
+        clientRef: input.clientRef ?? null,
       },
       select: { id: true },
     })
@@ -141,6 +152,6 @@ export async function metricSummary(user: SessionUser, now: Date = new Date()) {
     }
   })
 
-  const loggedThisMonth = await db.metric.count({ where: { athleteId: user.id, createdAt: { gte: startOfUtcMonth(now) } } })
+  const loggedThisMonth = await db.metric.count({ where: { athleteId: user.id, source: 'SELF', createdAt: { gte: startOfUtcMonth(now) } } })
   return { gradYear: profile.gradYear, items, quota: metricLoggingQuota(user, loggedThisMonth) }
 }

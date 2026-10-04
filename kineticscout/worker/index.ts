@@ -14,6 +14,7 @@ import cron, { type ScheduledTask } from 'node-cron'
 import { Worker, type Job } from 'bullmq'
 import { OpenAiLlmClient, type LlmClient } from '@/lib/ai/llm'
 import { db } from '@/lib/db'
+import { deliverPush } from '@/lib/push/service'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
 import { closeQueues, DEFAULT_JOB_OPTIONS, getQueue, QUEUE_NAMES, redisConnection, type AgentJob } from '@/lib/queue/queues'
@@ -81,6 +82,7 @@ async function main(): Promise<void> {
     }),
     new Worker(QUEUE_NAMES.metricEvidence, processMetricEvidence, { connection, concurrency: 2, lockDuration: 5 * 60_000 }),
     new Worker(QUEUE_NAMES.recruitingAssistant, createRecruitingProcessor(llm), { connection, concurrency: 2, lockDuration: 5 * 60_000 }),
+    new Worker(QUEUE_NAMES.push, (job: Job<{ notificationId: string }>) => deliverPush(job.data.notificationId), { connection, concurrency: 5 }),
     new Worker(QUEUE_NAMES.referenceClip, createReferenceClipProcessor(() => new GoogleVideoIntelligencePoseEstimator()), { connection, concurrency: 1, lockDuration: 15 * 60_000 }),
   ]
   for (const worker of workers) {

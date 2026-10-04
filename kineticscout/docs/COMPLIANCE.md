@@ -35,6 +35,11 @@ This document records how the product meets the "do not get sued" checklist, and
 | Contact requests: message, responses, shared email addresses | Letting athletes decide whether a coach gets their email | Until either account is deleted; open requests expire after 30 days; shared addresses cleared on block or consent withdrawal |
 | Blocks and reports about coaches | Safety | Until either account is deleted |
 | Puck or ball track and estimate (opt-in beta) | Analysis result | Until deletion, with the analysis |
+| Team coach name, title, team, school or club, state, staff page link, review decision | Proving a team coach is who they say | Until the coach deletes the account |
+| Team membership, testing days, recorded results and the athlete's answers | Coach-recorded measurements | Until either account is deleted; accepted results become the athlete's measurements |
+| Messages, read times, message reports | Recruiting conversations after an accepted contact | Until either account is deleted; ended conversations deleted 12 months after ending unless a report is open |
+| Push subscription (endpoint and keys) | Notifications on a device the user chose | Until turned off, signed out on that device, or reported gone by the push service |
+| Offline measurement outbox (on the device, not our servers) | Logging without a connection | Until sent, at most 30 days; cleared at sign-out |
 
 Not collected: location, contacts, device identifiers, advertising identifiers, third-party analytics.
 
@@ -60,6 +65,15 @@ Not collected: location, contacts, device identifiers, advertising identifiers, 
 - **Recruiting rules are the coach's responsibility.** KineticScout does not track contact periods for each association; the Terms make the coach responsible and require an attestation on each request. KineticScout is not affiliated with any governing body.
 - **Tracking beta** is opt-in per upload, costs more (included in the budget reservation), and its speed is labelled a lower bound in the product and the Terms.
 - **Exports** include contact requests received, blocks and reports (athletes) and the coach profile, saved athletes with notes, and requests sent (coaches).
+
+## Phase 6 privacy notes
+
+- **National norms** are aggregate tables the business licenses. The comparison runs on our servers; nothing about an athlete is sent to a publisher. Every figure names the table, publisher, edition, population and band sample size, and a table stops being used the day after its licence ends.
+- **Teams** give an adult coach the athlete's name, class and position, plus the results that coach records, and nothing else. Minors join only with a guardian's approval, every result needs the athlete's acceptance, and guardian withdrawal ends memberships.
+- **Messages** with minors are copied in full to the guardian, who can end the conversation or report a message without an account. Staff read messages only through the report queue, and each review is audited.
+- **Notifications** are opt-in per device after a click (never a prompt on page load) and show a generic line only, because lock screens are often visible to others.
+- **Offline storage** is limited to measurements waiting to send and an offline page with no account data; both are listed in the Cookie Policy.
+- **Exports** now include teams, team results, conversations and notification devices (the push service name only, since the endpoint works like a credential).
 
 ## Consent and cookies
 
@@ -112,3 +126,7 @@ No third-party script, pixel or font is loaded in the browser except Google Anal
 9. Staff time for coach account reviews (promised "usually within 2 business days") and for reports about coaches (alert after 24 hours, page after 3 days). Decide who may suspend a coach out of hours.
 10. Before deploying Phase 5: email account holders about the updated Privacy Policy and Terms (coach contact requests, guardian approval, tracking beta). `CURRENT_TERMS_VERSION` is bumped to `2026-10-04.3`.
 11. Counsel review of the coach terms against the recruiting rules of the associations the product will serve (for example NCAA, NAIA and NJCAA contact periods), and whether any association requires more than the coach's attestation.
+12. A licence for national norms data (or a decision to show KineticScout comparisons only). Import only tables whose licence allows showing the figures to users; keep the licence on file.
+13. Staff time for team reviews (promised "usually within 2 business days") and for message reports (alert after 24 hours, page after 3 days). Message reports involve minors: decide who may read them and how quickly.
+14. Before deploying Phase 6: email account holders about the updated Privacy Policy, Terms and Cookie Policy (messaging with guardian copies, teams, national norms, notifications, offline storage). `CURRENT_TERMS_VERSION` is bumped to `2026-10-05.1`.
+15. VAPID keys for Web Push per environment, if notifications should be offered.

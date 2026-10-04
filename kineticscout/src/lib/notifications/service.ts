@@ -1,6 +1,9 @@
 import 'server-only'
 import type { NotificationKind } from '@/generated/prisma/enums'
 import { db } from '@/lib/db'
+import { env } from '@/lib/env'
+import { errorFields, logger } from '@/lib/logger'
+import { enqueuePush } from '@/lib/queue/queues'
 
 export type NewNotification = { userId: string; kind: NotificationKind; title: string; body: string; href?: string; dedupeKey?: string }
 
@@ -11,9 +14,11 @@ export async function notify(input: NewNotification): Promise<boolean> {
     if (existing) return false
   }
   try {
-    await db.notification.create({
+    const created = await db.notification.create({
       data: { userId: input.userId, kind: input.kind, title: input.title.slice(0, 160), body: input.body.slice(0, 1000), href: input.href, dedupeKey: input.dedupeKey },
+      select: { id: true },
     })
+    await queuePush(input.userId, created.id)
     return true
   } catch (error) {
     // Unique violation from a concurrent duplicate.
@@ -24,4 +29,19 @@ export async function notify(input: NewNotification): Promise<boolean> {
 
 export async function unreadCount(userId: string): Promise<number> {
   return db.notification.count({ where: { userId, readAt: null } })
+}
+
+/**
+ * Push to the user's devices, if push is configured and they turned it on somewhere. A queue
+ * outage never fails the notification itself: the in-app notification is already stored.
+ */
+async function queuePush(userId: string, notificationId: string): Promise<void> {
+  const e = env()
+  if (!e.VAPID_PUBLIC_KEY || !e.REDIS_URL) return
+  try {
+    if ((await db.pushSubscription.count({ where: { userId } })) === 0) return
+    await enqueuePush(notificationId)
+  } catch (error) {
+    logger.warn({ notificationId, ...errorFields(error) }, 'push not queued')
+  }
 }

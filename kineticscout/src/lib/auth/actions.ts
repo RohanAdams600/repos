@@ -86,7 +86,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     await audit('auth.age_screen_refused')
     return { status: 'error', message: AGE_SCREEN_MESSAGE }
   }
-  if (input.accountType === 'COACH' && band !== 'ADULT') {
+  if (input.accountType !== 'ATHLETE' && band !== 'ADULT') {
     return { status: 'error', message: 'Coach accounts are for adults.', fieldErrors: { accountType: 'Choose Athlete' }, values }
   }
   if (band === 'MINOR' && !input.guardianEmail) {
@@ -276,7 +276,7 @@ export async function completeAccountAction(_prev: FormState, formData: FormData
     await audit('auth.age_screen_refused')
     redirect('/sign-up?notice=unavailable')
   }
-  if (input.accountType === 'COACH' && band !== 'ADULT') {
+  if (input.accountType !== 'ATHLETE' && band !== 'ADULT') {
     return { status: 'error', message: 'Coach accounts are for adults.', fieldErrors: { accountType: 'Choose Athlete' }, values }
   }
   if (band === 'MINOR' && !input.guardianEmail) {

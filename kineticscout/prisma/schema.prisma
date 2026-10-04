@@ -25,6 +25,8 @@ datasource db {
 enum Role {
   ATHLETE
   COACH
+  /// High school or travel team coach (Phase 6). Records measurements for roster athletes.
+  TEAM_COACH
   ADMIN
 }
 
@@ -231,15 +233,18 @@ model User {
   createdAt               DateTime         @default(now()) @map("created_at")
   updatedAt               DateTime         @updatedAt @map("updated_at")
 
-  athleteProfile   AthleteProfile?
-  guardianConsent  GuardianConsent?
-  subscriptions    Subscription[]
-  checkoutSessions CheckoutSession[]
-  aiUsage          AiUsage[]
-  testimonials     Testimonial[]
-  notifications    Notification[]
-  coachProfile     CoachProfile?
-  coachReports     CoachReport[]
+  athleteProfile    AthleteProfile?
+  guardianConsent   GuardianConsent?
+  subscriptions     Subscription[]
+  checkoutSessions  CheckoutSession[]
+  aiUsage           AiUsage[]
+  testimonials      Testimonial[]
+  notifications     Notification[]
+  coachProfile      CoachProfile?
+  coachReports      CoachReport[]
+  teams             Team[]
+  messagesSent      Message[]
+  pushSubscriptions PushSubscription[]
 
   @@index([role])
   @@index([deletionScheduledFor])
@@ -310,26 +315,40 @@ model AthleteProfile {
   savedBy         SavedProspect[]
   contactRequests ContactRequest[]
   coachBlocks     CoachBlock[]
+  teamMemberships TeamMember[]
+  messageThreads  MessageThread[]
+  teamEntries     TeamEntry[]
 
   @@index([sport, gradYear, primaryPosition])
   @@map("athlete_profiles")
 }
 
 model Metric {
-  id         String     @id @default(uuid(7)) @db.Uuid
-  athleteId  String     @map("athlete_id") @db.Uuid
+  id         String       @id @default(uuid(7)) @db.Uuid
+  athleteId  String       @map("athlete_id") @db.Uuid
   /// Date the measurement was taken (not the date it was logged).
-  date       DateTime   @db.Date
-  metricType MetricType @map("metric_type")
-  value      Decimal    @db.Decimal(7, 2)
-  verified   Boolean    @default(false)
+  date       DateTime     @db.Date
+  metricType MetricType   @map("metric_type")
+  value      Decimal      @db.Decimal(7, 2)
+  verified   Boolean      @default(false)
   /// Private storage object key of the supporting video. Resolved to a short-lived signed URL on read.
-  videoUrl   String?    @map("video_url") @db.VarChar(512)
-  createdAt  DateTime   @default(now()) @map("created_at")
+  videoUrl   String?      @map("video_url") @db.VarChar(512)
+  /// SELF: logged by the athlete. TEAM: recorded by a verified team coach and accepted by the athlete.
+  source     MetricSource @default(SELF)
+  /// Team that recorded it; null for SELF, or once the team is deleted.
+  teamId     String?      @map("team_id") @db.Uuid
+  /// Attribution kept with the value even if the team is later deleted, e.g. "J. Lee, Westlake High School, testing on 2026-10-04".
+  recordedBy String?      @map("recorded_by") @db.VarChar(200)
+  /// Random id from the device that logged it; makes offline retries idempotent.
+  clientRef  String?      @map("client_ref") @db.Uuid
+  createdAt  DateTime     @default(now()) @map("created_at")
 
   athlete      AthleteProfile      @relation(fields: [athleteId], references: [userId], onDelete: Cascade)
   verification MetricVerification?
+  team         Team?               @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  teamEntry    TeamEntry?
 
+  @@unique([athleteId, clientRef])
   // Profile pages and progression charts: latest values per type.
   @@index([athleteId, metricType, date(sort: Desc)])
   // Free tier monthly logging quota.
@@ -754,6 +773,8 @@ enum NotificationKind {
   CONTACT_REQUEST
   CONTACT_UPDATE
   COACH_VERIFICATION
+  TEAM_UPDATE
+  MESSAGE
 }
 
 model Notification {
@@ -934,6 +955,7 @@ model CoachProfile {
   contactRequests ContactRequest[]
   blockedBy       CoachBlock[]
   reports         CoachReport[]
+  messageThreads  MessageThread[]
 
   @@index([status, updatedAt])
   @@index([collegeId])
@@ -986,6 +1008,7 @@ model ContactRequest {
 
   coach   CoachProfile   @relation(fields: [coachId], references: [userId], onDelete: Cascade)
   athlete AthleteProfile @relation(fields: [athleteId], references: [userId], onDelete: Cascade)
+  thread  MessageThread?
 
   @@index([athleteId, status, createdAt(sort: Desc)])
   @@index([coachId, createdAt(sort: Desc)])
@@ -1020,4 +1043,298 @@ model CoachReport {
 
   @@index([resolvedAt, createdAt])
   @@map("coach_reports")
+}
+
+// ---------------------------------------------------------------------------------------------
+// Phase 6: national norms
+// ---------------------------------------------------------------------------------------------
+
+enum NormDatasetStatus {
+  DRAFT
+  ACTIVE
+  RETIRED
+}
+
+/// A licensed table of published percentile values. Rows never change after import; a new edition
+/// is a new dataset. Only ACTIVE datasets with an unexpired licence are used for percentiles.
+model NormDataset {
+  id               String            @id @default(uuid(7)) @db.Uuid
+  name             String            @db.VarChar(160)
+  publisher        String            @db.VarChar(160)
+  edition          String            @db.VarChar(40)
+  /// Who was measured, as the publisher describes it (shown next to every result).
+  population       String            @db.VarChar(400)
+  sourceUrl        String            @map("source_url") @db.VarChar(512)
+  /// Licence terms that allow showing these figures to users.
+  licence          String            @db.VarChar(1000)
+  licenceExpiresAt DateTime?         @map("licence_expires_at") @db.Date
+  status           NormDatasetStatus @default(DRAFT)
+  rowCount         Int               @map("row_count")
+  importedById     String?           @map("imported_by_id") @db.Uuid
+  activatedAt      DateTime?         @map("activated_at")
+  retiredAt        DateTime?         @map("retired_at")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  rows NormRow[]
+
+  @@unique([publisher, name, edition])
+  @@index([status, activatedAt])
+  @@map("norm_datasets")
+}
+
+/// One band of a norm table: raw-value quantiles (p10 is the value 10% of the population measured
+/// below; for timed events that is the fast end). A null min and max means the band covers all
+/// values of that dimension.
+model NormRow {
+  id         String     @id @default(uuid(7)) @db.Uuid
+  datasetId  String     @map("dataset_id") @db.Uuid
+  metricType MetricType @map("metric_type")
+  ageMin     Int?       @map("age_min") @db.SmallInt
+  ageMax     Int?       @map("age_max") @db.SmallInt
+  heightMin  Int?       @map("height_min") @db.SmallInt
+  heightMax  Int?       @map("height_max") @db.SmallInt
+  weightMin  Int?       @map("weight_min") @db.SmallInt
+  weightMax  Int?       @map("weight_max") @db.SmallInt
+  sampleSize Int        @map("sample_size")
+  p10        Decimal    @db.Decimal(8, 3)
+  p25        Decimal    @db.Decimal(8, 3)
+  p50        Decimal    @db.Decimal(8, 3)
+  p75        Decimal    @db.Decimal(8, 3)
+  p90        Decimal    @db.Decimal(8, 3)
+
+  dataset NormDataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+
+  @@index([datasetId, metricType])
+  @@map("norm_rows")
+}
+
+// ---------------------------------------------------------------------------------------------
+// Phase 6: team accounts
+// ---------------------------------------------------------------------------------------------
+
+enum MetricSource {
+  SELF
+  TEAM
+}
+
+enum TeamStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+enum TeamOrgType {
+  HIGH_SCHOOL
+  CLUB
+}
+
+/// A high school or travel team run by one TEAM_COACH account. Staff check the coach against the
+/// school's or club's public staff page before athletes can join.
+model Team {
+  id           String      @id @default(uuid(7)) @db.Uuid
+  coachId      String      @map("coach_id") @db.Uuid
+  name         String      @db.VarChar(120)
+  sport        Sport
+  orgType      TeamOrgType @map("org_type")
+  organization String      @db.VarChar(160)
+  state        String      @db.Char(2)
+  coachName    String      @map("coach_name") @db.VarChar(120)
+  coachTitle   String      @map("coach_title") @db.VarChar(80)
+  /// Public page that lists this coach (school athletics staff page or club staff page).
+  directoryUrl String      @map("directory_url") @db.VarChar(512)
+  status       TeamStatus  @default(PENDING)
+  reviewNote   String?     @map("review_note") @db.VarChar(500)
+  reviewedById String?     @map("reviewed_by_id") @db.Uuid
+  reviewedAt   DateTime?   @map("reviewed_at")
+  /// Code the coach shares with players. Joining still needs the coach's approval (and a guardian's for minors).
+  joinCode     String      @unique @map("join_code") @db.VarChar(12)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  coach    User             @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  members  TeamMember[]
+  sessions TestingSession[]
+  entries  TeamEntry[]
+  metrics  Metric[]
+
+  @@index([coachId])
+  @@index([status, updatedAt])
+  @@map("teams")
+}
+
+enum TeamMemberStatus {
+  /// The athlete asked to join with the team code; waiting for the coach.
+  REQUESTED
+  /// The coach approved; a parent or guardian must approve for an athlete under 18.
+  AWAITING_GUARDIAN
+  ACTIVE
+  DECLINED
+  LEFT
+  REMOVED
+}
+
+model TeamMember {
+  id                     String           @id @default(uuid(7)) @db.Uuid
+  teamId                 String           @map("team_id") @db.Uuid
+  athleteId              String           @map("athlete_id") @db.Uuid
+  status                 TeamMemberStatus @default(REQUESTED)
+  guardianRequired       Boolean          @map("guardian_required")
+  guardianTokenHash      String?          @unique @map("guardian_token_hash") @db.Char(64)
+  guardianTokenExpiresAt DateTime?        @map("guardian_token_expires_at")
+  requestedAt            DateTime         @default(now()) @map("requested_at")
+  coachDecidedAt         DateTime?        @map("coach_decided_at")
+  guardianRespondedAt    DateTime?        @map("guardian_responded_at")
+  endedAt                DateTime?        @map("ended_at")
+
+  team    Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  athlete AthleteProfile @relation(fields: [athleteId], references: [userId], onDelete: Cascade)
+
+  @@index([teamId, status])
+  @@index([athleteId, status])
+  @@map("team_members")
+}
+
+/// A testing day: the coach records measurements for several athletes at once.
+model TestingSession {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  teamId    String   @map("team_id") @db.Uuid
+  date      DateTime @db.Date
+  label     String   @db.VarChar(120)
+  location  String?  @db.VarChar(160)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  team    Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  entries TeamEntry[]
+
+  @@index([teamId, date(sort: Desc)])
+  @@map("testing_sessions")
+}
+
+enum TeamEntryStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+}
+
+/// A value the coach recorded. It becomes a Metric only when the athlete accepts it.
+model TeamEntry {
+  id          String          @id @default(uuid(7)) @db.Uuid
+  sessionId   String          @map("session_id") @db.Uuid
+  teamId      String          @map("team_id") @db.Uuid
+  athleteId   String          @map("athlete_id") @db.Uuid
+  metricType  MetricType      @map("metric_type")
+  value       Decimal         @db.Decimal(7, 2)
+  status      TeamEntryStatus @default(PENDING)
+  metricId    String?         @unique @map("metric_id") @db.Uuid
+  createdAt   DateTime        @default(now()) @map("created_at")
+  respondedAt DateTime?       @map("responded_at")
+
+  session TestingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  team    Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  athlete AthleteProfile @relation(fields: [athleteId], references: [userId], onDelete: Cascade)
+  metric  Metric?        @relation(fields: [metricId], references: [id], onDelete: SetNull)
+
+  @@unique([sessionId, athleteId, metricType])
+  @@index([athleteId, status])
+  @@map("team_entries")
+}
+
+// ---------------------------------------------------------------------------------------------
+// Phase 6: in-app messaging
+// ---------------------------------------------------------------------------------------------
+
+enum MessageThreadStatus {
+  OPEN
+  CLOSED
+}
+
+enum MessageReporter {
+  ATHLETE
+  COACH
+  GUARDIAN
+}
+
+/// One conversation per accepted contact request. For athletes under 18 the parent or guardian is
+/// emailed a copy of every message and can read the thread or end it through a signed link.
+model MessageThread {
+  id               String              @id @default(uuid(7)) @db.Uuid
+  contactRequestId String              @unique @map("contact_request_id") @db.Uuid
+  coachId          String              @map("coach_id") @db.Uuid
+  athleteId        String              @map("athlete_id") @db.Uuid
+  guardianCopy     Boolean             @map("guardian_copy")
+  status           MessageThreadStatus @default(OPEN)
+  /// athlete, coach, guardian, block, consent, suspended or staff.
+  closedBy         String?             @map("closed_by") @db.VarChar(20)
+  closedAt         DateTime?           @map("closed_at")
+  lastMessageAt    DateTime            @default(now()) @map("last_message_at")
+  createdAt        DateTime            @default(now()) @map("created_at")
+
+  contactRequest ContactRequest @relation(fields: [contactRequestId], references: [id], onDelete: Cascade)
+  coach          CoachProfile   @relation(fields: [coachId], references: [userId], onDelete: Cascade)
+  athlete        AthleteProfile @relation(fields: [athleteId], references: [userId], onDelete: Cascade)
+  messages       Message[]
+
+  @@index([coachId, lastMessageAt(sort: Desc)])
+  @@index([athleteId, lastMessageAt(sort: Desc)])
+  @@index([status, closedAt])
+  @@map("message_threads")
+}
+
+/// Plain text, shown without automatic links.
+model Message {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  threadId  String    @map("thread_id") @db.Uuid
+  senderId  String    @map("sender_id") @db.Uuid
+  body      String    @db.VarChar(2000)
+  createdAt DateTime  @default(now()) @map("created_at")
+  readAt    DateTime? @map("read_at")
+
+  thread  MessageThread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender  User            @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reports MessageReport[]
+
+  @@index([threadId, createdAt])
+  @@map("messages")
+}
+
+model MessageReport {
+  id           String          @id @default(uuid(7)) @db.Uuid
+  messageId    String          @map("message_id") @db.Uuid
+  reporterKind MessageReporter @map("reporter_kind")
+  /// Null when a parent or guardian reported through their link (they have no account).
+  reporterId   String?         @map("reporter_id") @db.Uuid
+  reason       String          @db.VarChar(1000)
+  resolvedAt   DateTime?       @map("resolved_at")
+  resolution   String?         @db.VarChar(500)
+  createdAt    DateTime        @default(now()) @map("created_at")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([resolvedAt, createdAt])
+  @@map("message_reports")
+}
+
+// ---------------------------------------------------------------------------------------------
+// Phase 6: installable app
+// ---------------------------------------------------------------------------------------------
+
+/// A browser push subscription, created only when the user turns on notifications for a device.
+/// The endpoint is a capability URL at the browser vendor's push service.
+model PushSubscription {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  endpoint      String    @unique @db.VarChar(1024)
+  p256dh        String    @db.VarChar(128)
+  auth          String    @db.VarChar(64)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  lastSuccessAt DateTime? @map("last_success_at")
+  failureCount  Int       @default(0) @map("failure_count")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }

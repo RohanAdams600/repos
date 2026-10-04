@@ -28,6 +28,10 @@ export const RATE_LIMITS = {
   calculator: { tokens: 30, window: '1 h' },
   outreachDraft: { tokens: 20, window: '1 d' },
   coachVerification: { tokens: 5, window: '1 h' },
+  teamCreate: { tokens: 5, window: '1 d' },
+  teamJoin: { tokens: 10, window: '1 h' },
+  messageSend: { tokens: 30, window: '1 h' },
+  messageReport: { tokens: 10, window: '1 h' },
   /** One counted profile view per visitor per profile per hour. */
   profileViewDedupe: { tokens: 1, window: '1 h' },
 } as const satisfies Record<string, { tokens: number; window: Duration }>

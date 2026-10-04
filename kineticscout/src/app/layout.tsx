@@ -7,6 +7,7 @@ import { SiteHeader } from '@/components/layout/site-header'
 import { Analytics } from '@/components/marketing/analytics'
 import { ConsentBanner } from '@/components/marketing/consent-banner'
 import { ContactDock } from '@/components/marketing/contact-dock'
+import { ServiceWorkerRegistration } from '@/components/pwa/service-worker'
 import { getAuthIdentity } from '@/lib/auth/session'
 import { CONSENT_COOKIE, parseConsent } from '@/lib/consent'
 import { parseTheme, THEME_COOKIE } from '@/lib/theme'
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
   openGraph: { type: 'website', siteName: 'KineticScout', locale: 'en_US' },
   twitter: { card: 'summary_large_image' },
   formatDetection: { telephone: false },
+  appleWebApp: { capable: true, title: 'KineticScout', statusBarStyle: 'black' },
 }
 
 export const viewport: Viewport = {
@@ -53,6 +55,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SiteFooter />
         <BackToTop />
         <ContactDock signedIn={signedIn} />
+        <ServiceWorkerRegistration enabled={process.env.NODE_ENV === 'production'} />
         {gaId && !consent && <ConsentBanner />}
         {gaId && consent?.analytics && <Analytics measurementId={gaId} nonce={nonce} />}
       </body>

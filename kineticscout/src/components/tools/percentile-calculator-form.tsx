@@ -86,15 +86,30 @@ export function PercentileCalculatorForm({ minimumCohort }: { minimumCohort: num
 
       <div aria-live="polite">
         {state.status === 'result' && (
-          <section aria-labelledby="calc-result" className="flex flex-col gap-2 border-2 border-fg p-6">
+          <section aria-labelledby="calc-result" className="flex flex-col gap-3 border-2 border-fg p-6">
             <h2 id="calc-result" className="text-xl font-bold">
-              About the <span className="tabular">{state.percentile}th</span> percentile
+              About the <span className="tabular">{(state.national ?? state.cohort)!.percentile}th</span> percentile{state.national ? ' nationally' : ''}
             </h2>
-            <p className="text-fg-muted">
-              Your {state.metricLabel.toLowerCase()} of <span className="tabular">{state.valueLabel}</span> is better than about{' '}
-              <span className="tabular">{state.percentile}%</span> of <span className="tabular">{state.cohortSize}</span> KineticScout athletes with a
-              similar build ({state.bandsLabel}). Rounded to the nearest 5.
-            </p>
+            {state.national && (
+              <p className="text-fg-muted">
+                Your {state.metricLabel.toLowerCase()} of <span className="tabular">{state.valueLabel}</span> is better than about{' '}
+                <span className="tabular">{state.national.percentile}%</span> of the {state.national.publisher} sample for {state.national.bandLabel} (
+                <span className="tabular">n = {state.national.sampleSize.toLocaleString('en-US')}</span>), from {state.national.name}, {state.national.edition}.{' '}
+                <a href={state.national.sourceUrl} target="_blank" rel="noopener noreferrer nofollow">
+                  Source
+                </a>
+              </p>
+            )}
+            {state.cohort ? (
+              <p className="text-fg-muted">
+                {state.national ? 'On KineticScout, it' : `Your ${state.metricLabel.toLowerCase()} of ${state.valueLabel}`} is better than about{' '}
+                <span className="tabular">{state.cohort.percentile}%</span> of <span className="tabular">{state.cohort.cohortSize}</span> athletes with a
+                similar build ({state.cohort.bandsLabel}).
+              </p>
+            ) : (
+              <p className="text-fg-muted">Fewer than {minimumCohort} KineticScout athletes with a build like yours have logged this yet.</p>
+            )}
+            <p className="text-sm text-fg-muted">Rounded to the nearest 5.</p>
           </section>
         )}
         {state.status === 'insufficient' && (

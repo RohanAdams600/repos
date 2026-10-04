@@ -37,7 +37,11 @@ export default function PercentileCalculatorPage() {
             If fewer than {K_MIN} athletes match, we widen the range step by step, up to {last.age} years, {last.height} inches and {last.weight} lb,
             and tell you the range used. If there are still too few, we say so instead of guessing.
           </li>
-          <li>Most values are logged by athletes themselves. This is not a national ranking and not a scouting grade.</li>
+          <li>
+            When a licensed national table covers your age and build, we also show your standing in it and name the publisher and edition. Otherwise
+            there is no national figure.
+          </li>
+          <li>Most KineticScout values are logged by athletes themselves. Neither figure is a scouting grade.</li>
           <li>Nothing you type here is saved.</li>
         </ul>
         <p className="text-fg-muted">

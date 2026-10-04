@@ -15,11 +15,13 @@ export const metricsRouter = createRouter({
         metricType: z.enum(MetricType),
         value: z.number().finite(),
         date: z.string().refine((v) => parseDateOnly(v) !== null, 'Enter a valid date'),
+        /** Set by the offline outbox so a resend cannot log the same measurement twice. */
+        clientRef: z.uuid().nullish(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       try {
-        return await logMetric(ctx.user, { metricType: input.metricType, value: input.value, date: parseDateOnly(input.date)! })
+        return await logMetric(ctx.user, { metricType: input.metricType, value: input.value, date: parseDateOnly(input.date)!, clientRef: input.clientRef })
       } catch (error) {
         if (error instanceof MetricQuotaError) {
           throw new TRPCError({ code: 'FORBIDDEN', message: `You have logged ${error.limit} metrics this month, the Free plan limit. Upgrade to Pro for unlimited logging.` })
@@ -44,6 +46,8 @@ export const metricsRouter = createRouter({
           value: true,
           date: true,
           verified: true,
+          source: true,
+          recordedBy: true,
           verification: { select: { status: true, rejectionReason: true, reviewerNote: true, reviewedAt: true } },
         },
       })
@@ -55,6 +59,8 @@ export const metricsRouter = createRouter({
           value: Number(r.value),
           date: r.date.toISOString().slice(0, 10),
           verified: r.verified,
+          coachRecorded: r.source === 'TEAM',
+          recordedBy: r.recordedBy,
           verification: r.verification
             ? { status: r.verification.status, rejectionReason: r.verification.rejectionReason, reviewerNote: r.verification.reviewerNote, reviewedAt: r.verification.reviewedAt?.toISOString() ?? null }
             : null,

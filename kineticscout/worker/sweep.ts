@@ -1,5 +1,7 @@
 import { processDueDeletions } from '@/lib/account/deletion'
 import { expireContactRequests } from '@/lib/coach/contact'
+import { expireTeamRequests } from '@/lib/teams/service'
+import { purgeClosedThreads } from '@/lib/messaging/service'
 import { db } from '@/lib/db'
 import { errorFields, logger } from '@/lib/logger'
 import { enqueueEvidenceCheck, enqueueProgramChange, enqueueVideoAnalysis } from '@/lib/queue/queues'
@@ -32,6 +34,8 @@ export async function sweepStuckWork(
   evidencePurged: number
   changesRequeued: number
   contactRequestsExpired: number
+  teamRequestsExpired: number
+  conversationsPurged: number
 }> {
   const stuck = await db.videoAnalysis.findMany({
     where: { status: 'QUEUED', createdAt: { lt: new Date(now.getTime() - 10 * 60_000) } },
@@ -109,5 +113,7 @@ export async function sweepStuckWork(
     evidencePurged: evidence.purged + evidence.abandoned,
     changesRequeued: pendingChanges.length,
     contactRequestsExpired: await expireContactRequests(now),
+    teamRequestsExpired: await expireTeamRequests(now),
+    conversationsPurged: await purgeClosedThreads(now),
   }
 }

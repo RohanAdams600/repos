@@ -2,6 +2,7 @@
 
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { CoachRecordedBadge } from '@/components/profile/coach-recorded-badge'
 import { VerifiedBadge } from '@/components/profile/verified-badge'
 import { EvidenceUpload } from '@/components/verification/evidence-upload'
 import { Alert } from '@/components/ui/alert'
@@ -46,13 +47,14 @@ export function MeasurementList() {
                   <span className="font-bold">{label}</span>
                   <span className="text-sm text-fg-muted">
                     Measured <span className="tabular">{item.date}</span>
+                    {item.coachRecorded && item.recordedBy ? <> · Recorded by {item.recordedBy.replace(/ on \d{4}-\d{2}-\d{2}$/, '')}</> : null}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="tabular text-xl font-bold">{formatMetric(item.metricType, item.value)}</span>
-                  {item.verified ? (
-                    <VerifiedBadge />
-                  ) : status === 'CHECKING' ? (
+                  {item.verified && <VerifiedBadge />}
+                  {item.coachRecorded && <CoachRecordedBadge />}
+                  {item.verified ? null : status === 'CHECKING' ? (
                     <span className="text-sm">Checking video</span>
                   ) : status === 'IN_REVIEW' ? (
                     <span className="text-sm">Waiting for review</span>

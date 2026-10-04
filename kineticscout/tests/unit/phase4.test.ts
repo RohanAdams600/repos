@@ -240,7 +240,10 @@ describe('profile PDF', () => {
     gpa: null,
     highSchool: null,
     twitterHandle: null,
-    metrics: [{ metricType: 'POP_TIME', label: 'Pop time', unit: 's', decimals: 2, best: 1.92, bestDate: '2026-09-01', bestVerified: true, verifiedBest: null, classPercentile: 81, cohortSize: 40 }],
+    metrics: [
+      { metricType: 'POP_TIME', label: 'Pop time', unit: 's', decimals: 2, best: 1.92, bestDate: '2026-09-01', bestVerified: true, bestCoachRecorded: false, bestRecordedBy: null, verifiedBest: null, classPercentile: 81, cohortSize: 40 },
+      { metricType: 'SIXTY_YARD_DASH', label: '60-yard dash', unit: 's', decimals: 2, best: 6.95, bestDate: '2026-09-20', bestVerified: false, bestCoachRecorded: true, bestRecordedBy: 'J. Lee, Westlake High School, Fall testing on 2026-09-20', verifiedBest: null, classPercentile: null, cohortSize: null },
+    ],
     verifiedCount: 1,
   }
 

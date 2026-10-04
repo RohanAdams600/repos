@@ -15,6 +15,7 @@ export const QUEUE_NAMES = {
   metricEvidence: 'metric-evidence',
   recruitingAssistant: 'agent-recruiting',
   referenceClip: 'reference-clip',
+  push: 'push-notification',
 } as const
 
 export type VideoAnalysisJob = { analysisId: string }
@@ -89,6 +90,13 @@ export async function enqueueOutreachDraft(changeId: string, athleteId: string):
     { kind: 'draft', changeId, athleteId },
     { ...DEFAULT_JOB_OPTIONS, jobId: `draft-${changeId}-${athleteId}` },
   )
+}
+
+export type PushJob = { notificationId: string }
+
+/** One push delivery per notification; the id collapses duplicates. */
+export async function enqueuePush(notificationId: string): Promise<void> {
+  await getQueue<PushJob>(QUEUE_NAMES.push).add('deliver', { notificationId }, { attempts: 3, backoff: { type: 'exponential', delay: 10_000 }, removeOnComplete: { age: 24 * 3600, count: 1_000 }, removeOnFail: { age: 7 * 24 * 3600 }, jobId: `push-${notificationId}` })
 }
 
 export async function closeQueues(): Promise<void> {

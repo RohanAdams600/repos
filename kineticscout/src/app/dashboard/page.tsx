@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CoachHome } from '@/components/coach/coach-home'
 import { GuardianBanner } from '@/components/dashboard/guardian-banner'
@@ -26,6 +27,8 @@ export default async function DashboardPage({ searchParams }: PageProps<'/dashbo
   const user = await requireAthlete('/dashboard')
   const params = await searchParams
   const notice = typeof params.notice === 'string' ? NOTICES[params.notice] : undefined
+
+  if (user.role === 'TEAM_COACH') redirect('/dashboard/team')
 
   if (user.role === 'COACH') {
     return (
@@ -70,7 +73,7 @@ export default async function DashboardPage({ searchParams }: PageProps<'/dashbo
             <Link href="/pricing">upgrade to Pro</Link> for unlimited logging.
           </Alert>
         ) : null}
-        <MetricLogForm metricTypes={sportMetrics} remaining={summary.quota.remaining} />
+        <MetricLogForm metricTypes={sportMetrics} remaining={summary.quota.remaining} userId={user.id} />
       </section>
 
       <section aria-labelledby="numbers-title" className="flex flex-col gap-4">

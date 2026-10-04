@@ -9,9 +9,10 @@ import { Button } from '@/components/ui/button'
 import { Field, Select, TextInput } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import { METRIC_DEFINITIONS } from '@/lib/metrics/definitions'
-import { errorMessage, useTRPC } from '@/trpc/client'
+import { OUTBOX_EVENT, queueEntry } from '@/lib/pwa/outbox'
+import { errorMessage, isNetworkError, useTRPC } from '@/trpc/client'
 
-export function MetricLogForm({ metricTypes, remaining }: { metricTypes: MetricType[]; remaining: number | null }) {
+export function MetricLogForm({ metricTypes, remaining, userId }: { metricTypes: MetricType[]; remaining: number | null; userId: string }) {
   const trpc = useTRPC()
   const router = useRouter()
   const today = new Date().toISOString().slice(0, 10)
@@ -20,7 +21,20 @@ export function MetricLogForm({ metricTypes, remaining }: { metricTypes: MetricT
   const [date, setDate] = useState(today)
   const [clientError, setClientError] = useState<string | null>(null)
   const [saved, setSaved] = useState<string | null>(null)
+  const [queued, setQueued] = useState<string | null>(null)
   const def = METRIC_DEFINITIONS[metricType]
+
+  /** No connection: keep it on this device; OutboxSync sends it when the device is back online. */
+  function keepOffline(numeric: number, clientRef: string) {
+    if (!queueEntry({ clientRef, userId, metricType, value: numeric, date })) {
+      setClientError('You are offline and this device cannot store the entry. Try again when you are back online.')
+      return
+    }
+    mutation.reset()
+    setQueued(`No connection. ${def.label} of ${numeric.toFixed(def.decimals)} ${def.unit} is saved on this device and will be sent when you are back online.`)
+    setValue('')
+    window.dispatchEvent(new Event(OUTBOX_EVENT))
+  }
 
   const mutation = useMutation(
     trpc.metrics.log.mutationOptions({
@@ -40,13 +54,19 @@ export function MetricLogForm({ metricTypes, remaining }: { metricTypes: MetricT
       onSubmit={(event) => {
         event.preventDefault()
         setSaved(null)
+        setQueued(null)
         const numeric = Number(value)
         if (!value || !Number.isFinite(numeric) || numeric < def.min || numeric > def.max) {
           setClientError(`Enter a ${def.label.toLowerCase()} between ${def.min} and ${def.max} ${def.unit}.`)
           return
         }
         setClientError(null)
-        mutation.mutate({ metricType, value: numeric, date })
+        const clientRef = crypto.randomUUID()
+        if (navigator.onLine === false) {
+          keepOffline(numeric, clientRef)
+          return
+        }
+        mutation.mutate({ metricType, value: numeric, date, clientRef }, { onError: (error) => (isNetworkError(error) ? keepOffline(numeric, clientRef) : undefined) })
       }}
     >
       {mutation.isError && (
@@ -55,6 +75,7 @@ export function MetricLogForm({ metricTypes, remaining }: { metricTypes: MetricT
         </Alert>
       )}
       {saved && <Alert tone="success">{saved}</Alert>}
+      {queued && <Alert tone="info">{queued}</Alert>}
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Metric" name="metricType" required>
           {(p) => (

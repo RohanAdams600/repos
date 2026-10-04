@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { SignOutForm } from '@/components/pwa/sign-out-form'
 import { Logo } from '@/components/brand/logo'
 import { SearchIcon } from '@/components/icons'
 import { MobileNav, type NavLink } from '@/components/layout/mobile-nav'
@@ -47,11 +48,11 @@ export async function SiteHeader() {
             <ThemeToggle />
             <div className="hidden items-center gap-2 md:flex">
               {identity ? (
-                <form action={signOutAction}>
+                <SignOutForm action={signOutAction}>
                   <Button type="submit" variant="secondary" size="sm">
                     Sign out
                   </Button>
-                </form>
+                </SignOutForm>
               ) : (
                 <>
                   <Link href="/sign-in" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
@@ -65,11 +66,11 @@ export async function SiteHeader() {
             </div>
             <MobileNav links={links}>
               {identity ? (
-                <form action={signOutAction}>
+                <SignOutForm action={signOutAction}>
                   <Button type="submit" variant="secondary" className="w-full">
                     Sign out
                   </Button>
-                </form>
+                </SignOutForm>
               ) : (
                 <>
                   <Link href="/sign-up" className={buttonVariants({ variant: 'primary' })}>

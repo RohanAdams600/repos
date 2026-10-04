@@ -3,10 +3,12 @@ import { analysisRouter } from '@/server/routers/analysis'
 import { coachRouter } from '@/server/routers/coach'
 import { contactRequestsRouter } from '@/server/routers/contact-requests'
 import { matchmakerRouter } from '@/server/routers/matchmaker'
+import { messagesRouter } from '@/server/routers/messages'
 import { metricsRouter } from '@/server/routers/metrics'
 import { notificationsRouter } from '@/server/routers/notifications'
 import { pipelineRouter } from '@/server/routers/pipeline'
 import { recruitingRouter } from '@/server/routers/recruiting'
+import { athleteTeamsRouter, teamRouter } from '@/server/routers/team'
 import { verificationRouter } from '@/server/routers/verification'
 import { createRouter } from '@/server/trpc'
 
@@ -21,6 +23,9 @@ export const appRouter = createRouter({
   recruiting: recruitingRouter,
   coach: coachRouter,
   contactRequests: contactRequestsRouter,
+  team: teamRouter,
+  athleteTeams: athleteTeamsRouter,
+  messages: messagesRouter,
 })
 
 export type AppRouter = typeof appRouter

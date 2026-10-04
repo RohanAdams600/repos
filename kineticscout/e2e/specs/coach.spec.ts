@@ -8,7 +8,7 @@ test.describe('verified coach', () => {
 
   test('coach pages are accessible', async ({ page }) => {
     const problems = watchProblems(page)
-    for (const path of ['/dashboard', '/dashboard/prospects', '/dashboard/saved', '/dashboard/contact-requests', '/dashboard/notifications', '/dashboard/settings']) {
+    for (const path of ['/dashboard', '/dashboard/prospects', '/dashboard/saved', '/dashboard/contact-requests', '/dashboard/messages', '/dashboard/notifications', '/dashboard/settings']) {
       const response = await page.goto(path)
       expect(response?.status(), path).toBe(200)
       await expect(page.locator('h1').first()).toBeVisible()
@@ -51,5 +51,24 @@ test.describe('verified coach', () => {
     // Nothing was sent: the request button is still offered once the dialog closes.
     await page.keyboard.press('Escape')
     await expect(result.getByRole('button', { name: 'Request contact' })).toBeVisible()
+  })
+})
+
+test.describe('college coach with an accepted contact', () => {
+  test.beforeEach(async ({ context, baseURL }) => {
+    await signIn(context, state().recruiter.cookie, baseURL!)
+  })
+
+  test('messages the athlete and sees who gets a copy', async ({ page }) => {
+    await page.goto('/dashboard/messages')
+    await expect(page.getByRole('link', { name: /Avery Testcase/ })).toBeVisible()
+    await expectAccessible(page, 'coach message list')
+    await page.goto(`/dashboard/messages/${state().guardian.threadId}`)
+    await expect(page.getByText(/Their parent or guardian gets a copy of every message/)).toBeVisible()
+    await page.goto(`/dashboard/messages/${state().recruiter.threadId}`)
+    await page.getByRole('textbox', { name: /^Message/ }).fill('Great, I will call Thursday at 5.')
+    await page.getByRole('button', { name: 'Send' }).click()
+    await expect(page.getByText('Great, I will call Thursday at 5.')).toBeVisible()
+    await expectAccessible(page, 'coach conversation')
   })
 })

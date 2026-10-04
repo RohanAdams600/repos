@@ -3,11 +3,13 @@ import Link from 'next/link'
 import { CancelDeletionForm, DeleteAccountForm } from '@/components/account/delete-account-form'
 import { MarketingPreferenceForm } from '@/components/account/marketing-preference-form'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
+import { DeviceSettings } from '@/components/pwa/device-settings'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { activeDeletionRequest, DELETION_GRACE_DAYS } from '@/lib/account/deletion'
 import { requireUser } from '@/lib/auth/session'
 import { db } from '@/lib/db'
+import { vapidConfig } from '@/lib/push/service'
 
 export const metadata: Metadata = { title: 'Settings' }
 
@@ -17,7 +19,7 @@ const MESSAGES: Record<string, { tone: 'success' | 'error' | 'info'; text: strin
   'export-limit': { tone: 'error', text: 'You have downloaded your data several times in the last hour. Try again later.' },
 }
 
-const ROLE_LABEL = { ATHLETE: 'Athlete', COACH: 'Coach', ADMIN: 'Staff' } as const
+const ROLE_LABEL = { ATHLETE: 'Athlete', COACH: 'College coach', TEAM_COACH: 'High school or travel coach', ADMIN: 'Staff' } as const
 const CONSENT_LABEL = { PENDING: 'Waiting for consent', GRANTED: 'Consent given', REVOKED: 'Consent withdrawn' } as const
 
 function formatDate(date: Date): string {
@@ -110,6 +112,13 @@ export default async function SettingsPage({ searchParams }: PageProps<'/dashboa
           </p>
         </section>
       )}
+
+      <section aria-labelledby="device-title" className="flex flex-col gap-4 border-2 border-border-subtle p-6">
+        <h2 id="device-title" className="text-xl font-bold">
+          This device
+        </h2>
+        <DeviceSettings vapidPublicKey={vapidConfig()?.publicKey ?? null} />
+      </section>
 
       <section aria-labelledby="data-title" className="flex flex-col gap-4 border-2 border-border-subtle p-6">
         <h2 id="data-title" className="text-xl font-bold">

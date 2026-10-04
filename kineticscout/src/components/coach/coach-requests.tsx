@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import Link from 'next/link'
 import { Alert } from '@/components/ui/alert'
+import { OpenThreadButton } from '@/components/messages/open-thread-button'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Spinner } from '@/components/ui/spinner'
@@ -49,6 +50,7 @@ export function CoachRequests() {
                   </li>
                 ))}
               </ul>
+              <OpenThreadButton contactRequestId={r.id} label={`Message ${r.athlete.firstName} on KineticScout`} />
             </div>
           )}
           {r.status === 'ACCEPTED' && r.sharedEmails.length === 0 && <p className="text-sm text-fg-muted">Contact details are no longer shared. The athlete or their parent or guardian withdrew them.</p>}

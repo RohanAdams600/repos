@@ -9,14 +9,14 @@ export const metadata: Metadata = { title: 'Manage parent or guardian consent', 
 
 const STATUS_TEXT = {
   GRANTED: 'Consent is given. The profile can be public if your teen chooses, and purchases and coach outreach are allowed.',
-  REVOKED: 'Consent is withdrawn. The profile is private, and purchases and coach outreach are blocked.',
+  REVOKED: 'Consent is withdrawn. The profile is private, and purchases, contact with coaches and team memberships have stopped.',
   PENDING: 'Consent is not given. The profile is private, and purchases and coach outreach are blocked.',
 } as const
 
 function doneMessage(done: unknown, name: string): string | null {
   switch (done) {
     case 'revoke':
-      return `Consent withdrawn. ${name}'s profile is now private, and purchases and coach outreach are blocked.`
+      return `Consent withdrawn. ${name}'s profile is now private, and purchases, contact with coaches and team memberships have stopped.`
     case 'regrant':
       return `Consent recorded for ${name}'s account.`
     case 'delete':
@@ -74,7 +74,7 @@ export default async function GuardianManagePage({ searchParams }: PageProps<'/c
           token={token}
           intent="revoke"
           title="Withdraw consent"
-          description={`Takes effect immediately: ${name}'s profile becomes private, purchases and messages to coaches are blocked, open coach contact requests are declined, and email addresses already shared with coaches are removed from their KineticScout pages (a coach who already wrote one down keeps it). ${name} can still log metrics and see their own numbers, and we email them to say consent was withdrawn.`}
+          description={`Takes effect immediately: ${name}'s profile becomes private, purchases and contact with coaches stop, open coach contact requests are declined, conversations with college coaches end, team memberships end, and email addresses already shared with coaches are removed from their KineticScout pages (a coach who already wrote one down keeps it). ${name} can still log metrics and see their own numbers, and we email them to say consent was withdrawn.`}
           submitLabel="Withdraw consent"
           pendingLabel="Withdrawing"
           checkbox={ctx.liveSubscriptionId && !ctx.cancelAtPeriodEnd ? { name: 'cancelSubscription', label: 'Also stop the Pro subscription from renewing (access continues until the end of the paid period).', required: false } : undefined}

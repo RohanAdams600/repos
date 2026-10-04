@@ -3,6 +3,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { CoachAdmin } from '@/components/admin/admin-coaches'
+import { MessageReportsAdmin } from '@/components/admin/admin-message-reports'
+import { NormsAdmin } from '@/components/admin/admin-norms'
+import { TeamAdmin } from '@/components/admin/admin-teams'
 import { ProgramDataAdmin } from '@/components/admin/admin-programs'
 import { ReferenceClipAdmin } from '@/components/admin/admin-reference-clips'
 import { VerificationQueue } from '@/components/admin/admin-verification'
@@ -151,8 +154,11 @@ export function AdminConsole() {
   return (
     <div className="flex flex-col gap-12">
       <CoachAdmin />
+      <TeamAdmin />
+      <MessageReportsAdmin />
       <VerificationQueue />
       <ProgramDataAdmin />
+      <NormsAdmin />
       <ReferenceClipAdmin />
       <MarketingQueue />
       <BlogDrafts />

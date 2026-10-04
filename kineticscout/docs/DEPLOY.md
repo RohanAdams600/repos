@@ -9,7 +9,8 @@ someone ticks, not background reading. Commands run from `kineticscout/`.
 
 - [ ] The decisions in `docs/COMPLIANCE.md` ("Decisions needed from the business") are made. In particular the `BUSINESS_*` values are the real legal entity; production refuses to boot without them.
 - [ ] Counsel has reviewed `/legal/privacy`, `/legal/terms`, `/legal/refunds` and `/legal/cookies` as rendered on staging.
-- [ ] Staff are assigned to the review queues the product promises "usually within 2 business days": metric verification clips, coach accounts, and reports about coaches (admin console).
+- [ ] Staff are assigned to the review queues the product promises "usually within 2 business days": metric verification clips, coach accounts and team accounts; and to reports about coaches and about messages, which can involve minors (admin console).
+- [ ] National norms: import only tables the business holds a licence to show, with the licence end date entered. Preview each table against a sample athlete before activating it. Without an active table, athletes see KineticScout comparisons only.
 - [ ] Every testimonial, case study and review on the site is real, with written consent on file. The admin console only publishes entries marked as consented.
 
 ### Accounts and services
@@ -22,6 +23,7 @@ someone ticks, not background reading. Commands run from `kineticscout/`.
 - [ ] **Resend:** sending domain verified with SPF and DKIM, a DMARC record published, `EMAIL_FROM` on that domain.
 - [ ] **OpenAI:** project key with a hard usage limit at or above `AI_GLOBAL_MONTHLY_BUDGET_USD` (the app enforces its own cap first).
 - [ ] **Optional integrations** (Meta, X, program data feed): leave unset unless the business decided to use them. All publishing switches default to off.
+- [ ] **Web Push (optional):** generate `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` once per environment (command in `.env.example`) and set `VAPID_SUBJECT` to a support mailto. Set them on both the web app and the worker. Never reuse staging keys in production; changing keys later invalidates every device's subscription.
 
 ### Environment variables
 
@@ -54,6 +56,8 @@ and names the variable in the error. `.env.example` lists every variable with a 
 
 ### Smoke test (within 15 minutes of release)
 
+- [ ] `/manifest.webmanifest` and `/sw.js` load; `/sw.js` has `Cache-Control: no-cache, no-store, must-revalidate`.
+
 - [ ] `curl -s https://kineticscout.com/api/health` returns `{"status":"ok", ...}` with HTTP 200.
 - [ ] The metrics scrape succeeds: `up{job="kineticscout"} == 1` and `kineticscout_queue_reachable == 1` in Prometheus.
 - [ ] Home, pricing and a legal page load signed out; the cookie banner offers Accept and Reject with equal weight.
@@ -84,6 +88,8 @@ Files are in `infra/monitoring/`. CI validates and unit tests the alert rules wi
 | `CoachReportUnresolvedLong` | A report about a coach has waited 3 days. Review it in the admin console (Coaches). Suspend first if the report describes contact with a minor outside the platform rules. |
 | `MetricVerificationBacklogBreached`, `CoachVerificationBacklogBreached` | Users have waited longer than we tell them. Add reviewer time; do not bulk-approve. |
 | `VideoAnalysisQueueStalled` | No worker is consuming `video-analysis`. Check that the worker is running and its heartbeat; restart it. Queued analyses resume on their own. |
+| `MessageReportUnresolvedLong` | A reported message has waited 3 days. Review it in the admin console (Message reports); end the conversation and suspend the coach if it breaks the Terms. |
+| `TeamVerificationBacklogBreached` | Team coaches have waited longer than we tell them. Add reviewer time; check each coach on the linked staff page. |
 | `AiBudgetNearlyExhausted` | AI features stop at 100% until the 1st (UTC). Check `kineticscout_ai_spend_usd` by feature for a runaway before raising `AI_GLOBAL_MONTHLY_BUDGET_USD`. |
 
 ## 4. Rollback

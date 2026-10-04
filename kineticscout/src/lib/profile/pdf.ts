@@ -160,6 +160,9 @@ export async function renderProfilePdf(card: ProfileCard, options: { publicUrl: 
       page.drawRectangle({ x: cols.verified - 2, y: y - 4, width: 62, height: 16, color: VOLT })
       drawCheck(page, cols.verified + 2, y - 2, 10)
       page.drawText('Verified', { x: cols.verified + 16, y, size: 9, font: sansBold, color: ONYX })
+    } else if (metric.bestCoachRecorded) {
+      page.drawRectangle({ x: cols.verified - 2, y: y - 4, width: 76, height: 16, borderColor: ONYX, borderWidth: 1 })
+      page.drawText('Coach-recorded', { x: cols.verified + 2, y, size: 8.5, font: sansBold, color: ONYX })
     } else if (metric.verifiedBest !== null) {
       page.drawText(`${metric.verifiedBest.toFixed(metric.decimals)} verified`, { x: cols.verified, y, size: 8, font: mono, color: TITANIUM })
     }
@@ -169,7 +172,8 @@ export async function renderProfilePdf(card: ProfileCard, options: { publicUrl: 
 
   // Method notes, then the link.
   const notes = [
-    'Verified: a KineticScout reviewer confirmed the value from video of the measurement. Other values are self-reported.',
+    'Verified: a KineticScout reviewer confirmed the value from video of the measurement. Coach-recorded: a staff-checked school or club',
+    'coach recorded it at a testing day and the athlete accepted it. Other values are self-reported.',
     'Class standing compares the best value of the last 18 months with KineticScout athletes in the same graduating class',
     '(published only for groups of at least 25 athletes). It is not a national ranking.',
   ]
