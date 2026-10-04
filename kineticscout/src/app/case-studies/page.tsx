@@ -3,14 +3,19 @@ import Link from 'next/link'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { EmptyState } from '@/components/ui/empty-state'
 import { db } from '@/lib/db'
+import { chromeMessages } from '@/i18n/messages/chrome'
+import { contentMessages } from '@/i18n/messages/content'
+import { getLocale, messages } from '@/i18n/server'
 
-export const metadata: Metadata = {
-  title: 'Case studies',
-  description: 'How athletes and families have used KineticScout, told with their consent.',
-  alternates: { canonical: '/case-studies' },
+export async function generateMetadata(): Promise<Metadata> {
+  const m = (await messages(contentMessages)).caseStudies
+  return { title: m.title, description: m.description, alternates: { canonical: '/case-studies' } }
 }
 
 export default async function CaseStudiesPage() {
+  const locale = await getLocale()
+  const m = (await messages(contentMessages)).caseStudies
+  const c = await messages(chromeMessages)
   const studies = await db.blogPost.findMany({
     where: { kind: 'CASE_STUDY', status: 'PUBLISHED' },
     orderBy: { publishedAt: 'desc' },
@@ -19,19 +24,17 @@ export default async function CaseStudiesPage() {
   })
   return (
     <div className="flex flex-col gap-8">
-      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Case studies' }]} />
+      <Breadcrumbs items={[{ label: c.homeCrumb, href: '/' }, { label: m.title }]} />
       <div className="flex max-w-3xl flex-col gap-3">
-        <h1 className="text-4xl font-bold">Case studies</h1>
+        <h1 className="text-4xl font-bold">{m.title}</h1>
         <p className="text-lg text-fg-muted">
-          Real athletes, real numbers, published only with written consent from the athlete and, for anyone under 18, their parent or guardian.
+          {m.lead}
         </p>
       </div>
       {studies.length === 0 ? (
-        <EmptyState title="No case studies yet">
-          We publish case studies only when an athlete and their family agree to share their story. The first ones are on the way.
-        </EmptyState>
+        <EmptyState title={m.emptyTitle}>{m.empty}</EmptyState>
       ) : (
-        <ul className="grid gap-6 md:grid-cols-2">
+        <ul className="grid gap-6 md:grid-cols-2" lang={locale === 'en' ? undefined : 'en'}>
           {studies.map((s) => (
             <li key={s.slug} className="flex flex-col gap-2 border-2 border-border-subtle p-6 hover:border-fg">
               <h2 className="text-xl font-bold">

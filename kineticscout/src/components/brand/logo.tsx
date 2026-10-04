@@ -14,9 +14,9 @@ export function LogoMark({ size = 32 }: { size?: number }) {
   )
 }
 
-export function Logo() {
+export function Logo({ label = 'KineticScout home' }: { label?: string }) {
   return (
-    <Link href="/" aria-label="KineticScout home" className="flex min-h-11 items-center gap-2 no-underline">
+    <Link href="/" aria-label={label} className="flex min-h-11 items-center gap-2 no-underline">
       <LogoMark />
       <span className="text-lg font-bold tracking-tight">KineticScout</span>
     </Link>

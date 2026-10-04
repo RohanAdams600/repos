@@ -9,9 +9,14 @@ import { initialFormState } from '@/lib/forms'
 import { contactAction } from '@/lib/marketing/actions'
 import { cn } from '@/lib/cn'
 import { CONTACT_TOPICS } from '@/lib/validation/contact-topics'
+import { useMessages } from '@/i18n/client'
+import { contactMessages } from '@/i18n/messages/contact'
 
 export function ContactForm() {
   const [state, action] = useActionState(contactAction, initialFormState)
+  const all = useMessages(contactMessages)
+  const m = all.form
+  const emailLabel = all.email
   const errors = state.status === 'error' ? (state.fieldErrors ?? {}) : {}
   const values = state.status === 'error' ? (state.values ?? {}) : {}
   return (
@@ -27,35 +32,34 @@ export function ContactForm() {
         <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Your name" name="name" required error={errors.name}>
+        <Field label={m.name} name="name" required error={errors.name}>
           {(p) => <TextInput {...p} autoComplete="name" defaultValue={values.name} />}
         </Field>
-        <Field label="Email" name="email" required error={errors.email} hint="We reply to this address.">
+        <Field label={emailLabel} name="email" required error={errors.email} hint={m.emailHint}>
           {(p) => <TextInput {...p} type="email" inputMode="email" autoComplete="email" defaultValue={values.email} />}
         </Field>
       </div>
-      <Field label="Topic" name="topic" required error={errors.topic}>
+      <Field label={m.topic} name="topic" required error={errors.topic}>
         {(p) => (
           <Select {...p} defaultValue={values.topic ?? ''}>
             <option value="" disabled>
-              Choose a topic
+              {m.chooseTopic}
             </option>
             {CONTACT_TOPICS.map((t) => (
               <option key={t.value} value={t.value}>
-                {t.label}
+                {m.topics[t.value] ?? t.label}
               </option>
             ))}
           </Select>
         )}
       </Field>
-      <Field label="Message" name="message" required error={errors.message}>
+      <Field label={m.message} name="message" required error={errors.message}>
         {(p) => <textarea {...p} rows={6} maxLength={4000} defaultValue={values.message} className={cn(inputClass, 'py-2')} />}
       </Field>
       <p className="text-sm text-fg-muted">
-        We use your name, email and message only to answer you, and delete messages after 12 months. Please do not include payment details.
-        See the <Link href="/legal/privacy">Privacy Policy</Link>.
+        {m.privacyNote} <Link href="/legal/privacy">{m.privacyLink}</Link>.
       </p>
-      <SubmitButton pendingLabel="Sending">Send message</SubmitButton>
+      <SubmitButton pendingLabel={m.sending}>{m.send}</SubmitButton>
     </form>
   )
 }

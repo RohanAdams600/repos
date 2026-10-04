@@ -2,17 +2,24 @@ import { CoachRecordedBadge } from '@/components/profile/coach-recorded-badge'
 import { VerifiedBadge } from '@/components/profile/verified-badge'
 import { formatHeight } from '@/lib/profile/format'
 import type { ProfileCard } from '@/lib/profile/public'
+import { pick } from '@/i18n/define'
+import { domain } from '@/i18n/messages/domain'
+import { profileMessages } from '@/i18n/messages/profile'
+import { getLocale } from '@/i18n/server'
 
 /** Shared by the public page and the owner's preview, so what the athlete sees is what recruiters see. */
-export function ProfileView({ card }: { card: ProfileCard }) {
-  const sides = [card.bats ? `Bats ${card.bats === 'RIGHT' ? 'right' : 'left'}` : null, card.throws ? `throws ${card.throws === 'RIGHT' ? 'right' : 'left'}` : null]
+export async function ProfileView({ card }: { card: ProfileCard }) {
+  const locale = await getLocale()
+  const m = pick(profileMessages, locale)
+  const d = domain(locale)
+  const sides = [card.bats ? m.bats(card.bats === 'RIGHT' ? 'right' : 'left') : null, card.throws ? m.throws(card.throws === 'RIGHT' ? 'right' : 'left') : null]
     .filter(Boolean)
     .join(', ')
   const facts: { label: string; value: string; numeric: boolean }[] = [
-    ...(card.heightInches ? [{ label: 'Height', value: formatHeight(card.heightInches), numeric: true }] : []),
-    ...(card.weightLbs ? [{ label: 'Weight', value: `${card.weightLbs} lb`, numeric: true }] : []),
-    ...(card.gpa !== null ? [{ label: 'GPA', value: card.gpa.toFixed(2), numeric: true }] : []),
-    ...(card.highSchool ? [{ label: 'High school', value: card.highSchool, numeric: false }] : []),
+    ...(card.heightInches ? [{ label: m.height, value: formatHeight(card.heightInches), numeric: true }] : []),
+    ...(card.weightLbs ? [{ label: m.weight, value: `${card.weightLbs} lb`, numeric: true }] : []),
+    ...(card.gpa !== null ? [{ label: m.gpa, value: card.gpa.toFixed(2), numeric: true }] : []),
+    ...(card.highSchool ? [{ label: m.highSchool, value: card.highSchool, numeric: false }] : []),
   ]
 
   return (
@@ -22,13 +29,13 @@ export function ProfileView({ card }: { card: ProfileCard }) {
           {card.firstName} {card.lastName}
         </h1>
         <p className="text-lg text-fg-muted">
-          Class of <span className="tabular">{card.gradYear}</span> · {card.positionLabel}
+          {m.classOf} <span className="tabular">{card.gradYear}</span> · {d.position[card.position]}
           {sides ? ` · ${sides.charAt(0).toUpperCase()}${sides.slice(1)}` : ''}
         </p>
         {card.twitterHandle && (
           <p>
             <a href={`https://x.com/${card.twitterHandle}`} rel="noopener noreferrer nofollow" target="_blank">
-              @{card.twitterHandle} on X
+              @{card.twitterHandle} {m.onX}
             </a>
           </p>
         )}
@@ -47,54 +54,49 @@ export function ProfileView({ card }: { card: ProfileCard }) {
 
       <section aria-labelledby="measurements-title" className="flex flex-col gap-4">
         <h2 id="measurements-title" className="text-2xl font-bold">
-          Measurements
+          {m.measurements}
         </h2>
         {card.metrics.length === 0 ? (
-          <p className="text-fg-muted">No measurements logged in the last 18 months.</p>
+          <p className="text-fg-muted">{m.noMeasurements}</p>
         ) : (
           <ul className="flex flex-col">
-            {card.metrics.map((m) => (
-              <li key={m.metricType} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 border-b-2 border-border-subtle py-3 sm:grid-cols-[1fr_auto_auto]">
+            {card.metrics.map((mt) => (
+              <li key={mt.metricType} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 border-b-2 border-border-subtle py-3 sm:grid-cols-[1fr_auto_auto]">
                 <div className="flex min-w-0 flex-col">
-                  <span className="font-bold">{m.label}</span>
+                  <span className="font-bold">{d.metric[mt.metricType]}</span>
                   <span className="text-sm text-fg-muted">
-                    Measured <span className="tabular">{m.bestDate}</span>
-                    {m.bestCoachRecorded && m.bestRecordedBy && <> · Recorded by {m.bestRecordedBy.replace(/ on \d{4}-\d{2}-\d{2}$/, '')}</>}
-                    {m.classPercentile !== null && (
+                    {m.measured} <span className="tabular">{mt.bestDate}</span>
+                    {mt.bestCoachRecorded && mt.bestRecordedBy && <> · {m.recordedBy} {mt.bestRecordedBy.replace(/ on \d{4}-\d{2}-\d{2}$/, '')}</>}
+                    {mt.classPercentile !== null && (
                       <>
                         {' '}
-                        · Top <span className="tabular">{Math.max(1, 100 - m.classPercentile)}%</span> of the class
+                        · {m.topOfClass(Math.max(1, 100 - mt.classPercentile))}
                       </>
                     )}
                   </span>
                 </div>
                 <span className="tabular text-right text-2xl font-bold">
-                  {m.best.toFixed(m.decimals)}
-                  <span className="ml-1 text-base font-normal text-fg-muted">{m.unit}</span>
+                  {mt.best.toFixed(mt.decimals)}
+                  <span className="ml-1 text-base font-normal text-fg-muted">{mt.unit}</span>
                 </span>
                 <span className="col-span-2 flex justify-start sm:col-span-1 sm:justify-end">
-                  {m.bestVerified ? (
+                  {mt.bestVerified ? (
                     <VerifiedBadge />
-                  ) : m.bestCoachRecorded ? (
+                  ) : mt.bestCoachRecorded ? (
                     <CoachRecordedBadge />
-                  ) : m.verifiedBest !== null ? (
+                  ) : mt.verifiedBest !== null ? (
                     <span className="text-sm text-fg-muted">
-                      Verified best <span className="tabular">{m.verifiedBest.toFixed(m.decimals)}</span>
+                      {m.verifiedBest} <span className="tabular">{mt.verifiedBest.toFixed(mt.decimals)}</span>
                     </span>
                   ) : (
-                    <span className="text-sm text-fg-muted">Self-reported</span>
+                    <span className="text-sm text-fg-muted">{m.selfReported}</span>
                   )}
                 </span>
               </li>
             ))}
           </ul>
         )}
-        <p className="text-sm text-fg-muted">
-          Verified means a KineticScout reviewer confirmed the value from video of the measurement. Coach-recorded means a high school or travel
-          coach, checked by our staff against their school or club staff page, recorded it at a testing day and the athlete accepted it. Class standing compares the best value of the
-          last 18 months with KineticScout athletes in the same graduating class, and is shown only for groups of at least 25 athletes. It is not a
-          national ranking.
-        </p>
+        <p className="text-sm text-fg-muted">{m.explainer}</p>
       </section>
     </div>
   )

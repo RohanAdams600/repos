@@ -220,12 +220,13 @@ export function selectNormRow<T extends NormBand>(rows: readonly T[], input: Bui
   return best?.row ?? null
 }
 
-export function describeNormBand(row: NormBand): string {
+export function describeNormBand(row: NormBand, locale: 'en' | 'es' = 'en'): string {
+  const es = locale === 'es'
   const parts: string[] = []
-  if (row.age) parts.push(row.age.min === row.age.max ? `age ${row.age.min}` : `ages ${row.age.min} to ${row.age.max}`)
-  if (row.height) parts.push(`${row.height.min} to ${row.height.max} in`)
-  if (row.weight) parts.push(`${row.weight.min} to ${row.weight.max} lb`)
-  return parts.length ? parts.join(', ') : 'all ages and builds'
+  if (row.age) parts.push(row.age.min === row.age.max ? (es ? `${row.age.min} años` : `age ${row.age.min}`) : es ? `de ${row.age.min} a ${row.age.max} años` : `ages ${row.age.min} to ${row.age.max}`)
+  if (row.height) parts.push(es ? `de ${row.height.min} a ${row.height.max} in` : `${row.height.min} to ${row.height.max} in`)
+  if (row.weight) parts.push(es ? `de ${row.weight.min} a ${row.weight.max} lb` : `${row.weight.min} to ${row.weight.max} lb`)
+  return parts.length ? parts.join(', ') : es ? 'todas las edades y complexiones' : 'all ages and builds'
 }
 
 /** "Better than X%" of the norm population, 1 to 99. */

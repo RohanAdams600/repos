@@ -58,7 +58,7 @@ test.describe('parent or guardian account', () => {
     await page.getByLabel(/^Type/).selectOption('CAMP')
     await page.getByLabel(/^Sport/).selectOption('BASEBALL')
     await page.getByLabel(/^Organizer \(/).fill('E2E Fixture Events (test data)')
-    await page.getByLabel(/^Organizer's page/).fill('https://e2e.example.test/clinic')
+    await page.getByLabel(/^Organizer.s page/).fill('https://e2e.example.test/clinic')
     const start = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10)
     await page.getByLabel(/^Start date/).fill(start)
     await page.getByLabel(/^End date/).fill(start)

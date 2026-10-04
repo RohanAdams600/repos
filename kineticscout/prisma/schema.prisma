@@ -229,6 +229,8 @@ model User {
   marketingOptInUpdatedAt DateTime?        @map("marketing_opt_in_updated_at")
   /// Self-serve or guardian deletion request. The worker deletes everything once this time passes.
   deletionScheduledFor    DateTime?        @map("deletion_scheduled_for")
+  /// Interface and email language: "en" or "es" (Phase 7).
+  locale                  String           @default("en") @db.VarChar(5)
   termsVersion            String           @map("terms_version") @db.VarChar(16)
   termsAcceptedAt         DateTime         @map("terms_accepted_at")
   /// First-touch UTM values, captured only with analytics consent. Shape: { utm_source, utm_medium, ... }.
@@ -259,6 +261,8 @@ model GuardianConsent {
   id                   String                @id @default(uuid(7)) @db.Uuid
   userId               String                @unique @map("user_id") @db.Uuid
   guardianEmail        String                @map("guardian_email") @db.VarChar(254)
+  /// Language for emails to the parent or guardian, chosen by the athlete at sign-up (Phase 7).
+  locale               String                @default("en") @db.VarChar(5)
   /// SHA-256 of the emailed token. The raw token is never stored.
   tokenHash            String                @unique @map("token_hash") @db.Char(64)
   status               GuardianConsentStatus @default(PENDING)

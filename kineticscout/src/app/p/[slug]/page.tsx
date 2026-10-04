@@ -13,6 +13,10 @@ import { logger } from '@/lib/logger'
 import { buildProfileCard, findPublicAthlete, isLikelyBot, recordProfileEvent } from '@/lib/profile/public'
 import { rateLimit } from '@/lib/security/rate-limit'
 import { hashedClientIp } from '@/lib/security/request'
+import { pick } from '@/i18n/define'
+import { domain } from '@/i18n/messages/domain'
+import { profileMessages } from '@/i18n/messages/profile'
+import { getLocale } from '@/i18n/server'
 
 type Props = PageProps<'/p/[slug]'>
 
@@ -24,13 +28,15 @@ const loadProfile = cache(async (slug: string) => {
 })
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const locale = await getLocale()
+  const m = pick(profileMessages, locale)
   const card = (await loadProfile((await params).slug))?.card
-  if (!card) return { title: 'Profile not found', robots: { index: false, follow: false } }
+  if (!card) return { title: m.notFound, robots: { index: false, follow: false } }
   // Link previews show first name and last initial only; the full name is on the page itself.
-  const title = `${card.firstName} ${card.lastName.charAt(0)}., Class of ${card.gradYear} ${card.positionLabel}`
+  const title = m.metaTitle(card.firstName, card.lastName.charAt(0), card.gradYear, domain(locale).position[card.position])
   return {
     title,
-    description: `Recruiting profile with ${card.metrics.length} measurements${card.verifiedCount ? `, ${card.verifiedCount} verified from video` : ''}.`,
+    description: m.metaDescription(card.metrics.length, card.verifiedCount),
     // Shared by direct link; athlete profiles are never listed in search engines.
     robots: { index: false, follow: false, nocache: true },
     openGraph: { title, type: 'profile' },
@@ -55,18 +61,20 @@ export default async function PublicProfilePage({ params }: Props) {
   }
 
   const url = `${env().APP_URL}/p/${slug}`
+  const locale = await getLocale()
+  const m = pick(profileMessages, locale)
   return (
     <article className="mx-auto flex max-w-3xl flex-col gap-8">
       <ProfileView card={card} />
       <div className="flex flex-wrap items-center gap-3 border-t-2 border-border-subtle pt-6">
         <a href={`/p/${slug}/pdf`} className={buttonVariants({ variant: 'primary' })}>
-          Download PDF
+          {m.downloadPdf}
         </a>
-        <CopyButton value={url} label="Copy link" />
+        <CopyButton value={url} label={m.copyLink} />
       </div>
+      {locale !== 'en' && <p className="text-sm text-fg-muted">{m.pdfNote}</p>}
       <p className="text-sm text-fg-muted">
-        Profiles on KineticScout are created by athletes. Questions about this athlete? Contact them directly. To report a profile, use our{' '}
-        <Link href="/contact">contact page</Link>.
+        {m.createdBy} <Link href="/contact">{m.contactPage}</Link>.
       </p>
     </article>
   )

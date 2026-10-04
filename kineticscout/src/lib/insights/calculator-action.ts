@@ -8,6 +8,9 @@ import { METRIC_DEFINITIONS, isPlausibleMetricValue } from '@/lib/metrics/defini
 import { fieldErrorsFrom, formValues } from '@/lib/forms'
 import { rateLimit } from '@/lib/security/rate-limit'
 import { hashedClientIp } from '@/lib/security/request'
+import { describeBands } from '@/lib/insights/build-cohort'
+import { describeNormBand } from '@/lib/insights/norms'
+import { getLocale } from '@/i18n/server'
 
 /** `values` echoes the inputs so the form keeps them after React resets it. */
 export type CalculatorState =
@@ -54,14 +57,15 @@ export async function calculatePercentileAction(_prev: CalculatorState, formData
   const [cohort, national] = await Promise.all([biometricPercentile(query), nationalPercentile(query)])
   if (cohort.status === 'insufficient' && !national) return { status: 'insufficient', metricLabel: def.label, values }
   const round5 = (p: number) => Math.min(95, Math.max(5, Math.round(p / 5) * 5))
+  const locale = await getLocale()
   return {
     status: 'result',
     metricLabel: def.label,
     valueLabel: `${input.value.toFixed(def.decimals)} ${def.unit}`,
     national: national
-      ? { percentile: round5(national.percentile), bandLabel: national.bandLabel, sampleSize: national.sampleSize, publisher: national.source.publisher, name: national.source.name, edition: national.source.edition, sourceUrl: national.source.sourceUrl }
+      ? { percentile: round5(national.percentile), bandLabel: describeNormBand(national.band, locale), sampleSize: national.sampleSize, publisher: national.source.publisher, name: national.source.name, edition: national.source.edition, sourceUrl: national.source.sourceUrl }
       : null,
-    cohort: cohort.status === 'ok' ? { percentile: round5(cohort.percentile), cohortSize: cohort.cohortSize, bandsLabel: cohort.bandsLabel } : null,
+    cohort: cohort.status === 'ok' ? { percentile: round5(cohort.percentile), cohortSize: cohort.cohortSize, bandsLabel: describeBands(cohort.bands, locale) } : null,
     values,
   }
 }

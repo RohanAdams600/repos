@@ -1,0 +1,33 @@
+import 'server-only'
+import { cookies, headers } from 'next/headers'
+import { cache } from 'react'
+import { getAuthIdentity } from '@/lib/auth/session'
+import { db } from '@/lib/db'
+import { DEFAULT_LOCALE, SPANISH_ENABLED, isLocale, LOCALE_COOKIE, localeFromAcceptLanguage, type Locale } from '@/i18n/config'
+import { pick, type Catalog } from '@/i18n/define'
+
+/**
+ * The request's language: an explicit choice (cookie) first, then the signed-in account's saved
+ * language, then the browser's Accept-Language, then English.
+ */
+export const getLocale = cache(async (): Promise<Locale> => {
+  if (!SPANISH_ENABLED) return DEFAULT_LOCALE
+  const chosen = (await cookies()).get(LOCALE_COOKIE)?.value
+  if (isLocale(chosen)) return chosen
+  const identity = await getAuthIdentity().catch(() => null)
+  if (identity) {
+    const row = await db.user.findUnique({ where: { id: identity.id }, select: { locale: true } }).catch(() => null)
+    if (row && isLocale(row.locale) && row.locale !== DEFAULT_LOCALE) return row.locale
+  }
+  return localeFromAcceptLanguage((await headers()).get('accept-language'))
+})
+
+export async function messages<T>(catalog: Catalog<T>): Promise<T> {
+  return pick(catalog, await getLocale())
+}
+
+/** Language for email to an account holder. */
+export async function userLocale(userId: string): Promise<Locale> {
+  const row = await db.user.findUnique({ where: { id: userId }, select: { locale: true } })
+  return row && isLocale(row.locale) ? row.locale : DEFAULT_LOCALE
+}

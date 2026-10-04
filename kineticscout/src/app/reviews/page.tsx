@@ -2,17 +2,21 @@ import type { Metadata } from 'next'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { EmptyState } from '@/components/ui/empty-state'
 import { db } from '@/lib/db'
+import { chromeMessages } from '@/i18n/messages/chrome'
+import { contentMessages } from '@/i18n/messages/content'
+import { messages } from '@/i18n/server'
 
-export const metadata: Metadata = {
-  title: 'Reviews',
-  description: 'What KineticScout athletes and parents say, published with their permission.',
-  alternates: { canonical: '/reviews' },
+export async function generateMetadata(): Promise<Metadata> {
+  const m = (await messages(contentMessages)).reviews
+  return { title: m.title, description: m.description, alternates: { canonical: '/reviews' } }
 }
 
 const PAGE_SIZE = 20
 
 export default async function ReviewsPage({ searchParams }: PageProps<'/reviews'>) {
   const params = await searchParams
+  const m = (await messages(contentMessages)).reviews
+  const c = await messages(chromeMessages)
   const page = Math.max(1, Math.min(200, Number(params.page) || 1))
   const [reviews, total] = await Promise.all([
     db.testimonial.findMany({
@@ -28,25 +32,22 @@ export default async function ReviewsPage({ searchParams }: PageProps<'/reviews'
 
   return (
     <div className="flex max-w-4xl flex-col gap-8">
-      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Reviews' }]} />
+      <Breadcrumbs items={[{ label: c.homeCrumb, href: '/' }, { label: m.title }]} />
       <div className="flex flex-col gap-3">
-        <h1 className="text-4xl font-bold">Reviews</h1>
+        <h1 className="text-4xl font-bold">{m.title}</h1>
         <p className="text-lg text-fg-muted">
-          Every review here comes from a KineticScout account holder who gave us permission to publish it. We do not edit what people say, pay for
-          reviews, or remove critical ones that follow our <a href="/legal/terms">terms</a>.
+          {m.lead} <a href="/legal/terms">{m.terms}</a>.
         </p>
       </div>
       {reviews.length === 0 ? (
-        <EmptyState title="No reviews published yet">
-          We are a new product and only publish reviews from real users with their permission. Check back soon.
-        </EmptyState>
+        <EmptyState title={m.emptyTitle}>{m.empty}</EmptyState>
       ) : (
         <ul className="grid gap-6 md:grid-cols-2">
           {reviews.map((r) => (
             <li key={r.id}>
               <figure className="flex h-full flex-col gap-4 border-2 border-border-subtle p-6">
                 {r.rating && (
-                  <p className="tabular text-sm" aria-label={`Rated ${r.rating} out of 5`}>
+                  <p className="tabular text-sm" aria-label={m.rated(r.rating)}>
                     {r.rating}/5
                   </p>
                 )}
@@ -60,10 +61,10 @@ export default async function ReviewsPage({ searchParams }: PageProps<'/reviews'
         </ul>
       )}
       {pageCount > 1 && (
-        <nav aria-label="Review pages" className="flex gap-4">
-          {page > 1 && <a href={`/reviews?page=${page - 1}`}>Newer</a>}
-          <span className="tabular text-sm">Page {page} of {pageCount}</span>
-          {page < pageCount && <a href={`/reviews?page=${page + 1}`}>Older</a>}
+        <nav aria-label={m.pages} className="flex gap-4">
+          {page > 1 && <a href={`/reviews?page=${page - 1}`}>{m.newer}</a>}
+          <span className="tabular text-sm">{m.page(page, pageCount)}</span>
+          {page < pageCount && <a href={`/reviews?page=${page + 1}`}>{m.older}</a>}
         </nav>
       )}
     </div>

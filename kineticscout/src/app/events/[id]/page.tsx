@@ -2,45 +2,51 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
-import { positionLabel } from '@/lib/athletes/positions'
 import { AttendanceForm } from '@/components/events/attendance-form'
 import { JsonLd } from '@/components/json-ld'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { Alert } from '@/components/ui/alert'
+import { pick } from '@/i18n/define'
+import { chromeMessages } from '@/i18n/messages/chrome'
+import { domain, formatDayRange } from '@/i18n/messages/domain'
+import { eventsMessages } from '@/i18n/messages/events'
+import { getLocale, messages } from '@/i18n/server'
 import { isAdmin } from '@/lib/auth/permissions'
 import { getSessionUser } from '@/lib/auth/session'
 import { env } from '@/lib/env'
-import { EVENT_KIND_LABEL, eventJsonLd, formatEventDates, utcDay } from '@/lib/events/rules'
+import { eventJsonLd, utcDay } from '@/lib/events/rules'
 import { attendanceFor, attendeesForCoach, eventDetail } from '@/lib/events/service'
 import { isPubliclyVisible } from '@/lib/profile/public'
-import { SPORT_LABEL } from '@/lib/sports'
 
 const load = cache(async (id: string) => eventDetail(id, await getSessionUser()))
 
 export async function generateMetadata({ params }: PageProps<'/events/[id]'>): Promise<Metadata> {
+  const locale = await getLocale()
+  const m = pick(eventsMessages, locale).detail
   const event = await load((await params).id)
-  if (!event) return { title: 'Event not found', robots: { index: false } }
+  if (!event) return { title: m.notFound, robots: { index: false } }
+  const d = domain(locale)
   const listed = event.status === 'PUBLISHED' || event.status === 'CANCELED'
   return {
     title: `${event.name}, ${event.city}, ${event.state}`,
-    description: `${EVENT_KIND_LABEL[event.kind]} for ${SPORT_LABEL[event.sport].toLowerCase()} on ${formatEventDates(event.startDate, event.endDate)} in ${event.city}, ${event.state}. Organized by ${event.organizer}.`,
+    description: m.metaDescription(d.eventKind[event.kind], d.sport[event.sport], formatDayRange(event.startDate, event.endDate, locale), `${event.city}, ${event.state}`, event.organizer),
     alternates: { canonical: `/events/${event.id}` },
     robots: listed ? undefined : { index: false, follow: false },
   }
 }
 
-const NOTICES = {
-  submitted: 'Thank you. Our staff will check the listing against the organizer’s page. You will get a notification when it is listed.',
-  updated: 'Changes saved. Athletes who are going were notified.',
-} as const
-
 export default async function EventPage({ params, searchParams }: PageProps<'/events/[id]'>) {
   const { id } = await params
   const event = await load(id)
   if (!event) notFound()
+  const locale = await getLocale()
+  const all = pick(eventsMessages, locale)
+  const m = all.detail
+  const d = domain(locale)
+  const c = await messages(chromeMessages)
   const user = await getSessionUser()
   const noticeKey = (await searchParams).notice
-  const notice = typeof noticeKey === 'string' && noticeKey in NOTICES ? NOTICES[noticeKey as keyof typeof NOTICES] : null
+  const notice = noticeKey === 'submitted' ? m.submitted : noticeKey === 'updated' ? m.updated : null
   const open = event.status === 'PUBLISHED' && event.endDate >= utcDay(new Date())
   const athlete = user?.role === 'ATHLETE' && user.hasAthleteProfile ? user : null
   const [attendance, profilePublic, attendees] = await Promise.all([
@@ -53,10 +59,10 @@ export default async function EventPage({ params, searchParams }: PageProps<'/ev
     <div className="mx-auto flex max-w-3xl flex-col gap-8">
       {(event.status === 'PUBLISHED' || event.status === 'CANCELED') && <JsonLd data={eventJsonLd({ ...event, status: event.status }, `${env().APP_URL}/events/${event.id}`)} />}
       <div className="flex flex-col gap-3">
-        <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Events', href: '/events' }, { label: event.name }]} />
+        <Breadcrumbs items={[{ label: c.homeCrumb, href: '/' }, { label: all.list.crumb, href: '/events' }, { label: event.name }]} />
         <h1 className="text-4xl font-bold">{event.name}</h1>
         <p className="text-lg text-fg-muted">
-          {EVENT_KIND_LABEL[event.kind]}, {SPORT_LABEL[event.sport]}
+          {d.eventKind[event.kind]}, {d.sport[event.sport]}
         </p>
       </div>
       {notice && (
@@ -64,55 +70,58 @@ export default async function EventPage({ params, searchParams }: PageProps<'/ev
           {notice}
         </Alert>
       )}
-      {event.status === 'CANCELED' && <Alert tone="error" title="Canceled">{event.reviewNote ?? 'This event was canceled.'}</Alert>}
-      {event.status === 'PENDING' && <Alert tone="info">Waiting for staff review. Only you and our staff can see this page.</Alert>}
-      {event.status === 'REJECTED' && <Alert tone="error" title="Not listed">{event.reviewNote ?? 'We could not match this listing to the organizer’s page.'}</Alert>}
+      {event.status === 'CANCELED' && <Alert tone="error" title={m.canceled}>{event.reviewNote ?? m.canceledDefault}</Alert>}
+      {event.status === 'PENDING' && <Alert tone="info">{m.pending}</Alert>}
+      {event.status === 'REJECTED' && <Alert tone="error" title={m.notListed}>{event.reviewNote ?? m.rejectedDefault}</Alert>}
 
       <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-[max-content_1fr]">
-        <dt className="font-bold">Dates</dt>
-        <dd>{formatEventDates(event.startDate, event.endDate)}</dd>
-        <dt className="font-bold">Location</dt>
+        <dt className="font-bold">{m.dates}</dt>
+        <dd>{formatDayRange(event.startDate, event.endDate, locale)}</dd>
+        <dt className="font-bold">{m.location}</dt>
         <dd>
           {event.venue ? `${event.venue}, ` : ''}
           {event.city}, {event.state}
         </dd>
-        <dt className="font-bold">Organizer</dt>
+        <dt className="font-bold">{m.organizer}</dt>
         <dd>{event.organizer}</dd>
         {(event.gradYearMin || event.gradYearMax) && (
           <>
-            <dt className="font-bold">Classes</dt>
+            <dt className="font-bold">{m.classes}</dt>
             <dd className="tabular">
-              {event.gradYearMin ?? 'Any'} to {event.gradYearMax ?? 'any'}
+              {event.gradYearMin ?? m.anyFrom} {m.to} {event.gradYearMax ?? m.anyTo}
             </dd>
           </>
         )}
         {event.costText && (
           <>
-            <dt className="font-bold">Cost</dt>
-            <dd>{event.costText} (as listed by the organizer)</dd>
+            <dt className="font-bold">{m.cost}</dt>
+            <dd>
+              {event.costText} {m.asListed}
+            </dd>
           </>
         )}
       </dl>
       <p className="break-words whitespace-pre-wrap">{event.description}</p>
       <p>
         <a href={event.officialUrl} rel="noopener noreferrer nofollow" target="_blank">
-          Organizer&apos;s page for this event<span className="sr-only"> (opens in a new tab)</span>
+          {m.organizerPage}
+          <span className="sr-only"> {m.newTab}</span>
         </a>
-        . Register and confirm details there.
+        . {m.registerThere}
       </p>
 
       {open && (
         <section aria-labelledby="going-heading" className="flex flex-col gap-4 border-2 border-border-subtle p-5">
           <h2 id="going-heading" className="text-2xl font-bold">
-            Going?
+            {m.going}
           </h2>
           {athlete ? (
             <AttendanceForm eventId={event.id} going={attendance !== null} shareWithCoaches={attendance?.shareWithCoaches ?? false} profilePublic={profilePublic} />
           ) : user ? (
-            <p className="text-fg-muted">Athletes can mark the events they are going to.</p>
+            <p className="text-fg-muted">{m.athletesOnly}</p>
           ) : (
             <p className="text-fg-muted">
-              <Link href={`/sign-in?next=/events/${event.id}`}>Sign in</Link> as an athlete to keep track of events you are going to.
+              <Link href={`/sign-in?next=/events/${event.id}`}>{m.signIn}</Link> {m.signInSuffix}
             </p>
           )}
         </section>
@@ -121,11 +130,11 @@ export default async function EventPage({ params, searchParams }: PageProps<'/ev
       {attendees && (
         <section aria-labelledby="attendees-heading" className="flex flex-col gap-3">
           <h2 id="attendees-heading" className="text-2xl font-bold">
-            Athletes going
+            {m.athletesGoing}
           </h2>
-          <p className="text-fg-muted">Athletes who chose to show coaches they are going and whose profiles are public. For athletes under 18, a parent or guardian has consented.</p>
+          <p className="text-fg-muted">{m.athletesGoingNote}</p>
           {attendees.length === 0 ? (
-            <p className="text-fg-muted">No athletes have shared that they are going yet.</p>
+            <p className="text-fg-muted">{m.noneGoing}</p>
           ) : (
             <ul className="flex flex-col gap-2">
               {attendees.map((a) => (
@@ -134,7 +143,7 @@ export default async function EventPage({ params, searchParams }: PageProps<'/ev
                     {a.firstName} {a.lastName}
                   </Link>
                   <span className="text-sm text-fg-muted">
-                    Class of <span className="tabular">{a.gradYear}</span>, {positionLabel(a.primaryPosition)}
+                    {m.classOf} <span className="tabular">{a.gradYear}</span>, {d.position[a.primaryPosition]}
                   </span>
                 </li>
               ))}
@@ -145,7 +154,7 @@ export default async function EventPage({ params, searchParams }: PageProps<'/ev
 
       {user && isAdmin(user) && event.status === 'PUBLISHED' && (
         <p>
-          <Link href={`/events/${event.id}/edit`}>Edit this listing</Link> (staff). Cancel it from the operations console.
+          <Link href={`/events/${event.id}/edit`}>{m.editListing}</Link> {m.editSuffix}
         </p>
       )}
     </div>

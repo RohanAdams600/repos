@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { AlertIcon, CheckIcon } from '@/components/icons'
 import { cn } from '@/lib/cn'
+import { useServerText } from '@/i18n/server-text-client'
 
 type AlertProps = {
   tone: 'error' | 'success' | 'info'
@@ -15,6 +16,8 @@ type AlertProps = {
 
 export function Alert({ tone, title, children, focusOnMount = false, className }: AlertProps) {
   const ref = useRef<HTMLDivElement>(null)
+  // Messages from the server arrive as English strings; show them in the reader's language.
+  const tr = useServerText()
   useEffect(() => {
     if (focusOnMount) ref.current?.focus()
   }, [focusOnMount, children])
@@ -34,8 +37,8 @@ export function Alert({ tone, title, children, focusOnMount = false, className }
     >
       <span className="mt-0.5 shrink-0">{tone === 'error' ? <AlertIcon /> : <CheckIcon />}</span>
       <div className="min-w-0">
-        {title && <p className="font-bold">{title}</p>}
-        <div className={cn(tone !== 'error' && 'text-fg-muted', title && 'mt-1')}>{children}</div>
+        {title && <p className="font-bold">{tr(title)}</p>}
+        <div className={cn(tone !== 'error' && 'text-fg-muted', title && 'mt-1')}>{typeof children === 'string' ? tr(children) : children}</div>
       </div>
     </div>
   )

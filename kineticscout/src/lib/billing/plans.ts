@@ -24,7 +24,35 @@ export const PRO_FEATURES = [
   'Side-by-side comparison synced at foot strike',
   'College Matchmaker against program recruiting averages',
   'Recruiting assistant: coaching-change and roster-need alerts with AI-drafted outreach',
+  'Training plans built from your video analysis, with drills from our staff coaches',
 ] as const
+
+export const FREE_FEATURES_ES: readonly string[] = [
+  'Enlace a tu perfil público y un PDF de una página para reclutadores',
+  'Registra hasta 3 mediciones al mes',
+  'Percentiles frente a tu clase de graduación y atletas de tu tamaño',
+  'Insignias de verificación para mediciones respaldadas con video',
+]
+
+export const PRO_FEATURES_ES: readonly string[] = [
+  'Registro ilimitado de mediciones con gráficas de progreso',
+  'Análisis biomecánico de video con IA y esqueleto superpuesto',
+  'Comparación lado a lado sincronizada en el apoyo del pie',
+  'College Matchmaker frente a los promedios de reclutamiento de cada programa',
+  'Asistente de reclutamiento: alertas de cambios de entrenador y necesidades de plantel, con borradores de mensajes escritos con IA',
+  'Planes de entrenamiento creados a partir de tu análisis de video, con ejercicios de nuestros entrenadores',
+]
+
+export function planFeatures(locale: 'en' | 'es'): { free: readonly string[]; pro: readonly string[] } {
+  return locale === 'es' ? { free: FREE_FEATURES_ES, pro: PRO_FEATURES_ES } : { free: FREE_FEATURES, pro: PRO_FEATURES }
+}
+
+/** Price labels as shown, for example "$14.99 per month" or "$14.99 al mes". */
+export function priceLabel(period: BillingPeriod, locale: 'en' | 'es'): string {
+  const amount = formatUsd(PRO_PRICES[period].amountCents)
+  if (locale === 'es') return `${amount} ${period === 'monthly' ? 'al mes' : 'al año'}`
+  return `${amount} ${period === 'monthly' ? 'per month' : 'per year'}`
+}
 
 /** Yearly savings versus twelve monthly payments, in whole dollars, for honest comparison copy. */
 export function yearlySavingsDollars(): number {

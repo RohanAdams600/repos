@@ -9,7 +9,7 @@ import type { Quantiles } from '@/lib/metrics/percentile'
 /** Shown next to every national figure, so the athlete can see whose numbers they are compared with. */
 export type NormSource = { datasetId: string; name: string; publisher: string; edition: string; population: string; sourceUrl: string }
 
-export type NationalResult = { percentile: number; sampleSize: number; bandLabel: string; source: NormSource }
+export type NationalResult = { percentile: number; sampleSize: number; bandLabel: string; band: NormBand; source: NormSource }
 
 type ActiveRow = NormBand & { datasetId: string; sampleSize: number; quantiles: Quantiles }
 type ActiveNorms = { datasets: NormSource[]; rows: ActiveRow[] }
@@ -77,6 +77,7 @@ export async function nationalPercentile(input: BuildInput & { metricType: Metri
     percentile: nationalStanding(input.metricType, input.value, found.row.quantiles),
     sampleSize: found.row.sampleSize,
     bandLabel: describeNormBand(found.row),
+    band: found.row,
     source: found.source,
   }
 }

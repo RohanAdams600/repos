@@ -61,7 +61,11 @@ export function rankInCohort(value: number, sorted: readonly number[], higherIsB
   return Math.round(Math.min(99, Math.max(1, pct)))
 }
 
-export function describeBands(b: CohortBands): string {
+export function describeBands(b: CohortBands, locale: 'en' | 'es' = 'en'): string {
+  if (locale === 'es') {
+    const edad = b.ageMin === b.ageMax ? `${b.ageMin} años` : `de ${b.ageMin} a ${b.ageMax} años`
+    return `${edad}, de ${b.heightMin} a ${b.heightMax} in, de ${b.weightMin} a ${b.weightMax} lb`
+  }
   const age = b.ageMin === b.ageMax ? `age ${b.ageMin}` : `ages ${b.ageMin} to ${b.ageMax}`
   return `${age}, ${b.heightMin} to ${b.heightMax} in, ${b.weightMin} to ${b.weightMax} lb`
 }

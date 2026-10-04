@@ -1,5 +1,7 @@
 import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { cn } from '@/lib/cn'
+import { ServerText } from '@/components/ui/server-text'
+import { UiText } from '@/components/ui/ui-text'
 
 export const inputClass =
   'block min-h-11 w-full rounded-sm border-2 border-border-strong bg-bg px-3 text-base text-fg aria-[invalid=true]:border-danger hover:border-fg'
@@ -25,9 +27,15 @@ export function Field({ label, name, error, hint, required, children, className 
       <label htmlFor={id} className="font-bold">
         {label}
         {required ? (
-          <span className="text-fg-muted font-normal"> (required)</span>
+          <span className="text-fg-muted font-normal">
+            {' '}
+            <UiText k="required" />
+          </span>
         ) : (
-          <span className="text-fg-muted font-normal"> (optional)</span>
+          <span className="text-fg-muted font-normal">
+            {' '}
+            <UiText k="optional" />
+          </span>
         )}
       </label>
       {hint && (
@@ -38,7 +46,7 @@ export function Field({ label, name, error, hint, required, children, className 
       {children({ id, name, required, 'aria-describedby': describedBy, 'aria-invalid': error ? true : undefined })}
       {error && (
         <p id={errorId} className="text-sm font-bold text-danger">
-          {error}
+          <ServerText text={error} />
         </p>
       )}
     </div>
@@ -81,7 +89,7 @@ export function Checkbox({
       </div>
       {error && (
         <p id={`${id}-error`} className="pl-9 text-sm font-bold text-danger">
-          {error}
+          <ServerText text={error} />
         </p>
       )}
     </div>

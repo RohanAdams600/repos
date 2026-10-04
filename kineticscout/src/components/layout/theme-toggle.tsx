@@ -3,6 +3,8 @@
 import { MoonIcon, SunIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { THEME_COOKIE } from '@/lib/theme'
+import { useMessages } from '@/i18n/client'
+import { chromeMessages } from '@/i18n/messages/chrome'
 
 function effectiveTheme(): 'light' | 'dark' {
   const explicit = document.documentElement.dataset.theme
@@ -16,11 +18,12 @@ function effectiveTheme(): 'light' | 'dark' {
  * by CSS from the same theme tokens, so it is correct before hydration too.
  */
 export function ThemeToggle() {
+  const m = useMessages(chromeMessages)
   return (
     <Button
       variant="ghost"
       size="icon"
-      aria-label="Switch between light and dark mode"
+      aria-label={m.themeToggle}
       onClick={() => {
         const next = effectiveTheme() === 'light' ? 'dark' : 'light'
         document.documentElement.dataset.theme = next

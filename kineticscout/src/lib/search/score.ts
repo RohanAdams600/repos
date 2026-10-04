@@ -12,8 +12,11 @@ export function normalizeQuery(raw: string | undefined | null): string {
     .slice(0, SEARCH_LIMITS.maxLength)
 }
 
+/** Lower-case words with accents folded, so "información" matches "informacion". */
 export function tokenize(text: string): string[] {
   return text
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
     .toLowerCase()
     .split(/[^a-z0-9]+/)
     .filter((t) => t.length >= 2)

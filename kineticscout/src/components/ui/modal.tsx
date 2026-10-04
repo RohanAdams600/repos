@@ -1,12 +1,15 @@
 'use client'
 
 import * as RadixDialog from '@radix-ui/react-dialog'
+import { useMessages } from '@/i18n/client'
+import { uiMessages } from '@/i18n/messages/ui'
 import type { ReactNode } from 'react'
 import { CloseIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
 /** Modal with arbitrary content: focus is trapped, Escape closes, focus returns to the trigger. */
 export function Modal({ open, onOpenChange, title, description, children }: { open: boolean; onOpenChange: (open: boolean) => void; title: string; description?: ReactNode; children: ReactNode }) {
+  const ui = useMessages(uiMessages)
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Portal>
@@ -15,7 +18,7 @@ export function Modal({ open, onOpenChange, title, description, children }: { op
           <div className="flex items-start justify-between gap-4">
             <RadixDialog.Title className="text-xl font-bold">{title}</RadixDialog.Title>
             <RadixDialog.Close asChild>
-              <Button variant="ghost" size="icon" aria-label="Close">
+              <Button variant="ghost" size="icon" aria-label={ui.close}>
                 <CloseIcon />
               </Button>
             </RadixDialog.Close>

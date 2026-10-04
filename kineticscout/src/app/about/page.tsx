@@ -7,58 +7,50 @@ import { directionsUrl } from '@/lib/business-links'
 import { organizationJsonLd } from '@/lib/content/organization'
 import { TEAM } from '@/lib/content/team'
 import { businessDetails } from '@/lib/legal'
+import { aboutMessages } from '@/i18n/messages/about'
+import { chromeMessages } from '@/i18n/messages/chrome'
+import { getLocale, messages } from '@/i18n/server'
 
-export const metadata: Metadata = {
-  title: 'About',
-  description: 'Who runs KineticScout, what we believe about athlete data, and how to reach us.',
-  alternates: { canonical: '/about' },
+export async function generateMetadata(): Promise<Metadata> {
+  const m = await messages(aboutMessages)
+  return { title: m.title, description: m.description, alternates: { canonical: '/about' } }
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const locale = await getLocale()
+  const m = await messages(aboutMessages)
+  const c = await messages(chromeMessages)
   const b = businessDetails()
   const org = organizationJsonLd()
   return (
     <div className="flex max-w-4xl flex-col gap-10">
       {org && <JsonLd data={org} />}
-      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'About' }]} />
+      <Breadcrumbs items={[{ label: c.homeCrumb, href: '/' }, { label: m.title }]} />
       <div className="flex flex-col gap-4">
-        <h1 className="text-4xl font-bold">About KineticScout</h1>
-        <p className="text-lg text-fg-muted">
-          KineticScout gives high school athletes and their families a clear picture of their measurables: where they stand in their class, what
-          is holding their mechanics back, and which programs recruit athletes with numbers like theirs.
-        </p>
+        <h1 className="text-4xl font-bold">{m.h1}</h1>
+        <p className="text-lg text-fg-muted">{m.lead}</p>
       </div>
 
       <section aria-labelledby="principles-title" className="flex flex-col gap-4">
         <h2 id="principles-title" className="text-2xl font-bold">
-          How we work
+          {m.howWeWork}
         </h2>
         <dl className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <dt className="font-bold">Your data is yours</dt>
-            <dd className="mt-1 text-fg-muted">Profiles start private. We never sell personal information or use it for advertising.</dd>
-          </div>
-          <div>
-            <dt className="font-bold">Minors are protected by default</dt>
-            <dd className="mt-1 text-fg-muted">No accounts under 13. Teens need a parent or guardian to approve anything public or paid.</dd>
-          </div>
-          <div>
-            <dt className="font-bold">Numbers you can trace</dt>
-            <dd className="mt-1 text-fg-muted">Every published statistic comes from anonymized groups of at least 25 athletes, with the method shown.</dd>
-          </div>
-          <div>
-            <dt className="font-bold">No promises we cannot keep</dt>
-            <dd className="mt-1 text-fg-muted">We show how measurables compare. We never claim to guarantee a roster spot, offer or scholarship.</dd>
-          </div>
+          {m.principles.map(([term, detail]) => (
+            <div key={term}>
+              <dt className="font-bold">{term}</dt>
+              <dd className="mt-1 text-fg-muted">{detail}</dd>
+            </div>
+          ))}
         </dl>
       </section>
 
       {TEAM.length > 0 && (
         <section aria-labelledby="team-title" className="flex flex-col gap-6">
           <h2 id="team-title" className="text-2xl font-bold">
-            The team
+            {m.team}
           </h2>
-          <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3" lang={locale === 'en' ? undefined : 'en'}>
             {TEAM.map((member) => (
               <li key={member.name} className="flex flex-col gap-3">
                 {member.photo && member.photoAlt && (
@@ -77,7 +69,7 @@ export default function AboutPage() {
 
       <section aria-labelledby="find-title" className="flex flex-col gap-3">
         <h2 id="find-title" className="text-2xl font-bold">
-          Contact and location
+          {m.contactTitle}
         </h2>
         {b.complete ? (
           <>
@@ -87,12 +79,12 @@ export default function AboutPage() {
               {b.postalAddress}
             </address>
             <a href={directionsUrl(b.postalAddress)} target="_blank" rel="noopener noreferrer">
-              Get directions (opens Google Maps)
+              {m.directions}
             </a>
           </>
         ) : null}
         <p className="text-fg-muted">
-          The fastest way to reach us is the <Link href="/contact">contact page</Link>. We reply within 2 business days.
+          {m.fastest} <Link href="/contact">{m.contactPage}</Link>. {m.reply}
         </p>
       </section>
     </div>

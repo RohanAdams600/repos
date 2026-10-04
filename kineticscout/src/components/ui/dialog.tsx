@@ -1,6 +1,8 @@
 'use client'
 
 import * as RadixDialog from '@radix-ui/react-dialog'
+import { useMessages } from '@/i18n/client'
+import { uiMessages } from '@/i18n/messages/ui'
 import type { ReactNode } from 'react'
 import { CloseIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
@@ -16,6 +18,7 @@ type ConfirmDialogProps = {
 
 /** Confirmation modal: focus is trapped, Escape closes, and focus returns to the trigger. */
 export function ConfirmDialog({ trigger, title, description, confirmLabel, onConfirm, tone = 'primary' }: ConfirmDialogProps) {
+  const ui = useMessages(uiMessages)
   return (
     <RadixDialog.Root>
       <RadixDialog.Trigger asChild>{trigger}</RadixDialog.Trigger>
@@ -25,7 +28,7 @@ export function ConfirmDialog({ trigger, title, description, confirmLabel, onCon
           <div className="flex items-start justify-between gap-4">
             <RadixDialog.Title className="text-xl font-bold">{title}</RadixDialog.Title>
             <RadixDialog.Close asChild>
-              <Button variant="ghost" size="icon" aria-label="Close">
+              <Button variant="ghost" size="icon" aria-label={ui.close}>
                 <CloseIcon />
               </Button>
             </RadixDialog.Close>
@@ -35,7 +38,7 @@ export function ConfirmDialog({ trigger, title, description, confirmLabel, onCon
           </RadixDialog.Description>
           <div className="mt-6 flex flex-wrap justify-end gap-3">
             <RadixDialog.Close asChild>
-              <Button variant="secondary">Cancel</Button>
+              <Button variant="secondary">{ui.cancel}</Button>
             </RadixDialog.Close>
             <RadixDialog.Close asChild>
               <Button variant={tone === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>

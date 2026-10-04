@@ -1,5 +1,6 @@
 import 'server-only'
-import { FAQS } from '@/lib/content/faq'
+import { FAQS, FAQS_ES, type Faq } from '@/lib/content/faq'
+import type { Locale } from '@/i18n/config'
 import { db } from '@/lib/db'
 import { rankDocuments, SEARCH_LIMITS, tokenize, type SearchDocument, type SearchResult } from '@/lib/search/score'
 
@@ -17,22 +18,39 @@ const STATIC_PAGES: SearchDocument[] = [
   { href: '/legal/refunds', section: 'Legal', title: 'Refund Policy', description: 'Refund windows, duplicate charges and cancellation.', keywords: 'refund money back cancel' },
   { href: '/legal/cookies', section: 'Legal', title: 'Cookie Policy', description: 'The cookies KineticScout sets and why.', keywords: 'cookies tracking analytics consent' },
   { href: '/sign-up', section: 'Page', title: 'Create your free profile', description: 'Sign up for a free KineticScout account.', keywords: 'register join account signup' },
+  { href: '/events', section: 'Page', title: 'Showcases, camps and combines', description: 'Upcoming events, each checked against the organizer’s own page.', keywords: 'events showcase camp combine tournament' },
+  { href: '/recruiting-calendar', section: 'Page', title: 'Recruiting calendar', description: 'Contact, evaluation, quiet and dead periods with their sources.', keywords: 'ncaa calendar dead period contact period recruiting rules' },
 ]
 
-const FAQ_DOCS: SearchDocument[] = FAQS.map((f) => ({
-  href: `/faq#${f.id}`,
-  section: 'FAQ',
-  title: f.question,
-  description: f.answer[0]!,
-  keywords: f.answer.slice(1).join(' '),
-}))
+const STATIC_PAGES_ES: SearchDocument[] = [
+  { href: '/', section: 'Página', title: 'Inicio de KineticScout', description: 'Registra tus mediciones, mira tu percentil de clase y encuentra programas que encajen con tus números.', keywords: 'velocidad de salida lanzamiento carrera 60 yardas pop time reclutamiento' },
+  { href: '/pricing', section: 'Página', title: 'Precios', description: 'Scout es gratis para siempre. Pro Prospect agrega análisis de video, el College Matchmaker y registro ilimitado.', keywords: 'precio costo plan pro suscripcion gratis mensual anual cancelar' },
+  { href: '/faq', section: 'Página', title: 'Preguntas frecuentes', description: 'Percentiles, privacidad, precisión del análisis de video, coincidencias con universidades y pagos.', keywords: 'ayuda preguntas dudas' },
+  { href: '/about', section: 'Página', title: 'Sobre KineticScout', description: 'Quién está detrás de KineticScout y cómo contactarnos.', keywords: 'empresa equipo direccion' },
+  { href: '/contact', section: 'Página', title: 'Contáctanos', description: 'Correo, teléfono y un formulario de contacto. Respondemos en un plazo de 2 días hábiles.', keywords: 'soporte ayuda correo telefono mensaje' },
+  { href: '/blog', section: 'Página', title: 'Informes de datos', description: 'Informes semanales de percentiles con datos anónimos de atletas de KineticScout.', keywords: 'blog articulos estadisticas promedios' },
+  { href: '/case-studies', section: 'Página', title: 'Casos de estudio', description: 'Cómo atletas y familias han usado KineticScout, publicado con su consentimiento.', keywords: 'historias ejemplos resultados' },
+  { href: '/reviews', section: 'Página', title: 'Opiniones', description: 'Lo que dicen los usuarios de KineticScout, publicado con su permiso.', keywords: 'testimonios opiniones calificaciones' },
+  { href: '/events', section: 'Página', title: 'Showcases, campamentos y combines', description: 'Próximos eventos, cada uno revisado con la página del organizador.', keywords: 'eventos showcase campamento combine torneo' },
+  { href: '/recruiting-calendar', section: 'Página', title: 'Calendario de reclutamiento', description: 'Periodos de contacto, evaluación, silencio y muertos, con sus fuentes.', keywords: 'ncaa calendario periodo muerto contacto reglas reclutamiento' },
+  { href: '/legal/privacy', section: 'Legal', title: 'Política de privacidad', description: 'Qué recopilamos, por qué, quién lo procesa y tus derechos.', keywords: 'datos eliminacion informacion personal menores coppa' },
+  { href: '/legal/terms', section: 'Legal', title: 'Términos del servicio', description: 'El acuerdo para usar KineticScout.', keywords: 'terminos condiciones reglas' },
+  { href: '/legal/refunds', section: 'Legal', title: 'Política de reembolsos', description: 'Plazos de reembolso, cargos duplicados y cancelación.', keywords: 'reembolso devolucion dinero cancelar' },
+  { href: '/legal/cookies', section: 'Legal', title: 'Política de cookies', description: 'Las cookies que usa KineticScout y por qué.', keywords: 'cookies rastreo analitica consentimiento' },
+  { href: '/sign-up', section: 'Página', title: 'Crea tu perfil gratis', description: 'Regístrate para una cuenta gratis de KineticScout.', keywords: 'registro unirse cuenta' },
+]
+
+const faqDocs = (faqs: readonly Faq[], section: string): SearchDocument[] =>
+  faqs.map((f) => ({ href: `/faq#${f.id}`, section, title: f.question, description: f.answer[0]!, keywords: f.answer.slice(1).join(' ') }))
+const FAQ_DOCS = faqDocs(FAQS, 'FAQ')
+const FAQ_DOCS_ES = faqDocs(FAQS_ES, 'Preguntas frecuentes')
 
 function escapeLike(term: string): string {
   return term.replace(/[\\%_]/g, (c) => `\\${c}`)
 }
 
 /** Site search over pages, FAQs, and published articles and case studies. */
-export async function siteSearch(query: string): Promise<SearchResult[]> {
+export async function siteSearch(query: string, locale: Locale = 'en'): Promise<SearchResult[]> {
   if (query.length < SEARCH_LIMITS.minLength) return []
   const tokens = tokenize(query).slice(0, 6)
   if (tokens.length === 0) return []
@@ -51,9 +69,10 @@ export async function siteSearch(query: string): Promise<SearchResult[]> {
   })
   const postDocs: SearchDocument[] = posts.map((p) => ({
     href: p.kind === 'CASE_STUDY' ? `/case-studies/${p.slug}` : `/blog/${p.slug}`,
-    section: p.kind === 'CASE_STUDY' ? 'Case study' : 'Data report',
+    section: p.kind === 'CASE_STUDY' ? (locale === 'es' ? 'Caso de estudio' : 'Case study') : locale === 'es' ? 'Informe de datos' : 'Data report',
     title: p.title,
     description: p.metaDescription,
   }))
-  return rankDocuments([...STATIC_PAGES, ...FAQ_DOCS, ...postDocs], query)
+  const pages = locale === 'es' ? [...STATIC_PAGES_ES, ...FAQ_DOCS_ES] : [...STATIC_PAGES, ...FAQ_DOCS]
+  return rankDocuments([...pages, ...postDocs], query)
 }

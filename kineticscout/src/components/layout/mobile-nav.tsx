@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { CloseIcon, MenuIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
+import { useMessages } from '@/i18n/client'
+import { chromeMessages } from '@/i18n/messages/chrome'
 
 export type NavLink = { href: string; label: string }
 
@@ -13,6 +15,7 @@ export function MobileNav({ links, children }: { links: NavLink[]; children?: Re
   const [open, setOpen] = useState(false)
   const toggle = useRef<HTMLButtonElement>(null)
   const pathname = usePathname()
+  const m = useMessages(chromeMessages)
 
   useEffect(() => {
     if (!open) return
@@ -28,11 +31,11 @@ export function MobileNav({ links, children }: { links: NavLink[]; children?: Re
 
   return (
     <div className="md:hidden">
-      <Button ref={toggle} variant="ghost" size="icon" aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? 'Close menu' : 'Open menu'} onClick={() => setOpen((v) => !v)}>
+      <Button ref={toggle} variant="ghost" size="icon" aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? m.closeMenu : m.openMenu} onClick={() => setOpen((v) => !v)}>
         {open ? <CloseIcon /> : <MenuIcon />}
       </Button>
       {open && (
-        <nav id="mobile-menu" aria-label="Main" className="absolute inset-x-0 top-full border-b-2 border-border-subtle bg-bg px-4 pb-6">
+        <nav id="mobile-menu" aria-label={m.mainNav} className="absolute inset-x-0 top-full border-b-2 border-border-subtle bg-bg px-4 pb-6">
           <ul className="flex flex-col">
             {links.map((link) => (
               <li key={link.href}>
