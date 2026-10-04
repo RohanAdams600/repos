@@ -5,74 +5,81 @@ import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { Alert } from '@/components/ui/alert'
 import { EmptyState } from '@/components/ui/empty-state'
 import { requireAthlete } from '@/lib/auth/session'
-import { K_MIN } from '@/lib/insights/build-cohort'
-import { TRAIT_LABELS } from '@/lib/insights/projection'
+import { describeBands, K_MIN } from '@/lib/insights/build-cohort'
+import { describeNormBand } from '@/lib/insights/norms'
 import { athleteBiometrics, athleteProjections } from '@/lib/insights/service'
+import { pick } from '@/i18n/define'
+import { INTL_LOCALE } from '@/i18n/config'
+import { accountMessages } from '@/i18n/messages/account'
+import { domain, percentileLabel } from '@/i18n/messages/domain'
+import { recruitingMessages } from '@/i18n/messages/recruiting'
+import { getLocale, messages } from '@/i18n/server'
 import { METRIC_DEFINITIONS, formatMetric } from '@/lib/metrics/definitions'
-import { ordinal } from '@/lib/metrics/percentile'
 
-export const metadata: Metadata = { title: 'Insights' }
-
-const SPORT_LABEL = { BASEBALL: 'baseball', HOCKEY: 'hockey', FOOTBALL: 'football' } as const
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await messages(recruitingMessages)).insights.title }
+}
 
 export default async function InsightsPage() {
   const user = await requireAthlete('/dashboard/insights')
   if (user.role !== 'ATHLETE') redirect('/dashboard')
   const [bio, projections] = await Promise.all([athleteBiometrics(user.id), athleteProjections(user.id)])
+  const locale = await getLocale()
+  const m = pick(recruitingMessages, locale).insights
+  const d = domain(locale)
+  const dash = pick(accountMessages, locale).dashboard
+  const num = (n: number) => n.toLocaleString(INTL_LOCALE[locale])
 
   return (
     <div className="flex max-w-3xl flex-col gap-10">
       <div className="flex flex-col gap-3">
-        <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Insights' }]} />
-        <h1 className="text-3xl font-bold">Insights</h1>
+        <Breadcrumbs items={[{ label: dash, href: '/dashboard' }, { label: m.title }]} />
+        <h1 className="text-3xl font-bold">{m.title}</h1>
       </div>
 
       <section aria-labelledby="build-title" className="flex flex-col gap-4">
         <h2 id="build-title" className="text-2xl font-bold">
-          Compared with athletes your size
+          {m.buildTitle}
         </h2>
-        <p className="text-fg-muted">
-          Each best value from the last 18 months is compared two ways. When a licensed national table covers your age and build, we show where
-          you stand in it and name its publisher. We also rank you against KineticScout athletes of a similar age, height and weight who logged
-          the same measurement, widening the group until at least {K_MIN} others are included. Your own values are mostly self-reported.
-        </p>
+        <p className="text-fg-muted">{m.buildIntro(K_MIN)}</p>
         {bio.status === 'needs-build' ? (
           <Alert tone="info">
-            Add your {bio.missing.join(' and ')} on <Link href="/dashboard/profile">Profile and sharing</Link> to see build-adjusted percentiles.
+            {m.needBuild(bio.missing.map((x) => m.missing[x]))} <Link href="/dashboard/profile">{m.profileLink}</Link>
+            {m.needBuildTail}
           </Alert>
         ) : bio.results.length === 0 ? (
-          <EmptyState title="No measurements yet">Log a measurement from your dashboard to see how it compares with athletes your size.</EmptyState>
+          <EmptyState title={m.emptyTitle}>{m.emptyBody}</EmptyState>
         ) : (
           <ul className="flex flex-col divide-y-2 divide-border-subtle border-2 border-border-subtle">
             {bio.results.map((r) => (
               <li key={r.metricType} className="flex flex-col gap-1 p-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="font-bold">{METRIC_DEFINITIONS[r.metricType].label}</span>
+                  <span className="font-bold">{d.metric[r.metricType]}</span>
                   <span className="tabular text-lg font-bold">{formatMetric(r.metricType, r.value)}</span>
                 </div>
                 {r.national && (
                   <div className="flex flex-col gap-1">
                     <p>
-                      <span className="font-bold">National:</span> better than <span className="tabular font-bold">{r.national.percentile}%</span> of the{' '}
-                      {r.national.source.publisher} sample for {r.national.bandLabel} (<span className="tabular">n = {r.national.sampleSize.toLocaleString('en-US')}</span>).
+                      <span className="font-bold">{m.national}</span>
+                      {m.nationalBody(r.national.percentile, r.national.source.publisher, describeNormBand(r.national.band, locale), num(r.national.sampleSize))}
                     </p>
                     <p className="text-sm text-fg-muted">
                       {r.national.source.name}, {r.national.source.edition}. {r.national.source.population}{' '}
                       <a href={r.national.source.sourceUrl} target="_blank" rel="noopener noreferrer nofollow">
-                        Source
+                        {m.source}
                       </a>
                     </p>
                   </div>
                 )}
                 {r.status === 'ok' ? (
                   <p className="text-fg-muted">
-                    <span className="font-bold text-fg">KineticScout:</span> better than <span className="tabular font-bold text-fg">{r.percentile}%</span> of{' '}
-                    <span className="tabular">{r.cohortSize}</span> athletes ({r.bandsLabel}).
+                    <span className="font-bold text-fg">{m.ks}</span>
+                    {m.ksBody(r.percentile, r.cohortSize, describeBands(r.bands, locale))}
                   </p>
                 ) : (
                   <p className="text-fg-muted">
-                    <span className="font-bold text-fg">KineticScout:</span> not enough athletes with a similar build have logged this yet (largest group
-                    found: <span className="tabular">{r.largestCohort}</span>, we need {K_MIN}).
+                    <span className="font-bold text-fg">{m.ks}</span>
+                    {m.ksNotEnough(r.largestCohort, K_MIN)}
                   </p>
                 )}
               </li>
@@ -83,18 +90,11 @@ export default async function InsightsPage() {
 
       <section aria-labelledby="projection-title" className="flex flex-col gap-4">
         <h2 id="projection-title" className="text-2xl font-bold">
-          Cross-sport equivalents
+          {m.crossTitle}
         </h2>
-        <p className="text-fg-muted">
-          Your standing on a measurement you have logged, read across to a related measurement in another sport: speed to speed, arm to arm,
-          rotational power to rotational power. For example, if your 40-yard dash beats 80% of your class, we show the 60-yard dash time that
-          beats 80% of baseball players in your class. It is an equivalent standing, not a prediction of what you would measure.
-        </p>
+        <p className="text-fg-muted">{m.crossIntro}</p>
         {projections.length === 0 ? (
-          <EmptyState title="Nothing to compare yet">
-            Equivalents appear once you have logged a speed, arm or rotational power measurement and enough athletes in the other sport have
-            logged theirs.
-          </EmptyState>
+          <EmptyState title={m.crossEmptyTitle}>{m.crossEmptyBody}</EmptyState>
         ) : (
           <ul className="flex flex-col divide-y-2 divide-border-subtle border-2 border-border-subtle">
             {projections.map((p) => {
@@ -103,25 +103,23 @@ export default async function InsightsPage() {
                 <li key={p.target} className="flex flex-col gap-2 p-4">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <span className="font-bold">
-                      {def.label} <span className="font-normal text-fg-muted">({SPORT_LABEL[def.sport]})</span>
+                      {d.metric[p.target]} <span className="font-normal text-fg-muted">({d.sport[def.sport].toLowerCase()})</span>
                     </span>
                     <span className="tabular text-lg font-bold">
-                      {p.bound === 'at-least' ? 'at least ' : p.bound === 'at-most' ? 'at most ' : ''}
+                      {p.bound === 'at-least' ? m.atLeast : p.bound === 'at-most' ? m.atMost : ''}
                       {formatMetric(p.target, p.value)}
                     </span>
                   </div>
                   <p className="text-sm text-fg-muted">
-                    {TRAIT_LABELS[p.trait]}: your{' '}
+                    {m.trait[p.trait]}: {m.your}{' '}
                     {p.sources.map((s, i) => (
                       <span key={s.metricType}>
-                        {i > 0 ? (i === p.sources.length - 1 ? ' and ' : ', ') : ''}
-                        {METRIC_DEFINITIONS[s.metricType].label.toLowerCase()} ({ordinal(s.standing)} percentile)
+                        {i > 0 ? (i === p.sources.length - 1 ? m.and : ', ') : ''}
+                        {m.sourcePct(d.metric[s.metricType], percentileLabel(s.standing, locale))}
                       </span>
-                    ))}{' '}
-                    {p.sources.length > 1 ? 'average' : 'is'} the <span className="tabular">{ordinal(p.standing)}</span> percentile.{' '}
-                    {p.scope === 'national' && p.source
-                      ? `Read from national tables for your build (${p.source.publisher}, ${p.source.name}, ${p.source.edition}).`
-                      : `Compared with ${p.scope === 'class' ? `the class of ${p.gradYear}` : 'all classes'} on KineticScout.`}
+                    ))}
+                    {m.result(p.sources.length > 1, percentileLabel(p.standing, locale))}{' '}
+                    {p.scope === 'national' && p.source ? m.national2(p.source.publisher, p.source.name, p.source.edition) : m.classScope(p.scope === 'class' ? p.gradYear : null)}
                   </p>
                 </li>
               )

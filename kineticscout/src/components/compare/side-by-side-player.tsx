@@ -5,7 +5,10 @@ import { PauseIcon, PlayIcon } from '@/components/icons'
 import { drawSkeleton, nearestFrame } from '@/components/dashboard/skeleton-draw'
 import { Button } from '@/components/ui/button'
 import { decodePoseTrack } from '@/lib/biomechanics/codec'
-import { ANCHOR_LABELS, commonAnchor, syncWindow } from '@/lib/biomechanics/compare'
+import { commonAnchor, syncWindow } from '@/lib/biomechanics/compare'
+import { useMessages } from '@/i18n/client'
+import { analysisMessages } from '@/i18n/messages/analysis'
+import { useServerText } from '@/i18n/server-text-client'
 import type { CompactPoseTrack, KinematicReport } from '@/lib/biomechanics/types'
 
 export type ComparisonSide = { label: string; videoUrl: string; pose: CompactPoseTrack; report: KinematicReport; handedness: 'RIGHT' | 'LEFT'; attribution: string | null }
@@ -14,6 +17,8 @@ export type ComparisonSide = { label: string; videoUrl: string; pose: CompactPos
 const MAX_DRIFT_SEC = 0.04
 
 function Panel({ side, mirrored, videoRef, canvasRef }: { side: ComparisonSide; mirrored: boolean; videoRef: React.RefObject<HTMLVideoElement | null>; canvasRef: React.RefObject<HTMLCanvasElement | null> }) {
+  const m = useMessages(analysisMessages).compare
+  const serverText = useServerText()
   return (
     <figure className="flex min-w-0 flex-col gap-2">
       <div className="relative w-full bg-black" style={{ aspectRatio: String(side.pose.aspectRatio), transform: mirrored ? 'scaleX(-1)' : undefined }}>
@@ -26,13 +31,13 @@ function Panel({ side, mirrored, videoRef, canvasRef }: { side: ComparisonSide; 
           disablePictureInPicture
           controlsList="nodownload noplaybackrate"
           className="absolute inset-0 h-full w-full object-fill"
-          aria-label={`${side.label}, synced with the other clip`}
+          aria-label={m.synced(serverText(side.label))}
         />
         <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true" />
       </div>
       <figcaption className="text-sm">
-        <span className="font-bold">{side.label}</span>
-        {mirrored && <span className="text-fg-muted"> · mirrored to match your side</span>}
+        <span className="font-bold">{serverText(side.label)}</span>
+        {mirrored && <span className="text-fg-muted">{m.mirrored}</span>}
         {side.attribution && <span className="block text-fg-muted">{side.attribution}</span>}
       </figcaption>
     </figure>
@@ -54,7 +59,8 @@ export function SideBySidePlayer({ a, b }: { a: ComparisonSide; b: ComparisonSid
   const anchor = useMemo(() => commonAnchor(a.report, b.report), [a.report, b.report])
   const fsA = anchor?.a ?? 0
   const fsB = anchor?.b ?? 0
-  const anchorLabel = ANCHOR_LABELS[anchor?.event ?? 'HAND_PEAK']
+  const m = useMessages(analysisMessages).compare
+  const anchorLabel = m.anchor[anchor?.event ?? 'HAND_PEAK']!
   const span = useMemo(() => syncWindow({ anchorTime: fsA, durationSec: a.report.durationSec }, { anchorTime: fsB, durationSec: b.report.durationSec }), [fsA, fsB, a.report.durationSec, b.report.durationSec])
   const startAt = Math.max(span.start, -0.8)
   const mirrored = a.handedness !== b.handedness
@@ -150,20 +156,20 @@ export function SideBySidePlayer({ a, b }: { a: ComparisonSide; b: ComparisonSid
           <Button
             variant="primary"
             size="sm"
-            aria-label={playing ? 'Pause both clips' : 'Play both clips'}
+            aria-label={playing ? m.pauseBoth : m.playBoth}
             onClick={() => {
               if (!playing && tau >= span.end - 0.01) seek(startAt)
               setPlaying((p) => !p)
             }}
           >
             {playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
-            {playing ? 'Pause' : 'Play'}
+            {playing ? m.pause : m.play}
           </Button>
           <Button variant="secondary" size="sm" onClick={() => (setPlaying(false), seek(0))}>
-            Jump to {anchorLabel}
+            {m.jump(anchorLabel)}
           </Button>
           <label className="flex items-center gap-2 text-sm font-bold">
-            Speed
+            {m.speed}
             <select value={rate} onChange={(e) => setRate(Number(e.target.value))} className="min-h-9 border-2 border-border-strong bg-bg px-2">
               <option value={0.1}>0.1x</option>
               <option value={0.25}>0.25x</option>
@@ -172,12 +178,12 @@ export function SideBySidePlayer({ a, b }: { a: ComparisonSide; b: ComparisonSid
             </select>
           </label>
           <Button variant="secondary" size="sm" aria-pressed={showSkeleton} onClick={() => setShowSkeleton((v) => !v)}>
-            {showSkeleton ? 'Hide skeletons' : 'Show skeletons'}
+            {showSkeleton ? m.hideAll : m.showAll}
           </Button>
         </div>
         <label className="flex flex-col gap-2 text-sm font-bold">
           <span>
-            Time from {anchorLabel}: <span className="tabular">{ms > 0 ? `+${ms}` : ms} ms</span>
+            {m.timeFrom(anchorLabel)} <span className="tabular">{ms > 0 ? `+${ms}` : ms} ms</span>
           </span>
           <input
             type="range"
@@ -187,7 +193,7 @@ export function SideBySidePlayer({ a, b }: { a: ComparisonSide; b: ComparisonSid
             value={tau}
             onChange={(e) => (setPlaying(false), seek(Number(e.target.value)))}
             className="w-full accent-[var(--accent)]"
-            aria-valuetext={`${ms} milliseconds from ${anchorLabel}`}
+            aria-valuetext={m.msFrom(ms, anchorLabel)}
           />
         </label>
       </div>

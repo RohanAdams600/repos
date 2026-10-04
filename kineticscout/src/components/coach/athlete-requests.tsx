@@ -9,30 +9,27 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Modal } from '@/components/ui/modal'
 import { Spinner } from '@/components/ui/spinner'
+import { useLocale, useMessages } from '@/i18n/client'
+import { connectionsMessages } from '@/i18n/messages/connections'
+import { formatDay } from '@/i18n/messages/domain'
+import { UiText } from '@/components/ui/ui-text'
 import { errorMessage, useTRPC } from '@/trpc/client'
-
-const STATUS: Record<string, string> = {
-  ATHLETE_ACCEPTED: 'You accepted. Waiting for your parent or guardian to approve.',
-  ACCEPTED: 'Accepted. The coach has your email address.',
-  DECLINED: 'Declined. Nothing was shared.',
-  WITHDRAWN: 'The coach withdrew this request.',
-  EXPIRED: 'Expired without an answer.',
-}
 
 function ReportDialog({ coachId, coachName }: { coachId: string; coachName: string }) {
   const trpc = useTRPC()
   const [open, setOpen] = useState(false)
   const [reason, setReason] = useState('')
   const report = useMutation(trpc.contactRequests.report.mutationOptions())
+  const m = useMessages(connectionsMessages).requests
   return (
     <>
       <Button size="sm" variant="ghost" onClick={() => setOpen(true)}>
-        Report
+        {m.report}
       </Button>
-      <Modal open={open} onOpenChange={setOpen} title={`Report ${coachName}`} description="Tell us what happened. Our staff reviews every report and can suspend a coach.">
+      <Modal open={open} onOpenChange={setOpen} title={m.reportTitle(coachName)} description={m.reportIntro}>
         {report.isSuccess ? (
           <Alert tone="success" focusOnMount>
-            Thank you. We will review this report. If you feel unsafe, also tell a parent, guardian or school staff member.
+            {m.reportThanks}
           </Alert>
         ) : (
           <form
@@ -44,11 +41,11 @@ function ReportDialog({ coachId, coachName }: { coachId: string; coachName: stri
           >
             {report.isError && <Alert tone="error">{errorMessage(report.error)}</Alert>}
             <label htmlFor={`report-${coachId}`} className="font-bold">
-              What happened? <span className="font-normal text-fg-muted">(required)</span>
+              {m.whatHappened} <span className="font-normal text-fg-muted"><UiText k="required" /></span>
             </label>
             <textarea id={`report-${coachId}`} rows={5} maxLength={1000} value={reason} onChange={(e) => setReason(e.target.value)} className="rounded-sm border-2 border-border-strong bg-bg p-3" />
             <Button type="submit" variant="danger" className="self-start" disabled={report.isPending}>
-              Send report
+              {m.sendReport}
             </Button>
           </form>
         )}
@@ -65,10 +62,13 @@ export function AthleteRequests() {
   const respond = useMutation(trpc.contactRequests.respond.mutationOptions({ onSuccess: refresh }))
   const unblock = useMutation(trpc.contactRequests.unblock.mutationOptions({ onSuccess: refresh }))
   const block = useMutation(trpc.contactRequests.block.mutationOptions({ onSuccess: refresh }))
-  if (requests.isPending) return <Spinner label="Loading requests" />
+  const m = useMessages(connectionsMessages).requests
+  const locale = useLocale()
+  const day = (iso: string) => formatDay(new Date(iso), locale, 'short')
+  if (requests.isPending) return <Spinner label={m.loading} />
   if (requests.isError) return <Alert tone="error">{errorMessage(requests.error)}</Alert>
   if (requests.data.length === 0) {
-    return <EmptyState title="No contact requests">When a verified college coach asks to contact you, the request appears here. Coaches can only find you if your profile is public.</EmptyState>
+    return <EmptyState title={m.emptyTitle}>{m.emptyBody}</EmptyState>
   }
   return (
     <ul className="flex flex-col gap-4">
@@ -82,49 +82,46 @@ export function AthleteRequests() {
                 {coachName}, {r.coach.title}
               </p>
               <p className="text-sm text-fg-muted">
-                {r.coach.college?.schoolName} ({r.coach.college?.division}). Verified by KineticScout staff
-                {r.coach.reviewedAt ? ` on ${r.coach.reviewedAt.slice(0, 10)}` : ''}. Sent <span className="tabular">{r.createdAt.slice(0, 10)}</span>.
+                {m.verified(r.coach.college?.schoolName ?? '', r.coach.college?.division ?? '', r.coach.reviewedAt ? day(r.coach.reviewedAt) : null, day(r.createdAt))}
               </p>
             </div>
             <p className="border-l-4 border-border-strong pl-3 whitespace-pre-wrap">{r.message}</p>
             {r.status === 'PENDING' ? (
               <>
                 <p className="text-sm text-fg-muted">
-                  {r.guardianRequired
-                    ? 'If you accept, your parent or guardian is asked to approve before the coach gets your email address and theirs.'
-                    : 'If you accept, the coach gets your email address.'}
+                  {r.guardianRequired ? m.ifGuardian : m.ifAccept}
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Button size="sm" disabled={respond.isPending} onClick={() => respond.mutate({ id: r.id, decision: 'accept' })}>
-                    Accept
+                    {m.accept}
                   </Button>
                   <Button size="sm" variant="secondary" disabled={respond.isPending} onClick={() => respond.mutate({ id: r.id, decision: 'decline' })}>
-                    Decline
+                    {m.decline}
                   </Button>
                   <Button size="sm" variant="secondary" disabled={respond.isPending} onClick={() => respond.mutate({ id: r.id, decision: 'decline', block: true })}>
-                    Decline and block
+                    {m.declineBlock}
                   </Button>
                   <ReportDialog coachId={r.coach.userId} coachName={coachName} />
                 </div>
               </>
             ) : (
               <div className="flex flex-wrap items-center gap-3">
-                <p className="text-sm font-bold">{STATUS[r.status]}</p>
-                {r.contactShared && !r.coach.blocked && <OpenThreadButton contactRequestId={r.id} label={`Message ${coachName}`} />}
+                <p className="text-sm font-bold">{m.athleteStatus[r.status]}</p>
+                {r.contactShared && !r.coach.blocked && <OpenThreadButton contactRequestId={r.id} label={m.message(coachName)} />}
                 {r.coach.blocked ? (
                   <Button size="sm" variant="ghost" onClick={() => unblock.mutate({ coachId: r.coach.userId })}>
-                    Unblock coach
+                    {m.unblock}
                   </Button>
                 ) : (
                   <ConfirmDialog
                     trigger={
                       <Button size="sm" variant="ghost" disabled={block.isPending}>
-                        Block coach
+                        {m.block}
                       </Button>
                     }
-                    title={`Block ${coachName}?`}
-                    description="They will no longer find you in search or be able to send you requests, and any email address you shared is removed from their KineticScout page. If they already wrote it down, they keep it. You can unblock them later."
-                    confirmLabel="Block coach"
+                    title={m.blockTitle(coachName)}
+                    description={m.blockBody}
+                    confirmLabel={m.block}
                     tone="danger"
                     onConfirm={() => block.mutate({ coachId: r.coach.userId })}
                   />

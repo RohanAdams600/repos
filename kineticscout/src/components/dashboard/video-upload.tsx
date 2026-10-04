@@ -10,10 +10,14 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { ProgressBar } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
 import { isAllowedVideoType, VIDEO_UPLOAD_POLICY } from '@/lib/storage/video-files'
-import { FILMING_GUIDANCE, HANDEDNESS_VERB, MOTION_LABELS, MOTIONS_BY_SPORT, PROJECTILE_NOUN, type Motion, type SportName } from '@/lib/biomechanics/motions'
+import { MOTIONS_BY_SPORT, type Motion, type SportName } from '@/lib/biomechanics/motions'
 import { Checkbox } from '@/components/ui/field'
 import { putWithProgress, UPLOAD_ERRORS } from '@/lib/upload/put'
 import { readVideoMetadata, type VideoMeta } from '@/lib/upload/video-metadata'
+import { useMessages } from '@/i18n/client'
+import { analysisMessages } from '@/i18n/messages/analysis'
+import { domainMessages } from '@/i18n/messages/domain'
+import { useServerText } from '@/i18n/server-text-client'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
 type Hand = 'RIGHT' | 'LEFT'
@@ -38,6 +42,11 @@ export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; spo
   const [phase, setPhase] = useState<Phase>('idle')
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const t = useMessages(analysisMessages)
+  const m = t.upload
+  const d = useMessages(domainMessages)
+  const serverText = useServerText()
+  const noun = t.projectile.noun[motion]
 
   const createUpload = useMutation(trpc.analysis.createUpload.mutationOptions())
   const completeUpload = useMutation(trpc.analysis.completeUpload.mutationOptions())
@@ -55,22 +64,22 @@ export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; spo
     if (!chosen) return setPhase('idle')
     if (!isAllowedVideoType(chosen.type)) {
       setPhase('error')
-      return setError('Choose an MP4 or MOV video. Most phones record in one of these formats.')
+      return setError(m.type)
     }
     if (chosen.size > VIDEO_UPLOAD_POLICY.maxBytes) {
       setPhase('error')
-      return setError(`That file is ${(chosen.size / MB).toFixed(0)} MB. The limit is ${VIDEO_UPLOAD_POLICY.maxBytes / MB} MB; trim the clip to just the ${motionNames}.`)
+      return setError(m.tooBig((chosen.size / MB).toFixed(0), VIDEO_UPLOAD_POLICY.maxBytes / MB, motionNames))
     }
     setPhase('checking')
     try {
       const info = await readVideoMetadata(chosen)
       if (info.durationMs > VIDEO_UPLOAD_POLICY.maxDurationMs) {
         setPhase('error')
-        return setError(`The clip is ${(info.durationMs / 1000).toFixed(1)} seconds. Trim it to ${VIDEO_UPLOAD_POLICY.maxDurationMs / 1000} seconds or less.`)
+        return setError(m.tooLong((info.durationMs / 1000).toFixed(1), VIDEO_UPLOAD_POLICY.maxDurationMs / 1000))
       }
       if (info.durationMs < VIDEO_UPLOAD_POLICY.minDurationMs) {
         setPhase('error')
-        return setError('The clip must be at least 1 second long.')
+        return setError(m.tooShort)
       }
       setFile(chosen)
       setMeta(info)
@@ -78,7 +87,7 @@ export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; spo
       setPhase('ready')
     } catch {
       setPhase('error')
-      setError('We could not read that video in your browser. Try exporting it again as MP4.')
+      setError(m.unreadable)
     }
   }
 
@@ -107,32 +116,32 @@ export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; spo
     } catch (err) {
       setPhase('error')
       const key = err instanceof Error ? err.message : ''
-      setError(UPLOAD_ERRORS[key] ?? errorMessage(err))
+      setError(serverText(UPLOAD_ERRORS[key] ?? errorMessage(err)))
     } finally {
       abortRef.current = null
     }
   }
 
   const busy = phase === 'uploading' || phase === 'finalizing' || phase === 'checking'
-  const handLabel = HANDEDNESS_VERB[motion]
-  const motionNames = motions.map((m) => MOTION_LABELS[m].toLowerCase()).join(' or ')
+  const handLabel = m.hand[motion]
+  const motionNames = m.motionNames(motions.map((mo) => d.motion[mo]))
 
   return (
     <section aria-labelledby="upload-title" className="flex flex-col gap-6 border-2 border-border-subtle p-6">
       <div>
         <h2 id="upload-title" className="text-xl font-bold">
-          Analyze a {motionNames}
+          {m.title(motionNames)}
         </h2>
-        <p className="mt-1 text-fg-muted">The analysis estimates when your hips, trunk, arm and hand reach peak speed, and flags the sequence problems behind lost velocity.</p>
+        <p className="mt-1 text-fg-muted">{m.intro}</p>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
         <fieldset className="flex flex-col gap-2" disabled={busy}>
-          <legend className="mb-2 font-bold">Motion</legend>
-          {motions.map((m) => (
-            <label key={m} className="flex min-h-11 cursor-pointer items-center gap-3 border-2 border-border-strong px-3 has-[:checked]:border-fg">
-              <input type="radio" name="motion" value={m} checked={motion === m} onChange={() => setMotion(m)} className="size-5 accent-[var(--accent)]" />
-              {MOTION_LABELS[m]}
+          <legend className="mb-2 font-bold">{m.motion}</legend>
+          {motions.map((mo) => (
+            <label key={mo} className="flex min-h-11 cursor-pointer items-center gap-3 border-2 border-border-strong px-3 has-[:checked]:border-fg">
+              <input type="radio" name="motion" value={mo} checked={motion === mo} onChange={() => setMotion(mo)} className="size-5 accent-[var(--accent)]" />
+              {d.motion[mo]}
             </label>
           ))}
         </fieldset>
@@ -141,7 +150,7 @@ export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; spo
           {(['RIGHT', 'LEFT'] as const).map((h) => (
             <label key={h} className="flex min-h-11 cursor-pointer items-center gap-3 border-2 border-border-strong px-3 has-[:checked]:border-fg">
               <input type="radio" name="hand" value={h} checked={hand === h} onChange={() => setHand(h)} className="size-5 accent-[var(--accent)]" />
-              {h === 'RIGHT' ? 'Right' : 'Left'}
+              {h === 'RIGHT' ? m.right : m.left}
             </label>
           ))}
         </fieldset>
@@ -152,27 +161,22 @@ export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; spo
         checked={trackObject}
         disabled={busy}
         onChange={(e) => setTrackObject(e.target.checked)}
-        label={
-          <>
-            Also track the {PROJECTILE_NOUN[motion]} (beta). We estimate its direction and speed across the frame from the video. It is an estimate, it
-            works best with a bright {PROJECTILE_NOUN[motion]} against a plain background, and we may not find it at all.
-          </>
-        }
+        label={m.track(noun)}
       />
 
       <div className="flex flex-col gap-3">
-        <h3 className="font-bold">Filming checklist</h3>
+        <h3 className="font-bold">{m.checklist}</h3>
         <ul className="flex list-disc flex-col gap-1 pl-5 text-fg-muted">
-          <li>{FILMING_GUIDANCE[motion]}</li>
-          <li>Whole body in frame from start to finish, with no one else in the shot.</li>
-          <li>Use slow motion (120 or 240 frames per second) if your phone has it.</li>
-          <li>MP4 or MOV, up to {VIDEO_UPLOAD_POLICY.maxDurationMs / 1000} seconds and {VIDEO_UPLOAD_POLICY.maxBytes / MB} MB.</li>
+          <li>{m.filming[motion]}</li>
+          <li>{m.wholeBody}</li>
+          <li>{m.slowMo}</li>
+          <li>{m.format(VIDEO_UPLOAD_POLICY.maxDurationMs / 1000, VIDEO_UPLOAD_POLICY.maxBytes / MB)}</li>
         </ul>
       </div>
 
       <div className="flex flex-col gap-3">
         <label htmlFor="video-file" className="font-bold">
-          Video file
+          {m.file}
         </label>
         <input
           ref={inputRef}
@@ -185,7 +189,7 @@ export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; spo
           className="block w-full text-base file:mr-4 file:min-h-11 file:cursor-pointer file:border-2 file:border-border-strong file:bg-transparent file:px-4 file:font-bold file:text-fg hover:file:border-fg"
         />
         <label htmlFor="video-camera" className="font-bold">
-          Or record now <span className="font-normal text-fg-muted">(opens the camera on phones and tablets)</span>
+          {m.record} <span className="font-normal text-fg-muted">{m.recordHint}</span>
         </label>
         <input
           id="video-camera"
@@ -196,7 +200,7 @@ export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; spo
           onChange={(e) => onFileChosen(e.target.files?.[0])}
           className="block w-full text-base file:mr-4 file:min-h-11 file:cursor-pointer file:border-2 file:border-border-strong file:bg-transparent file:px-4 file:font-bold file:text-fg hover:file:border-fg"
         />
-        {phase === 'checking' && <Spinner label="Checking video" />}
+        {phase === 'checking' && <Spinner label={m.checking} />}
         {error && (
           <div id="video-error">
             <Alert tone="error" focusOnMount>
@@ -208,31 +212,31 @@ export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; spo
 
       {previewUrl && meta && (
         <div className="flex flex-col gap-2">
-          <video src={previewUrl} controls muted playsInline className="max-h-80 w-full bg-black object-contain" aria-label="Preview of the selected video" />
+          <video src={previewUrl} controls muted playsInline className="max-h-80 w-full bg-black object-contain" aria-label={m.preview} />
           <p className="tabular text-sm text-fg-muted">
             {(meta.durationMs / 1000).toFixed(1)} s, {meta.width} x {meta.height}, {(file!.size / MB).toFixed(1)} MB
           </p>
         </div>
       )}
 
-      {phase === 'uploading' && <ProgressBar value={progress} label="Uploading video" />}
-      {phase === 'finalizing' && <Spinner label="Checking the uploaded file" />}
+      {phase === 'uploading' && <ProgressBar value={progress} label={m.uploading} />}
+      {phase === 'finalizing' && <Spinner label={m.finalizing} />}
 
       <div className="flex flex-wrap gap-3">
         <ConfirmDialog
           trigger={
             <Button disabled={phase !== 'ready'}>
-              <UploadIcon /> Upload and analyze
+              <UploadIcon /> {m.start}
             </Button>
           }
-          title="Start this analysis?"
-          description={<p>This uses one of your {monthlyLimit} analyses for the month. Results usually take one to three minutes.</p>}
-          confirmLabel="Start analysis"
+          title={m.confirmTitle}
+          description={<p>{m.confirmBody(monthlyLimit)}</p>}
+          confirmLabel={m.confirm}
           onConfirm={startUpload}
         />
         {phase === 'uploading' && (
           <Button variant="secondary" onClick={() => abortRef.current?.abort()}>
-            Cancel upload
+            {m.cancel}
           </Button>
         )}
       </div>

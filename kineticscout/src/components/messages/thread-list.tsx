@@ -5,14 +5,19 @@ import Link from 'next/link'
 import { Alert } from '@/components/ui/alert'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Spinner } from '@/components/ui/spinner'
+import { useMessages } from '@/i18n/client'
+import { connectionsMessages } from '@/i18n/messages/connections'
+import { useServerText } from '@/i18n/server-text-client'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
 export function ThreadList({ emptyHint }: { emptyHint: string }) {
   const trpc = useTRPC()
   const threads = useQuery({ ...trpc.messages.list.queryOptions(), refetchInterval: 30_000 })
-  if (threads.isPending) return <Spinner label="Loading messages" />
+  const m = useMessages(connectionsMessages).messages
+  const serverText = useServerText()
+  if (threads.isPending) return <Spinner label={m.loading} />
   if (threads.isError) return <Alert tone="error">{errorMessage(threads.error)}</Alert>
-  if (threads.data.length === 0) return <EmptyState title="No conversations yet">{emptyHint}</EmptyState>
+  if (threads.data.length === 0) return <EmptyState title={m.emptyTitle}>{emptyHint}</EmptyState>
   return (
     <ul className="flex flex-col divide-y-2 divide-border-subtle border-2 border-border-subtle">
       {threads.data.map((t) => (
@@ -22,15 +27,13 @@ export function ThreadList({ emptyHint }: { emptyHint: string }) {
               <span className="font-bold underline">{t.withName}</span>
               <span className="text-sm text-fg-muted">
                 {t.unread > 0 ? (
-                  <span className="tabular font-bold text-fg">
-                    {t.unread} unread
-                  </span>
+                  <span className="tabular font-bold text-fg">{m.unread(t.unread)}</span>
                 ) : t.status === 'CLOSED' ? (
-                  'Ended'
+                  m.ended
                 ) : null}
               </span>
             </span>
-            <span className="text-sm text-fg-muted">{t.withDetail}</span>
+            <span className="text-sm text-fg-muted">{serverText(t.withDetail)}</span>
             {t.preview && <span className="truncate text-fg-muted">{t.preview}</span>}
           </Link>
         </li>

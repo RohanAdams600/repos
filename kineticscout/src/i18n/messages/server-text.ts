@@ -323,6 +323,8 @@ const PATTERNS: [RegExp, (m: RegExpMatchArray, t: (s: string) => string) => stri
   [/^Choose a (.+) for your sport\.$/, (m) => `Elige un movimiento de tu deporte (${m[1]}).`],
   [/^(.+) is too long$/, (m, t) => `${t(m[1]!)} es demasiado largo`],
   [/^Type (\S+) to confirm$/, (m) => `Escribe ${m[1]} para confirmar`],
+  [/^Your clip from (\d{4}-\d{2}-\d{2})$/, (m) => `Tu clip del ${m[1]}`],
+  [/^Class of (\d{4})$/, (m) => `Generación ${m[1]}`],
 ]
 
 const ES_VALID: Record<string, string> = { 'start date': 'una fecha de inicio válida', 'end date': 'una fecha de fin válida' }

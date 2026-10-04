@@ -1,8 +1,10 @@
-import { ANCHOR_LABELS, comparisonRows, SEGMENTS } from '@/lib/biomechanics/compare'
+'use client'
+
+import { useMessages } from '@/i18n/client'
+import { analysisMessages } from '@/i18n/messages/analysis'
+import { comparisonRows, SEGMENTS } from '@/lib/biomechanics/compare'
 import type { KinematicReport, SegmentName } from '@/lib/biomechanics/types'
 
-const SEGMENT_LABEL: Record<SegmentName, string> = { pelvis: 'Pelvis', torso: 'Torso', arm: 'Arm', hand: 'Hand' }
-const SEGMENT_MARK: Record<SegmentName, string> = { pelvis: 'P', torso: 'T', arm: 'A', hand: 'H' }
 
 /**
  * When each segment reached peak speed, relative to the shared sync event, for both clips. A good sequence
@@ -10,7 +12,10 @@ const SEGMENT_MARK: Record<SegmentName, string> = { pelvis: 'P', torso: 'T', arm
  */
 export function SequenceTimeline({ a, b, labelA, labelB }: { a: KinematicReport; b: KinematicReport; labelA: string; labelB: string }) {
   const { anchor, rows } = comparisonRows(a, b)
-  const anchorLabel = ANCHOR_LABELS[anchor?.event ?? 'HAND_PEAK']
+  const m = useMessages(analysisMessages).compare
+  const SEGMENT_LABEL: Record<SegmentName, string> = m.segment
+  const SEGMENT_MARK: Record<SegmentName, string> = m.mark
+  const anchorLabel = m.anchor[anchor?.event ?? 'HAND_PEAK']!
   const values = rows.flatMap((r) => [r.a, r.b]).filter((v): v is number => v !== null)
   const min = Math.min(0, ...values) - 40
   const max = Math.max(0, ...values) + 40
@@ -22,7 +27,7 @@ export function SequenceTimeline({ a, b, labelA, labelB }: { a: KinematicReport;
   ]
   return (
     <div className="flex flex-col gap-4">
-      <svg viewBox={`0 0 ${width} 150`} className="w-full" role="img" aria-label={`Peak speed timing of pelvis, torso, arm and hand for both clips, relative to ${anchorLabel}. Values are listed in the table below.`}>
+      <svg viewBox={`0 0 ${width} 150`} className="w-full" role="img" aria-label={m.svg(anchorLabel)}>
         <line x1={x(0)} x2={x(0)} y1={12} y2={136} stroke="currentColor" strokeWidth={2} strokeDasharray="4 4" />
         <text x={x(0)} y={148} textAnchor="middle" fontSize={11} fill="currentColor">
           {anchorLabel}
@@ -50,19 +55,19 @@ export function SequenceTimeline({ a, b, labelA, labelB }: { a: KinematicReport;
       </svg>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[480px] text-left">
-          <caption className="sr-only">Peak speed time relative to {anchorLabel}, in milliseconds</caption>
+          <caption className="sr-only">{m.tableCaption(anchorLabel)}</caption>
           <thead>
             <tr className="border-b-2 border-border-subtle">
-              <th scope="col" className="py-2 pr-4">Segment</th>
+              <th scope="col" className="py-2 pr-4">{m.colSegment}</th>
               <th scope="col" className="py-2 pr-4 text-right">{labelA}</th>
               <th scope="col" className="py-2 pr-4 text-right">{labelB}</th>
-              <th scope="col" className="py-2 text-right">Difference</th>
+              <th scope="col" className="py-2 text-right">{m.colDiff}</th>
             </tr>
           </thead>
           <tbody>
             {SEGMENTS.map((segment) => {
               const r = rows.find((row) => row.segment === segment)!
-              const fmt = (v: number | null) => (v === null ? 'n/a' : `${v > 0 ? '+' : ''}${v} ms`)
+              const fmt = (v: number | null) => (v === null ? m.na : `${v > 0 ? '+' : ''}${v} ms`)
               return (
                 <tr key={segment} className="border-b border-border-subtle">
                   <th scope="row" className="py-2 pr-4">
@@ -70,17 +75,14 @@ export function SequenceTimeline({ a, b, labelA, labelB }: { a: KinematicReport;
                   </th>
                   <td className="tabular py-2 pr-4 text-right">{fmt(r.a)}</td>
                   <td className="tabular py-2 pr-4 text-right">{fmt(r.b)}</td>
-                  <td className="tabular py-2 text-right">{r.differenceMs === null ? 'n/a' : `${r.differenceMs > 0 ? '+' : ''}${r.differenceMs} ms`}</td>
+                  <td className="tabular py-2 text-right">{r.differenceMs === null ? m.na : `${r.differenceMs > 0 ? '+' : ''}${r.differenceMs} ms`}</td>
                 </tr>
               )
             })}
           </tbody>
         </table>
       </div>
-      <p className="text-sm text-fg-muted">
-        Times are estimated from 2D video at each clip&apos;s frame rate, so differences under about one frame (33 ms at 30 fps) are within
-        measurement error. The order of the peaks matters more than the exact times.
-      </p>
+      <p className="text-sm text-fg-muted">{m.error}</p>
     </div>
   )
 }

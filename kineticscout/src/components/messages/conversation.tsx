@@ -10,9 +10,14 @@ import { Modal } from '@/components/ui/modal'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/cn'
 import { CLOSED_BY_LABEL, MESSAGE_POLICY } from '@/lib/messaging/rules'
+import { useLocale, useMessages } from '@/i18n/client'
+import { connectionsMessages } from '@/i18n/messages/connections'
+import { INTL_LOCALE, type Locale } from '@/i18n/config'
+import { useServerText } from '@/i18n/server-text-client'
+import { UiText } from '@/components/ui/ui-text'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
-const when = (iso: string) => new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+const when = (iso: string, locale: Locale) => new Date(iso).toLocaleString(INTL_LOCALE[locale], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
 
 function ReportMessage({ messageId }: { messageId: string }) {
   const trpc = useTRPC()
@@ -20,10 +25,11 @@ function ReportMessage({ messageId }: { messageId: string }) {
   const [reason, setReason] = useState('')
   const report = useMutation(trpc.messages.report.mutationOptions())
   const id = `report-${messageId}`
+  const m = useMessages(connectionsMessages).messages
   return (
     <>
       <Button size="sm" variant="ghost" onClick={() => setOpen(true)}>
-        Report
+        {m.report}
       </Button>
       <Modal
         open={open}
@@ -31,12 +37,12 @@ function ReportMessage({ messageId }: { messageId: string }) {
           setOpen(next)
           if (!next) report.reset()
         }}
-        title="Report this message"
-        description="Our staff read the message with the messages around it and can end the conversation or suspend a coach."
+        title={m.reportTitle}
+        description={m.reportIntro}
       >
         {report.isSuccess ? (
           <Alert tone="success" focusOnMount>
-            Thank you. Our staff will review it.
+            {m.reportThanks}
           </Alert>
         ) : (
           <form
@@ -48,11 +54,11 @@ function ReportMessage({ messageId }: { messageId: string }) {
           >
             {report.isError && <Alert tone="error">{errorMessage(report.error)}</Alert>}
             <label htmlFor={id} className="font-bold">
-              What is wrong? <span className="font-normal text-fg-muted">(required)</span>
+              {m.whatWrong} <span className="font-normal text-fg-muted"><UiText k="required" /></span>
             </label>
             <textarea id={id} rows={4} maxLength={1000} value={reason} onChange={(e) => setReason(e.target.value)} className={cn(inputClass, 'py-2')} />
             <Button type="submit" disabled={report.isPending} className="self-start">
-              Send report
+              {m.sendReport}
             </Button>
           </form>
         )}
@@ -74,52 +80,54 @@ export function Conversation({ threadId }: { threadId: string }) {
   const [body, setBody] = useState('')
   const [announcement, setAnnouncement] = useState('')
   const seen = useRef<number | null>(null)
+  const m = useMessages(connectionsMessages).messages
+  const locale = useLocale()
+  const serverText = useServerText()
+  const newFrom = m.newFrom
 
   // Announce messages that arrive while the page is open, without reading the whole list again.
   const incoming = thread.data?.messages.filter((m) => !m.mine).length ?? 0
   useEffect(() => {
     if (!thread.data) return
-    if (seen.current !== null && incoming > seen.current) setAnnouncement(`New message from ${thread.data.withName}`)
+    if (seen.current !== null && incoming > seen.current) setAnnouncement(newFrom(thread.data.withName))
     seen.current = incoming
-  }, [incoming, thread.data])
+  }, [incoming, thread.data, newFrom])
 
-  if (thread.isPending) return <Spinner label="Loading conversation" />
+  if (thread.isPending) return <Spinner label={m.loadingOne} />
   if (thread.isError) return <Alert tone="error">{errorMessage(thread.error)}</Alert>
   const t = thread.data
   const remaining = MESSAGE_POLICY.maxLength - body.length
 
   return (
     <div className="flex flex-col gap-6">
-      <p className="text-fg-muted">{t.withDetail}</p>
+      <p className="text-fg-muted">{serverText(t.withDetail)}</p>
       {t.guardianCopy && (
         <Alert tone="info">
-          {t.role === 'athlete'
-            ? 'Your parent or guardian gets a copy of every message in this conversation.'
-            : `${t.withName} is under 18. Their parent or guardian gets a copy of every message and can end the conversation. Keep to recruiting.`}
+          {t.role === 'athlete' ? m.athleteCopy : m.coachCopy(t.withName)}
         </Alert>
       )}
-      {t.status === 'CLOSED' && <Alert tone="info">{CLOSED_BY_LABEL[t.closedBy ?? 'staff'] ?? 'This conversation has ended.'}</Alert>}
+      {t.status === 'CLOSED' && <Alert tone="info">{CLOSED_BY_LABEL[t.closedBy ?? 'staff'] ?? m.ended2}</Alert>}
 
       <p className="sr-only" aria-live="polite">
         {announcement}
       </p>
       {t.messages.length === 0 ? (
-        <p className="text-fg-muted">No messages yet.</p>
+        <p className="text-fg-muted">{m.none}</p>
       ) : (
-        <ol aria-label="Messages" className="flex flex-col gap-3">
-          {t.messages.map((m) => (
-            <li key={m.id} className={cn('flex flex-col gap-2 border-2 p-4', m.mine ? 'border-fg' : 'border-border-subtle')}>
+        <ol aria-label={m.list} className="flex flex-col gap-3">
+          {t.messages.map((msg) => (
+            <li key={msg.id} className={cn('flex flex-col gap-2 border-2 p-4', msg.mine ? 'border-fg' : 'border-border-subtle')}>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <span className="font-bold">{m.mine ? 'You' : t.withName}</span>
+                <span className="font-bold">{msg.mine ? m.you : t.withName}</span>
                 <span className="tabular text-sm text-fg-muted">
-                  {when(m.createdAt)}
-                  {m.mine && m.read ? ' · Read' : ''}
+                  {when(msg.createdAt, locale)}
+                  {msg.mine && msg.read ? m.read : ''}
                 </span>
               </div>
-              <p className="break-words whitespace-pre-wrap">{m.body}</p>
-              {!m.mine && (
+              <p className="break-words whitespace-pre-wrap">{msg.body}</p>
+              {!msg.mine && (
                 <div className="self-end">
-                  <ReportMessage messageId={m.id} />
+                  <ReportMessage messageId={msg.id} />
                 </div>
               )}
             </li>
@@ -142,7 +150,7 @@ export function Conversation({ threadId }: { threadId: string }) {
             </Alert>
           )}
           <label htmlFor="message-body" className="font-bold">
-            Message <span className="font-normal text-fg-muted">(required)</span>
+            {m.message} <span className="font-normal text-fg-muted"><UiText k="required" /></span>
           </label>
           <textarea
             id="message-body"
@@ -154,18 +162,18 @@ export function Conversation({ threadId }: { threadId: string }) {
             className={cn(inputClass, 'py-2')}
           />
           <p id="message-body-count" className="tabular text-sm text-fg-muted">
-            {remaining} characters left
+            {m.left(remaining)}
           </p>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Button type="submit" disabled={send.isPending || body.trim().length === 0}>
-              {send.isPending ? <Spinner label="Sending" /> : null}
-              Send
+              {send.isPending ? <Spinner label={m.sending} /> : null}
+              {m.send}
             </Button>
             <ConfirmDialog
-              trigger={<Button variant="ghost">End conversation</Button>}
-              title="End this conversation?"
-              description="Neither of you can send more messages here. The messages stay visible to both of you."
-              confirmLabel="End conversation"
+              trigger={<Button variant="ghost">{m.end}</Button>}
+              title={m.endTitle}
+              description={m.endBody}
+              confirmLabel={m.end}
               tone="danger"
               onConfirm={() => close.mutate({ threadId })}
             />
