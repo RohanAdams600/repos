@@ -10,6 +10,9 @@ import { Field, Select, TextInput } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import { METRIC_DEFINITIONS } from '@/lib/metrics/definitions'
 import { OUTBOX_EVENT, queueEntry } from '@/lib/pwa/outbox'
+import { useMessages } from '@/i18n/client'
+import { domainMessages } from '@/i18n/messages/domain'
+import { metricsMessages } from '@/i18n/messages/metrics'
 import { errorMessage, isNetworkError, useTRPC } from '@/trpc/client'
 
 export function MetricLogForm({ metricTypes, remaining, userId }: { metricTypes: MetricType[]; remaining: number | null; userId: string }) {
@@ -23,15 +26,18 @@ export function MetricLogForm({ metricTypes, remaining, userId }: { metricTypes:
   const [saved, setSaved] = useState<string | null>(null)
   const [queued, setQueued] = useState<string | null>(null)
   const def = METRIC_DEFINITIONS[metricType]
+  const m = useMessages(metricsMessages).log
+  const d = useMessages(domainMessages)
+  const label = d.metric[metricType]
 
   /** No connection: keep it on this device; OutboxSync sends it when the device is back online. */
   function keepOffline(numeric: number, clientRef: string) {
     if (!queueEntry({ clientRef, userId, metricType, value: numeric, date })) {
-      setClientError('You are offline and this device cannot store the entry. Try again when you are back online.')
+      setClientError(m.offlineFull)
       return
     }
     mutation.reset()
-    setQueued(`No connection. ${def.label} of ${numeric.toFixed(def.decimals)} ${def.unit} is saved on this device and will be sent when you are back online.`)
+    setQueued(m.queued(m.entry(label, numeric.toFixed(def.decimals), def.unit)))
     setValue('')
     window.dispatchEvent(new Event(OUTBOX_EVENT))
   }
@@ -39,7 +45,7 @@ export function MetricLogForm({ metricTypes, remaining, userId }: { metricTypes:
   const mutation = useMutation(
     trpc.metrics.log.mutationOptions({
       onSuccess: () => {
-        setSaved(`${def.label} of ${Number(value).toFixed(def.decimals)} ${def.unit} saved.`)
+        setSaved(m.saved(m.entry(label, Number(value).toFixed(def.decimals), def.unit)))
         setValue('')
         router.refresh()
       },
@@ -57,7 +63,7 @@ export function MetricLogForm({ metricTypes, remaining, userId }: { metricTypes:
         setQueued(null)
         const numeric = Number(value)
         if (!value || !Number.isFinite(numeric) || numeric < def.min || numeric > def.max) {
-          setClientError(`Enter a ${def.label.toLowerCase()} between ${def.min} and ${def.max} ${def.unit}.`)
+          setClientError(m.range(label, def.min, def.max, def.unit))
           return
         }
         setClientError(null)
@@ -77,18 +83,18 @@ export function MetricLogForm({ metricTypes, remaining, userId }: { metricTypes:
       {saved && <Alert tone="success">{saved}</Alert>}
       {queued && <Alert tone="info">{queued}</Alert>}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Metric" name="metricType" required>
+        <Field label={m.metric} name="metricType" required>
           {(p) => (
             <Select {...p} value={metricType} onChange={(e) => setMetricType(e.target.value as MetricType)}>
               {metricTypes.map((t) => (
                 <option key={t} value={t}>
-                  {METRIC_DEFINITIONS[t].label} ({METRIC_DEFINITIONS[t].unit})
+                  {d.metric[t]} ({METRIC_DEFINITIONS[t].unit})
                 </option>
               ))}
             </Select>
           )}
         </Field>
-        <Field label={`Value (${def.unit})`} name="value" required error={clientError ?? undefined}>
+        <Field label={m.value(def.unit)} name="value" required error={clientError ?? undefined}>
           {(p) => (
             <TextInput
               {...p}
@@ -100,19 +106,17 @@ export function MetricLogForm({ metricTypes, remaining, userId }: { metricTypes:
             />
           )}
         </Field>
-        <Field label="Date measured" name="date" required>
+        <Field label={m.date} name="date" required>
           {(p) => <TextInput {...p} type="date" max={today} value={date} onChange={(e) => setDate(e.target.value)} />}
         </Field>
       </div>
       <div className="flex flex-wrap items-center gap-4">
         <Button type="submit" disabled={disabled}>
-          {mutation.isPending && <Spinner label="Saving" />}
-          {mutation.isPending ? 'Saving' : 'Log metric'}
+          {mutation.isPending && <Spinner label={m.saving} />}
+          {mutation.isPending ? m.saving : m.submit}
         </Button>
         {remaining !== null && (
-          <p className="text-sm text-fg-muted">
-            <span className="tabular">{remaining}</span> of 3 free entries left this month.
-          </p>
+          <p className="tabular text-sm text-fg-muted">{m.left(remaining)}</p>
         )}
       </div>
     </form>

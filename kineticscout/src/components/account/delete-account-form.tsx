@@ -8,10 +8,13 @@ import { Field, TextInput } from '@/components/ui/field'
 import { PasswordInput } from '@/components/ui/password-input'
 import { SubmitButton } from '@/components/ui/submit-button'
 import { cancelDeletionAction, deleteAccountAction } from '@/lib/account/actions'
+import { useMessages } from '@/i18n/client'
+import { authMessages } from '@/i18n/messages/auth'
 import { initialFormState } from '@/lib/forms'
 
 export function DeleteAccountForm() {
   const [state, action] = useActionState(deleteAccountAction, initialFormState)
+  const m = useMessages(authMessages).deleteAccount
   const formRef = useRef<HTMLFormElement>(null)
   const errors = state.status === 'error' ? state.fieldErrors : undefined
   const values = state.status === 'error' ? state.values : undefined
@@ -23,27 +26,23 @@ export function DeleteAccountForm() {
           {state.message}
         </Alert>
       )}
-      <Field label="Type DELETE to confirm" name="confirmation" required error={errors?.confirmation}>
+      <Field label={m.typeDelete} name="confirmation" required error={errors?.confirmation}>
         {(props) => <TextInput {...props} autoComplete="off" spellCheck={false} defaultValue={values?.confirmation} />}
       </Field>
-      <Field label="Your password" name="password" required error={errors?.password} hint="We ask again so nobody else can delete your account from an unlocked device.">
+      <Field label={m.yourPassword} name="password" required error={errors?.password} hint={m.passwordHint}>
         {(props) => <PasswordInput {...props} autoComplete="current-password" />}
       </Field>
       <ConfirmDialog
         tone="danger"
-        title="Delete your account?"
+        title={m.dialogTitle}
         description={
-          <p>
-            Your profile, metrics, videos, analyses and recruiting pipeline will be permanently deleted after 7 days, and any subscription
-            will end at that point. You can cancel the request from Settings until then. Consider downloading your data first, and see the
-            Refund Policy if you recently paid.
-          </p>
+          <p>{m.dialogBody}</p>
         }
-        confirmLabel="Delete my account"
+        confirmLabel={m.confirm}
         onConfirm={() => formRef.current?.requestSubmit()}
         trigger={
           <Button variant="danger" className="self-start">
-            Delete my account
+            {m.confirm}
           </Button>
         }
       />
@@ -53,6 +52,7 @@ export function DeleteAccountForm() {
 
 export function CancelDeletionForm() {
   const [state, action] = useActionState(cancelDeletionAction, initialFormState)
+  const m = useMessages(authMessages).deleteAccount
   return (
     <form action={action} className="flex flex-col gap-3">
       {state.status === 'error' && (
@@ -60,8 +60,8 @@ export function CancelDeletionForm() {
           {state.message}
         </Alert>
       )}
-      <SubmitButton pendingLabel="Canceling" className="self-start">
-        Keep my account
+      <SubmitButton pendingLabel={m.canceling} className="self-start">
+        {m.keep}
       </SubmitButton>
     </form>
   )

@@ -157,6 +157,18 @@ const ES: Record<string, string> = {
   'This analysis has no report to compare.': 'Este análisis no tiene un informe para comparar.',
   'That reference clip is not available.': 'Ese video de referencia no está disponible.',
 
+  'The file could not be read as a video.': 'No se pudo leer el archivo como video.',
+  'This video was already submitted for a different athlete.': 'Este video ya se envió para otro atleta.',
+  'The clip is longer than 60 seconds.': 'El clip dura más de 60 segundos.',
+  'The measured value is not clearly visible in the video.': 'El valor medido no se ve con claridad en el video.',
+  'The value shown in the video does not match the logged value.': 'El valor que aparece en el video no coincide con el valor registrado.',
+  'The video does not show this measurement.': 'El video no muestra esta medición.',
+  'The video could not be used to confirm this measurement.': 'No se pudo usar el video para confirmar esta medición.',
+  'The upload was interrupted. Check your connection and try again.': 'La carga se interrumpió. Revisa tu conexión e inténtalo de nuevo.',
+  'The upload took too long. Try a shorter clip or a faster connection.': 'La carga tardó demasiado. Prueba con un clip más corto o una conexión más rápida.',
+  'Storage rejected the file. It may be larger than declared, or the upload link expired. Start again.': 'El almacenamiento rechazó el archivo. Puede ser más grande de lo indicado, o el enlace de carga venció. Empieza de nuevo.',
+  'The upload failed. Try again in a moment.': 'La carga falló. Inténtalo de nuevo en un momento.',
+  'Upload canceled.': 'Carga cancelada.',
   // Recruiting, matchmaker, outreach
   'Add this program to your pipeline first.': 'Primero agrega este programa a tu lista.',
   'Pipeline entry not found.': 'No se encontró esa entrada de tu lista.',
@@ -203,6 +215,13 @@ const ES: Record<string, string> = {
   'You are sending messages too quickly. Try again later.': 'Estás enviando mensajes demasiado rápido. Inténtalo de nuevo más tarde.',
   'Tell us what is wrong in a sentence or two': 'Cuéntanos qué pasa en una o dos oraciones',
 
+  'The athlete ended this conversation.': 'El atleta terminó esta conversación.',
+  'The coach ended this conversation.': 'El entrenador terminó esta conversación.',
+  'A parent or guardian ended this conversation.': 'Un padre, una madre o un tutor terminó esta conversación.',
+  'This conversation ended because the athlete blocked the coach.': 'Esta conversación terminó porque el atleta bloqueó al entrenador.',
+  'This conversation ended because parental consent was withdrawn.': 'Esta conversación terminó porque se retiró el consentimiento parental.',
+  'This conversation ended because the coach account was suspended.': 'Esta conversación terminó porque se suspendió la cuenta del entrenador.',
+  'KineticScout staff ended this conversation.': 'El personal de KineticScout terminó esta conversación.',
   // Teams
   'Team not found.': 'No se encontró el equipo.',
   'Teams are for high school and travel coach accounts.': 'Los equipos son para cuentas de entrenador de high school o de club.',

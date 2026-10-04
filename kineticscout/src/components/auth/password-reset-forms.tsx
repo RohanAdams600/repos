@@ -7,14 +7,17 @@ import { PasswordInput } from '@/components/ui/password-input'
 import { SubmitButton } from '@/components/ui/submit-button'
 import { requestPasswordResetAction, updatePasswordAction } from '@/lib/auth/actions'
 import { initialFormState } from '@/lib/forms'
+import { useMessages } from '@/i18n/client'
+import { authMessages } from '@/i18n/messages/auth'
 import { PASSWORD_MIN_LENGTH } from '@/lib/validation/constants'
 
 export function RequestResetForm() {
   const [state, action] = useActionState(requestPasswordResetAction, initialFormState)
+  const t = useMessages(authMessages)
   const errors = state.status === 'error' ? (state.fieldErrors ?? {}) : {}
   if (state.status === 'success') {
     return (
-      <Alert tone="success" title="Check your email" focusOnMount>
+      <Alert tone="success" title={t.reset.checkEmail} focusOnMount>
         {state.message}
       </Alert>
     )
@@ -26,16 +29,17 @@ export function RequestResetForm() {
           {state.message}
         </Alert>
       )}
-      <Field label="Email" name="email" required error={errors.email}>
+      <Field label={t.email} name="email" required error={errors.email}>
         {(p) => <TextInput {...p} type="email" autoComplete="email" inputMode="email" defaultValue={state.status === 'error' ? state.values?.email : undefined} />}
       </Field>
-      <SubmitButton pendingLabel="Sending link">Send reset link</SubmitButton>
+      <SubmitButton pendingLabel={t.reset.sending}>{t.reset.send}</SubmitButton>
     </form>
   )
 }
 
 export function UpdatePasswordForm() {
   const [state, action] = useActionState(updatePasswordAction, initialFormState)
+  const t = useMessages(authMessages)
   const errors = state.status === 'error' ? (state.fieldErrors ?? {}) : {}
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
@@ -44,13 +48,13 @@ export function UpdatePasswordForm() {
           {state.message}
         </Alert>
       )}
-      <Field label="New password" name="password" required error={errors.password} hint={`At least ${PASSWORD_MIN_LENGTH} characters.`}>
+      <Field label={t.reset.newPassword} name="password" required error={errors.password} hint={t.reset.hint(PASSWORD_MIN_LENGTH)}>
         {(p) => <PasswordInput {...p} autoComplete="new-password" />}
       </Field>
-      <Field label="Confirm new password" name="confirmPassword" required error={errors.confirmPassword}>
+      <Field label={t.reset.confirm} name="confirmPassword" required error={errors.confirmPassword}>
         {(p) => <PasswordInput {...p} autoComplete="new-password" />}
       </Field>
-      <SubmitButton pendingLabel="Saving">Save new password</SubmitButton>
+      <SubmitButton pendingLabel={t.reset.saving}>{t.reset.save}</SubmitButton>
     </form>
   )
 }

@@ -1,11 +1,22 @@
 import type { Metadata } from 'next'
 import { LegalPage } from '@/components/legal-page'
+import { getLocale } from '@/i18n/server'
 import { businessDetails } from '@/lib/legal'
+import { RefundsEs } from './refunds-es'
 
-export const metadata: Metadata = { title: 'Refund Policy', alternates: { canonical: '/legal/refunds' } }
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getLocale()) === 'es' ? 'Política de reembolsos' : 'Refund Policy', alternates: { canonical: '/legal/refunds' } }
+}
 
-export default function RefundsPage() {
+export default async function RefundsPage() {
   const b = businessDetails()
+  if ((await getLocale()) === 'es') {
+    return (
+      <LegalPage title="Política de reembolsos">
+        <RefundsEs b={b} />
+      </LegalPage>
+    )
+  }
   return (
     <LegalPage title="Refund Policy">
       <ul>

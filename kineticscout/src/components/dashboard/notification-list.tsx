@@ -7,6 +7,8 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Spinner } from '@/components/ui/spinner'
+import { useMessages } from '@/i18n/client'
+import { accountMessages } from '@/i18n/messages/account'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
 export function NotificationList() {
@@ -17,19 +19,19 @@ export function NotificationList() {
   const items = query.data?.pages.flatMap((p) => p.items) ?? []
   const hasUnread = items.some((n) => n.readAt === null)
   const { mutate } = markAll
+  const t = useMessages(accountMessages)
+  const m = t.notifications
 
   // Opening the page counts as reading what is on it; unread items stay highlighted until the next visit.
   useEffect(() => {
     if (hasUnread) mutate()
   }, [hasUnread, mutate])
 
-  if (query.isPending) return <Spinner label="Loading notifications" />
+  if (query.isPending) return <Spinner label={m.loading} />
   if (query.isError) return <Alert tone="error">{errorMessage(query.error)}</Alert>
   if (items.length === 0) {
     return (
-      <EmptyState title="No notifications yet">
-        Verification results and recruiting alerts for programs you follow appear here.
-      </EmptyState>
+      <EmptyState title={m.emptyTitle}>{m.emptyBody}</EmptyState>
     )
   }
   return (
@@ -39,7 +41,7 @@ export function NotificationList() {
           <li key={n.id} className={n.readAt === null ? 'flex flex-col gap-1 border-l-4 border-l-accent-text p-4' : 'flex flex-col gap-1 p-4'}>
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <p className="font-bold">
-                {n.readAt === null && <span className="sr-only">New: </span>}
+                {n.readAt === null && <span className="sr-only">{m.new}</span>}
                 {n.title}
               </p>
               <time dateTime={n.createdAt} className="tabular text-sm text-fg-muted">
@@ -49,7 +51,7 @@ export function NotificationList() {
             <p className="text-fg-muted">{n.body}</p>
             {n.href && (
               <Link href={n.href} className="self-start font-bold">
-                Open
+                {m.open}
               </Link>
             )}
           </li>
@@ -57,7 +59,7 @@ export function NotificationList() {
       </ul>
       {query.hasNextPage && (
         <Button variant="secondary" onClick={() => query.fetchNextPage()} disabled={query.isFetchingNextPage} className="self-start">
-          {query.isFetchingNextPage ? 'Loading' : 'Load more'}
+          {query.isFetchingNextPage ? t.loading : t.loadMore}
         </Button>
       )}
     </div>

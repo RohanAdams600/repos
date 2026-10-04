@@ -5,22 +5,24 @@ import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { Alert } from '@/components/ui/alert'
 import { canPurchase, hasProAccess } from '@/lib/auth/permissions'
 import { requireUser } from '@/lib/auth/session'
+import { pick } from '@/i18n/define'
+import { accountMessages } from '@/i18n/messages/account'
+import { formatDay } from '@/i18n/messages/domain'
+import { getLocale, messages } from '@/i18n/server'
 import { db } from '@/lib/db'
 
-export const metadata: Metadata = { title: 'Plan and billing' }
-
-const MESSAGES: Record<string, { tone: 'success' | 'error' | 'info'; text: string }> = {
-  success: { tone: 'success', text: 'Payment received. Pro features unlock as soon as Stripe confirms the subscription, usually within a few seconds. Refresh if they are not available yet.' },
-  'already-subscribed': { tone: 'info', text: 'You already have an active subscription. Use the billing portal to change or cancel it.' },
-  'guardian-consent': { tone: 'error', text: 'A parent or guardian must give consent before a purchase can be made on this account.' },
-  'portal-unavailable': { tone: 'error', text: 'The billing portal is unavailable right now. Try again in a few minutes.' },
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await messages(accountMessages)).billing.title }
 }
 
 export default async function BillingPage({ searchParams }: PageProps<'/dashboard/billing'>) {
   const user = await requireUser('/dashboard/billing')
   const params = await searchParams
+  const locale = await getLocale()
+  const t = pick(accountMessages, locale)
+  const m = t.billing
   const key = [params.checkout, params.notice, params.error].find((v): v is string => typeof v === 'string')
-  const message = key ? MESSAGES[key] : undefined
+  const message = key ? m.notices[key] : undefined
   const subscription = await db.subscription.findFirst({
     where: { userId: user.id },
     orderBy: { updatedAt: 'desc' },
@@ -31,47 +33,48 @@ export default async function BillingPage({ searchParams }: PageProps<'/dashboar
   return (
     <div className="flex max-w-2xl flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Plan and billing' }]} />
-        <h1 className="text-3xl font-bold">Plan and billing</h1>
+        <Breadcrumbs items={[{ label: t.dashboard, href: '/dashboard' }, { label: m.title }]} />
+        <h1 className="text-3xl font-bold">{m.title}</h1>
       </div>
       {message && <Alert tone={message.tone}>{message.text}</Alert>}
 
       <section aria-labelledby="plan-title" className="flex flex-col gap-3 border-2 border-border-subtle p-6">
         <h2 id="plan-title" className="text-xl font-bold">
-          Current plan: {pro ? 'Pro Prospect' : 'Scout (free)'}
+          {m.current(pro)}
         </h2>
         {subscription && (
           <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
-            <dt className="text-fg-muted">Status</dt>
-            <dd>{subscription.status.replace('_', ' ').toLowerCase()}</dd>
-            <dt className="text-fg-muted">Billing</dt>
-            <dd>{subscription.interval === 'YEAR' ? 'Yearly' : 'Monthly'}</dd>
+            <dt className="text-fg-muted">{m.status}</dt>
+            <dd>{m.statuses[subscription.status] ?? subscription.status}</dd>
+            <dt className="text-fg-muted">{m.billing}</dt>
+            <dd>{subscription.interval === 'YEAR' ? m.yearly : m.monthly}</dd>
             {subscription.currentPeriodEnd && (
               <>
-                <dt className="text-fg-muted">{subscription.cancelAtPeriodEnd ? 'Access ends' : 'Renews'}</dt>
-                <dd className="tabular">{subscription.currentPeriodEnd.toISOString().slice(0, 10)}</dd>
+                <dt className="text-fg-muted">{subscription.cancelAtPeriodEnd ? m.ends : m.renews}</dt>
+                <dd className="tabular">{formatDay(subscription.currentPeriodEnd, locale)}</dd>
               </>
             )}
           </dl>
         )}
         {subscription?.status === 'PAST_DUE' && (
-          <Alert tone="error">Your last payment failed. Update your card in the billing portal to keep Pro access.</Alert>
+          <Alert tone="error">{m.pastDue}</Alert>
         )}
         {pro || subscription ? (
           <div className="flex flex-col gap-2">
             <ManageBillingForm />
-            <p className="text-sm text-fg-muted">Change plan, update your card, download invoices, or cancel in one step. Cancelling keeps Pro until the end of the paid period.</p>
+            <p className="text-sm text-fg-muted">{m.manageNote}</p>
           </div>
         ) : canPurchase(user) ? (
           <ProCheckoutForms />
         ) : user.role === 'GUARDIAN' || user.role === 'TEAM_COACH' ? (
-          <Alert tone="info">Pro unlocks athlete tools, so it is bought on the athlete&apos;s own account. A parent or guardian can complete the payment there once consent is given.</Alert>
+          <Alert tone="info">{m.athleteOnly}</Alert>
         ) : (
-          <Alert tone="info">A parent or guardian must give consent before a purchase can be made. They should also be the one to complete the payment.</Alert>
+          <Alert tone="info">{m.needConsent}</Alert>
         )}
       </section>
       <p className="text-sm text-fg-muted">
-        See the <Link href="/legal/refunds">Refund Policy</Link>. Payments are processed by Stripe; KineticScout never sees or stores your card number.
+        {m.see} <Link href="/legal/refunds">{m.refunds}</Link>
+        {m.stripe}
       </p>
     </div>
   )

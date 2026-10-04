@@ -11,12 +11,13 @@ import { escapeHtml } from '@/lib/security/sanitize'
 const CONSENT_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 /** Stores the guardian address at sign-up without emailing yet (the teen has not confirmed their own email). */
-export async function recordGuardianContact(userId: string, guardianEmail: string): Promise<void> {
+export async function recordGuardianContact(userId: string, guardianEmail: string, locale: 'en' | 'es' = 'en'): Promise<void> {
   await db.guardianConsent.upsert({
     where: { userId },
     create: {
       userId,
       guardianEmail,
+      locale,
       tokenHash: sha256Hex(randomToken()),
       status: 'PENDING',
       expiresAt: new Date(),

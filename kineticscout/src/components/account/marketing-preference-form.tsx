@@ -5,6 +5,8 @@ import { Alert } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/field'
 import { SubmitButton } from '@/components/ui/submit-button'
 import { updateMarketingPreferenceAction, updatePreferencesByLinkAction } from '@/lib/account/actions'
+import { useMessages } from '@/i18n/client'
+import { accountMessages } from '@/i18n/messages/account'
 import { initialFormState } from '@/lib/forms'
 
 type Props = { optedIn: boolean; disabled?: boolean } & ({ mode: 'settings' } | { mode: 'link'; userId: string; token: string })
@@ -12,6 +14,7 @@ type Props = { optedIn: boolean; disabled?: boolean } & ({ mode: 'settings' } | 
 /** One checkbox, unticked means no product email. Saving is explicit; nothing changes on page load. */
 export function MarketingPreferenceForm(props: Props) {
   const [state, action] = useActionState(props.mode === 'settings' ? updateMarketingPreferenceAction : updatePreferencesByLinkAction, initialFormState)
+  const t = useMessages(accountMessages)
   return (
     <form action={action} className="flex flex-col gap-4">
       {state.status === 'error' && (
@@ -34,10 +37,10 @@ export function MarketingPreferenceForm(props: Props) {
         name="marketing"
         defaultChecked={props.optedIn}
         disabled={props.disabled}
-        label="Send me occasional product news and training tips (about twice a month at most)."
+        label={t.marketing.label}
       />
-      <SubmitButton pendingLabel="Saving" className="self-start">
-        Save email preferences
+      <SubmitButton pendingLabel={t.saving} className="self-start">
+        {t.marketing.save}
       </SubmitButton>
     </form>
   )

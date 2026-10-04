@@ -1,12 +1,23 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LegalPage } from '@/components/legal-page'
+import { getLocale } from '@/i18n/server'
 import { businessDetails } from '@/lib/legal'
+import { TermsEs } from './terms-es'
 
-export const metadata: Metadata = { title: 'Terms of Service', alternates: { canonical: '/legal/terms' } }
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getLocale()) === 'es' ? 'Términos del servicio' : 'Terms of Service', alternates: { canonical: '/legal/terms' } }
+}
 
-export default function TermsPage() {
+export default async function TermsPage() {
   const b = businessDetails()
+  if ((await getLocale()) === 'es') {
+    return (
+      <LegalPage title="Términos del servicio">
+        <TermsEs b={b} />
+      </LegalPage>
+    )
+  }
   return (
     <LegalPage title="Terms of Service">
       <p>
@@ -183,6 +194,12 @@ export default function TermsPage() {
         The service is provided as is. To the extent the law allows, we are not liable for indirect or consequential losses, and our total
         liability is limited to the amount you paid us in the 12 months before the claim. Nothing in these terms limits rights you have under
         consumer protection law that cannot be waived.
+      </p>
+
+      <h2>Translations</h2>
+      <p>
+        These terms and our other policies may be offered in Spanish as a courtesy. The English version governs; if the two versions differ, the
+        English version applies.
       </p>
 
       <h2>Governing law</h2>

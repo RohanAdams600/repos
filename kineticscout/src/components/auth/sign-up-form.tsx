@@ -3,15 +3,21 @@
 import Link from 'next/link'
 import { useActionState } from 'react'
 import { Alert } from '@/components/ui/alert'
-import { Checkbox, Field, TextInput } from '@/components/ui/field'
+import { Checkbox, Field, Select, TextInput } from '@/components/ui/field'
 import { PasswordInput } from '@/components/ui/password-input'
 import { SubmitButton } from '@/components/ui/submit-button'
 import { signUpAction } from '@/lib/auth/actions'
 import { initialFormState } from '@/lib/forms'
+import { useLocale, useMessages } from '@/i18n/client'
+import { SPANISH_ENABLED } from '@/i18n/config'
+import { authMessages } from '@/i18n/messages/auth'
 import { PASSWORD_MIN_LENGTH } from '@/lib/validation/constants'
 
 export function SignUpForm() {
   const [state, action] = useActionState(signUpAction, initialFormState)
+  const t = useMessages(authMessages)
+  const m = t.signUp
+  const locale = useLocale()
   const errors = state.status === 'error' ? (state.fieldErrors ?? {}) : {}
   const values = state.status === 'error' ? (state.values ?? {}) : {}
   const today = new Date().toISOString().slice(0, 10)
@@ -26,16 +32,9 @@ export function SignUpForm() {
 
       <fieldset className="flex flex-col gap-3" aria-describedby={errors.accountType ? 'account-type-error' : undefined}>
         <legend className="mb-2 font-bold">
-          I am a <span className="font-normal text-fg-muted">(required)</span>
+          {m.iAmA} <span className="font-normal text-fg-muted">{m.required}</span>
         </legend>
-        {(
-          [
-            ['ATHLETE', 'Athlete', 'Track your numbers and find programs that fit.'],
-            ['COACH', 'College coach', 'Adults only. We verify your school email and staff listing before you can search or contact athletes.'],
-            ['TEAM_COACH', 'High school or travel coach', 'Adults only. We check your school or club staff page before players can join your team.'],
-            ['GUARDIAN', 'Parent or guardian', 'Adults only. Sign up with the email address your athlete listed for you to see and manage their account.'],
-          ] as const
-        ).map(([value, label, description]) => (
+        {m.types.map(([value, label, description]) => (
           <label key={value} className="flex cursor-pointer items-start gap-3 border-2 border-border-strong p-3 has-[:checked]:border-fg">
             <input type="radio" name="accountType" value={value} defaultChecked={(values.accountType ?? 'ATHLETE') === value} className="mt-1 size-5 accent-[var(--accent)]" />
             <span>
@@ -51,23 +50,33 @@ export function SignUpForm() {
         )}
       </fieldset>
 
-      <Field label="Email" name="email" required error={errors.email}>
+      <Field label={t.email} name="email" required error={errors.email}>
         {(p) => <TextInput {...p} type="email" autoComplete="email" inputMode="email" defaultValue={values.email} />}
       </Field>
-      <Field label="Password" name="password" required error={errors.password} hint={`At least ${PASSWORD_MIN_LENGTH} characters. A short sentence works well.`}>
+      <Field label={t.password} name="password" required error={errors.password} hint={m.passwordHint(PASSWORD_MIN_LENGTH)}>
         {(p) => <PasswordInput {...p} autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} />}
       </Field>
-      <Field label="Date of birth" name="dateOfBirth" required error={errors.dateOfBirth}>
+      <Field label={m.dob} name="dateOfBirth" required error={errors.dateOfBirth}>
         {(p) => <TextInput {...p} type="date" max={today} autoComplete="bday" defaultValue={values.dateOfBirth} />}
       </Field>
       <Field
-        label="Parent or guardian email"
+        label={m.guardianEmail}
         name="guardianEmail"
         error={errors.guardianEmail}
-        hint="Only if you are under 18. We ask them to approve before your profile can be public or a purchase can be made."
+        hint={m.guardianHint}
       >
         {(p) => <TextInput {...p} type="email" autoComplete="off" inputMode="email" defaultValue={values.guardianEmail} />}
       </Field>
+      {SPANISH_ENABLED && (
+        <Field label={m.guardianLanguage} name="guardianLocale">
+          {(p) => (
+            <Select {...p} defaultValue={values.guardianLocale ?? locale}>
+              <option value="en" lang="en">English</option>
+              <option value="es" lang="es">Español</option>
+            </Select>
+          )}
+        </Field>
+      )}
 
       <Checkbox
         name="acceptTerms"
@@ -75,15 +84,15 @@ export function SignUpForm() {
         error={errors.acceptTerms}
         label={
           <>
-            I agree to the <Link href="/legal/terms">Terms of Service</Link> and have read the <Link href="/legal/privacy">Privacy Policy</Link>.
+            {m.agree} <Link href="/legal/terms">{m.terms}</Link> {m.andRead} <Link href="/legal/privacy">{m.privacy}</Link>.
           </>
         }
       />
-      <Checkbox name="marketingOptIn" label="Email me product news and training content. You can unsubscribe at any time." />
+      <Checkbox name="marketingOptIn" label={m.marketing} />
 
-      <SubmitButton pendingLabel="Creating account">Create account</SubmitButton>
+      <SubmitButton pendingLabel={m.pending}>{m.submit}</SubmitButton>
       <p className="text-sm">
-        Already have an account? <Link href="/sign-in">Sign in</Link>
+        {m.already} <Link href="/sign-in">{t.signIn.submit}</Link>
       </p>
     </form>
   )

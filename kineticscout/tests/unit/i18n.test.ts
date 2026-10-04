@@ -3,6 +3,9 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { localeFromAcceptLanguage } from '@/i18n/config'
 import { hasPattern, SERVER_TEXT_ES, translateServerText } from '@/i18n/messages/server-text'
+import { CLOSED_BY_LABEL } from '@/lib/messaging/rules'
+import { UPLOAD_ERRORS } from '@/lib/upload/put'
+import { REJECTION_LABELS } from '@/lib/verification/policy'
 
 describe('language detection', () => {
   it('follows Accept-Language preferences and falls back to English', () => {
@@ -76,5 +79,12 @@ describe('server messages in Spanish', () => {
       }
     }
     expect(missing).toEqual([])
+  })
+})
+
+describe('label maps shown through the server text translator', () => {
+  it('has Spanish for every closed-conversation, rejection and upload message', () => {
+    const texts = [...Object.values(CLOSED_BY_LABEL), ...Object.values(REJECTION_LABELS), ...Object.values(UPLOAD_ERRORS)]
+    expect(texts.filter((t) => !(t in SERVER_TEXT_ES))).toEqual([])
   })
 })

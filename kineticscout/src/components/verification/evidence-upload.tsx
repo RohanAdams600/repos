@@ -10,6 +10,8 @@ import { Spinner } from '@/components/ui/spinner'
 import { putWithProgress, UPLOAD_ERRORS } from '@/lib/upload/put'
 import { isAllowedVideoType } from '@/lib/storage/video-files'
 import { EVIDENCE_POLICY } from '@/lib/verification/policy'
+import { useMessages } from '@/i18n/client'
+import { metricsMessages } from '@/i18n/messages/metrics'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
 /** Label styled as a button for a visually hidden file input; shows focus when the input has it. */
@@ -27,12 +29,13 @@ export function EvidenceUpload({ metricId, metricLabel, onDone }: { metricId: st
   const [error, setError] = useState<string | null>(null)
   const controller = useRef<AbortController | null>(null)
   const inputId = `evidence-${metricId}`
+  const m = useMessages(metricsMessages).evidence
 
   async function upload(file: File | undefined) {
     if (!file) return
     setError(null)
-    if (!isAllowedVideoType(file.type)) return setError('Choose an MP4 or MOV video.')
-    if (file.size > EVIDENCE_POLICY.maxBytes) return setError('The clip must be 60 MB or smaller. Trim it to the moment of the measurement.')
+    if (!isAllowedVideoType(file.type)) return setError(m.type)
+    if (file.size > EVIDENCE_POLICY.maxBytes) return setError(m.size)
     try {
       setPhase('uploading')
       const { upload } = await createUpload.mutateAsync({ metricId, contentType: file.type, sizeBytes: file.size })
@@ -52,7 +55,7 @@ export function EvidenceUpload({ metricId, metricLabel, onDone }: { metricId: st
   if (phase === 'done') {
     return (
       <Alert tone="success" focusOnMount>
-        Video received. We run automatic checks first, then a reviewer confirms the value, usually within 2 business days.
+        {m.received}
       </Alert>
     )
   }
@@ -60,41 +63,38 @@ export function EvidenceUpload({ metricId, metricLabel, onDone }: { metricId: st
   return (
     <div className="flex flex-col gap-4 border-2 border-border-subtle p-4">
       <div className="flex flex-col gap-2 text-fg-muted">
-        <p>
-          Send one clip that shows this {metricLabel.toLowerCase()} being measured. A reviewer must be able to read the value on screen, for
-          example:
-        </p>
+        <p>{m.intro(metricLabel)}</p>
         <ul className="flex list-disc flex-col gap-1 pl-5">
-          <li>the radar gun, Pocket Radar or launch monitor display, filmed together with the swing, throw or shot;</li>
-          <li>for timed runs, the full run with the timing system or a visible stopwatch;</li>
-          <li>an official showcase results screen or sheet with your name.</li>
+          {m.examples.map((example) => (
+            <li key={example}>{example}</li>
+          ))}
         </ul>
-        <p className="text-sm">MP4 or MOV, up to 60 seconds and 60 MB. The video is reviewed privately, never shown on your profile, and deleted 30 days after the decision.</p>
+        <p className="text-sm">{m.rules}</p>
       </div>
       {error && (
         <Alert tone="error" focusOnMount>
           {error}
         </Alert>
       )}
-      {phase === 'uploading' && <ProgressBar value={progress} label="Uploading video" />}
-      {phase === 'finalizing' && <Spinner label="Checking the upload" />}
+      {phase === 'uploading' && <ProgressBar value={progress} label={m.uploading} />}
+      {phase === 'finalizing' && <Spinner label={m.finalizing} />}
       {(phase === 'idle' || phase === 'error') && (
         <div className="flex flex-wrap gap-3">
           <label htmlFor={inputId} className={PICKER}>
             <UploadIcon />
-            Choose video
+            {m.choose}
           </label>
           <input id={inputId} type="file" accept="video/mp4,video/quicktime" className="sr-only" onChange={(e) => void upload(e.target.files?.[0])} />
           {/* On phones and tablets this opens the camera directly; elsewhere it behaves like Choose video. */}
           <label htmlFor={`${inputId}-camera`} className={PICKER}>
-            Record now
+            {m.record}
           </label>
           <input id={`${inputId}-camera`} type="file" accept="video/*" capture="environment" className="sr-only" onChange={(e) => void upload(e.target.files?.[0])} />
         </div>
       )}
       {phase === 'uploading' && (
         <Button variant="secondary" size="sm" className="self-start" onClick={() => controller.current?.abort()}>
-          Cancel upload
+          {m.cancel}
         </Button>
       )}
     </div>

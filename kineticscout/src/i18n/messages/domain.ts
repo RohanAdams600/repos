@@ -1,3 +1,4 @@
+import { ordinal } from '@/lib/metrics/percentile'
 import type { EventKind, MetricType, MotionType, Position, RecruitingPeriodKind, Sport } from '@/generated/prisma/enums'
 import type { Locale } from '@/i18n/config'
 import { INTL_LOCALE } from '@/i18n/config'
@@ -167,4 +168,9 @@ export function formatDay(date: Date, locale: Locale, style: 'long' | 'short' = 
 export function formatDayRange(start: Date, end: Date, locale: Locale): string {
   if (start.getTime() === end.getTime()) return formatDay(start, locale)
   return `${formatDay(start, locale)} ${locale === 'es' ? 'al' : 'to'} ${formatDay(end, locale)}`
+}
+
+/** A class percentile as a short label: "90th" in English, "percentil 90" in Spanish. */
+export function percentileLabel(n: number, locale: Locale): string {
+  return locale === 'es' ? `percentil ${n}` : ordinal(n)
 }

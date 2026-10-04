@@ -9,14 +9,21 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Spinner } from '@/components/ui/spinner'
-import { METRIC_DEFINITIONS, formatMetric } from '@/lib/metrics/definitions'
+import { formatMetric } from '@/lib/metrics/definitions'
 import { REJECTION_LABELS } from '@/lib/verification/policy'
+import { useMessages } from '@/i18n/client'
+import { domainMessages } from '@/i18n/messages/domain'
+import { metricsMessages } from '@/i18n/messages/metrics'
+import { useServerText } from '@/i18n/server-text-client'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
 export function MeasurementList() {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState<string | null>(null)
+  const m = useMessages(metricsMessages).list
+  const d = useMessages(domainMessages)
+  const serverText = useServerText()
   const query = useInfiniteQuery(
     trpc.metrics.entries.infiniteQueryOptions(
       { limit: 20 },
@@ -29,15 +36,15 @@ export function MeasurementList() {
   const items = query.data?.pages.flatMap((p) => p.items) ?? []
   const refresh = () => queryClient.invalidateQueries({ queryKey: trpc.metrics.entries.queryKey() })
 
-  if (query.isPending) return <Spinner label="Loading measurements" />
+  if (query.isPending) return <Spinner label={m.loading} />
   if (query.isError) return <Alert tone="error">{errorMessage(query.error)}</Alert>
-  if (items.length === 0) return <EmptyState title="No measurements yet">Log a measurement from your dashboard, then come back to verify it.</EmptyState>
+  if (items.length === 0) return <EmptyState title={m.emptyTitle}>{m.emptyBody}</EmptyState>
 
   return (
     <div className="flex flex-col gap-4">
       <ul className="flex flex-col divide-y-2 divide-border-subtle border-2 border-border-subtle">
         {items.map((item) => {
-          const label = METRIC_DEFINITIONS[item.metricType].label
+          const label = d.metric[item.metricType]
           const status = item.verification?.status
           const canSubmit = !item.verified && status !== 'CHECKING' && status !== 'IN_REVIEW'
           return (
@@ -46,8 +53,8 @@ export function MeasurementList() {
                 <div className="flex min-w-0 flex-col">
                   <span className="font-bold">{label}</span>
                   <span className="text-sm text-fg-muted">
-                    Measured <span className="tabular">{item.date}</span>
-                    {item.coachRecorded && item.recordedBy ? <> · Recorded by {item.recordedBy.replace(/ on \d{4}-\d{2}-\d{2}$/, '')}</> : null}
+                    {m.measured} <span className="tabular">{item.date}</span>
+                    {item.coachRecorded && item.recordedBy ? m.recordedBy(item.recordedBy.replace(/ on \d{4}-\d{2}-\d{2}$/, '')) : null}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -55,21 +62,21 @@ export function MeasurementList() {
                   {item.verified && <VerifiedBadge />}
                   {item.coachRecorded && <CoachRecordedBadge />}
                   {item.verified ? null : status === 'CHECKING' ? (
-                    <span className="text-sm">Checking video</span>
+                    <span className="text-sm">{m.checking}</span>
                   ) : status === 'IN_REVIEW' ? (
-                    <span className="text-sm">Waiting for review</span>
+                    <span className="text-sm">{m.waiting}</span>
                   ) : null}
                   {canSubmit && (
                     <Button size="sm" variant="secondary" aria-expanded={open === item.id} onClick={() => setOpen(open === item.id ? null : item.id)}>
-                      {open === item.id ? 'Close' : status === 'REJECTED' ? 'Send a new video' : 'Verify with video'}
+                      {open === item.id ? m.close : status === 'REJECTED' ? m.resend : m.verify}
                     </Button>
                   )}
                 </div>
               </div>
               {status === 'REJECTED' && item.verification?.rejectionReason && (
                 <p className="text-sm text-fg-muted">
-                  Not verified: {REJECTION_LABELS[item.verification.rejectionReason]}
-                  {item.verification.reviewerNote ? ` Reviewer note: ${item.verification.reviewerNote}` : ''}
+                  {m.notVerified} {serverText(REJECTION_LABELS[item.verification.rejectionReason])}
+                  {item.verification.reviewerNote ? m.reviewerNote(item.verification.reviewerNote) : ''}
                 </p>
               )}
               {open === item.id && canSubmit && (
@@ -87,7 +94,7 @@ export function MeasurementList() {
       </ul>
       {query.hasNextPage && (
         <Button variant="secondary" onClick={() => query.fetchNextPage()} disabled={query.isFetchingNextPage} className="self-start">
-          {query.isFetchingNextPage ? 'Loading' : 'Load more'}
+          {query.isFetchingNextPage ? m.loadingMore : m.loadMore}
         </Button>
       )}
     </div>

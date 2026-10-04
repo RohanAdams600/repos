@@ -39,6 +39,7 @@ export const signUpSchema = z
     password: passwordSchema,
     dateOfBirth: dateOfBirthSchema,
     guardianEmail: z.preprocess(emptyToUndefined, emailSchema.optional()),
+    guardianLocale: z.preprocess(emptyToUndefined, z.enum(['en', 'es']).optional()),
     acceptTerms: z.literal('on', { error: 'Accept the Terms of Service and Privacy Policy to continue' }),
     marketingOptIn: z.preprocess(emptyToUndefined, z.literal('on').optional()),
   })
@@ -66,6 +67,7 @@ export const accountCompletionSchema = z.object({
   accountType: z.enum(['ATHLETE', 'COACH', 'TEAM_COACH', 'GUARDIAN'], { error: 'Choose an account type' }),
   dateOfBirth: dateOfBirthSchema,
   guardianEmail: z.preprocess(emptyToUndefined, emailSchema.optional()),
+  guardianLocale: z.preprocess(emptyToUndefined, z.enum(['en', 'es']).optional()),
   acceptTerms: z.literal('on', { error: 'Accept the Terms of Service and Privacy Policy to continue' }),
   marketingOptIn: z.preprocess(emptyToUndefined, z.literal('on').optional()),
 })

@@ -1,17 +1,23 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { AuthShell } from '@/components/auth/auth-shell'
+import { authMessages } from '@/i18n/messages/auth'
+import { messages } from '@/i18n/server'
 
-export const metadata: Metadata = { title: 'Check your email', robots: { index: false } }
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await messages(authMessages)).checkEmail.title, robots: { index: false } }
+}
 
-export default function CheckEmailPage() {
+export default async function CheckEmailPage() {
+  const t = await messages(authMessages)
+  const m = t.checkEmail
   return (
-    <AuthShell title="Check your email">
+    <AuthShell title={m.title}>
       <div className="flex flex-col gap-4 text-fg-muted">
-        <p>We sent a confirmation link to the address you entered. Open it on this device to finish setting up your profile.</p>
-        <p>The link expires in 24 hours. If nothing arrives within a few minutes, check your spam folder.</p>
+        <p>{m.sent}</p>
+        <p>{m.expires}</p>
         <p>
-          Already confirmed? <Link href="/sign-in">Sign in</Link>
+          {m.already} <Link href="/sign-in">{t.signIn.submit}</Link>
         </p>
       </div>
     </AuthShell>

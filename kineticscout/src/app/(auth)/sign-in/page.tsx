@@ -2,21 +2,21 @@ import type { Metadata } from 'next'
 import { AuthShell } from '@/components/auth/auth-shell'
 import { SignInForm } from '@/components/auth/sign-in-form'
 import { Alert } from '@/components/ui/alert'
+import { authMessages } from '@/i18n/messages/auth'
+import { messages } from '@/i18n/server'
 import { safeRedirectPath } from '@/lib/security/origin'
 
-export const metadata: Metadata = { title: 'Sign in', robots: { index: false } }
-
-const NOTICES: Record<string, string> = {
-  'link-expired': 'That link has expired or was already used. Sign in, or request a new link.',
-  'email-confirmed': 'Your email is confirmed. Sign in to continue.',
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await messages(authMessages)).signIn.title, robots: { index: false } }
 }
 
 export default async function SignInPage({ searchParams }: PageProps<'/sign-in'>) {
   const params = await searchParams
+  const m = (await messages(authMessages)).signIn
   const next = typeof params.next === 'string' ? safeRedirectPath(params.next) : undefined
-  const notice = typeof params.notice === 'string' ? NOTICES[params.notice] : undefined
+  const notice = typeof params.notice === 'string' ? m.notices[params.notice] : undefined
   return (
-    <AuthShell title="Sign in">
+    <AuthShell title={m.title}>
       {notice && <Alert tone="info">{notice}</Alert>}
       <SignInForm next={next} />
     </AuthShell>

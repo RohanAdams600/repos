@@ -6,6 +6,8 @@ import { Checkbox, Field, TextInput } from '@/components/ui/field'
 import { SubmitButton } from '@/components/ui/submit-button'
 import { guardianManageAction, requestGuardianLinksAction } from '@/lib/auth/guardian-actions'
 import { initialFormState } from '@/lib/forms'
+import { useMessages } from '@/i18n/client'
+import { consentMessages } from '@/i18n/messages/consent'
 
 type Intent = 'revoke' | 'regrant' | 'delete' | 'cancel-deletion'
 
@@ -58,6 +60,7 @@ export function GuardianManageForm({ token, intent, title, description, submitLa
 
 export function GuardianLinkRequestForm() {
   const [state, action] = useActionState(requestGuardianLinksAction, initialFormState)
+  const m = useMessages(consentMessages).manage.linkForm
   if (state.status === 'success') {
     return (
       <Alert tone="success" focusOnMount>
@@ -73,11 +76,11 @@ export function GuardianLinkRequestForm() {
           {state.message}
         </Alert>
       )}
-      <Field label="Your email address" name="email" required error={state.status === 'error' ? state.fieldErrors?.email : undefined} hint="Use the address that received the original consent request.">
+      <Field label={m.email} name="email" required error={state.status === 'error' ? state.fieldErrors?.email : undefined} hint={m.hint}>
         {(props) => <TextInput {...props} type="email" autoComplete="email" defaultValue={values?.email} />}
       </Field>
-      <SubmitButton pendingLabel="Sending" className="self-start">
-        Email me a management link
+      <SubmitButton pendingLabel={m.pending} className="self-start">
+        {m.submit}
       </SubmitButton>
     </form>
   )

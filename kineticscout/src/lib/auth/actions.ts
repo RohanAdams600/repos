@@ -20,6 +20,7 @@ import { pepperedHash } from '@/lib/security/hash'
 import { safeRedirectPath } from '@/lib/security/origin'
 import { rateLimit } from '@/lib/security/rate-limit'
 import { hashedClientIp } from '@/lib/security/request'
+import { getLocale } from '@/i18n/server'
 import {
   accountCompletionSchema,
   passwordResetRequestSchema,
@@ -78,6 +79,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     return { status: 'error', message: 'Check the highlighted fields.', fieldErrors: fieldErrorsFrom(parsed.error), values }
   }
   const input = parsed.data
+  const locale = await getLocale()
 
   const band = ageBand(input.dateOfBirth)
   if (band === 'UNDER_13') {
@@ -136,13 +138,14 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
           marketingEmailOptIn: input.marketingOptIn === 'on',
           marketingOptInUpdatedAt: new Date(),
           termsVersion: CURRENT_TERMS_VERSION,
+          locale,
           termsAcceptedAt: new Date(),
           acquisition: await acquisitionFromCookie(),
         },
         // Never overwrite an existing row from an unauthenticated request.
         update: {},
       })
-      if (band === 'MINOR' && input.guardianEmail) await recordGuardianContact(authUser.id, input.guardianEmail)
+      if (band === 'MINOR' && input.guardianEmail) await recordGuardianContact(authUser.id, input.guardianEmail, input.guardianLocale ?? locale)
       await audit('auth.sign_up', { actorId: authUser.id, metadata: { role: input.accountType, minor: band === 'MINOR' } })
     } catch (dbError) {
       // The account can still be completed at /onboarding after the email is confirmed.
@@ -261,6 +264,7 @@ export async function completeAccountAction(_prev: FormState, formData: FormData
     return { status: 'error', message: 'Check the highlighted fields.', fieldErrors: fieldErrorsFrom(parsed.error), values }
   }
   const input = parsed.data
+  const locale = await getLocale()
   const band = ageBand(input.dateOfBirth)
 
   if (band === 'UNDER_13') {
@@ -296,12 +300,13 @@ export async function completeAccountAction(_prev: FormState, formData: FormData
       marketingEmailOptIn: input.marketingOptIn === 'on',
       marketingOptInUpdatedAt: new Date(),
       termsVersion: CURRENT_TERMS_VERSION,
+      locale,
       termsAcceptedAt: new Date(),
       acquisition: await acquisitionFromCookie(),
     },
     update: {},
   })
-  if (band === 'MINOR' && input.guardianEmail) await recordGuardianContact(identity.id, input.guardianEmail)
+  if (band === 'MINOR' && input.guardianEmail) await recordGuardianContact(identity.id, input.guardianEmail, input.guardianLocale ?? locale)
   await audit('auth.account_completed', { actorId: identity.id })
   redirect('/onboarding')
 }

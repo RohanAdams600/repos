@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
+import { useMessages } from '@/i18n/client'
+import { accountMessages } from '@/i18n/messages/account'
 import { base64UrlToBytes, currentPushSubscription, pushSupported } from '@/lib/pwa/device'
 
 type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> }
 
 function InstallApp() {
+  const m = useMessages(accountMessages).device
   const [prompt, setPrompt] = useState<InstallPrompt | null>(null)
   const [installed, setInstalled] = useState(false)
   useEffect(() => {
@@ -34,13 +37,10 @@ function InstallApp() {
     }
   }, [])
 
-  if (installed) return <p>KineticScout is installed on this device.</p>
+  if (installed) return <p>{m.installed}</p>
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-fg-muted">
-        Install KineticScout to open it from your home screen in its own window. On iPhone or iPad: tap Share, then Add to Home Screen. On Android:
-        open the browser menu, then Install app.
-      </p>
+      <p className="text-fg-muted">{m.install}</p>
       {prompt && (
         <Button
           variant="secondary"
@@ -51,7 +51,7 @@ function InstallApp() {
             setPrompt(null)
           }}
         >
-          Install KineticScout
+          {m.installButton}
         </Button>
       )}
     </div>
@@ -59,6 +59,7 @@ function InstallApp() {
 }
 
 function PushNotifications({ vapidPublicKey }: { vapidPublicKey: string }) {
+  const m = useMessages(accountMessages).device
   const [state, setState] = useState<'loading' | 'unsupported' | 'off' | 'on' | 'blocked'>('loading')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -94,11 +95,11 @@ function PushNotifications({ vapidPublicKey }: { vapidPublicKey: string }) {
       if (!response.ok) {
         await subscription.unsubscribe()
         const body = (await response.json().catch(() => null)) as { error?: string } | null
-        throw new Error(body?.error ?? 'Notifications could not be turned on.')
+        throw new Error(body?.error ?? m.onFailed)
       }
       setState('on')
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Notifications could not be turned on.')
+      setError(e instanceof Error ? e.message : m.onFailed)
     } finally {
       setBusy(false)
     }
@@ -115,7 +116,7 @@ function PushNotifications({ vapidPublicKey }: { vapidPublicKey: string }) {
       }
       setState('off')
     } catch {
-      setError('Notifications could not be turned off. Try again.')
+      setError(m.offFailed)
     } finally {
       setBusy(false)
     }
@@ -123,28 +124,25 @@ function PushNotifications({ vapidPublicKey }: { vapidPublicKey: string }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-fg-muted">
-        Notifications only say what kind of update arrived, for example &ldquo;New message&rdquo;. Names, numbers and message text appear only inside the
-        app, so nothing private shows on your lock screen. This setting is for this device only.
-      </p>
+      <p className="text-fg-muted">{m.pushIntro}</p>
       {error && <Alert tone="error">{error}</Alert>}
       <div aria-live="polite">
-        {state === 'loading' && <Spinner label="Checking notifications" />}
-        {state === 'unsupported' && <p>This browser does not support notifications. On iPhone or iPad, install KineticScout to your Home Screen first.</p>}
-        {state === 'blocked' && <p>Notifications are blocked for this site. You can allow them in your browser&apos;s site settings.</p>}
-        {state === 'on' && <p className="font-bold">Notifications are on for this device.</p>}
-        {state === 'off' && <p>Notifications are off for this device.</p>}
+        {state === 'loading' && <Spinner label={m.checking} />}
+        {state === 'unsupported' && <p>{m.unsupported}</p>}
+        {state === 'blocked' && <p>{m.blocked}</p>}
+        {state === 'on' && <p className="font-bold">{m.on}</p>}
+        {state === 'off' && <p>{m.off}</p>}
       </div>
       {state === 'off' && (
         <Button variant="secondary" className="self-start" disabled={busy} onClick={() => void turnOn()}>
-          {busy ? <Spinner label="Turning on" /> : null}
-          Turn on notifications
+          {busy ? <Spinner label={m.turningOn} /> : null}
+          {m.turnOn}
         </Button>
       )}
       {state === 'on' && (
         <Button variant="secondary" className="self-start" disabled={busy} onClick={() => void turnOff()}>
-          {busy ? <Spinner label="Turning off" /> : null}
-          Turn off notifications
+          {busy ? <Spinner label={m.turningOff} /> : null}
+          {m.turnOff}
         </Button>
       )}
     </div>
@@ -152,13 +150,12 @@ function PushNotifications({ vapidPublicKey }: { vapidPublicKey: string }) {
 }
 
 export function DeviceSettings({ vapidPublicKey }: { vapidPublicKey: string | null }) {
+  const m = useMessages(accountMessages).device
   return (
     <div className="flex flex-col gap-6">
       <InstallApp />
       {vapidPublicKey && <PushNotifications vapidPublicKey={vapidPublicKey} />}
-      <p className="text-sm text-fg-muted">
-        Measurements you log while offline wait on this device and are sent when you reconnect. Signing out removes them, and stops notifications here.
-      </p>
+      <p className="text-sm text-fg-muted">{m.offline}</p>
     </div>
   )
 }

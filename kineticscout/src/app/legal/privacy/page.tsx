@@ -1,12 +1,23 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LegalPage } from '@/components/legal-page'
+import { getLocale } from '@/i18n/server'
 import { businessDetails } from '@/lib/legal'
+import { PrivacyEs } from './privacy-es'
 
-export const metadata: Metadata = { title: 'Privacy Policy', alternates: { canonical: '/legal/privacy' } }
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getLocale()) === 'es' ? 'Política de privacidad' : 'Privacy Policy', alternates: { canonical: '/legal/privacy' } }
+}
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
   const b = businessDetails()
+  if ((await getLocale()) === 'es') {
+    return (
+      <LegalPage title="Política de privacidad">
+        <PrivacyEs b={b} />
+      </LegalPage>
+    )
+  }
   return (
     <LegalPage title="Privacy Policy">
       <p>
@@ -73,6 +84,7 @@ export default function PrivacyPage() {
         Measurements you log while your device is offline are kept in your browser on that device until they are sent, and are deleted from it when
         you sign out. The app also stores a copy of its offline page on the device; it contains nothing about your account.
       </p>
+      <p>Your language choice is kept in a cookie and, when you are signed in, on your account, so we can show the site and send emails in that language.</p>
 
       <h2>How we use it</h2>
       <ul>
@@ -132,7 +144,7 @@ export default function PrivacyPage() {
           introductions for you to review and send yourself. We never contact coaches for you.
         </li>
         <li>To publish anonymized statistics. Each published figure describes a group of at least 25 athletes, with one value per athlete, so no individual can be identified.</li>
-        <li>To send account emails (confirmations, password resets, guardian consent requests, billing notices).</li>
+        <li>To send account emails (confirmations, password resets, guardian consent requests, billing notices), in the language you chose.</li>
         <li>To send product news only if you opted in. Every marketing email has an unsubscribe link and supports one-click unsubscribe; you can also change your choice in Settings or from the preferences link in any email. We record when you made each choice.</li>
         <li>To keep the service secure, prevent fraud and comply with law.</li>
       </ul>

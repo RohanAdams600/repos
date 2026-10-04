@@ -7,10 +7,16 @@ import { AuthShell } from '@/components/auth/auth-shell'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { getAuthState } from '@/lib/auth/session'
-import { LEGAL_LAST_UPDATED, TERMS_HIGHLIGHTS } from '@/lib/legal'
+import { LEGAL_LAST_UPDATED, LEGAL_UPDATED_ON, TERMS_HIGHLIGHTS, TERMS_HIGHLIGHTS_ES } from '@/lib/legal'
+import { pick } from '@/i18n/define'
+import { authMessages } from '@/i18n/messages/auth'
+import { formatDay } from '@/i18n/messages/domain'
+import { getLocale, messages } from '@/i18n/server'
 import { safeRedirectPath } from '@/lib/security/origin'
 
-export const metadata: Metadata = { title: 'Updated terms', robots: { index: false, follow: false } }
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await messages(authMessages)).terms.title, robots: { index: false, follow: false } }
+}
 
 /**
  * Shown instead of the dashboard until the current terms are accepted. Declining is a real option:
@@ -24,38 +30,38 @@ export default async function TermsUpdatePage({ searchParams }: PageProps<'/term
   if (state.status === 'needs-account') redirect('/onboarding')
   if (state.user.termsCurrent) redirect(next)
   const deletionDate = state.user.deletionScheduledFor
+  const locale = await getLocale()
+  const t = pick(authMessages, locale)
+  const m = t.terms
+  const highlights = locale === 'es' ? TERMS_HIGHLIGHTS_ES : TERMS_HIGHLIGHTS
 
   return (
-    <AuthShell title="We updated our terms" intro={<p>Our Terms of Service and Privacy Policy changed on {LEGAL_LAST_UPDATED}. Please review them to keep using KineticScout.</p>}>
+    <AuthShell title={m.h1} intro={<p>{m.intro(locale === 'es' ? formatDay(LEGAL_UPDATED_ON, locale) : LEGAL_LAST_UPDATED)}</p>}>
       <div className="flex flex-col gap-3">
-        <h2 className="text-xl font-bold">Key points</h2>
+        <h2 className="text-xl font-bold">{m.keyPoints}</h2>
         <ul className="flex list-disc flex-col gap-2 pl-5 text-fg-muted">
-          {TERMS_HIGHLIGHTS.map((point) => (
+          {highlights.map((point) => (
             <li key={point}>{point}</li>
           ))}
         </ul>
         <p className="text-fg-muted">
-          Read the full <Link href="/legal/terms">Terms of Service</Link> and <Link href="/legal/privacy">Privacy Policy</Link>.
+          {m.readFull} <Link href="/legal/terms">{t.signUp.terms}</Link> {m.and} <Link href="/legal/privacy">{t.signUp.privacy}</Link>.
         </p>
       </div>
       <TermsAcceptForm next={next} />
 
       <section aria-labelledby="decline-title" className="flex flex-col gap-4 border-t-2 border-border-subtle pt-6">
         <h2 id="decline-title" className="text-xl font-bold">
-          Do not agree?
+          {m.declineTitle}
         </h2>
-        <p className="text-fg-muted">You can take a copy of your data and close your account without accepting the new terms.</p>
+        <p className="text-fg-muted">{m.declineBody}</p>
         <form method="post" action="/api/account/export">
           <Button type="submit" variant="secondary">
-            Download my data
+            {m.download}
           </Button>
         </form>
         {deletionDate ? (
-          <Alert tone="info">
-            Your account is scheduled for deletion on{' '}
-            {deletionDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}. To cancel, accept the
-            terms above and open Settings.
-          </Alert>
+          <Alert tone="info">{m.scheduled(formatDay(deletionDate, locale))}</Alert>
         ) : (
           <DeleteAccountForm />
         )}

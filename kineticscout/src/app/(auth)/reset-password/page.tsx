@@ -1,12 +1,17 @@
 import type { Metadata } from 'next'
 import { AuthShell } from '@/components/auth/auth-shell'
 import { UpdatePasswordForm } from '@/components/auth/password-reset-forms'
+import { authMessages } from '@/i18n/messages/auth'
+import { messages } from '@/i18n/server'
 
-export const metadata: Metadata = { title: 'Choose a new password', robots: { index: false } }
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await messages(authMessages)).reset.newTitle, robots: { index: false } }
+}
 
-export default function ResetPasswordPage() {
+export default async function ResetPasswordPage() {
+  const m = (await messages(authMessages)).reset
   return (
-    <AuthShell title="Choose a new password" intro="Other devices will be signed out after you save.">
+    <AuthShell title={m.newTitle} intro={m.newIntro}>
       <UpdatePasswordForm />
     </AuthShell>
   )

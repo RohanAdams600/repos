@@ -3,16 +3,30 @@ import Link from 'next/link'
 import { GuardianLinkRequestForm } from '@/components/account/guardian-manage-forms'
 import { LegalPage } from '@/components/legal-page'
 import { DELETION_GRACE_DAYS } from '@/lib/account/deletion'
+import { getLocale } from '@/i18n/server'
 import { businessDetails } from '@/lib/legal'
+import { YourDataEs } from './your-data-es'
 
-export const metadata: Metadata = {
-  title: 'Your data and privacy choices',
-  description: 'Download your KineticScout data, delete your account, manage email, and parent or guardian controls for athletes under 18.',
-  alternates: { canonical: '/legal/your-data' },
+export async function generateMetadata(): Promise<Metadata> {
+  const es = (await getLocale()) === 'es'
+  return {
+    title: es ? 'Tus datos y opciones de privacidad' : 'Your data and privacy choices',
+    description: es
+      ? 'Descarga tus datos de KineticScout, elimina tu cuenta, gestiona los correos y los controles para padres, madres y tutores de atletas menores de 18 años.'
+      : 'Download your KineticScout data, delete your account, manage email, and parent or guardian controls for athletes under 18.',
+    alternates: { canonical: '/legal/your-data' },
+  }
 }
 
-export default function YourDataPage() {
+export default async function YourDataPage() {
   const b = businessDetails()
+  if ((await getLocale()) === 'es') {
+    return (
+      <LegalPage title="Tus datos y opciones de privacidad">
+        <YourDataEs b={b} />
+      </LegalPage>
+    )
+  }
   return (
     <LegalPage title="Your data and privacy choices">
       <p>

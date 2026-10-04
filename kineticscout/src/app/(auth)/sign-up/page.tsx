@@ -2,18 +2,20 @@ import type { Metadata } from 'next'
 import { AuthShell } from '@/components/auth/auth-shell'
 import { SignUpForm } from '@/components/auth/sign-up-form'
 import { Alert } from '@/components/ui/alert'
+import { authMessages } from '@/i18n/messages/auth'
+import { messages } from '@/i18n/server'
 
-export const metadata: Metadata = {
-  title: 'Create your free profile',
-  description: 'Create a free KineticScout profile to log your measurables and see your class percentile.',
-  alternates: { canonical: '/sign-up' },
+export async function generateMetadata(): Promise<Metadata> {
+  const m = (await messages(authMessages)).signUp
+  return { title: m.title, description: m.description, alternates: { canonical: '/sign-up' } }
 }
 
 export default async function SignUpPage({ searchParams }: PageProps<'/sign-up'>) {
   const params = await searchParams
+  const m = (await messages(authMessages)).signUp
   return (
-    <AuthShell title="Create your free profile" intro="Free forever for up to 3 metrics a month. No card required.">
-      {params.notice === 'unavailable' && <Alert tone="info">Sorry, we can&apos;t create a KineticScout account for you.</Alert>}
+    <AuthShell title={m.title} intro={m.intro}>
+      {params.notice === 'unavailable' && <Alert tone="info">{m.unavailable}</Alert>}
       <SignUpForm />
     </AuthShell>
   )
