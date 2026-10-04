@@ -1,3 +1,7 @@
+> **Repository contents**
+> - `/` (this file): the Autonoma landing page described below.
+> - [`kineticscout/`](kineticscout/README.md): the KineticScout web app and background worker.
+
 # Autonoma — Landing Page
 
 Landing page for **Autonoma**, an AI automation service that builds AI agents to

@@ -1,0 +1,201 @@
+@import 'tailwindcss';
+
+/*
+ * KineticScout design tokens.
+ *
+ * Every text/background pair below meets WCAG 2.2 AAA (7:1) and every UI boundary meets 3:1.
+ * The ratios are asserted in tests/unit/contrast.test.ts; change a value there first.
+ *
+ * Dark is the brand default. Light applies when the visitor's OS prefers it (and they have not
+ * chosen dark), or when they pick it with the theme toggle (data-theme on <html>).
+ */
+:root {
+  --bg: #121212; /* Onyx Black */
+  --surface: #2d2d2d; /* Titanium Gray */
+  --fg: #ffffff; /* Crisp White */
+  --fg-muted: #e0e0e0; /* Light Ash */
+  --accent: #e6ff00; /* High-Vis Neon Volt */
+  --on-accent: #121212;
+  --accent-text: #e6ff00;
+  --border-strong: #8a8a8a;
+  --border-subtle: #2d2d2d;
+  --danger: #ffa8a0;
+  --focus: #e6ff00;
+  --primary-button-border: #e6ff00;
+  --accent-outline: transparent;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --bg: #ffffff;
+    --surface: #f2f2f2;
+    --fg: #121212;
+    --fg-muted: #2d2d2d;
+    --accent: #e6ff00;
+    --on-accent: #121212;
+    --accent-text: #121212;
+    --border-strong: #6b6b6b;
+    --border-subtle: #d9d9d9;
+    --danger: #a0001c;
+    --focus: #121212;
+    --primary-button-border: #121212;
+    --accent-outline: #121212;
+    color-scheme: light;
+  }
+}
+
+:root[data-theme='light'] {
+  --bg: #ffffff;
+  --surface: #f2f2f2;
+  --fg: #121212;
+  --fg-muted: #2d2d2d;
+  --accent: #e6ff00;
+  --on-accent: #121212;
+  --accent-text: #121212;
+  --border-strong: #6b6b6b;
+  --border-subtle: #d9d9d9;
+  --danger: #a0001c;
+  --focus: #121212;
+  --primary-button-border: #121212;
+  --accent-outline: #121212;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-text: var(--accent-text);
+  --color-border-strong: var(--border-strong);
+  --color-border-subtle: var(--border-subtle);
+  --color-danger: var(--danger);
+  --color-focus: var(--focus);
+  --color-primary-button-border: var(--primary-button-border);
+  --color-accent-outline: var(--accent-outline);
+
+  --font-sans: 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
+  --font-mono: var(--font-roboto-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* 4pt base grid: every spacing utility is a multiple of 4px. */
+  --spacing: 4px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 80px;
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Long words, URLs and numbers never force horizontal scrolling on small screens. */
+  p,
+  li,
+  dd,
+  td,
+  h1,
+  h2,
+  h3 {
+    overflow-wrap: anywhere;
+  }
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
+  /* Links are always underlined so they never rely on color alone (WCAG 1.4.1). */
+  a {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+  /* Readable hover: thicker underline, no fades. */
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+}
+
+@layer utilities {
+  /* Theme toggle icon follows the active theme without JavaScript. */
+  .theme-icon-light {
+    display: none;
+  }
+  :root[data-theme='light'] .theme-icon-light {
+    display: inline;
+  }
+  :root[data-theme='light'] .theme-icon-dark {
+    display: none;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) .theme-icon-light {
+      display: inline;
+    }
+    :root:not([data-theme='dark']) .theme-icon-dark {
+      display: none;
+    }
+  }
+  .tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print: content only, black on white, link targets visible. */
+@media print {
+  :root,
+  :root[data-theme] {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --fg: #000000;
+    --fg-muted: #000000;
+    --accent-text: #000000;
+    --border-subtle: #000000;
+  }
+  header,
+  nav,
+  footer,
+  button,
+  [data-print='hide'] {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+  }
+}

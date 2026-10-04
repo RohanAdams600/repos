@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+out/
+build/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# generated Prisma client
+src/generated/
+
+# secrets: only .env.example is ever committed
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+service-account*.json
+gcp-*.json
+
+# local tooling
+.DS_Store
+*.log
+.vercel
+.turbo
+backups/
+
+# local service artifacts
+dump.rdb

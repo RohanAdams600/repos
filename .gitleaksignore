@@ -1,0 +1,6 @@
+# Reviewed gitleaks findings that are not secrets.
+#
+# Autonoma landing page (root script.js): VAPI_ASSISTANT_ID is a public assistant identifier that the
+# Vapi Web SDK requires in browser code alongside the public key. It grants no privileged access.
+f6d8c957be904eed3855273bcb378814105cffa1:script.js:generic-api-key:137
+4c76d2fe9b489720386eeee27e783b7217e2e378:script.js:generic-api-key:134
