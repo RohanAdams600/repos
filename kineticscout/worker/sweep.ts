@@ -1,4 +1,5 @@
 import { processDueDeletions } from '@/lib/account/deletion'
+import { expireContactRequests } from '@/lib/coach/contact'
 import { db } from '@/lib/db'
 import { errorFields, logger } from '@/lib/logger'
 import { enqueueEvidenceCheck, enqueueProgramChange, enqueueVideoAnalysis } from '@/lib/queue/queues'
@@ -14,7 +15,8 @@ import { workerEnv } from '@worker/env'
  *   - purges security logs and billing bookkeeping rows past their retention period;
  *   - carries out account deletions whose 7-day cancellation window has ended;
  *   - re-enqueues stuck verification checks and deletes evidence clips past their retention;
- *   - re-enqueues program changes Agent 3 has not processed (an enqueue that failed at write time).
+ *   - re-enqueues program changes Agent 3 has not processed (an enqueue that failed at write time);
+ *   - expires unanswered coach contact requests.
  * Every step is idempotent, so overlapping sweeps on several replicas are harmless.
  */
 export async function sweepStuckWork(
@@ -29,6 +31,7 @@ export async function sweepStuckWork(
   evidenceRequeued: number
   evidencePurged: number
   changesRequeued: number
+  contactRequestsExpired: number
 }> {
   const stuck = await db.videoAnalysis.findMany({
     where: { status: 'QUEUED', createdAt: { lt: new Date(now.getTime() - 10 * 60_000) } },
@@ -105,5 +108,6 @@ export async function sweepStuckWork(
     evidenceRequeued: stuckEvidence.length,
     evidencePurged: evidence.purged + evidence.abandoned,
     changesRequeued: pendingChanges.length,
+    contactRequestsExpired: await expireContactRequests(now),
   }
 }

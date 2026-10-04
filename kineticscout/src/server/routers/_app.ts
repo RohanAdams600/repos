@@ -1,5 +1,7 @@
 import { adminRouter } from '@/server/routers/admin'
 import { analysisRouter } from '@/server/routers/analysis'
+import { coachRouter } from '@/server/routers/coach'
+import { contactRequestsRouter } from '@/server/routers/contact-requests'
 import { matchmakerRouter } from '@/server/routers/matchmaker'
 import { metricsRouter } from '@/server/routers/metrics'
 import { notificationsRouter } from '@/server/routers/notifications'
@@ -17,6 +19,8 @@ export const appRouter = createRouter({
   verification: verificationRouter,
   notifications: notificationsRouter,
   recruiting: recruitingRouter,
+  coach: coachRouter,
+  contactRequests: contactRequestsRouter,
 })
 
 export type AppRouter = typeof appRouter

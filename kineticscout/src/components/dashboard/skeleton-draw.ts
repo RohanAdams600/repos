@@ -62,3 +62,29 @@ export function drawSkeleton(canvas: HTMLCanvasElement, context: CanvasRendering
     context.stroke()
   }
 }
+
+/** Draws the tracked projectile path up to time t (volt line over an onyx underlay, so it shows on any footage). */
+export function drawTrajectory(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, points: readonly { t: number; x: number; y: number }[], t: number): void {
+  const visible = points.filter((p) => p.t <= t)
+  if (visible.length === 0) return
+  const { clientWidth: w, clientHeight: h } = canvas
+  for (const [width, color] of [
+    [6, 'rgba(18,18,18,0.85)'],
+    [3, '#E6FF00'],
+  ] as const) {
+    context.lineWidth = width
+    context.strokeStyle = color
+    context.lineJoin = 'round'
+    context.beginPath()
+    visible.forEach((p, i) => (i === 0 ? context.moveTo(p.x * w, p.y * h) : context.lineTo(p.x * w, p.y * h)))
+    context.stroke()
+  }
+  const last = visible[visible.length - 1]!
+  context.beginPath()
+  context.arc(last.x * w, last.y * h, 6, 0, Math.PI * 2)
+  context.fillStyle = '#E6FF00'
+  context.fill()
+  context.lineWidth = 2
+  context.strokeStyle = '#121212'
+  context.stroke()
+}

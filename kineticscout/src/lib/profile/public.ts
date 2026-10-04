@@ -170,6 +170,12 @@ export async function findPublicAthlete(slug: string): Promise<string | null> {
   return row.userId
 }
 
+/** Same rules as findPublicAthlete, by athlete id (coach search, saved boards, contact requests). */
+export async function isPubliclyVisible(athleteId: string): Promise<boolean> {
+  const row = await db.athleteProfile.findUnique({ where: { userId: athleteId }, select: { publicSlug: true } })
+  return row?.publicSlug ? (await findPublicAthlete(row.publicSlug)) === athleteId : false
+}
+
 export type VisibilityResult = { ok: true; slug: string | null } | { ok: false; reason: 'consent-required' | 'deletion-pending' | 'no-profile' }
 
 export async function setProfileVisibility(

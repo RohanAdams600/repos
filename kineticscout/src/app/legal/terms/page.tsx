@@ -55,10 +55,43 @@ export default function TermsPage() {
         </li>
       </ul>
 
+      <h2>Coach accounts</h2>
+      <ul>
+        <li>
+          Coach accounts are for adults who currently work for a college athletic program. You must give your real name and title, use a
+          school or program email address, and keep your details current. We check your program&apos;s staff directory before you can search
+          athletes or send requests.
+        </li>
+        <li>
+          You are responsible for following the recruiting rules of your governing association, including contact periods. Each request asks
+          you to confirm that contact is allowed now; do not send one when it is not.
+        </li>
+        <li>
+          Use athlete information only to recruit for your program. Do not copy profiles into other services, share contact details with
+          anyone outside your program&apos;s staff, or use them for marketing. Do not put links or phone numbers in a first message, and do not
+          try to contact an athlete who declined or blocked you by other means.
+        </li>
+        <li>We may suspend a coach account that breaks these rules or that we can no longer verify. Suspension withdraws open requests.</li>
+      </ul>
+
+      <h2>Contact requests for athletes</h2>
+      <ul>
+        <li>
+          Verified coaches can find your profile only while it is public, and can only ask to contact you. Nothing is shared unless you accept.
+          If you are under 18, a parent or guardian must also approve before the coach receives your email address and theirs.
+        </li>
+        <li>
+          You can decline, block or report any coach. Blocking removes you from that coach&apos;s search results and removes any email address you
+          shared from their KineticScout page. Our staff reviews every report.
+        </li>
+      </ul>
+
       <h2>What KineticScout does and does not do</h2>
       <p>
         Percentiles, fit scores and video analysis are estimates based on the data available. Video analysis uses a single 2D camera view and
-        is not medical, injury or professional coaching advice. KineticScout does not guarantee recruiting interest, roster spots, scholarships
+        is not medical, injury or professional coaching advice. Puck and ball tracking is a beta feature: its speed and angle figures are
+        estimates from the video (the speed is a lower bound), are not radar or official measurements, and may be missing when the object
+        cannot be followed. KineticScout does not guarantee recruiting interest, roster spots, scholarships
         or offers, and is not affiliated with any college, league or governing body.
       </p>
 

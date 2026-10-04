@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { decodePoseTrack, encodePoseTrack } from '@/lib/biomechanics/codec'
+import { commonAnchor } from '@/lib/biomechanics/compare'
 import { analyzeKinematicSequence, drivingArmSide, fillShortGaps, leadSide } from '@/lib/biomechanics/kinematics'
 import { PoseQualityError } from '@/lib/biomechanics/types'
 import { syntheticSwing } from '../helpers/synthetic-pose'
@@ -100,5 +101,34 @@ describe('pose codec', () => {
     expect(decoded.frames).toHaveLength(track.frames.length)
     expect(decoded.frames[10]!.keypoints.left_hip!.x).toBeCloseTo(track.frames[10]!.keypoints.left_hip!.x, 3)
     expect(decoded.frames[10]!.keypoints.nose).toBeUndefined()
+  })
+})
+
+describe('hockey shots and football throws', () => {
+  it('drives with the shooting-side hand on the stick and the throwing arm for a pass', () => {
+    expect(drivingArmSide('HOCKEY_SHOT', 'LEFT')).toBe('left')
+    expect(leadSide('LEFT')).toBe('right')
+    expect(drivingArmSide('FOOTBALL_THROW', 'RIGHT')).toBe('right')
+  })
+
+  it('analyses a left-handed shot from skates without a visible foot strike, syncing on the hands', () => {
+    // The synthetic track animates the left arm; for a left shot the front leg is the right one, which
+    // stays planted (gliding), so no foot strike is detected.
+    const report = analyzeKinematicSequence({ track: syntheticSwing(efficient), motionType: 'HOCKEY_SHOT', handedness: 'LEFT' })
+    expect(report.motionType).toBe('HOCKEY_SHOT')
+    expect(report.sequenceIsIdeal).toBe(true)
+    expect(report.footStrikeTime).toBeNull()
+    expect(report.warnings).toContain('FOOT_STRIKE_NOT_DETECTED')
+    expect(commonAnchor(report, report)?.event).toBe('HAND_PEAK')
+  })
+
+  it('words findings for the motion being analysed', () => {
+    const track = syntheticSwing({ ...efficient, armPeak: 0.4, torsoPeak: 0.47, handPeak: 0.53 })
+    const shot = analyzeKinematicSequence({ track, motionType: 'HOCKEY_SHOT', handedness: 'LEFT' })
+    const finding = shot.findings.find((f) => f.code === 'ARM_LEADS_TRUNK')!
+    expect(finding.detail).toContain('bottom arm')
+    expect(finding.focus).toContain('net')
+    const pass = analyzeKinematicSequence({ track, motionType: 'FOOTBALL_THROW', handedness: 'LEFT' })
+    expect(pass.findings.find((f) => f.code === 'ARM_LEADS_TRUNK')!.detail).toContain('throwing arm')
   })
 })

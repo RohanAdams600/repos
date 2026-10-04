@@ -57,6 +57,8 @@ export const serverEnvSchema = z
     OPENAI_OUTPUT_USD_PER_MTOK: z.coerce.number().positive().default(1.6),
     /** Video Intelligence person detection list price per minute of video. */
     VIDEO_ANALYSIS_USD_PER_MINUTE: z.coerce.number().positive().default(0.1),
+    /** Video Intelligence object tracking, billed in addition to person detection when puck or ball tracking is requested. */
+    OBJECT_TRACKING_USD_PER_MINUTE: z.coerce.number().positive().default(0.15),
     /** Pro analyses allowed per user per calendar month (cost ceiling). */
     VIDEO_ANALYSES_PER_MONTH: z.coerce.number().int().positive().max(500).default(30),
 
@@ -86,10 +88,13 @@ export const serverEnvSchema = z
 
     /** Allow sk_test_ keys outside local development (staging only). */
     ALLOW_TEST_PAYMENTS: booleanFlag,
+    /** Signed-in end-to-end tests without Supabase (see src/lib/auth/e2e-stub.ts). Refused outside DEPLOY_ENV=local. */
+    E2E_AUTH_STUB: booleanFlag,
   })
   .superRefine((env, ctx) => {
     const deployed = env.DEPLOY_ENV !== 'local'
     const issue = (path: string, message: string) => ctx.addIssue({ code: 'custom', path: [path], message })
+    if (env.E2E_AUTH_STUB && deployed) issue('E2E_AUTH_STUB', 'is only allowed when DEPLOY_ENV=local')
 
     if (env.SERVICE_ROLE === 'web') {
       if (!env.SUPABASE_URL) issue('SUPABASE_URL', 'required for the web app')

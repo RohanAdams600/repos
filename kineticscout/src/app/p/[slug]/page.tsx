@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { after } from 'next/server'
+import { cache } from 'react'
 import { ProfileView } from '@/components/profile/profile-view'
 import { CopyButton } from '@/components/ui/copy-button'
 import { buttonVariants } from '@/components/ui/button'
@@ -15,9 +16,15 @@ import { hashedClientIp } from '@/lib/security/request'
 
 type Props = PageProps<'/p/[slug]'>
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const athleteId = await findPublicAthlete((await params).slug)
+/** Metadata and the page body share one lookup per request instead of querying twice. */
+const loadProfile = cache(async (slug: string) => {
+  const athleteId = await findPublicAthlete(slug)
   const card = athleteId ? await buildProfileCard(athleteId, 'public') : null
+  return athleteId && card ? { athleteId, card } : null
+})
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const card = (await loadProfile((await params).slug))?.card
   if (!card) return { title: 'Profile not found', robots: { index: false, follow: false } }
   // Link previews show first name and last initial only; the full name is on the page itself.
   const title = `${card.firstName} ${card.lastName.charAt(0)}., Class of ${card.gradYear} ${card.positionLabel}`
@@ -32,10 +39,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicProfilePage({ params }: Props) {
   const { slug } = await params
-  const athleteId = await findPublicAthlete(slug)
-  if (!athleteId) notFound()
-  const card = await buildProfileCard(athleteId, 'public')
-  if (!card) notFound()
+  const loaded = await loadProfile(slug)
+  if (!loaded) notFound()
+  const { athleteId, card } = loaded
 
   const viewer = await getSessionUser()
   const userAgent = (await headers()).get('user-agent')

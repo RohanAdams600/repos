@@ -1,0 +1,184 @@
+# Alert rules for KineticScout. Thresholds follow what the product promises users:
+# reviews "usually within 2 business days", deletion when the 7-day grace period ends, and the
+# worker schedules in worker/schedule.ts. Validate with: promtool check rules alerts.yml
+# and promtool test rules alerts.test.yml
+groups:
+  - name: kineticscout-availability
+    rules:
+      - alert: KineticScoutDown
+        expr: probe_success{job="kineticscout-health"} == 0
+        for: 3m
+        labels:
+          severity: page
+        annotations:
+          summary: Health check failing for {{ $labels.instance }}
+          description: /api/health has not answered 200 for 3 minutes. It returns 503 when Postgres or Upstash is unreachable. See docs/DEPLOY.md, Rollback.
+
+      - alert: KineticScoutMetricsScrapeFailing
+        expr: up{job="kineticscout"} == 0
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: Operational metrics cannot be collected
+          description: /api/internal/metrics has failed for 10 minutes (wrong secret, or the database query failed). Every other KineticScout alert is blind until this is fixed.
+
+      - alert: KineticScoutQueueUnreachable
+        expr: kineticscout_queue_reachable == 0
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: The web app cannot read the job queue
+          description: Redis has been unreachable from the web app for 10 minutes. Uploads, verification checks and outreach drafts will not be processed.
+
+      - alert: KineticScoutMetricsSlow
+        expr: kineticscout_metrics_collect_seconds > 2
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Metrics collection is slow
+          description: Collecting operational gauges took {{ $value | humanizeDuration }}. Check database load and missing indexes.
+
+  - name: kineticscout-privacy
+    rules:
+      - alert: AccountDeletionOverdue
+        expr: kineticscout_account_deletions_overdue > 0
+        for: 1h
+        labels:
+          severity: page
+        annotations:
+          summary: '{{ $value }} account deletion(s) past their scheduled time'
+          description: Deletion runs every 10 minutes once the 7-day grace period ends. An overdue deletion breaks a commitment in the privacy policy. Check worker logs for "account deletion failed".
+
+  - name: kineticscout-trust-and-safety
+    rules:
+      - alert: CoachReportUnresolved
+        expr: kineticscout_coach_reports_oldest_age_seconds > 24 * 3600
+        labels:
+          severity: warning
+        annotations:
+          summary: A report about a coach has waited over a day
+          description: Reports can involve contact with minors. Triage in the admin console, Coaches tab.
+
+      - alert: CoachReportUnresolvedLong
+        expr: kineticscout_coach_reports_oldest_age_seconds > 72 * 3600
+        labels:
+          severity: page
+        annotations:
+          summary: A report about a coach has waited over 3 days
+
+      - alert: MetricVerificationBacklog
+        expr: kineticscout_metric_verifications_oldest_age_seconds > 36 * 3600
+        labels:
+          severity: warning
+        annotations:
+          summary: Verification reviews are falling behind
+          description: The oldest clip has waited {{ $value | humanizeDuration }}. Athletes are told "usually within 2 business days".
+
+      - alert: MetricVerificationBacklogBreached
+        expr: kineticscout_metric_verifications_oldest_age_seconds > 96 * 3600
+        labels:
+          severity: page
+        annotations:
+          summary: A verification has waited longer than we tell athletes
+
+      - alert: CoachVerificationBacklog
+        expr: kineticscout_coach_verifications_oldest_age_seconds > 36 * 3600
+        labels:
+          severity: warning
+        annotations:
+          summary: Coach account reviews are falling behind
+          description: The oldest coach account has waited {{ $value | humanizeDuration }}. Coaches are told "usually within 2 business days".
+
+      - alert: CoachVerificationBacklogBreached
+        expr: kineticscout_coach_verifications_oldest_age_seconds > 96 * 3600
+        labels:
+          severity: page
+        annotations:
+          summary: A coach account review has waited longer than we tell coaches
+
+  - name: kineticscout-jobs
+    rules:
+      - alert: VideoAnalysisQueueStalled
+        expr: kineticscout_video_analyses_queued_oldest_age_seconds > 30 * 60
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: Video analyses are not being picked up
+          description: The sweep re-enqueues queued analyses after 10 minutes. One still queued after 30 means no worker is consuming the video-analysis queue.
+
+      - alert: VideoAnalysisStuckProcessing
+        expr: kineticscout_video_analyses_processing_stuck > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $value }} analyses stuck in processing'
+          description: Processing has run longer than 30 minutes, which usually means a worker died mid-job.
+
+      - alert: VideoAnalysisFailureSpike
+        expr: kineticscout_video_analyses_failed_24h > 10
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $value }} video analyses failed in the last 24 hours'
+          description: Excludes expired uploads. Check worker logs by error code; a Video Intelligence quota or credential problem fails every job.
+
+      - alert: QueueFailedJobsRising
+        expr: increase(kineticscout_queue_jobs{state="failed"}[1h]) > 5
+        labels:
+          severity: warning
+        annotations:
+          summary: Jobs are failing on queue {{ $labels.queue }}
+          description: More than 5 jobs exhausted their 3 attempts in the last hour.
+
+      - alert: ProgramChangesBacklog
+        expr: kineticscout_program_changes_oldest_age_seconds > 6 * 3600
+        labels:
+          severity: warning
+        annotations:
+          summary: The recruiting assistant has not processed a program change for 6 hours
+
+      - alert: GrowthAgentStale
+        expr: (time() - kineticscout_agent_last_success_timestamp_seconds{agent="GROWTH"} > 5 * 86400) and kineticscout_agent_last_success_timestamp_seconds{agent="GROWTH"} > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: The growth agent has not succeeded in 5 days
+          description: It is scheduled Tuesdays and Thursdays, so two runs have been missed.
+
+      - alert: SeoAgentStale
+        expr: (time() - kineticscout_agent_last_success_timestamp_seconds{agent="SEO"} > 8 * 86400) and kineticscout_agent_last_success_timestamp_seconds{agent="SEO"} > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: The data and SEO agent has not succeeded in 8 days
+          description: It is scheduled weekly on Sundays.
+
+      - alert: AgentRunsFailing
+        expr: kineticscout_agent_runs_failed_24h > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: The {{ $labels.agent }} agent failed in the last 24 hours
+
+  - name: kineticscout-spend
+    rules:
+      - alert: AiBudgetHigh
+        expr: kineticscout_ai_spend_month_usd / kineticscout_ai_budget_month_usd > 0.8
+        labels:
+          severity: warning
+        annotations:
+          summary: AI spend is at {{ $value | humanizePercentage }} of the monthly budget
+          description: At 100% the budget guard refuses new AI calls until the 1st (UTC). Raise AI_GLOBAL_MONTHLY_BUDGET_USD only after checking which feature drove the spend.
+
+      - alert: AiBudgetNearlyExhausted
+        expr: kineticscout_ai_spend_month_usd / kineticscout_ai_budget_month_usd > 0.95
+        labels:
+          severity: page
+        annotations:
+          summary: AI spend is at {{ $value | humanizePercentage }} of the monthly budget
+          description: Video and reference clip analysis, outreach drafts and the growth and SEO agents stop when the budget is reached.

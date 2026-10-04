@@ -1,6 +1,6 @@
 import { PDFDocument, PDFName, StandardFonts } from 'pdf-lib'
 import { describe, expect, it } from 'vitest'
-import { comparisonRows, mirrorTrack, peaksRelativeToFootStrike, syncWindow } from '@/lib/biomechanics/compare'
+import { commonAnchor, comparisonRows, mirrorTrack, peaksRelativeToFootStrike, syncWindow } from '@/lib/biomechanics/compare'
 import { birthDateWindow, cohortBands, describeBands, K_MIN, rankInCohort } from '@/lib/insights/build-cohort'
 import { projectAcrossSports, traitOf, valueAtStanding } from '@/lib/insights/projection'
 import { percentileRank } from '@/lib/metrics/percentile'
@@ -156,13 +156,21 @@ describe('side-by-side sync', () => {
   it('expresses peaks in milliseconds from foot strike', () => {
     expect(peaksRelativeToFootStrike(report(1))).toEqual({ pelvis: 50, hand: 200 })
     expect(peaksRelativeToFootStrike(report(null))).toEqual({})
-    const rows = comparisonRows(report(1), report(0.9))
+    const { anchor, rows } = comparisonRows(report(1), report(0.9))
+    expect(anchor).toEqual({ event: 'FOOT_STRIKE', a: 1, b: 0.9 })
     expect(rows.find((r) => r.segment === 'pelvis')).toEqual({ segment: 'pelvis', a: 50, b: 150, differenceMs: -100 })
     expect(rows.find((r) => r.segment === 'torso')).toEqual({ segment: 'torso', a: null, b: null, differenceMs: null })
   })
 
+  it('falls back to peak hand speed when either clip has no foot strike', () => {
+    expect(commonAnchor(report(1), report(null))).toEqual({ event: 'HAND_PEAK', a: 1.2, b: 1.2 })
+    const { rows } = comparisonRows(report(null), report(1))
+    expect(rows.find((r) => r.segment === 'pelvis')).toEqual({ segment: 'pelvis', a: -150, b: -150, differenceMs: 0 })
+    expect(commonAnchor({ footStrikeTime: null, peaks: [] }, report(1))).toBeNull()
+  })
+
   it('plays only the stretch both clips cover', () => {
-    expect(syncWindow({ footStrikeTime: 2, durationSec: 5 }, { footStrikeTime: 1, durationSec: 6 })).toEqual({ start: -1, end: 3 })
+    expect(syncWindow({ anchorTime: 2, durationSec: 5 }, { anchorTime: 1, durationSec: 6 })).toEqual({ start: -1, end: 3 })
   })
 
   it('mirrors a track and swaps left and right keypoints', () => {

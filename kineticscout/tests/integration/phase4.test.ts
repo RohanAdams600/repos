@@ -420,7 +420,8 @@ describe('side-by-side comparisons', () => {
     const athlete = await createAthlete({ tier: 'PRO' })
     const a = await analysis(athlete.id)
     const b = await analysis(athlete.id)
-    await analysis(athlete.id, null)
+    // No foot strike (common on skates): still comparable, synced on peak hand speed.
+    const c = await analysis(athlete.id, null)
     const valid = await clip({})
     await clip({ licenseExpiresAt: new Date(Date.now() - DAY) })
     await clip({ active: false })
@@ -428,12 +429,22 @@ describe('side-by-side comparisons', () => {
     const caller = appRouter.createCaller({ user: athlete, ipHash: 'test' })
     const options = await caller.analysis.compareOptions({ analysisId: a.id })
     expect(options.syncable).toBe(true)
-    expect(options.own.map((o) => o.id)).toEqual([b.id])
+    expect(options.own.map((o) => o.id).sort()).toEqual([b.id, c.id].sort())
     expect(options.references.map((r) => r.id)).toEqual([valid.id])
 
     const comparison = await caller.analysis.comparison({ analysisId: a.id, other: { kind: 'reference', id: valid.id } })
     expect(comparison.b).toMatchObject({ label: 'Licensed Pro (MLB)', attribution: 'Footage licensed from Rights Holder LLC', handedness: 'LEFT' })
     expect(comparison.a.videoUrl).toContain('https://storage.test/play/')
+  })
+
+  it('accepts only motions that belong to the athlete’s sport', async () => {
+    const athlete = await createAthlete({ tier: 'PRO' })
+    const caller = appRouter.createCaller({ user: athlete, ipHash: 'test' })
+    const upload = { handedness: 'LEFT' as const, contentType: 'video/mp4', sizeBytes: 1000, durationMs: 4000, width: 1080, height: 1920 }
+    await expect(caller.analysis.createUpload({ ...upload, motionType: 'HOCKEY_SHOT' })).rejects.toSatisfy((e: unknown) => e instanceof TRPCError && e.code === 'BAD_REQUEST')
+    await db.athleteProfile.update({ where: { userId: athlete.id }, data: { sport: 'HOCKEY', primaryPosition: 'CENTER' } })
+    const created = await caller.analysis.createUpload({ ...upload, motionType: 'HOCKEY_SHOT' })
+    expect(created.upload.url).toContain(`videos/${athlete.id}/`)
   })
 
   it('refuses expired licences and other athletes’ clips', async () => {

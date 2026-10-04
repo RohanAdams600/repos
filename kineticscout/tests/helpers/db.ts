@@ -5,6 +5,7 @@ import { db } from '@/lib/db'
 import { CURRENT_TERMS_VERSION } from '@/lib/legal'
 
 const TABLES = [
+  'coach_reports', 'coach_blocks', 'contact_requests', 'saved_prospects', 'coach_profiles',
   'reference_clips', 'program_changes', 'roster_needs', 'outreach_drafts', 'notifications', 'metric_verifications', 'profile_view_days',
   'data_deletion_receipts', 'testimonials', 'contact_messages',
   'ai_usage', 'audit_logs', 'marketing_assets', 'blog_posts', 'agent_runs', 'percentile_baselines', 'video_analyses',

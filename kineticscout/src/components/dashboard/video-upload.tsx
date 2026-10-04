@@ -10,11 +10,12 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { ProgressBar } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
 import { isAllowedVideoType, VIDEO_UPLOAD_POLICY } from '@/lib/storage/video-files'
+import { FILMING_GUIDANCE, HANDEDNESS_VERB, MOTION_LABELS, MOTIONS_BY_SPORT, PROJECTILE_NOUN, type Motion, type SportName } from '@/lib/biomechanics/motions'
+import { Checkbox } from '@/components/ui/field'
 import { putWithProgress, UPLOAD_ERRORS } from '@/lib/upload/put'
 import { readVideoMetadata, type VideoMeta } from '@/lib/upload/video-metadata'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
-type Motion = 'SWING' | 'PITCH'
 type Hand = 'RIGHT' | 'LEFT'
 type Phase = 'idle' | 'checking' | 'ready' | 'uploading' | 'finalizing' | 'error'
 
@@ -22,13 +23,15 @@ const MB = 1024 * 1024
 
 
 
-export function VideoUpload({ monthlyLimit }: { monthlyLimit: number }) {
+export function VideoUpload({ monthlyLimit, sport }: { monthlyLimit: number; sport: SportName }) {
+  const motions = MOTIONS_BY_SPORT[sport]
   const trpc = useTRPC()
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const abortRef = useRef<AbortController | null>(null)
-  const [motion, setMotion] = useState<Motion>('SWING')
+  const [motion, setMotion] = useState<Motion>(motions[0]!)
   const [hand, setHand] = useState<Hand>('RIGHT')
+  const [trackObject, setTrackObject] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [meta, setMeta] = useState<VideoMeta | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -56,7 +59,7 @@ export function VideoUpload({ monthlyLimit }: { monthlyLimit: number }) {
     }
     if (chosen.size > VIDEO_UPLOAD_POLICY.maxBytes) {
       setPhase('error')
-      return setError(`That file is ${(chosen.size / MB).toFixed(0)} MB. The limit is ${VIDEO_UPLOAD_POLICY.maxBytes / MB} MB; trim the clip to just the swing or pitch.`)
+      return setError(`That file is ${(chosen.size / MB).toFixed(0)} MB. The limit is ${VIDEO_UPLOAD_POLICY.maxBytes / MB} MB; trim the clip to just the ${motionNames}.`)
     }
     setPhase('checking')
     try {
@@ -90,6 +93,7 @@ export function VideoUpload({ monthlyLimit }: { monthlyLimit: number }) {
       const { analysisId, upload } = await createUpload.mutateAsync({
         motionType: motion,
         handedness: hand,
+        trackObject,
         contentType: file.type,
         sizeBytes: file.size,
         durationMs: meta.durationMs,
@@ -110,13 +114,14 @@ export function VideoUpload({ monthlyLimit }: { monthlyLimit: number }) {
   }
 
   const busy = phase === 'uploading' || phase === 'finalizing' || phase === 'checking'
-  const handLabel = motion === 'SWING' ? 'Bats' : 'Throws'
+  const handLabel = HANDEDNESS_VERB[motion]
+  const motionNames = motions.map((m) => MOTION_LABELS[m].toLowerCase()).join(' or ')
 
   return (
     <section aria-labelledby="upload-title" className="flex flex-col gap-6 border-2 border-border-subtle p-6">
       <div>
         <h2 id="upload-title" className="text-xl font-bold">
-          Analyze a swing or pitch
+          Analyze a {motionNames}
         </h2>
         <p className="mt-1 text-fg-muted">The analysis estimates when your hips, trunk, arm and hand reach peak speed, and flags the sequence problems behind lost velocity.</p>
       </div>
@@ -124,10 +129,10 @@ export function VideoUpload({ monthlyLimit }: { monthlyLimit: number }) {
       <div className="grid gap-6 sm:grid-cols-2">
         <fieldset className="flex flex-col gap-2" disabled={busy}>
           <legend className="mb-2 font-bold">Motion</legend>
-          {(['SWING', 'PITCH'] as const).map((m) => (
+          {motions.map((m) => (
             <label key={m} className="flex min-h-11 cursor-pointer items-center gap-3 border-2 border-border-strong px-3 has-[:checked]:border-fg">
               <input type="radio" name="motion" value={m} checked={motion === m} onChange={() => setMotion(m)} className="size-5 accent-[var(--accent)]" />
-              {m === 'SWING' ? 'Swing' : 'Pitch'}
+              {MOTION_LABELS[m]}
             </label>
           ))}
         </fieldset>
@@ -142,10 +147,23 @@ export function VideoUpload({ monthlyLimit }: { monthlyLimit: number }) {
         </fieldset>
       </div>
 
+      <Checkbox
+        name="trackObject"
+        checked={trackObject}
+        disabled={busy}
+        onChange={(e) => setTrackObject(e.target.checked)}
+        label={
+          <>
+            Also track the {PROJECTILE_NOUN[motion]} (beta). We estimate its direction and speed across the frame from the video. It is an estimate, it
+            works best with a bright {PROJECTILE_NOUN[motion]} against a plain background, and we may not find it at all.
+          </>
+        }
+      />
+
       <div className="flex flex-col gap-3">
         <h3 className="font-bold">Filming checklist</h3>
         <ul className="flex list-disc flex-col gap-1 pl-5 text-fg-muted">
-          <li>Camera facing your chest, square to the line toward the pitcher or plate, at hip height.</li>
+          <li>{FILMING_GUIDANCE[motion]}</li>
           <li>Whole body in frame from start to finish, with no one else in the shot.</li>
           <li>Use slow motion (120 or 240 frames per second) if your phone has it.</li>
           <li>MP4 or MOV, up to {VIDEO_UPLOAD_POLICY.maxDurationMs / 1000} seconds and {VIDEO_UPLOAD_POLICY.maxBytes / MB} MB.</li>

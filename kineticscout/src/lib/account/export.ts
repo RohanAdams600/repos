@@ -63,6 +63,11 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
           },
           outreachDrafts: { orderBy: { createdAt: 'asc' }, select: { trigger: true, channel: true, subject: true, body: true, createdAt: true, copiedAt: true, college: { select: { schoolName: true } } } },
           profileViews: { orderBy: { day: 'asc' }, select: { day: true, views: true, pdfDownloads: true } },
+          contactRequests: {
+            orderBy: { createdAt: 'asc' },
+            select: { status: true, message: true, createdAt: true, athleteRespondedAt: true, guardianRespondedAt: true, coach: { select: { firstName: true, lastName: true, title: true, college: { select: { schoolName: true } } } } },
+          },
+          coachBlocks: { select: { createdAt: true, coach: { select: { firstName: true, lastName: true } } } },
           pipeline: {
             orderBy: { createdAt: 'asc' },
             select: { status: true, lastContactDate: true, createdAt: true, college: { select: { schoolName: true, division: true, state: true } } },
@@ -77,6 +82,24 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
       testimonials: { select: { displayName: true, descriptor: true, quote: true, rating: true, status: true, consentRecordedAt: true, publishedAt: true } },
       aiUsage: { orderBy: { createdAt: 'asc' }, select: { feature: true, createdAt: true } },
       notifications: { orderBy: { createdAt: 'asc' }, select: { kind: true, title: true, body: true, createdAt: true, readAt: true } },
+      coachProfile: {
+        select: {
+          firstName: true,
+          lastName: true,
+          title: true,
+          workEmail: true,
+          workEmailVerifiedAt: true,
+          staffDirectoryUrl: true,
+          status: true,
+          reviewNote: true,
+          reviewedAt: true,
+          createdAt: true,
+          college: { select: { schoolName: true } },
+          savedProspects: { select: { note: true, createdAt: true, updatedAt: true, athlete: { select: { firstName: true, lastName: true, gradYear: true } } } },
+          contactRequests: { select: { status: true, message: true, createdAt: true, sharedEmails: true, athlete: { select: { firstName: true, lastName: true } } } },
+        },
+      },
+      coachReports: { select: { reason: true, createdAt: true, resolvedAt: true } },
     },
   })
 
@@ -145,6 +168,10 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
     outreachDrafts: (profile?.outreachDrafts ?? []).map((d) => ({ ...d, college: d.college.schoolName })),
     publicProfileDailyCounts: (profile?.profileViews ?? []).map((v) => ({ ...v, day: v.day.toISOString().slice(0, 10) })),
     notifications: user.notifications,
+    contactRequestsReceived: (profile?.contactRequests ?? []).map((r) => ({ ...r, coach: { name: `${r.coach.firstName} ${r.coach.lastName}`, title: r.coach.title, school: r.coach.college?.schoolName ?? null } })),
+    blockedCoaches: (profile?.coachBlocks ?? []).map((b) => ({ coach: `${b.coach.firstName} ${b.coach.lastName}`, blockedAt: b.createdAt })),
+    coachAccount: user.coachProfile,
+    reportsYouMade: user.coachReports,
     aiFeatureUse: user.aiUsage,
     securityEvents,
   }

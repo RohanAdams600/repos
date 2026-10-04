@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { CoachHome } from '@/components/coach/coach-home'
 import { GuardianBanner } from '@/components/dashboard/guardian-banner'
 import { MetricLogForm } from '@/components/dashboard/metric-log-form'
 import { ProgressionChart } from '@/components/dashboard/progression-chart'
@@ -29,11 +30,9 @@ export default async function DashboardPage({ searchParams }: PageProps<'/dashbo
   if (user.role === 'COACH') {
     return (
       <div className="flex flex-col gap-6">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <EmptyState title="Coach tools are not available yet">
-          Your coach account is set up. Search, saved prospects and messaging for coaches are in development; we will email you when they
-          launch.
-        </EmptyState>
+        <Breadcrumbs items={[{ label: 'Dashboard' }]} />
+        <h1 className="text-3xl font-bold">Coach dashboard</h1>
+        <CoachHome />
       </div>
     )
   }

@@ -1,30 +1,49 @@
 import type { KinematicReport, PoseTrack, SegmentName } from '@/lib/biomechanics/types'
 
 /**
- * Side-by-side comparison helpers. Two clips are aligned on lead foot strike: time zero is the
- * frame the front foot lands in each clip, so the delivery or swing that follows lines up even if
- * the clips start at different moments.
+ * Side-by-side comparison helpers. Two clips are aligned on a shared event: lead foot strike when
+ * both clips have one, otherwise the moment of peak hand speed (contact or release), which every
+ * analysis has. Skaters often show no clear foot strike, so hockey shots usually sync on the hands.
  */
 
 export const SEGMENTS: readonly SegmentName[] = ['pelvis', 'torso', 'arm', 'hand']
 
-/** Segment peak times in milliseconds relative to foot strike (negative: before foot strike). */
-export function peaksRelativeToFootStrike(report: Pick<KinematicReport, 'footStrikeTime' | 'peaks'>): Partial<Record<SegmentName, number>> {
-  if (report.footStrikeTime === null) return {}
+type AnchorSource = Pick<KinematicReport, 'footStrikeTime' | 'peaks'>
+
+export type AnchorEvent = 'FOOT_STRIKE' | 'HAND_PEAK'
+export type Anchor = { event: AnchorEvent; a: number; b: number }
+
+function handPeak(report: AnchorSource): number | null {
+  return report.peaks.find((p) => p.segment === 'hand')?.time ?? null
+}
+
+export function commonAnchor(a: AnchorSource, b: AnchorSource): Anchor | null {
+  if (a.footStrikeTime !== null && b.footStrikeTime !== null) return { event: 'FOOT_STRIKE', a: a.footStrikeTime, b: b.footStrikeTime }
+  const ha = handPeak(a)
+  const hb = handPeak(b)
+  return ha !== null && hb !== null ? { event: 'HAND_PEAK', a: ha, b: hb } : null
+}
+
+export const ANCHOR_LABELS: Record<AnchorEvent, string> = { FOOT_STRIKE: 'foot strike', HAND_PEAK: 'peak hand speed' }
+
+/** Segment peak times in milliseconds relative to an anchor time (negative: before it). */
+export function peaksRelativeTo(report: Pick<KinematicReport, 'peaks'>, anchorTime: number): Partial<Record<SegmentName, number>> {
   const out: Partial<Record<SegmentName, number>> = {}
-  for (const peak of report.peaks) out[peak.segment] = Math.round((peak.time - report.footStrikeTime) * 1000)
+  for (const peak of report.peaks) out[peak.segment] = Math.round((peak.time - anchorTime) * 1000)
   return out
 }
 
-export type SyncClip = { footStrikeTime: number; durationSec: number }
+/** Segment peak times relative to foot strike (empty when foot strike was not detected). */
+export function peaksRelativeToFootStrike(report: AnchorSource): Partial<Record<SegmentName, number>> {
+  return report.footStrikeTime === null ? {} : peaksRelativeTo(report, report.footStrikeTime)
+}
 
-/**
- * Shared timeline in seconds relative to foot strike that both clips can show:
- * from the later "start" to the earlier "end".
- */
+export type SyncClip = { anchorTime: number; durationSec: number }
+
+/** Shared timeline in seconds relative to the anchor that both clips can show. */
 export function syncWindow(a: SyncClip, b: SyncClip): { start: number; end: number } {
-  const start = Math.max(-a.footStrikeTime, -b.footStrikeTime)
-  const end = Math.min(a.durationSec - a.footStrikeTime, b.durationSec - b.footStrikeTime)
+  const start = Math.max(-a.anchorTime, -b.anchorTime)
+  const end = Math.min(a.durationSec - a.anchorTime, b.durationSec - b.anchorTime)
   return { start, end: Math.max(start, end) }
 }
 
@@ -42,12 +61,16 @@ export function mirrorTrack(track: PoseTrack): PoseTrack {
 
 export type ComparisonRow = { segment: SegmentName; a: number | null; b: number | null; differenceMs: number | null }
 
-export function comparisonRows(a: Pick<KinematicReport, 'footStrikeTime' | 'peaks'>, b: Pick<KinematicReport, 'footStrikeTime' | 'peaks'>): ComparisonRow[] {
-  const pa = peaksRelativeToFootStrike(a)
-  const pb = peaksRelativeToFootStrike(b)
-  return SEGMENTS.map((segment) => {
-    const va = pa[segment] ?? null
-    const vb = pb[segment] ?? null
-    return { segment, a: va, b: vb, differenceMs: va !== null && vb !== null ? va - vb : null }
-  })
+export function comparisonRows(a: AnchorSource, b: AnchorSource): { anchor: Anchor | null; rows: ComparisonRow[] } {
+  const anchor = commonAnchor(a, b)
+  const pa = anchor ? peaksRelativeTo(a, anchor.a) : {}
+  const pb = anchor ? peaksRelativeTo(b, anchor.b) : {}
+  return {
+    anchor,
+    rows: SEGMENTS.map((segment) => {
+      const va = pa[segment] ?? null
+      const vb = pb[segment] ?? null
+      return { segment, a: va, b: vb, differenceMs: va !== null && vb !== null ? va - vb : null }
+    }),
+  }
 }

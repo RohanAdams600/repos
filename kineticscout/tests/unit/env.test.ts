@@ -77,4 +77,9 @@ describe('server environment validation', () => {
   it('rejects weak peppers', () => {
     expect(() => parseServerEnv({ ...local, HASH_PEPPER: 'short' })).toThrow(/HASH_PEPPER/)
   })
+  it('accepts the end-to-end sign-in stub only for local runs', () => {
+    expect(parseServerEnv({ ...local, E2E_AUTH_STUB: 'true' }).E2E_AUTH_STUB).toBe(true)
+    expect(() => parseServerEnv({ ...production, E2E_AUTH_STUB: 'true' })).toThrow(/E2E_AUTH_STUB/)
+    expect(() => parseServerEnv({ ...production, DEPLOY_ENV: 'staging', E2E_AUTH_STUB: 'true' })).toThrow(EnvValidationError)
+  })
 })

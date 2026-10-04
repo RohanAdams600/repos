@@ -1,0 +1,122 @@
+# Unit tests for alerts.yml: promtool test rules alerts.test.yml
+rule_files:
+  - alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  # An overdue deletion must hold for an hour before paging, so one slow sweep does not wake anyone.
+  - interval: 1m
+    input_series:
+      - series: 'kineticscout_account_deletions_overdue{job="kineticscout"}'
+        values: '0 1x90'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: AccountDeletionOverdue
+        exp_alerts: []
+      - eval_time: 75m
+        alertname: AccountDeletionOverdue
+        exp_alerts:
+          - exp_labels: { severity: page, job: kineticscout }
+            exp_annotations:
+              summary: '1 account deletion(s) past their scheduled time'
+              description: 'Deletion runs every 10 minutes once the 7-day grace period ends. An overdue deletion breaks a commitment in the privacy policy. Check worker logs for "account deletion failed".'
+
+  # Review backlog: warning after 36 hours, page after 96, nothing below.
+  - interval: 1h
+    input_series:
+      - series: 'kineticscout_metric_verifications_oldest_age_seconds{job="kineticscout"}'
+        values: '0 3600+3600x120'
+    alert_rule_test:
+      - eval_time: 30h
+        alertname: MetricVerificationBacklog
+        exp_alerts: []
+      - eval_time: 40h
+        alertname: MetricVerificationBacklog
+        exp_alerts:
+          - exp_labels: { severity: warning, job: kineticscout }
+            exp_annotations:
+              summary: Verification reviews are falling behind
+              description: 'The oldest clip has waited 1d 16h 0m 0s. Athletes are told "usually within 2 business days".'
+      - eval_time: 90h
+        alertname: MetricVerificationBacklogBreached
+        exp_alerts: []
+      - eval_time: 100h
+        alertname: MetricVerificationBacklogBreached
+        exp_alerts:
+          - exp_labels: { severity: page, job: kineticscout }
+            exp_annotations:
+              summary: A verification has waited longer than we tell athletes
+
+  # Budget ratio crosses 80% then 95%.
+  - interval: 1h
+    input_series:
+      - series: 'kineticscout_ai_spend_month_usd{job="kineticscout"}'
+        values: '100 210 240'
+      - series: 'kineticscout_ai_budget_month_usd{job="kineticscout"}'
+        values: '250 250 250'
+    alert_rule_test:
+      - eval_time: 0h
+        alertname: AiBudgetHigh
+        exp_alerts: []
+      - eval_time: 1h
+        alertname: AiBudgetHigh
+        exp_alerts:
+          - exp_labels: { severity: warning, job: kineticscout }
+            exp_annotations:
+              summary: AI spend is at 84% of the monthly budget
+              description: At 100% the budget guard refuses new AI calls until the 1st (UTC). Raise AI_GLOBAL_MONTHLY_BUDGET_USD only after checking which feature drove the spend.
+      - eval_time: 1h
+        alertname: AiBudgetNearlyExhausted
+        exp_alerts: []
+      - eval_time: 2h
+        alertname: AiBudgetNearlyExhausted
+        exp_alerts:
+          - exp_labels: { severity: page, job: kineticscout }
+            exp_annotations:
+              summary: AI spend is at 96% of the monthly budget
+              description: Video and reference clip analysis, outreach drafts and the growth and SEO agents stop when the budget is reached.
+
+  # An agent that has never succeeded (fresh deploy, timestamp 0) must not alert as stale.
+  - interval: 1h
+    input_series:
+      - series: 'kineticscout_agent_last_success_timestamp_seconds{job="kineticscout",agent="SEO"}'
+        values: '0x200'
+    alert_rule_test:
+      - eval_time: 200h
+        alertname: SeoAgentStale
+        exp_alerts: []
+
+  # A queued analysis older than 30 minutes for 5 minutes means no worker is consuming.
+  - interval: 1m
+    input_series:
+      - series: 'kineticscout_video_analyses_queued_oldest_age_seconds{job="kineticscout"}'
+        values: '0+60x60'
+    alert_rule_test:
+      - eval_time: 33m
+        alertname: VideoAnalysisQueueStalled
+        exp_alerts: []
+      - eval_time: 40m
+        alertname: VideoAnalysisQueueStalled
+        exp_alerts:
+          - exp_labels: { severity: page, job: kineticscout }
+            exp_annotations:
+              summary: Video analyses are not being picked up
+              description: The sweep re-enqueues queued analyses after 10 minutes. One still queued after 30 means no worker is consuming the video-analysis queue.
+
+  # Failed jobs are retained for 30 days, so the alert watches the increase, not the level.
+  - interval: 10m
+    input_series:
+      - series: 'kineticscout_queue_jobs{job="kineticscout",queue="video-analysis",state="failed"}'
+        values: '40x6 40 42 44 46 48 50'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: QueueFailedJobsRising
+        exp_alerts: []
+      - eval_time: 120m
+        alertname: QueueFailedJobsRising
+        exp_alerts:
+          - exp_labels: { severity: warning, job: kineticscout, queue: video-analysis, state: failed }
+            exp_annotations:
+              summary: Jobs are failing on queue video-analysis
+              description: More than 5 jobs exhausted their 3 attempts in the last hour.

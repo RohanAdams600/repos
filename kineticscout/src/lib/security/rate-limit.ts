@@ -27,6 +27,7 @@ export const RATE_LIMITS = {
   profilePdf: { tokens: 30, window: '1 h' },
   calculator: { tokens: 30, window: '1 h' },
   outreachDraft: { tokens: 20, window: '1 d' },
+  coachVerification: { tokens: 5, window: '1 h' },
   /** One counted profile view per visitor per profile per hour. */
   profileViewDedupe: { tokens: 1, window: '1 h' },
 } as const satisfies Record<string, { tokens: number; window: Duration }>

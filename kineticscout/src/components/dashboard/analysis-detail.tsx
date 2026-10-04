@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { ANALYSIS_FAILURES, STATUS_LABELS } from '@/components/dashboard/analysis-messages'
 import { KinematicReportView } from '@/components/dashboard/kinematic-report'
 import { PoseOverlayPlayer } from '@/components/dashboard/pose-overlay-player'
+import { ProjectilePanel } from '@/components/dashboard/projectile-panel'
+import { PROJECTILE_NOUN } from '@/lib/biomechanics/motions'
 import { Alert } from '@/components/ui/alert'
 import { buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
@@ -45,15 +47,16 @@ export function AnalysisDetail({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-8">
       {analysis.videoUrl && analysis.pose ? (
-        <PoseOverlayPlayer videoUrl={analysis.videoUrl} pose={analysis.pose} footStrikeTime={analysis.report.footStrikeTime} />
+        <PoseOverlayPlayer videoUrl={analysis.videoUrl} pose={analysis.pose} footStrikeTime={analysis.report.footStrikeTime} trajectory={analysis.projectile?.points} />
       ) : (
         <p className="text-fg-muted">The original video has been deleted under our retention policy. The report below is kept.</p>
       )}
-      {analysis.videoUrl && analysis.report.footStrikeTime !== null && (
+      {analysis.videoUrl && (
         <Link href={`/dashboard/analysis/${analysis.id}/compare`} className={buttonVariants({ variant: 'secondary' })}>
           Compare side by side
         </Link>
       )}
+      {analysis.projectile && <ProjectilePanel estimate={analysis.projectile} noun={PROJECTILE_NOUN[analysis.motionType]} />}
       <KinematicReportView report={analysis.report} />
     </div>
   )

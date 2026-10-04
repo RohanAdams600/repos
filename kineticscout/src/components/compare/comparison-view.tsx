@@ -25,8 +25,8 @@ export function ComparisonView({ analysisId }: { analysisId: string }) {
   if (!options.data.syncable) {
     return (
       <Alert tone="info">
-        This clip cannot be synced: either the lead foot strike was not detected or the video was deleted under the retention policy.{' '}
-        <Link href="/dashboard/analysis">Upload a new clip</Link> filmed from the side with the whole body in frame.
+        This clip cannot be compared because its video was deleted under the retention policy. <Link href="/dashboard/analysis">Upload a new clip</Link> to
+        compare.
       </Alert>
     )
   }

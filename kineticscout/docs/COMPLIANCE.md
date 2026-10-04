@@ -6,7 +6,7 @@ This document records how the product meets the "do not get sued" checklist, and
 
 - **COPPA (under 13).** Sign-up uses a neutral date-of-birth screen. If the date is under 13, the server stores nothing, sends nothing to Supabase, and sets a 24-hour cookie so the form cannot simply be resubmitted with a different date. The message does not reveal the cutoff. If an under-13 date reaches onboarding (an interrupted sign-up), the Supabase auth user is deleted.
 - **Teens (13 to 17).** A parent or guardian email is required. Until the guardian consents through an emailed one-time link (confirmed by POST, with an attestation checkbox), the profile stays private and purchases and coach outreach are blocked (`src/lib/auth/permissions.ts`). Guardian tokens are stored hashed, are single-use, and expire after 7 days.
-- **Ongoing guardian control.** The consent confirmation email carries a private management link (`/consent/guardian/manage`, valid 1 year, re-requestable from `/legal/your-data` without revealing whether an address is on file). It lets the guardian withdraw consent (immediate: profile private, purchases and outreach blocked, teen notified), optionally stop renewal, give consent again with a fresh attestation, and request or cancel deletion of the account.
+- **Ongoing guardian control.** The consent confirmation email carries a private management link (`/consent/guardian/manage`, valid 1 year, re-requestable from `/legal/your-data` without revealing whether an address is on file). It lets the guardian withdraw consent (immediate: profile private, purchases and outreach blocked, open coach contact requests declined and shared addresses cleared from coaches' pages, teen notified), optionally stop renewal, give consent again with a fresh attestation, and request or cancel deletion of the account.
 - **Advertising.** Paid ads target adults only: the Meta client refuses any ad set whose `age_min` is under 18, and ad copy is checked for promises aimed at children.
 
 ## Data minimisation and inventory
@@ -30,6 +30,11 @@ This document records how the product meets the "do not get sued" checklist, and
 | Hashed IPs, audit events | Security | 24 months, purged by the worker |
 | Contact form messages | Answering the visitor | 12 months, purged by the worker |
 | First-touch UTM values (with consent) | Campaign attribution | Until deletion (cookie: 30 days) |
+| Coach name, title, program, school email, staff directory link, review decision | Proving a coach works where they say | Until the coach deletes the account |
+| Saved athletes and private notes (coach) | Coach's recruiting board | Until removed or the coach account is deleted |
+| Contact requests: message, responses, shared email addresses | Letting athletes decide whether a coach gets their email | Until either account is deleted; open requests expire after 30 days; shared addresses cleared on block or consent withdrawal |
+| Blocks and reports about coaches | Safety | Until either account is deleted |
+| Puck or ball track and estimate (opt-in beta) | Analysis result | Until deletion, with the analysis |
 
 Not collected: location, contacts, device identifiers, advertising identifiers, third-party analytics.
 
@@ -47,6 +52,14 @@ Not collected: location, contacts, device identifiers, advertising identifiers, 
 - **Verification clips** are viewed only by staff reviewers through short-lived signed URLs, never shown publicly, and deleted 30 days after the decision.
 - **Outreach** is drafted, never sent: the athlete copies or opens the draft in their own email. Drafts can only use facts on the athlete's own profile and sourced program facts, and minors need guardian consent before the feature is available.
 - **Aggregates**: build-cohort percentiles and cross-sport equivalents use groups of at least 25 athletes; the anonymous calculator rounds to the nearest 5 and stores nothing it is given.
+
+## Phase 5 privacy notes
+
+- **Coach access is narrow by design.** Coaches must be adults whose school email and staff directory listing staff have checked. They see only athletes with public profiles, and only the public card; a profile that goes private disappears from their search and boards. Athletes see how many verified coaches saved them, never who.
+- **Athletes decide, guardians co-decide.** No contact detail reaches a coach until the athlete accepts; for a minor a guardian must approve too, and then the coach receives both addresses and is asked to include the guardian. First messages cannot contain links or phone numbers, every request carries the coach's attestation that their association's rules allow contact, and athletes can block or report at any time. A guardian withdrawing consent ends every coach's access on the platform.
+- **Recruiting rules are the coach's responsibility.** KineticScout does not track contact periods for each association; the Terms make the coach responsible and require an attestation on each request. KineticScout is not affiliated with any governing body.
+- **Tracking beta** is opt-in per upload, costs more (included in the budget reservation), and its speed is labelled a lower bound in the product and the Terms.
+- **Exports** include contact requests received, blocks and reports (athletes) and the coach profile, saved athletes with notes, and requests sent (coaches).
 
 ## Consent and cookies
 
@@ -96,3 +109,6 @@ No third-party script, pixel or font is loaded in the browser except Google Anal
 6. Licensed reference footage for side-by-side comparisons, and a licensed source of coaching-staff and roster-need data (or staff time to enter changes from school announcements).
 7. Staff time to review verification clips (the dashboard promises a decision within about 2 business days).
 8. Before deploying Phase 4: email account holders about the updated Privacy Policy (outreach drafts now send profile facts to OpenAI). `CURRENT_TERMS_VERSION` is bumped, so signed-in users are asked to accept the new version.
+9. Staff time for coach account reviews (promised "usually within 2 business days") and for reports about coaches (alert after 24 hours, page after 3 days). Decide who may suspend a coach out of hours.
+10. Before deploying Phase 5: email account holders about the updated Privacy Policy and Terms (coach contact requests, guardian approval, tracking beta). `CURRENT_TERMS_VERSION` is bumped to `2026-10-04.3`.
+11. Counsel review of the coach terms against the recruiting rules of the associations the product will serve (for example NCAA, NAIA and NJCAA contact periods), and whether any association requires more than the coach's attestation.

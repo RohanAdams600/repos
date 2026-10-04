@@ -1,0 +1,39 @@
+# Scrape configuration for KineticScout. Merge these jobs into your Prometheus (or Grafana Agent /
+# Alloy) config. The bearer token is the app's INTERNAL_API_SECRET, read from a file so it never
+# sits in this config.
+global:
+  scrape_interval: 60s
+  evaluation_interval: 60s
+
+rule_files:
+  - alerts.yml
+
+scrape_configs:
+  # Operational gauges: review backlogs, stuck jobs, overdue deletions, AI spend.
+  - job_name: kineticscout
+    scheme: https
+    metrics_path: /api/internal/metrics
+    authorization:
+      type: Bearer
+      credentials_file: /etc/prometheus/secrets/kineticscout-internal-api-secret
+    static_configs:
+      - targets: ['kineticscout.com']
+        labels:
+          env: production
+
+  # Uptime: the public health check through the blackbox exporter (module http_2xx).
+  - job_name: kineticscout-health
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets: ['https://kineticscout.com/api/health']
+        labels:
+          env: production
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115

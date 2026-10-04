@@ -1,15 +1,16 @@
-import { comparisonRows, SEGMENTS } from '@/lib/biomechanics/compare'
+import { ANCHOR_LABELS, comparisonRows, SEGMENTS } from '@/lib/biomechanics/compare'
 import type { KinematicReport, SegmentName } from '@/lib/biomechanics/types'
 
 const SEGMENT_LABEL: Record<SegmentName, string> = { pelvis: 'Pelvis', torso: 'Torso', arm: 'Arm', hand: 'Hand' }
 const SEGMENT_MARK: Record<SegmentName, string> = { pelvis: 'P', torso: 'T', arm: 'A', hand: 'H' }
 
 /**
- * When each segment reached peak speed, relative to foot strike, for both clips. A good sequence
+ * When each segment reached peak speed, relative to the shared sync event, for both clips. A good sequence
  * peaks pelvis, then torso, then arm, then hand. Letters mark segments so color is never the only cue.
  */
 export function SequenceTimeline({ a, b, labelA, labelB }: { a: KinematicReport; b: KinematicReport; labelA: string; labelB: string }) {
-  const rows = comparisonRows(a, b)
+  const { anchor, rows } = comparisonRows(a, b)
+  const anchorLabel = ANCHOR_LABELS[anchor?.event ?? 'HAND_PEAK']
   const values = rows.flatMap((r) => [r.a, r.b]).filter((v): v is number => v !== null)
   const min = Math.min(0, ...values) - 40
   const max = Math.max(0, ...values) + 40
@@ -21,10 +22,10 @@ export function SequenceTimeline({ a, b, labelA, labelB }: { a: KinematicReport;
   ]
   return (
     <div className="flex flex-col gap-4">
-      <svg viewBox={`0 0 ${width} 150`} className="w-full" role="img" aria-label="Peak speed timing of pelvis, torso, arm and hand for both clips, relative to foot strike. Values are listed in the table below.">
+      <svg viewBox={`0 0 ${width} 150`} className="w-full" role="img" aria-label={`Peak speed timing of pelvis, torso, arm and hand for both clips, relative to ${anchorLabel}. Values are listed in the table below.`}>
         <line x1={x(0)} x2={x(0)} y1={12} y2={136} stroke="currentColor" strokeWidth={2} strokeDasharray="4 4" />
         <text x={x(0)} y={148} textAnchor="middle" fontSize={11} fill="currentColor">
-          foot strike
+          {anchorLabel}
         </text>
         {lanes.map((lane) => (
           <g key={lane.key}>
@@ -49,7 +50,7 @@ export function SequenceTimeline({ a, b, labelA, labelB }: { a: KinematicReport;
       </svg>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[480px] text-left">
-          <caption className="sr-only">Peak speed time relative to foot strike, in milliseconds</caption>
+          <caption className="sr-only">Peak speed time relative to {anchorLabel}, in milliseconds</caption>
           <thead>
             <tr className="border-b-2 border-border-subtle">
               <th scope="col" className="py-2 pr-4">Segment</th>

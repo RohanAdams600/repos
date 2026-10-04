@@ -43,8 +43,11 @@
 kineticscout/
 ├── AGENTS.md                      Agent guidance (Next.js version docs + project rules)
 ├── .env.example                   Every variable, with deploy requirements
-├── docs/                          Architecture, security, compliance
-├── infra/gcs-cors.json            Upload bucket CORS (PUT from APP_URL only)
+├── docs/                          Architecture, security, compliance, deploy checklist, load testing
+├── e2e/                           Playwright + axe specs, seed, local auth stub cookies (Phase 5)
+├── infra/
+│   ├── gcs-cors.json              Upload bucket CORS (PUT from APP_URL only)
+│   └── monitoring/                Prometheus scrape config, alert rules + promtool tests, Grafana dashboard (Phase 5)
 ├── next.config.ts                 Static security headers, image policy, body limits
 ├── prisma.config.ts               Prisma 7 CLI config (direct URL for migrations)
 ├── prisma/
@@ -62,21 +65,26 @@ kineticscout/
 │   │   ├── (auth)/                sign-in, sign-up, password reset
 │   │   ├── auth/confirm/          POST-confirmed email links (scanner-safe)
 │   │   ├── onboarding/            account completion + athlete profile
-│   │   ├── consent/guardian/      parent or guardian consent; manage/ (withdraw, re-grant, delete via private link)
+│   │   ├── consent/guardian/      parent or guardian consent; manage/ (withdraw, re-grant, delete via private link); contact/ (approve a coach request)
+│   │   ├── coach/verify-email/    POST-confirmed school email confirmation for coach accounts (Phase 5)
 │   │   ├── email/preferences/     token-authenticated email preference centre (Phase 3)
 │   │   ├── terms-update/          re-acceptance gate when CURRENT_TERMS_VERSION changes (Phase 3)
 │   │   ├── dashboard/             overview, profile and sharing, measurements, insights, analysis (+ compare), matchmaker,
-│   │   │                          recruiting assistant, notifications, billing, settings (auth required)
+│   │   │                          recruiting assistant, contact requests, notifications, billing, settings (auth required);
+│   │   │                          coaches: prospects, saved, contact requests (Phase 5)
 │   │   ├── p/[slug]/              public athlete profile, share image and PDF (Phase 4)
 │   │   ├── tools/                 public percentile calculator by build (Phase 4)
 │   │   ├── admin/                 growth agent output + article drafts (ADMIN, else 404)
 │   │   ├── blog/                  articles published by the Data and SEO agent
 │   │   ├── faq/ search/ contact/ about/ reviews/ case-studies/   marketing site (Phase 2)
 │   │   ├── legal/                 privacy, terms, refunds, cookies, your-data
-│   │   └── api/                   trpc, webhooks/stripe, billing/*, account/export, profile/pdf, email/unsubscribe, health, internal/revalidate
+│   │   └── api/                   trpc, webhooks/stripe, billing/*, account/export, profile/pdf, email/unsubscribe, health, internal/revalidate, internal/metrics
 │   ├── components/                ui/ primitives, layout/, auth/, account/, dashboard/, admin/, brand/
 │   ├── lib/
-│   │   ├── auth/                  Supabase clients, DAL (session.ts), policy (permissions.ts), age rules, guardian consent and management, re-auth, actions
+│   │   ├── auth/                  Supabase clients, DAL (session.ts), policy (permissions.ts), age rules, guardian consent and management, re-auth, actions,
+│   │   │                          e2e-stub.ts (test-only sign-in, refused outside DEPLOY_ENV=local)
+│   │   ├── coach/                 coach verification, prospect search and boards, contact requests (guardian approval, block, report), rules
+│   │   ├── ops/                   operational gauges and Prometheus text format (Phase 5)
 │   │   ├── account/               data export, scheduled deletion (grace period, resumable steps, receipts), settings actions
 │   │   ├── profile/               public profile data and visibility, slugs, view counters, PDF renderer
 │   │   ├── verification/          evidence policy, MP4 metadata reader, automated checks, reviewer decisions, retention
@@ -87,7 +95,7 @@ kineticscout/
 │   │   ├── email/                 Resend client, HTML templates, marketing sender (consent re-check), signed preference links
 │   │   ├── security/              CSP, origin/CSRF, rate limits, hashing, sanitization
 │   │   ├── billing/               plans, Stripe client, checkout, webhook processing, subscription sync
-│   │   ├── biomechanics/          pose types, codec, 2D kinematic sequence analysis
+│   │   ├── biomechanics/          pose types, codec, motions by sport, 2D kinematic sequence analysis, comparison anchors, projectile estimate
 │   │   ├── matchmaker/            program fit scoring
 │   │   ├── metrics/               metric catalogue, quota-safe logging, percentile ranks
 │   │   ├── ai/                    OpenAI client with structured output, budget reservations
@@ -105,10 +113,11 @@ kineticscout/
 │   ├── agents/growth/             Agent 1: trends → copy → compliance → payloads → Meta (guarded)
 │   ├── agents/seo/                Agent 2: k-anonymous percentiles → article → fact check → publish
 │   ├── jobs/video-analysis.ts     Pose estimation + kinematic report
-│   ├── pose/                      Google Video Intelligence adapter
+│   ├── pose/                      Google Video Intelligence adapter (person detection, optional object tracking)
 │   ├── agents/recruiting/         Agent 3: licensed program feed import (daily, optional)
 │   ├── jobs/                      video-analysis, metric-evidence, recruiting (fan-out + drafts), reference-clip
-│   └── sweep.ts                   Re-enqueue stuck work, enforce retention, run due deletions, purge evidence, retry program changes
+│   └── sweep.ts                   Re-enqueue stuck work, enforce retention, run due deletions, purge evidence, retry program changes,
+│                                  expire contact requests
 └── tests/                         unit/, integration/ (Postgres), helpers/, setup/
 ```
 
@@ -117,6 +126,7 @@ kineticscout/
 `User` 1–1 `AthleteProfile` 1–n `Metric`, `VideoAnalysis`, `RecruitingPipeline` n–1 `CollegeProgram`.
 `User` 1–n `Subscription`, `CheckoutSession`, `AiUsage`; 1–1 `GuardianConsent`.
 Agent tables: `AgentRun` 1–n `MarketingAsset`, `BlogPost`; `PercentileBaseline` holds weekly snapshots.
+Coaches (Phase 5): `User` 1–1 `CoachProfile` n–1 `CollegeProgram`; `CoachProfile` 1–n `SavedProspect`, `ContactRequest`, `CoachReport` (each also n–1 the athlete); `CoachBlock` joins athlete and coach.
 Ledgers: `StripeEvent` (webhook idempotency), `AuditLog` (security events), `DataDeletionReceipt` (proof a deletion was requested and completed; keyed hash of the user id only).
 
 Column names follow the brief exactly (`stripe_customer_id`, `subscription_tier`, `grad_year`, `primary_position`, `height`, `weight`, `gpa`, `high_school`, `twitter_handle`, `metric_type`, `value`, `verified`, `video_url`, `average_recruiting_metrics`, `head_coach_email`, `last_contact_date`). Where the brief named a column without a unit, the Prisma field carries it (`heightInches @map("height")`). `60_YARD_DASH` is not a valid identifier, so the enum key is `SIXTY_YARD_DASH @map("60_YARD_DASH")`; the stored value matches the brief.
@@ -145,7 +155,11 @@ Column names follow the brief exactly (`stripe_customer_id`, `subscription_tier`
 
 **Agent 3 (recruiting assistant).** Program data changes come from staff edits in `/admin` or a licensed feed (`PROGRAM_DATA_FEED_URL`, daily, schema-validated, known programs only). A new head coach or a posted roster need is written as a `ProgramChange` with its source and enqueued at once; the sweep retries anything unprocessed. Fan-out selects Pro athletes with the program in their pipeline who turned alerts on (and have guardian consent if under 18; roster needs also match position and class). Each gets an outreach draft written by the LLM from a fixed fact sheet and rejected unless every number appears in it, the coach on file is addressed and no promise or em dash appears, then an in-app notification and, if enabled, an email. If drafting is impossible the alert still goes out. Athletes can also request drafts manually; nothing is ever sent to a coach by KineticScout.
 
-**Side-by-side comparison.** Both clips are aligned on lead foot strike: clip A drives the clock and clip B is re-seeked whenever it drifts by more than about a frame; a left-handed clip is mirrored against a right-handed one. Reference clips are uploaded by staff with licence details (enforced by a CHECK constraint), processed by the same pose pipeline, and playable only while active and within the licence term, re-checked on every request.
+**Side-by-side comparison.** Both clips are aligned on lead foot strike when both have one, otherwise on the driving hand's peak speed (hockey shots can lack a clear plant): clip A drives the clock and clip B is re-seeked whenever it drifts by more than about a frame; a left-handed clip is mirrored against a right-handed one. Reference clips are uploaded by staff with licence details (enforced by a CHECK constraint), processed by the same pose pipeline, and playable only while active and within the licence term, re-checked on every request.
+
+**Puck and ball tracking (Phase 5, beta).** When the athlete opts in, the worker adds `OBJECT_TRACKING` to the Video Intelligence request (its cost is part of the budget reservation). `projectile.ts` keeps tracks labelled as the sport's ball or puck, picks the one with the most observations in the 250 ms after peak hand speed (release), and fits a straight line to its centre over that window. The athlete's entered height is the ruler from image units to feet. The result is a launch angle in the image plane and a speed reported as a lower bound, because motion toward or away from the camera is invisible in 2D. Too few points, a poor fit, a missing height or a speed outside the plausible range for the matching metric produce a warning instead of a number.
+
+**Coach verification and contact (Phase 5).** A coach account is adults-only. The coach names their program and a school or program email address; a hashed, expiring link confirms the inbox (POST-confirmed so mail scanners cannot click it), then staff match the person to the program's public staff directory. A database CHECK refuses `VERIFIED` without a confirmed email and a review. Verified coaches search public profiles with the same visibility rules as `/p/<slug>` applied in SQL (consent for minors, no pending deletion, blocks excluded) and see only the public card. A contact request carries a first message without links or phone numbers and an attestation that the coach's association allows contact now; one open request per pair (partial unique index), 20 per coach per day, 90 days' wait after a decline, expiry after 30 days. The athlete accepts or declines; for a minor, acceptance emails the guardian a hashed 14-day link, and only their approval shares both addresses (a CHECK keeps `shared_emails` empty unless accepted). Blocking a coach, or a guardian withdrawing consent, declines open requests and clears shared addresses from the coach's page. Reports go to the admin console; suspension withdraws the coach's open requests.
 
 **Agents.** node-cron ticks in `AGENT_TIMEZONE`: Growth runs Tuesday and Thursday at 10:00, Data/SEO runs Sunday at 00:00. Each tick enqueues a BullMQ job with id `<agent>-<slot>`, and `AgentRun(agent, slot)` is unique, so every slot runs once across all replicas. Failed runs can be retried.
 
@@ -157,3 +171,4 @@ Column names follow the brief exactly (`stripe_customer_id`, `subscription_tier`
 | 2 | Marketing site: FAQ (5 detailed, expandable, FAQPage schema), site search, contact form + thank-you page, floating contact button and sticky mobile CTA, scroll progress, reviews and case studies (admin-curated, consent-backed, empty until real ones exist), About page with team (from `content/team.json`) and directions link, Organization schema, GA4 behind an equal-choice consent banner (public pages only), UTM first-touch attribution, per-article share images | **Done**. Content still needed from the business: real reviews, case studies, team photos |
 | 3 | Settings page; data export (JSON); self-serve account deletion with a 7-day cancellable window, renewal pause, resumable external steps and anonymous receipts; staff entry for emailed requests; one-click unsubscribe (RFC 8058) and token preference centre; guardian management link (withdraw, re-grant, cancel renewal, request or cancel deletion); profile editing; terms re-acceptance gate; public Your data page | **Done** |
 | 4 | Public profiles with private share links, one-page PDF and share image; verified metric badges (evidence upload, automated checks, staff review); biometric percentile engine and public calculator; cross-sport equivalents; Agent 3 recruiting assistant (program change feed and admin entry, alerts, grounded outreach drafts); side-by-side comparison synced at foot strike with a licensed reference clip library; notifications | **Done**. Needs from the business: licensed reference footage and a licensed program data source |
+| 5 | Hockey shot and football throw analysis (sport-aware motions, comparison anchored at foot strike or hand peak); puck and ball tracking beta (Video Intelligence object tracking, launch angle and lower-bound speed scaled by athlete height); coach tools (school email and staff directory verification, prospect search over public profiles, saved boards with private notes, contact requests with athlete acceptance and guardian approval for minors, block and report, admin review); hardening (Playwright + axe e2e suite with a local auth stub, CI e2e and alert-rule jobs, load simulation by route group, `/api/internal/metrics`, alert rules, Grafana dashboard, deploy checklist) | **Done**. Needs from the business: staff time for coach reviews and reports, and the policy-change email |

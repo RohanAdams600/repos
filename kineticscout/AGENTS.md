@@ -12,5 +12,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Authorization lives in `src/lib/auth/session.ts` and `src/lib/auth/permissions.ts`. Every page, Server Action, Route Handler and tRPC procedure checks it; never rely on `src/proxy.ts` alone.
 - Run `npm run typecheck && npm run lint && npm run test:all` before committing. Integration tests need Postgres (see README).
+- For any page or component change, also run `npm run build && npm run test:e2e`: it checks every page with axe (WCAG 2.2 AA plus AAA contrast, light and dark). Fix violations; never disable an axe rule to pass.
 - Brand rules are enforced in code review: no gradients, no glassmorphism, no em dashes in copy, no emoji in headings, no lucide icons (use `src/components/icons.tsx`), WCAG AAA contrast (tests/unit/contrast.test.ts).
 - Never add marketing claims, statistics, testimonials or reviews that are not backed by real data.

@@ -64,3 +64,62 @@ jobs:
         env:
           APP_URL: https://ci.invalid
         run: npx next build
+
+  monitoring-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check and unit test the alert rules
+        run: |
+          curl -sSfL -o prometheus.tgz https://github.com/prometheus/prometheus/releases/download/v3.5.0/prometheus-3.5.0.linux-amd64.tar.gz
+          echo "e811827af26d822afb09a4f28314f61b618b12cff5369835a67f674d8b46f39a  prometheus.tgz" | sha256sum -c -
+          tar -xzf prometheus.tgz --strip-components=1 prometheus-3.5.0.linux-amd64/promtool
+          ./promtool check rules infra/monitoring/alerts.yml
+          ./promtool test rules infra/monitoring/alerts.test.yml
+          ./promtool check config --syntax-only infra/monitoring/prometheus.yml
+
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: kinetic
+          POSTGRES_PASSWORD: kinetic_ci_only
+          POSTGRES_DB: kineticscout_e2e
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U kinetic" --health-interval 5s --health-timeout 5s --health-retries 10
+    # Local-mode server with the e2e sign-in stub. These values exist only inside this job.
+    env:
+      DATABASE_URL: postgresql://kinetic:kinetic_ci_only@localhost:5432/kineticscout_e2e
+      DIRECT_DATABASE_URL: postgresql://kinetic:kinetic_ci_only@localhost:5432/kineticscout_e2e
+      DEPLOY_ENV: local
+      APP_URL: http://localhost:3100
+      SUPABASE_URL: https://ci-placeholder.supabase.invalid
+      SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder_only
+      HASH_PEPPER: ci-only-pepper-not-used-anywhere-else-000000
+      INTERNAL_API_SECRET: ci-only-internal-secret-not-used-elsewhere-00
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: kineticscout/package-lock.json
+      - run: npm ci
+      - run: npx prisma migrate deploy
+      - run: npm run db:seed
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: End-to-end and accessibility tests (WCAG 2.2 AA plus AAA contrast)
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            kineticscout/playwright-report
+            kineticscout/test-results
+          retention-days: 7

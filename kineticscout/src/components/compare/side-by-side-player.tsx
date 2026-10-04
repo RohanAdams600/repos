@@ -5,7 +5,7 @@ import { PauseIcon, PlayIcon } from '@/components/icons'
 import { drawSkeleton, nearestFrame } from '@/components/dashboard/skeleton-draw'
 import { Button } from '@/components/ui/button'
 import { decodePoseTrack } from '@/lib/biomechanics/codec'
-import { syncWindow } from '@/lib/biomechanics/compare'
+import { ANCHOR_LABELS, commonAnchor, syncWindow } from '@/lib/biomechanics/compare'
 import type { CompactPoseTrack, KinematicReport } from '@/lib/biomechanics/types'
 
 export type ComparisonSide = { label: string; videoUrl: string; pose: CompactPoseTrack; report: KinematicReport; handedness: 'RIGHT' | 'LEFT'; attribution: string | null }
@@ -26,7 +26,7 @@ function Panel({ side, mirrored, videoRef, canvasRef }: { side: ComparisonSide; 
           disablePictureInPicture
           controlsList="nodownload noplaybackrate"
           className="absolute inset-0 h-full w-full object-fill"
-          aria-label={`${side.label}, synced at foot strike`}
+          aria-label={`${side.label}, synced with the other clip`}
         />
         <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true" />
       </div>
@@ -40,7 +40,8 @@ function Panel({ side, mirrored, videoRef, canvasRef }: { side: ComparisonSide; 
 }
 
 /**
- * Two clips on one clock measured from lead foot strike. Clip A drives playback; clip B is
+ * Two clips on one clock measured from a shared event (foot strike, or peak hand speed when either
+ * clip has no detectable foot strike). Clip A drives playback; clip B is
  * re-seeked whenever it drifts by more than a frame, so the two stay aligned at any speed.
  */
 export function SideBySidePlayer({ a, b }: { a: ComparisonSide; b: ComparisonSide }) {
@@ -50,9 +51,11 @@ export function SideBySidePlayer({ a, b }: { a: ComparisonSide; b: ComparisonSid
   const canvasB = useRef<HTMLCanvasElement>(null)
   const trackA = useMemo(() => decodePoseTrack(a.pose), [a.pose])
   const trackB = useMemo(() => decodePoseTrack(b.pose), [b.pose])
-  const fsA = a.report.footStrikeTime ?? 0
-  const fsB = b.report.footStrikeTime ?? 0
-  const span = useMemo(() => syncWindow({ footStrikeTime: fsA, durationSec: a.report.durationSec }, { footStrikeTime: fsB, durationSec: b.report.durationSec }), [fsA, fsB, a.report.durationSec, b.report.durationSec])
+  const anchor = useMemo(() => commonAnchor(a.report, b.report), [a.report, b.report])
+  const fsA = anchor?.a ?? 0
+  const fsB = anchor?.b ?? 0
+  const anchorLabel = ANCHOR_LABELS[anchor?.event ?? 'HAND_PEAK']
+  const span = useMemo(() => syncWindow({ anchorTime: fsA, durationSec: a.report.durationSec }, { anchorTime: fsB, durationSec: b.report.durationSec }), [fsA, fsB, a.report.durationSec, b.report.durationSec])
   const startAt = Math.max(span.start, -0.8)
   const mirrored = a.handedness !== b.handedness
   const [tau, setTau] = useState(startAt)
@@ -157,7 +160,7 @@ export function SideBySidePlayer({ a, b }: { a: ComparisonSide; b: ComparisonSid
             {playing ? 'Pause' : 'Play'}
           </Button>
           <Button variant="secondary" size="sm" onClick={() => (setPlaying(false), seek(0))}>
-            Foot strike
+            Jump to {anchorLabel}
           </Button>
           <label className="flex items-center gap-2 text-sm font-bold">
             Speed
@@ -174,7 +177,7 @@ export function SideBySidePlayer({ a, b }: { a: ComparisonSide; b: ComparisonSid
         </div>
         <label className="flex flex-col gap-2 text-sm font-bold">
           <span>
-            Time from foot strike: <span className="tabular">{ms > 0 ? `+${ms}` : ms} ms</span>
+            Time from {anchorLabel}: <span className="tabular">{ms > 0 ? `+${ms}` : ms} ms</span>
           </span>
           <input
             type="range"
@@ -184,7 +187,7 @@ export function SideBySidePlayer({ a, b }: { a: ComparisonSide; b: ComparisonSid
             value={tau}
             onChange={(e) => (setPlaying(false), seek(Number(e.target.value)))}
             className="w-full accent-[var(--accent)]"
-            aria-valuetext={`${ms} milliseconds from foot strike`}
+            aria-valuetext={`${ms} milliseconds from ${anchorLabel}`}
           />
         </label>
       </div>

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { Handedness, MotionType } from '@/generated/prisma/enums'
 import { startOfUtcMonth } from '@/lib/ai/budget'
 import { audit } from '@/lib/audit'
+import type { ProjectileEstimate } from '@/lib/biomechanics/projectile'
 import type { CompactPoseTrack, KinematicReport } from '@/lib/biomechanics/types'
 import { db } from '@/lib/db'
 import { env } from '@/lib/env'
@@ -12,6 +13,7 @@ import { createSignedPlaybackUrl, createSignedUpload, deleteObject, getObjectInf
 import { extensionFor, isAllowedVideoType, sniffVideoContainer, VIDEO_UPLOAD_POLICY } from '@/lib/storage/video-files'
 import { enforceRateLimit, RateLimitError } from '@/lib/security/rate-limit'
 import { playableReferenceWhere } from '@/lib/reference/service'
+import { isMotionForSport, MOTION_LABELS, motionsForSport } from '@/lib/biomechanics/motions'
 import { createRouter, proProcedure } from '@/server/trpc'
 
 const videoProcedure = proProcedure('video-analysis')
@@ -28,6 +30,8 @@ export const analysisRouter = createRouter({
         durationMs: z.number().int().positive(),
         width: z.number().int().min(160).max(8192),
         height: z.number().int().min(160).max(8192),
+        /** Puck or ball tracking (beta). */
+        trackObject: z.boolean().default(false),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -38,6 +42,10 @@ export const analysisRouter = createRouter({
         throw error
       }
       if (!isAllowedVideoType(input.contentType)) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Upload an MP4 or MOV video.' })
+      const profile = await db.athleteProfile.findUniqueOrThrow({ where: { userId: ctx.user.id }, select: { sport: true } })
+      if (!isMotionForSport(input.motionType, profile.sport)) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: `Choose a ${motionsForSport(profile.sport).map((m) => MOTION_LABELS[m].toLowerCase()).join(' or ')} for your sport.` })
+      }
       if (input.sizeBytes > VIDEO_UPLOAD_POLICY.maxBytes) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Videos must be 150 MB or smaller.' })
       if (input.durationMs > VIDEO_UPLOAD_POLICY.maxDurationMs) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Trim the clip to 20 seconds or less.' })
       if (input.durationMs < VIDEO_UPLOAD_POLICY.minDurationMs) throw new TRPCError({ code: 'BAD_REQUEST', message: 'The clip must be at least 1 second long.' })
@@ -59,6 +67,7 @@ export const analysisRouter = createRouter({
           durationMs: input.durationMs,
           widthPx: input.width,
           heightPx: input.height,
+          trackObject: input.trackObject,
           // Object key is server-generated: no user-controlled path segments.
           objectKey: `pending/${crypto.randomUUID()}`,
         },
@@ -131,7 +140,7 @@ export const analysisRouter = createRouter({
   get: videoProcedure.input(z.object({ id: z.uuid() })).query(async ({ ctx, input }) => {
     const row = await db.videoAnalysis.findFirst({
       where: { id: input.id, athleteId: ctx.user.id },
-      select: { id: true, motionType: true, handedness: true, status: true, errorCode: true, createdAt: true, objectKey: true, report: true, poseData: true },
+      select: { id: true, motionType: true, handedness: true, status: true, errorCode: true, createdAt: true, objectKey: true, report: true, poseData: true, trackObject: true, projectile: true },
     })
     if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found.' })
     const playable = row.status === 'COMPLETE' && row.errorCode !== 'VIDEO_PURGED'
@@ -144,6 +153,8 @@ export const analysisRouter = createRouter({
       createdAt: row.createdAt.toISOString(),
       report: row.report as KinematicReport | null,
       pose: row.poseData as CompactPoseTrack | null,
+      trackObject: row.trackObject,
+      projectile: row.projectile as ProjectileEstimate | null,
       videoUrl: playable ? await createSignedPlaybackUrl(row.objectKey) : null,
     }
   }),
@@ -152,7 +163,8 @@ export const analysisRouter = createRouter({
   compareOptions: videoProcedure.input(z.object({ analysisId: z.uuid() })).query(async ({ ctx, input }) => {
     const base = await db.videoAnalysis.findFirst({ where: { id: input.analysisId, athleteId: ctx.user.id }, select: { motionType: true, status: true, report: true, errorCode: true } })
     if (!base) throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found.' })
-    const syncable = base.status === 'COMPLETE' && base.errorCode !== 'VIDEO_PURGED' && (base.report as KinematicReport | null)?.footStrikeTime != null
+    // Every completed analysis has a hand peak, so it can be synced (on foot strike when both clips have one).
+    const syncable = base.status === 'COMPLETE' && base.errorCode !== 'VIDEO_PURGED' && base.report !== null
     const [own, references] = await Promise.all([
       db.videoAnalysis.findMany({
         where: { athleteId: ctx.user.id, motionType: base.motionType, status: 'COMPLETE', id: { not: input.analysisId }, OR: [{ errorCode: null }, { errorCode: { not: 'VIDEO_PURGED' } }] },
@@ -164,7 +176,7 @@ export const analysisRouter = createRouter({
     ])
     return {
       syncable,
-      own: own.filter((o) => (o.report as KinematicReport | null)?.footStrikeTime != null).map((o) => ({ id: o.id, createdAt: o.createdAt.toISOString(), handedness: o.handedness })),
+      own: own.filter((o) => o.report !== null).map((o) => ({ id: o.id, createdAt: o.createdAt.toISOString(), handedness: o.handedness })),
       references,
     }
   }),
@@ -175,8 +187,7 @@ export const analysisRouter = createRouter({
       const select = { id: true, handedness: true, objectKey: true, report: true, poseData: true, createdAt: true } as const
       const base = await db.videoAnalysis.findFirst({ where: { id: input.analysisId, athleteId: ctx.user.id, status: 'COMPLETE' }, select: { ...select, errorCode: true } })
       if (!base || base.errorCode === 'VIDEO_PURGED' || !base.poseData) throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found.' })
-      const baseReport = base.report as KinematicReport
-      if (baseReport.footStrikeTime === null) throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Foot strike was not detected in this clip, so it cannot be synced.' })
+      if (!base.report) throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'This analysis has no report to compare.' })
 
       type Side = { label: string; videoUrl: string; pose: CompactPoseTrack; report: KinematicReport; handedness: 'RIGHT' | 'LEFT'; attribution: string | null }
       const side = async (row: { objectKey: string; poseData: unknown; report: unknown; handedness: 'RIGHT' | 'LEFT' }, label: string, attribution: string | null): Promise<Side> => ({
@@ -191,7 +202,7 @@ export const analysisRouter = createRouter({
       let other: Side
       if (input.other.kind === 'own') {
         const row = await db.videoAnalysis.findFirst({ where: { id: input.other.id, athleteId: ctx.user.id, status: 'COMPLETE' }, select: { ...select, errorCode: true } })
-        if (!row || row.errorCode === 'VIDEO_PURGED' || !row.poseData || (row.report as KinematicReport).footStrikeTime === null) throw new TRPCError({ code: 'NOT_FOUND', message: 'That clip cannot be compared.' })
+        if (!row || row.errorCode === 'VIDEO_PURGED' || !row.poseData || !row.report) throw new TRPCError({ code: 'NOT_FOUND', message: 'That clip cannot be compared.' })
         other = await side(row, `Your clip from ${row.createdAt.toISOString().slice(0, 10)}`, null)
       } else {
         // Playable only while active, processed and licensed: checked again on every request.

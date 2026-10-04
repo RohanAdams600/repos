@@ -6,6 +6,7 @@ import { VerificationRejection } from '@/generated/prisma/enums'
 import { METRIC_DEFINITIONS } from '@/lib/metrics/definitions'
 import { createSignedPlaybackUrl } from '@/lib/storage/gcs'
 import { decideEvidence } from '@/lib/verification/service'
+import { decideCoach } from '@/lib/coach/verification'
 import { completeReferenceUpload, createReferenceUpload, deleteReferenceClip, setReferenceClipActive } from '@/lib/reference/service'
 import { Handedness, MotionType } from '@/generated/prisma/enums'
 import { postRosterNeed, rosterNeedSchema, staffUpdateSchema, updateProgramStaff } from '@/lib/recruiting/changes'
@@ -367,6 +368,48 @@ export const adminRouter = createRouter({
 
   deleteReferenceClip: adminProcedure.input(z.object({ clipId: z.uuid() })).mutation(async ({ ctx, input }) => {
     await deleteReferenceClip(ctx.user.id, input.clipId)
+    return { ok: true }
+  }),
+
+  /** Coaches who confirmed their school email and wait for a staff-directory check. */
+  coachQueue: adminProcedure.query(async () => {
+    const [waiting, recent] = await Promise.all([
+      db.coachProfile.findMany({
+        where: { status: 'IN_REVIEW' },
+        orderBy: { updatedAt: 'asc' },
+        take: 25,
+        select: { userId: true, firstName: true, lastName: true, title: true, workEmail: true, workEmailVerifiedAt: true, staffDirectoryUrl: true, college: { select: { schoolName: true, division: true, dataSourceUrl: true } } },
+      }),
+      db.coachProfile.findMany({
+        where: { status: { in: ['VERIFIED', 'SUSPENDED'] } },
+        orderBy: { reviewedAt: 'desc' },
+        take: 25,
+        select: { userId: true, firstName: true, lastName: true, title: true, status: true, reviewedAt: true, college: { select: { schoolName: true } }, _count: { select: { reports: { where: { resolvedAt: null } } } } },
+      }),
+    ])
+    return { waiting, recent }
+  }),
+
+  decideCoach: adminProcedure
+    .input(z.object({ coachId: z.uuid(), decision: z.enum(['VERIFIED', 'REJECTED', 'SUSPENDED']), note: z.string().trim().max(500).nullable() }))
+    .mutation(async ({ ctx, input }) => {
+      if (input.decision !== 'VERIFIED' && !input.note) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Add a note explaining the decision; the coach sees it.' })
+      if (!(await decideCoach(ctx.user.id, input.coachId, input.decision, input.note))) throw new TRPCError({ code: 'CONFLICT', message: 'This coach is not in a state that allows that decision.' })
+      return { ok: true }
+    }),
+
+  coachReports: adminProcedure.query(() =>
+    db.coachReport.findMany({
+      where: { resolvedAt: null },
+      orderBy: { createdAt: 'asc' },
+      take: 50,
+      select: { id: true, reason: true, createdAt: true, coach: { select: { userId: true, firstName: true, lastName: true, title: true, status: true, college: { select: { schoolName: true } } } }, reporter: { select: { athleteProfile: { select: { firstName: true, gradYear: true } } } } },
+    }),
+  ),
+
+  resolveCoachReport: adminProcedure.input(z.object({ id: z.uuid(), resolution: z.string().trim().min(5).max(500) })).mutation(async ({ input }) => {
+    const result = await db.coachReport.updateMany({ where: { id: input.id, resolvedAt: null }, data: { resolvedAt: new Date(), resolution: sanitizeText(input.resolution) } })
+    if (!result.count) throw new TRPCError({ code: 'NOT_FOUND', message: 'Report already resolved.' })
     return { ok: true }
   }),
 })

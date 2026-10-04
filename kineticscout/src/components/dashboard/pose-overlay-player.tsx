@@ -1,18 +1,18 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { drawSkeleton, nearestFrame } from '@/components/dashboard/skeleton-draw'
+import { drawSkeleton, drawTrajectory, nearestFrame } from '@/components/dashboard/skeleton-draw'
 import { decodePoseTrack } from '@/lib/biomechanics/codec'
 import type { CompactPoseTrack } from '@/lib/biomechanics/types'
 import { Button } from '@/components/ui/button'
 
-type Props = { videoUrl: string; pose: CompactPoseTrack; footStrikeTime: number | null }
+type Props = { videoUrl: string; pose: CompactPoseTrack; footStrikeTime: number | null; trajectory?: readonly { t: number; x: number; y: number }[] }
 
 /**
  * Plays the athlete's video with the tracked skeleton drawn on top, synchronised per video frame
  * (requestVideoFrameCallback where supported, animation frames otherwise).
  */
-export function PoseOverlayPlayer({ videoUrl, pose, footStrikeTime }: Props) {
+export function PoseOverlayPlayer({ videoUrl, pose, footStrikeTime, trajectory }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const track = useMemo(() => decodePoseTrack(pose), [pose])
@@ -28,7 +28,10 @@ export function PoseOverlayPlayer({ videoUrl, pose, footStrikeTime }: Props) {
     let handle = 0
     let cancelled = false
 
-    const draw = () => drawSkeleton(canvas, context, showSkeleton ? nearestFrame(track.frames, video.currentTime) : null)
+    const draw = () => {
+      drawSkeleton(canvas, context, showSkeleton ? nearestFrame(track.frames, video.currentTime) : null)
+      if (showSkeleton && trajectory) drawTrajectory(canvas, context, trajectory, video.currentTime)
+    }
 
     const hasVfc = 'requestVideoFrameCallback' in HTMLVideoElement.prototype
     const loop = () => {
@@ -45,7 +48,7 @@ export function PoseOverlayPlayer({ videoUrl, pose, footStrikeTime }: Props) {
       if (hasVfc) video.cancelVideoFrameCallback(handle)
       else cancelAnimationFrame(handle)
     }
-  }, [track, showSkeleton])
+  }, [track, showSkeleton, trajectory])
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.playbackRate = rate

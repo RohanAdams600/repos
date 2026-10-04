@@ -19,11 +19,12 @@ import {
   type SegmentName,
   type SegmentPeak,
 } from '@/lib/biomechanics/types'
+import { MOTION_WORDS, type Motion } from '@/lib/biomechanics/motions'
 
 /**
  * Kinematic sequence analysis from a 2D pose track ("kseq-2d-v1").
  *
- * Efficient rotational athletes (hitters and pitchers) accelerate body segments proximal to distal:
+ * Efficient rotational athletes (hitters, pitchers, passers and shooters) accelerate body segments proximal to distal:
  * pelvis, then trunk, then arm, then hand, each peaking slightly after the previous one. This module
  * estimates each segment's angular speed from a single face-on video and reports the order and spacing
  * of the peaks, hip-shoulder separation at foot strike, and the flaws those imply.
@@ -47,19 +48,22 @@ type Side = 'left' | 'right'
 
 export type AnalysisInput = {
   track: PoseTrack
-  motionType: 'SWING' | 'PITCH'
+  motionType: Motion
   handedness: 'RIGHT' | 'LEFT'
 }
 
-/** The lead side faces the target: glove side for a pitcher, front side for a hitter. */
+/** The lead side faces the target: glove side for a pitcher or passer, front side for a hitter or shooter. */
 export function leadSide(handedness: 'RIGHT' | 'LEFT'): Side {
   return handedness === 'RIGHT' ? 'left' : 'right'
 }
 
-/** Arm whose rotation drives the motion: the throwing arm for pitchers, the lead arm for hitters. */
-export function drivingArmSide(motionType: 'SWING' | 'PITCH', handedness: 'RIGHT' | 'LEFT'): Side {
-  if (motionType === 'PITCH') return handedness === 'RIGHT' ? 'right' : 'left'
-  return leadSide(handedness)
+/**
+ * Arm whose rotation drives the motion: the throwing arm for a pitch or pass, the bottom hand on
+ * the stick for a hockey shot (the shooting side), and the lead arm for a swing.
+ */
+export function drivingArmSide(motionType: Motion, handedness: 'RIGHT' | 'LEFT'): Side {
+  if (motionType === 'SWING') return leadSide(handedness)
+  return handedness === 'RIGHT' ? 'right' : 'left'
 }
 
 type Series = { x: number[]; y: number[]; score: number[] }
@@ -190,12 +194,13 @@ function buildFindings(
   peaks: Record<SegmentName, SegmentPeak>,
   separationAtFootStrike: number | null,
   frameRate: number,
-  motionType: 'SWING' | 'PITCH',
+  motionType: Motion,
 ): Finding[] {
   const findings: Finding[] = []
   // Differences smaller than half a frame are within measurement noise.
   const tolerance = 0.5 / frameRate
-  const handWord = motionType === 'SWING' ? 'hands and barrel' : 'hand at release'
+  const words = MOTION_WORDS[motionType]
+  const handWord = words.handPeak
 
   if (peaks.torso.time < peaks.pelvis.time - tolerance) {
     findings.push({
@@ -211,8 +216,8 @@ function buildFindings(
       code: 'ARM_LEADS_TRUNK',
       severity: 'high',
       title: 'Arm speed peaks before the trunk',
-      detail: `The ${motionType === 'SWING' ? 'lead arm' : 'throwing arm'} peaked ${Math.round((peaks.torso.time - peaks.arm.time) * 1000)} ms before the trunk, a sign the arm is generating speed on its own rather than receiving it from the body.`,
-      focus: motionType === 'SWING' ? 'Keep the hands back until the trunk turns, avoiding an early push or cast.' : 'Delay arm acceleration until the trunk has rotated toward the target.',
+      detail: `The ${words.arm} peaked ${Math.round((peaks.torso.time - peaks.arm.time) * 1000)} ms before the trunk, a sign the arm is generating speed on its own rather than receiving it from the body.`,
+      focus: words.armFocus,
     })
   }
   if (peaks.hand.time < peaks.arm.time - tolerance) {
@@ -228,9 +233,9 @@ function buildFindings(
     findings.push({
       code: 'LOW_HIP_SHOULDER_SEPARATION',
       severity: 'medium',
-      title: 'Hips and shoulders rotate together at foot strike',
-      detail: `Estimated hip-shoulder separation at foot strike was ${separationAtFootStrike.toFixed(0)} degrees. Little separation limits the stretch the trunk can use.`,
-      focus: 'Start opening the hips while keeping the shoulders closed as the front foot lands.',
+      title: `Hips and shoulders rotate together at ${words.plant}`,
+      detail: `Estimated hip-shoulder separation at ${words.plant} was ${separationAtFootStrike.toFixed(0)} degrees. Little separation limits the stretch the trunk can use.`,
+      focus: motionType === 'HOCKEY_SHOT' ? 'Start opening the hips while keeping the shoulders closed as your weight moves onto the front leg.' : 'Start opening the hips while keeping the shoulders closed as the front foot lands.',
     })
   }
   const orderIsIdeal =

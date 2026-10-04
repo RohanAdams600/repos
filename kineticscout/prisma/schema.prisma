@@ -134,6 +134,10 @@ enum GuardianConsentStatus {
 enum MotionType {
   SWING
   PITCH
+  /// Hockey slapshot or wrist shot.
+  HOCKEY_SHOT
+  /// Football forward pass.
+  FOOTBALL_THROW
 }
 
 enum Handedness {
@@ -234,6 +238,8 @@ model User {
   aiUsage          AiUsage[]
   testimonials     Testimonial[]
   notifications    Notification[]
+  coachProfile     CoachProfile?
+  coachReports     CoachReport[]
 
   @@index([role])
   @@index([deletionScheduledFor])
@@ -295,12 +301,15 @@ model AthleteProfile {
   createdAt             DateTime    @default(now()) @map("created_at")
   updatedAt             DateTime    @updatedAt @map("updated_at")
 
-  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  metrics        Metric[]
-  pipeline       RecruitingPipeline[]
-  videoAnalyses  VideoAnalysis[]
-  profileViews   ProfileViewDay[]
-  outreachDrafts OutreachDraft[]
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metrics         Metric[]
+  pipeline        RecruitingPipeline[]
+  videoAnalyses   VideoAnalysis[]
+  profileViews    ProfileViewDay[]
+  outreachDrafts  OutreachDraft[]
+  savedBy         SavedProspect[]
+  contactRequests ContactRequest[]
+  coachBlocks     CoachBlock[]
 
   @@index([sport, gradYear, primaryPosition])
   @@map("athlete_profiles")
@@ -364,6 +373,7 @@ model CollegeProgram {
   changes        ProgramChange[]
   rosterNeeds    RosterNeed[]
   outreachDrafts OutreachDraft[]
+  coaches        CoachProfile[]
 
   @@unique([schoolName, sport])
   @@index([sport, division])
@@ -459,6 +469,10 @@ model VideoAnalysis {
   poseData    Json?               @map("pose_data")
   /// Kinematic sequence report (see src/lib/biomechanics/types.ts).
   report      Json?
+  /// Puck or ball tracking requested (beta, extra Video Intelligence cost).
+  trackObject Boolean             @default(false) @map("track_object")
+  /// Projectile estimate (see src/lib/biomechanics/projectile.ts).
+  projectile  Json?
   algorithm   String?             @db.VarChar(32)
   errorCode   String?             @map("error_code") @db.VarChar(64)
   createdAt   DateTime            @default(now()) @map("created_at")
@@ -737,6 +751,9 @@ enum NotificationKind {
   ROSTER_NEED
   METRIC_VERIFIED
   METRIC_REJECTED
+  CONTACT_REQUEST
+  CONTACT_UPDATE
+  COACH_VERIFICATION
 }
 
 model Notification {
@@ -874,4 +891,133 @@ model ReferenceClip {
 
   @@index([motionType, handedness, active, status])
   @@map("reference_clips")
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5: coach tools
+// ---------------------------------------------------------------------------
+
+enum CoachVerificationStatus {
+  UNSUBMITTED
+  EMAIL_PENDING
+  IN_REVIEW
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+/// A college coach. Search, saved prospects and contact requests require status VERIFIED: the coach
+/// proved control of a school email address and a staff member matched them to the program's
+/// published staff directory.
+model CoachProfile {
+  userId                  String                  @id @map("user_id") @db.Uuid
+  firstName               String                  @map("first_name") @db.VarChar(50)
+  lastName                String                  @map("last_name") @db.VarChar(50)
+  title                   String                  @db.VarChar(80)
+  collegeId               String?                 @map("college_id") @db.Uuid
+  workEmail               String?                 @map("work_email") @db.VarChar(254)
+  workEmailTokenHash      String?                 @unique @map("work_email_token_hash") @db.Char(64)
+  workEmailTokenExpiresAt DateTime?               @map("work_email_token_expires_at")
+  workEmailVerifiedAt     DateTime?               @map("work_email_verified_at")
+  /// Public staff directory page listing the coach, checked by the reviewer.
+  staffDirectoryUrl       String?                 @map("staff_directory_url") @db.VarChar(512)
+  status                  CoachVerificationStatus @default(UNSUBMITTED)
+  reviewNote              String?                 @map("review_note") @db.VarChar(500)
+  reviewedById            String?                 @map("reviewed_by_id") @db.Uuid
+  reviewedAt              DateTime?               @map("reviewed_at")
+  createdAt               DateTime                @default(now()) @map("created_at")
+  updatedAt               DateTime                @updatedAt @map("updated_at")
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  college         CollegeProgram?  @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  savedProspects  SavedProspect[]
+  contactRequests ContactRequest[]
+  blockedBy       CoachBlock[]
+  reports         CoachReport[]
+
+  @@index([status, updatedAt])
+  @@index([collegeId])
+  @@map("coach_profiles")
+}
+
+/// A coach's private board. Notes are visible only to the coach who wrote them.
+model SavedProspect {
+  coachId   String   @map("coach_id") @db.Uuid
+  athleteId String   @map("athlete_id") @db.Uuid
+  note      String?  @db.VarChar(1000)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  coach   CoachProfile   @relation(fields: [coachId], references: [userId], onDelete: Cascade)
+  athlete AthleteProfile @relation(fields: [athleteId], references: [userId], onDelete: Cascade)
+
+  @@id([coachId, athleteId])
+  @@index([athleteId])
+  @@map("saved_prospects")
+}
+
+enum ContactRequestStatus {
+  PENDING
+  /// The athlete accepted; a parent or guardian must approve before details are shared.
+  ATHLETE_ACCEPTED
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+  EXPIRED
+}
+
+/// A coach asking to contact an athlete. Contact details are shared only once the athlete (and,
+/// for an athlete under 18, a parent or guardian) accepts.
+model ContactRequest {
+  id                     String               @id @default(uuid(7)) @db.Uuid
+  coachId                String               @map("coach_id") @db.Uuid
+  athleteId              String               @map("athlete_id") @db.Uuid
+  message                String               @db.VarChar(1000)
+  status                 ContactRequestStatus @default(PENDING)
+  guardianRequired       Boolean              @map("guardian_required")
+  guardianTokenHash      String?              @unique @map("guardian_token_hash") @db.Char(64)
+  guardianTokenExpiresAt DateTime?            @map("guardian_token_expires_at")
+  athleteRespondedAt     DateTime?            @map("athlete_responded_at")
+  guardianRespondedAt    DateTime?            @map("guardian_responded_at")
+  /// Addresses shared with the coach on acceptance (the athlete's, plus the guardian's for minors).
+  sharedEmails           String[]             @default([]) @map("shared_emails")
+  createdAt              DateTime             @default(now()) @map("created_at")
+  expiresAt              DateTime             @map("expires_at")
+
+  coach   CoachProfile   @relation(fields: [coachId], references: [userId], onDelete: Cascade)
+  athlete AthleteProfile @relation(fields: [athleteId], references: [userId], onDelete: Cascade)
+
+  @@index([athleteId, status, createdAt(sort: Desc)])
+  @@index([coachId, createdAt(sort: Desc)])
+  @@index([status, expiresAt])
+  @@map("contact_requests")
+}
+
+/// An athlete who blocked a coach: no search results, saves or requests between them.
+model CoachBlock {
+  athleteId String   @map("athlete_id") @db.Uuid
+  coachId   String   @map("coach_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  athlete AthleteProfile @relation(fields: [athleteId], references: [userId], onDelete: Cascade)
+  coach   CoachProfile   @relation(fields: [coachId], references: [userId], onDelete: Cascade)
+
+  @@id([athleteId, coachId])
+  @@map("coach_blocks")
+}
+
+model CoachReport {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  coachId    String    @map("coach_id") @db.Uuid
+  reporterId String    @map("reporter_id") @db.Uuid
+  reason     String    @db.VarChar(1000)
+  resolvedAt DateTime? @map("resolved_at")
+  resolution String?   @db.VarChar(500)
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  coach    CoachProfile @relation(fields: [coachId], references: [userId], onDelete: Cascade)
+  reporter User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([resolvedAt, createdAt])
+  @@map("coach_reports")
 }

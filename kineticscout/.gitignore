@@ -30,3 +30,8 @@ backups/
 
 # local service artifacts
 dump.rdb
+
+# End-to-end test state and artifacts
+e2e/.state.json
+test-results/
+playwright-report/

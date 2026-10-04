@@ -1,10 +1,12 @@
 # KineticScout
 
-Performance data and recruiting tools for high school athletes. Athletes log measurables (exit velocity, pitch velocity, 60-yard dash and more), see their percentile within their graduating class, analyze swing and pitch mechanics from video, and find college programs whose typical recruit matches their numbers.
+Performance data and recruiting tools for high school athletes. Athletes log measurables (exit velocity, pitch velocity, 60-yard dash and more), see their percentile within their graduating class, analyze swing, pitch, hockey shot and football throw mechanics from video, and find college programs whose typical recruit matches their numbers. Verified college coaches can search public profiles and ask to make contact; athletes, and parents of athletes under 18, decide what is shared.
 
 - **Architecture, stack and directory map:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **Security controls:** [docs/SECURITY.md](docs/SECURITY.md)
 - **Compliance (COPPA, data inventory, SDK audit):** [docs/COMPLIANCE.md](docs/COMPLIANCE.md)
+- **Production deploy checklist, monitoring and rollback:** [docs/DEPLOY.md](docs/DEPLOY.md)
+- **Load test method and results:** [docs/LOAD-TESTING.md](docs/LOAD-TESTING.md)
 
 ## What is in Phase 1
 
@@ -40,6 +42,13 @@ Privacy controls that work without contacting support:
 - **Insights**: percentiles against athletes of a similar age, height and weight, plus cross-sport equivalents. A public calculator lives at `/tools/percentile-calculator`.
 - **Recruiting assistant (Agent 3, Pro)**: watches pipeline programs for coaching changes and roster needs (staff entry in `/admin` or a licensed feed via `PROGRAM_DATA_FEED_URL`), alerts the athlete and drafts an introduction from verified facts.
 - **Side-by-side comparison (Pro)**: two clips synced at foot strike with skeleton overlays and a kinematic sequence timeline, against the athlete's own clips or licensed reference footage uploaded in `/admin`.
+
+## What is in Phase 5
+
+- **Hockey and football analysis**: hockey shots and football throws join baseball swings and pitches, with sport-specific filming guidance and findings. Comparisons sync at foot strike, or at peak hand speed when a clip has no clear plant.
+- **Puck and ball tracking (beta)**: opt-in per upload. Video Intelligence object tracking finds the puck or ball after release; the athlete's height scales it to a launch angle and a speed shown as a lower bound, drawn as a trail on the video.
+- **Coach tools**: coach accounts confirm a school email address and are checked against their program's staff directory. Verified coaches search public profiles by sport, class, position and measurements, save athletes with private notes, and send contact requests. Athletes accept, decline, block or report; for athletes under 18 a parent or guardian approves before any email address is shared.
+- **Launch readiness**: Playwright and axe tests of every page (WCAG 2.2 AA plus AAA contrast, light and dark) with a local sign-in stub, run in CI; a load simulation by route group with recorded results; `/api/internal/metrics` with Prometheus alert rules (unit tested) and a Grafana dashboard; a production deploy checklist.
 
 ## Local development
 
@@ -86,15 +95,20 @@ Create a private bucket with uniform access, apply `infra/gcs-cors.json` (`gclou
 | `npm run test:integration` | Integration tests against Postgres (`TEST_DATABASE_URL`, defaults to `kineticscout_test` on localhost) |
 | `npm run admin:grant -- email@example.com` | Grant ADMIN (`--revoke` to remove); audit-logged |
 | `npm run backup:verify` | Dump, restore into a scratch DB and verify (uses `DIRECT_DATABASE_URL`) |
-| `npm run load:simulate` | Concurrent-user load simulation (`BASE_URL`, `USERS`, `DURATION_S`) |
+| `npm run test:e2e` | Playwright + axe against a production build (run `npm run build` first; starts the server with the local sign-in stub) |
+| `npm run load:simulate` | Load simulation by route group (`BASE_URL`, `USERS`, `DURATION_S`, optional `PROFILE_SLUG`, `SESSION_COOKIE`); see docs/LOAD-TESTING.md |
 
 ## Deploying
 
+Follow [docs/DEPLOY.md](docs/DEPLOY.md) for every release. In short:
+
 - **Web:** any Node host (Vercel works as-is). Set `DEPLOY_ENV=production`, `NODE_ENV=production`, `SERVICE_ROLE=web`. If you self-host on several instances, set `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`.
 - **Worker:** a long-running process (Railway, Fly.io, ECS, Cloud Run with min instances). Command: `npm run worker`, with `SERVICE_ROLE=worker`. Replicas are safe; each scheduled run executes once.
-- **Monitoring:** point an uptime monitor at `GET /api/health` and set `WORKER_HEARTBEAT_URL` for a worker dead man's switch.
+- **Monitoring:** point an uptime monitor at `GET /api/health`, set `WORKER_HEARTBEAT_URL` for a worker dead man's switch, and scrape `GET /api/internal/metrics` with the rules and dashboard in `infra/monitoring/`.
 - **Migrations:** `npm run db:migrate` (uses `DIRECT_DATABASE_URL`) before releasing a new version.
 
 ## Testing
 
-146 tests: 117 unit and 29 integration. They cover the kinematic analysis (synthetic pose tracks with known peak timing), matchmaker scoring, percentile ranks, CSP/CSRF/redirect/cookie rules, env validation, COPPA age bands, permissions, marketing compliance and article fact checking, and WCAG AAA contrast computed from the CSS tokens. Against Postgres they test the free-tier quota under 12 concurrent submissions, Stripe webhook idempotency, out-of-order and concurrent delivery, duplicate-subscription refunds, k-anonymous percentile SQL, AI budget caps under a race, exactly-once agent runs, RLS on every table and tRPC authorization.
+252 Vitest tests (168 unit, 84 integration), 49 Playwright end-to-end tests and 6 `promtool` alert-rule tests. The Vitest suites cover the kinematic analysis (synthetic pose tracks with known peak timing), matchmaker scoring, percentile ranks, CSP/CSRF/redirect/cookie rules, env validation, COPPA age bands, permissions, marketing compliance and article fact checking, and WCAG AAA contrast computed from the CSS tokens. Against Postgres they test the free-tier quota under 12 concurrent submissions, Stripe webhook idempotency, out-of-order and concurrent delivery, duplicate-subscription refunds, k-anonymous percentile SQL, AI budget caps under a race, exactly-once agent runs, RLS on every table and tRPC authorization. Phase 5 adds hockey and football kinematics, the projectile estimate and the tracking job's cost, coach verification, prospect search visibility, contact requests with guardian approval, blocking and consent withdrawal, the operational metrics, and the e2e sign-in stub's refusal outside local.
+
+The end-to-end suite (`npm run test:e2e`, also in CI) signs in as an athlete, a verified coach and an admin through the local stub, exercises logging a measurement, sharing, saving a prospect, the contact dialog and accepting a request, and runs axe (WCAG 2.2 A and AA plus AAA contrast) on every public, athlete, coach and admin page in light and dark mode.

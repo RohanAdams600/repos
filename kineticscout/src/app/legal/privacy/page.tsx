@@ -27,11 +27,19 @@ export default function PrivacyPage() {
         <li>Account: email address, password (stored only as a salted hash by our authentication provider), date of birth, account type, and for athletes under 18 a parent or guardian email address.</li>
         <li>Athlete profile: name, graduating class, sport, position, and optionally height, weight, GPA, high school, batting and throwing side, and X handle.</li>
         <li>Performance data: the metrics you log and the dates they were measured.</li>
-        <li>Videos you upload for analysis, the body keypoints detected in them, and the resulting report.</li>
+        <li>Videos you upload for analysis, the body keypoints detected in them, the path of the puck or ball if you turn on tracking (beta), and the resulting report.</li>
         <li>Verification clips you send to have a measurement verified, the automatic check results (file type, length, recording date from the file, and a fingerprint of the file), and the reviewer&apos;s decision.</li>
         <li>Colleges you add to your recruiting pipeline and their status, your recruiting assistant settings, and the outreach drafts written for you.</li>
         <li>Public profile choices (whether it is public, whether GPA and high school are shown) and daily counts of profile views and PDF downloads. We do not record who viewed your profile.</li>
-        <li>In-app notifications we send you, such as verification results and recruiting alerts.</li>
+        <li>In-app notifications we send you, such as verification results, recruiting alerts and contact requests.</li>
+        <li>
+          Coach accounts (adults only): name, job title, college program, a school or program email address that we confirm with a link, a link to
+          the program&apos;s public staff directory, and our staff&apos;s verification decision. Also the athletes a coach saves, with their private notes.
+        </li>
+        <li>
+          Contact requests between verified coaches and athletes: the coach&apos;s message, the responses of the athlete and, for athletes under 18, the
+          parent or guardian, and the email addresses shared once a request is accepted. Also blocks, and reports athletes make about coaches.
+        </li>
         <li>Billing: your Stripe customer identifier and subscription status. Card details go directly to Stripe; we never see or store card numbers.</li>
         <li>Security data: request IP addresses are used to prevent abuse and are stored only as keyed hashes, never in readable form. We log security events such as failed sign-ins.</li>
         <li>Contact form: your name, email, topic and message, used only to answer you and deleted after 12 months.</li>
@@ -48,6 +56,16 @@ export default function PrivacyPage() {
         </li>
         <li>To verify measurements: a KineticScout reviewer watches the clip you send to confirm the value. The clip is never shown on your profile.</li>
         <li>
+          To let verified college coaches find public profiles. Before a coach can search, we confirm their school email address and our staff
+          match them to their program&apos;s staff directory. Coaches see only what your public profile shows, and only while it is public. You see
+          how many verified coaches saved your profile, never which ones.
+        </li>
+        <li>
+          To pass on contact requests. A coach&apos;s first message cannot contain links or phone numbers. Your email address is shared with the coach
+          only if you accept; for athletes under 18, only after a parent or guardian also approves by email, and then the coach receives both
+          addresses. You can decline, block or report any coach.
+        </li>
+        <li>
           To run the recruiting assistant if you use it: we watch coaching changes and roster needs at programs in your pipeline and draft
           introductions for you to review and send yourself. We never contact coaches for you.
         </li>
@@ -60,10 +78,10 @@ export default function PrivacyPage() {
       <h2>Who processes data for us</h2>
       <ul>
         <li>Supabase: authentication and database hosting.</li>
-        <li>Google Cloud: private storage of analysis and verification videos, and pose detection (Video Intelligence API).</li>
+        <li>Google Cloud: private storage of analysis and verification videos, pose detection and, when you turn on tracking, puck and ball tracking (Video Intelligence API).</li>
         <li>Stripe: payments and subscriptions.</li>
         <li>Upstash: rate limiting and short-lived caching.</li>
-        <li>Resend: delivery of account emails.</li>
+        <li>Resend: delivery of account emails, including contact request emails to athletes, coaches and parents or guardians.</li>
         <li>
           OpenAI: drafting marketing copy and data reports from aggregate statistics, and, only when you use the recruiting assistant, drafting
           outreach messages. For a draft we send your name, graduating class, position, best measurements and, if you entered them, height,
@@ -75,7 +93,8 @@ export default function PrivacyPage() {
       </ul>
       <p>
         These providers act on our instructions under data processing terms. We do not sell personal information and do not share it for
-        cross-context behavioral advertising. Your profile is visible to others only if you make it public.
+        cross-context behavioral advertising. Your profile is visible to others only if you make it public, and your email address goes to a
+        coach only when you accept their request as described above.
       </p>
 
       <h2>How long we keep it</h2>
@@ -85,6 +104,13 @@ export default function PrivacyPage() {
         <li>Uploaded videos: deleted 12 months after upload. The analysis report is kept with your account.</li>
         <li>Verification clips: deleted 30 days after the reviewer&apos;s decision (immediately if the automatic checks reject them). The decision and the file fingerprint are kept with the measurement.</li>
         <li>Outreach drafts and notifications: until you delete them or your account.</li>
+        <li>Coach accounts, saved athletes and private notes: until the coach deletes their account or removes the athlete from their list.</li>
+        <li>
+          Contact requests: until the athlete or the coach deletes their account. Unanswered requests close after 30 days. If an athlete blocks a
+          coach, or a parent or guardian withdraws consent, any email address already shared is removed from the coach&apos;s KineticScout page; we
+          cannot recall a copy the coach already made.
+        </li>
+        <li>Reports about coaches: until the coach&apos;s or the reporting athlete&apos;s account is deleted.</li>
         <li>Security logs: up to 24 months.</li>
         <li>Contact form messages: 12 months.</li>
         <li>Billing records: as long as tax and accounting law requires, held by Stripe.</li>
@@ -105,8 +131,8 @@ export default function PrivacyPage() {
         </li>
         <li>
           Parents and guardians of athletes under 18 receive a private link when they consent. With it they can withdraw consent (the profile
-          returns to private and purchases and coach outreach stop immediately), stop a subscription from renewing, or have the account
-          deleted. A deletion a guardian requests can only be canceled by that guardian. A new link can be requested at any time.
+          returns to private, purchases and coach outreach stop immediately, open coach contact requests are declined, and email addresses
+          already shared are removed from coaches&apos; pages), stop a subscription from renewing, or have the account deleted. A deletion a guardian requests can only be canceled by that guardian. A new link can be requested at any time.
         </li>
       </ul>
       <p>

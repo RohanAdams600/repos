@@ -10,6 +10,7 @@ import { canPublishProfile } from '@/lib/auth/permissions'
 import { requireAthlete } from '@/lib/auth/session'
 import { db } from '@/lib/db'
 import { env } from '@/lib/env'
+import { savedByVerifiedCoaches } from '@/lib/coach/prospects'
 import { buildProfileCard, profileStats } from '@/lib/profile/public'
 import { gradYearBounds } from '@/lib/validation/profile'
 
@@ -49,7 +50,7 @@ export default async function EditProfilePage({ searchParams }: PageProps<'/dash
       publicShowSchool: true,
     },
   })
-  const [preview, stats] = await Promise.all([buildProfileCard(user.id, 'public'), profileStats(user.id)])
+  const [preview, stats, savedBy] = await Promise.all([buildProfileCard(user.id, 'public'), profileStats(user.id), savedByVerifiedCoaches(user.id)])
   const canPublish = canPublishProfile(user)
   const url = profile.publicSlug ? `${env().APP_URL}/p/${profile.publicSlug}` : null
   const { min, max } = gradYearBounds()
@@ -99,6 +100,12 @@ export default async function EditProfilePage({ searchParams }: PageProps<'/dash
           url={url}
           stats={stats}
         />
+        {profile.isPublic && (
+          <p className="text-sm">
+            <span className="tabular font-bold">{savedBy}</span> verified college {savedBy === 1 ? 'coach has' : 'coaches have'} saved your profile. We never
+            show which coaches; they can contact you only through a request you accept.
+          </p>
+        )}
         {canPublish && (
           <form method="post" action="/api/profile/pdf" className="border-t-2 border-border-subtle pt-6">
             <Button type="submit" variant="secondary">

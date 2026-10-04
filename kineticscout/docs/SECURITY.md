@@ -55,8 +55,8 @@ Each item from the brief, mapped to where it is enforced and how it is verified.
 | Failed requests and timeouts | Client: 20 s fetch timeout, no retries on 4xx, plain-language errors. Server: Stripe (10 s, 2 retries with idempotency keys), OpenAI (60 s, 2 retries, one schema-repair attempt), Resend (8 s, 1 retry), Meta (15 s, retries on transient errors), X API (8 s per call), Postgres `statement_timeout` 10 s and pool timeouts. |
 | Spending caps | AI reservations under an advisory lock enforce the global and per-user monthly budgets, tested with 10 concurrent callers. Video analyses are capped per user per month. Meta ads require an account spending limit with headroom and an adults-only ad set, and are created **PAUSED** by default. Checkout refuses to run if the Stripe price differs from the displayed price. |
 | Duplicate payments | See the checkout layers in ARCHITECTURE.md. Duplicates that slip through are cancelled and refunded automatically. Tested in `stripe-webhook.test.ts`. |
-| Monitoring | `GET /api/health` (database and Redis checks, 503 when degraded) for uptime monitors. The worker pings `WORKER_HEARTBEAT_URL` every 5 minutes as a dead man's switch. Structured JSON logs. |
-| Concurrency simulation | Integration tests fire simultaneous metric submissions, webhooks, AI reservations and agent triggers. `npm run load:simulate` drives N virtual users against a deployment with latency and error budgets. |
+| Monitoring | `GET /api/health` (database and Redis checks, 503 when degraded) for uptime monitors. The worker pings `WORKER_HEARTBEAT_URL` every 5 minutes as a dead man's switch. `GET /api/internal/metrics` exposes review backlogs, overdue deletions, stuck jobs, queue depth and AI spend to Prometheus; `infra/monitoring/` holds alert rules (unit tested with `promtool` in CI) and a Grafana dashboard. Structured JSON logs. |
+| Concurrency simulation | Integration tests fire simultaneous metric submissions, webhooks, AI reservations and agent triggers. `npm run load:simulate` drives N virtual users through every route group (including public profiles, PDFs and the signed-in dashboard) with per-group latency and error budgets; results in `docs/LOAD-TESTING.md`. |
 | Backups | `npm run backup:verify` dumps, restores into a scratch database, and compares row counts, migrations and RLS. Run it weekly in CI against a staging replica. |
 
 ## Privacy controls (Phase 3)
@@ -81,6 +81,20 @@ Each item from the brief, mapped to where it is enforced and how it is verified.
 | LLM output | Structured output plus zod validation and a fact-sheet check (numbers, coach name, link, banned wording) before any draft is stored; per-user daily cap and AI budget. |
 | Program feed | HTTPS only, bearer token optional, 30 s timeout, 10 MB cap, redirects refused, schema-validated, updates existing programs only. |
 | Reference footage | Licence fields required by CHECK constraint; playability (active, processed, unexpired) re-checked on each request; 15-minute signed URLs. |
+
+## Phase 5 controls
+
+| Control | Implementation | Verified by |
+|---|---|---|
+| Coach identity | Adults only. School email must end in `.edu` or the program's athletics domain; a 48-hour link, stored as a SHA-256 hash and confirmed by POST, proves the inbox; staff then match the person to the program's staff directory. A database CHECK refuses `VERIFIED` without a confirmed email and a recorded review. Submissions limited to 5 per hour. | `tests/integration/coach.test.ts` |
+| Coach decisions | Admin-only (404 otherwise), single-transition updates (`IN_REVIEW` to a decision, or `VERIFIED` to `SUSPENDED`), audited. Suspension withdraws the coach's open requests. | `coach.test.ts` |
+| Prospect search | Visibility rules from the public profile (consent for minors, no pending deletion) and blocks are applied in SQL before filters; results are the public card only. A profile that goes private disappears from search and from saved boards (only the coach's own note stays). | `coach.test.ts` |
+| Contact with minors | First messages reject links and phone numbers (client and server). Contact details are shared only after the athlete accepts and, for minors, a guardian approves through a hashed 14-day link; a CHECK keeps `shared_emails` empty unless the request is accepted. One open request per pair (partial unique index), 20 per coach per day, 90 days' wait after a decline, expiry after 30 days. Blocking a coach or withdrawing guardian consent declines open requests and clears shared addresses. | `coach.test.ts` |
+| Abuse reports | Only athletes a coach has contacted can report that coach; reports are sanitised, audited and queued for staff, with an alert after 24 hours unresolved. | `coach.test.ts`, `infra/monitoring/alerts.test.yml` |
+| Object tracking cost | Tracking is opt-in per upload and its per-minute cost is part of the AI budget reservation before the Video Intelligence call. | `tests/integration/video-analysis-job.test.ts` |
+| End-to-end sign-in stub | `E2E_AUTH_STUB` lets Playwright sign in without Supabase. The cookie is `<user id>.<HMAC(HASH_PEPPER)>`, so it cannot be forged without the server secret. `env.ts` refuses to boot with the flag outside `DEPLOY_ENV=local`, and the session code repeats that check at runtime. | `tests/unit/hardening.test.ts`, `tests/unit/env.test.ts` |
+| Operational metrics | `GET /api/internal/metrics` requires `Bearer INTERNAL_API_SECRET` (constant-time compare), returns counts only (no ids or emails, tested), `no-store`, and answers 503 rather than partial data when collection fails. | `tests/integration/ops-metrics.test.ts` |
+| Accessibility regression | Every public, athlete, coach and admin page is checked in light and dark mode with axe (WCAG 2.2 A and AA plus the AAA contrast rule) in CI. | `e2e/specs/*.spec.ts` |
 
 ## Known residual risks and follow-ups
 

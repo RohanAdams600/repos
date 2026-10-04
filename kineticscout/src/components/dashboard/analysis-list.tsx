@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Spinner } from '@/components/ui/spinner'
 import { ANALYSIS_FAILURES, STATUS_LABELS } from '@/components/dashboard/analysis-messages'
+import { MOTION_LABELS } from '@/lib/biomechanics/motions'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
 export function AnalysisList() {
@@ -37,7 +38,7 @@ export function AnalysisList() {
             <li key={item.id}>
               <Link href={`/dashboard/analysis/${item.id}`} className="flex flex-wrap items-center justify-between gap-3 p-4 no-underline hover:bg-surface">
                 <span>
-                  <span className="font-bold">{item.motionType === 'SWING' ? 'Swing' : 'Pitch'}</span>
+                  <span className="font-bold">{MOTION_LABELS[item.motionType]}</span>
                   <span className="tabular ml-3 text-sm text-fg-muted">{new Date(item.createdAt).toLocaleString()}</span>
                 </span>
                 <span className="text-sm">

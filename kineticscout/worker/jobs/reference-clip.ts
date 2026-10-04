@@ -15,7 +15,7 @@ import type { PoseEstimator } from '@worker/pose/google-video-intelligence'
 /**
  * Runs a licensed reference clip through the same pose estimation and kinematic analysis as athlete
  * videos, so both sides of a comparison are measured the same way. Clips without a detectable foot
- * strike cannot be synced and are marked FAILED.
+ * strike still sync on peak hand speed.
  */
 export function createReferenceClipProcessor(createEstimator: () => PoseEstimator) {
   let estimator: PoseEstimator | undefined
@@ -41,7 +41,6 @@ export function createReferenceClipProcessor(createEstimator: () => PoseEstimato
       const track = await estimator.estimate({ gcsUri: gcsUri(clip.objectKey), aspectRatio })
       await settleAiSpend(reservation, { inputTokens: 0, outputTokens: 0, costMicros: usdToMicros(minutes * env().VIDEO_ANALYSIS_USD_PER_MINUTE) })
       const report = analyzeKinematicSequence({ track, motionType: clip.motionType, handedness: clip.handedness })
-      if (report.footStrikeTime === null) return fail('FOOT_STRIKE_NOT_DETECTED')
       await db.referenceClip.update({
         where: { id: clip.id },
         data: { status: 'READY', report: report as unknown as Prisma.InputJsonValue, poseData: encodePoseTrack(track) as unknown as Prisma.InputJsonValue, errorCode: null },

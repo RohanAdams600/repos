@@ -10,6 +10,8 @@ import {
   type GuardianConsentState,
   type SessionUser,
 } from '@/lib/auth/permissions'
+import { cookies } from 'next/headers'
+import { E2E_SESSION_COOKIE, e2eStubEnabled, readE2eSession } from '@/lib/auth/e2e-stub'
 import { createSupabaseServerClient } from '@/lib/auth/supabase'
 import { db } from '@/lib/db'
 import { CURRENT_TERMS_VERSION } from '@/lib/legal'
@@ -28,6 +30,13 @@ export type AuthState =
 
 /** Verified identity from the session JWT (signature and expiry checked by Supabase). */
 export const getAuthIdentity = cache(async (): Promise<{ id: string; email: string } | null> => {
+  if (e2eStubEnabled()) {
+    const userId = readE2eSession((await cookies()).get(E2E_SESSION_COOKIE)?.value, process.env.HASH_PEPPER)
+    if (userId) {
+      const user = await db.user.findUnique({ where: { id: userId }, select: { email: true } })
+      return user ? { id: userId, email: user.email } : null
+    }
+  }
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase.auth.getClaims()
   if (error || !data?.claims?.sub) return null

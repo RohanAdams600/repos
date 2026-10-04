@@ -8,12 +8,13 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Checkbox, Field, Select, TextInput } from '@/components/ui/field'
 import { ProgressBar } from '@/components/ui/progress'
+import { MOTION_LABELS, type Motion } from '@/lib/biomechanics/motions'
 import { isAllowedVideoType } from '@/lib/storage/video-files'
 import { putWithProgress } from '@/lib/upload/put'
 import { readVideoMetadata } from '@/lib/upload/video-metadata'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
-const EMPTY = { title: '', playerName: '', level: 'MLB', motionType: 'SWING' as 'SWING' | 'PITCH', handedness: 'RIGHT' as 'RIGHT' | 'LEFT', licensor: '', licenseReference: '', licenseExpiresAt: '', attribution: '', confirmed: false }
+const EMPTY = { title: '', playerName: '', level: 'MLB', motionType: 'SWING' as Motion, handedness: 'RIGHT' as 'RIGHT' | 'LEFT', licensor: '', licenseReference: '', licenseExpiresAt: '', attribution: '', confirmed: false }
 
 export function ReferenceClipAdmin() {
   const trpc = useTRPC()
@@ -90,8 +91,11 @@ export function ReferenceClipAdmin() {
             <Field label="Motion" name="refMotion" required>
               {(p) => (
                 <Select {...p} value={form.motionType} onChange={set('motionType')}>
-                  <option value="SWING">Swing</option>
-                  <option value="PITCH">Pitch</option>
+                  {(Object.keys(MOTION_LABELS) as Motion[]).map((m) => (
+                    <option key={m} value={m}>
+                      {MOTION_LABELS[m]}
+                    </option>
+                  ))}
                 </Select>
               )}
             </Field>
@@ -136,7 +140,7 @@ export function ReferenceClipAdmin() {
                 {c.playerName} ({c.level}): {c.title}
               </p>
               <p className="text-sm text-fg-muted">
-                {c.motionType === 'SWING' ? 'Swing' : 'Pitch'}, {c.handedness === 'RIGHT' ? 'right' : 'left'}. Status: {c.status.toLowerCase().replace('_', ' ')}
+                {MOTION_LABELS[c.motionType]}, {c.handedness === 'RIGHT' ? 'right' : 'left'}. Status: {c.status.toLowerCase().replace('_', ' ')}
                 {c.errorCode ? ` (${c.errorCode})` : ''}. Licence {c.licenseReference} from {c.licensor}
                 {c.licenseExpiresAt ? `, ends ${new Date(c.licenseExpiresAt).toISOString().slice(0, 10)}` : ''}
                 {expired ? ' (expired)' : ''}.

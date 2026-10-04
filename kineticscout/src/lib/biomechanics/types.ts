@@ -77,7 +77,7 @@ export type QualityWarning =
 
 export type KinematicReport = {
   algorithm: 'kseq-2d-v1'
-  motionType: 'SWING' | 'PITCH'
+  motionType: 'SWING' | 'PITCH' | 'HOCKEY_SHOT' | 'FOOTBALL_THROW'
   handedness: 'RIGHT' | 'LEFT'
   frameRate: number
   durationSec: number

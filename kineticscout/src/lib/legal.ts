@@ -7,14 +7,17 @@ import { env } from '@/lib/env'
  * page or API call (requireUser and the tRPC protectedProcedure enforce it), and account holders are
  * emailed before the change takes effect, as the Privacy Policy promises.
  */
-export const CURRENT_TERMS_VERSION = '2026-10-04.2'
+export const CURRENT_TERMS_VERSION = '2026-10-04.3'
 export const LEGAL_LAST_UPDATED = 'October 4, 2026'
 
 /** Plain-language summary shown on /terms-update for the current version. */
 export const TERMS_HIGHLIGHTS: readonly string[] = [
-  'New: you can make your profile public with a private link and PDF. Public profiles are never listed in search engines and show GPA and high school only if you choose.',
-  'New: send a video of a measurement and a reviewer can verify it. Verification clips are reviewed privately and deleted 30 days after the decision.',
-  'New: the Pro recruiting assistant drafts outreach with OpenAI, which receives your name, class, position and measurements (never your email, date of birth or videos). You send every message yourself.',
+  'New: verified college coaches can find public profiles and ask to contact you. Your email address is shared only if you accept and, for athletes under 18, only after a parent or guardian also approves. You can decline, block or report any coach.',
+  "New: coach accounts confirm a school email address and are checked against their program's staff directory before they can search. Coaches agree to follow their association's recruiting rules.",
+  'New: puck and ball tracking (beta) estimates speed and angle from your video using an extra Google Cloud video service. The speed shown is a lower bound, not a radar reading.',
+  'If a parent or guardian withdraws consent, open coach contact requests are declined and email addresses already shared are removed from coaches\' pages.',
+  'Public profiles are never listed in search engines and show GPA and high school only if you choose. Verification clips are deleted 30 days after the decision.',
+  'The Pro recruiting assistant drafts outreach with OpenAI, which receives your name, class, position and measurements (never your email, date of birth or videos). You send every message yourself.',
   'You can download all of your data, or delete your account, yourself from Settings. Deletion happens after a 7-day window in which you can cancel.',
   'A parent or guardian of an athlete under 18 can withdraw consent, cancel a subscription, or request deletion at any time with a private link, without signing in.',
   'Every product email has a one-click unsubscribe, and you can change your choice in Settings at any time.',

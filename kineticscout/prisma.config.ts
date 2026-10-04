@@ -10,7 +10,8 @@ export default defineConfig({
     seed: 'tsx prisma/seed.ts',
   },
   datasource: {
-    url: process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL ?? '',
-    shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL,
+    // `||` so an empty variable (common in CI and env templates) counts as unset.
+    url: process.env.DIRECT_DATABASE_URL || process.env.DATABASE_URL || '',
+    shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL || undefined,
   },
 })

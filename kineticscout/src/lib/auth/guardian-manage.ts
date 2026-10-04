@@ -2,6 +2,7 @@ import 'server-only'
 import { activeDeletionRequest, cancelDeletion, scheduleDeletion } from '@/lib/account/deletion'
 import type { DeletionRequester } from '@/generated/prisma/client'
 import { audit } from '@/lib/audit'
+import { endContactOperations } from '@/lib/coach/contact'
 import { stripe } from '@/lib/billing/stripe'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
@@ -125,13 +126,17 @@ export async function lookupManageToken(token: string): Promise<ManageContext | 
 }
 
 /**
- * Withdraws consent. Effective immediately: the profile becomes private and purchases and coach
- * outreach are blocked (see permissions.ts). Optionally stops the subscription from renewing.
+ * Withdraws consent. Effective immediately: the profile becomes private, purchases and coach
+ * outreach are blocked (see permissions.ts), open coach contact requests are declined and email
+ * addresses already shared are removed from coaches' pages. Optionally stops the subscription from
+ * renewing.
  */
 export async function revokeConsent(ctx: ManageContext, options: { cancelSubscription: boolean }): Promise<void> {
+  const now = new Date()
   await db.$transaction([
-    db.guardianConsent.update({ where: { id: ctx.consentId }, data: { status: 'REVOKED', revokedAt: new Date() } }),
+    db.guardianConsent.update({ where: { id: ctx.consentId }, data: { status: 'REVOKED', revokedAt: now } }),
     db.athleteProfile.updateMany({ where: { userId: ctx.userId }, data: { isPublic: false } }),
+    ...endContactOperations(ctx.userId, 'guardian', now),
   ])
   if (options.cancelSubscription && ctx.liveSubscriptionId && !ctx.cancelAtPeriodEnd) {
     await stripe().subscriptions.update(ctx.liveSubscriptionId, { cancel_at_period_end: true }, { idempotencyKey: `guardian-cancel-${ctx.liveSubscriptionId}` })

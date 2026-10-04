@@ -2,6 +2,7 @@ import { UnrecoverableError, type Job } from 'bullmq'
 import type { Prisma } from '@/generated/prisma/client'
 import { releaseAiSpend, reserveAiSpend, settleAiSpend, usdToMicros } from '@/lib/ai/budget'
 import { encodePoseTrack } from '@/lib/biomechanics/codec'
+import { estimateProjectile, type ObjectTrackCandidate } from '@/lib/biomechanics/projectile'
 import { ALGORITHM_VERSION, analyzeKinematicSequence } from '@/lib/biomechanics/kinematics'
 import { PoseQualityError } from '@/lib/biomechanics/types'
 import { db } from '@/lib/db'
@@ -34,7 +35,7 @@ export function createVideoAnalysisProcessor(createEstimator: () => PoseEstimato
     const { analysisId } = job.data
     const analysis = await db.videoAnalysis.findUnique({
       where: { id: analysisId },
-      select: { id: true, athleteId: true, status: true, objectKey: true, motionType: true, handedness: true, durationMs: true, widthPx: true, heightPx: true },
+      select: { id: true, athleteId: true, status: true, objectKey: true, motionType: true, handedness: true, durationMs: true, widthPx: true, heightPx: true, trackObject: true, athlete: { select: { heightInches: true } } },
     })
     if (!analysis) throw new UnrecoverableError('analysis not found')
     if (analysis.status === 'COMPLETE') return { status: 'COMPLETE' }
@@ -54,15 +55,16 @@ export function createVideoAnalysisProcessor(createEstimator: () => PoseEstimato
       return fail(analysisId, 'UNSUPPORTED_FILE')
     }
 
-    // Video Intelligence bills per started minute. Reserve before calling.
+    // Video Intelligence bills per started minute and per feature. Reserve before calling.
     const minutes = Math.max(1, Math.ceil((analysis.durationMs ?? VIDEO_UPLOAD_POLICY.maxDurationMs) / 60_000))
+    const usdPerMinute = env().VIDEO_ANALYSIS_USD_PER_MINUTE + (analysis.trackObject ? env().OBJECT_TRACKING_USD_PER_MINUTE : 0)
     let reservation
     try {
       reservation = await reserveAiSpend({
         feature: 'VIDEO_ANALYSIS',
         model: 'video-intelligence-person-detection',
         userId: analysis.athleteId,
-        estimatedCostMicros: usdToMicros(minutes * env().VIDEO_ANALYSIS_USD_PER_MINUTE),
+        estimatedCostMicros: usdToMicros(minutes * usdPerMinute),
       })
     } catch {
       return fail(analysisId, 'BUDGET_EXHAUSTED')
@@ -71,16 +73,30 @@ export function createVideoAnalysisProcessor(createEstimator: () => PoseEstimato
     try {
       const aspectRatio = analysis.widthPx && analysis.heightPx ? analysis.widthPx / analysis.heightPx : 16 / 9
       estimator ??= createEstimator()
-      const track = await estimator.estimate({ gcsUri: gcsUri(analysis.objectKey), aspectRatio })
-      await settleAiSpend(reservation, { inputTokens: 0, outputTokens: 0, costMicros: usdToMicros(minutes * env().VIDEO_ANALYSIS_USD_PER_MINUTE) })
+      const input = { gcsUri: gcsUri(analysis.objectKey), aspectRatio }
+      let track
+      let objects: ObjectTrackCandidate[] | null = null
+      if (analysis.trackObject && estimator.estimateWithObjects) {
+        ;({ track, objects } = await estimator.estimateWithObjects(input))
+      } else {
+        track = await estimator.estimate(input)
+      }
+      await settleAiSpend(reservation, { inputTokens: 0, outputTokens: 0, costMicros: usdToMicros(minutes * usdPerMinute) })
 
       const report = analyzeKinematicSequence({ track, motionType: analysis.motionType, handedness: analysis.handedness })
+      // Beta tracking never fails the analysis: any problem is recorded as warnings on the estimate.
+      const releaseTime = report.peaks.find((p) => p.segment === 'hand')?.time ?? null
+      const projectile =
+        objects && releaseTime !== null
+          ? estimateProjectile({ candidates: objects, motion: analysis.motionType, releaseTime, pose: track, athleteHeightInches: analysis.athlete.heightInches })
+          : null
       await db.videoAnalysis.update({
         where: { id: analysisId },
         data: {
           status: 'COMPLETE',
           report: report as unknown as Prisma.InputJsonValue,
           poseData: encodePoseTrack(track) as unknown as Prisma.InputJsonValue,
+          ...(projectile ? { projectile: projectile as unknown as Prisma.InputJsonValue } : {}),
           algorithm: ALGORITHM_VERSION,
           errorCode: null,
           completedAt: new Date(),

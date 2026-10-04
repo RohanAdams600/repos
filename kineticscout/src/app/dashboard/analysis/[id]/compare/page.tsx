@@ -25,7 +25,8 @@ export default async function ComparePage({ params }: PageProps<'/dashboard/anal
         />
         <h1 className="text-3xl font-bold">Side-by-side comparison</h1>
         <p className="text-fg-muted">
-          Both clips are lined up on the moment your front foot lands, then play together. Slow them down to see which body segment fires first.
+          Both clips are lined up on the moment your front foot lands (or on peak hand speed when a foot strike is not visible, common on skates),
+          then play together. Slow them down to see which body segment fires first.
         </p>
       </div>
       <ComparisonView analysisId={id} />

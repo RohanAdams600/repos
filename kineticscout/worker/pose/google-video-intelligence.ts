@@ -1,9 +1,32 @@
 import { VideoIntelligenceServiceClient, protos } from '@google-cloud/video-intelligence'
+import type { ObjectTrackCandidate } from '@/lib/biomechanics/projectile'
 import { KEYPOINT_NAMES, type KeypointName, type PoseFrame, type PoseTrack } from '@/lib/biomechanics/types'
 import { requireEnv } from '@/lib/env'
 
 export interface PoseEstimator {
   estimate(input: { gcsUri: string; aspectRatio: number }): Promise<PoseTrack>
+  /** Pose plus labelled object tracks (puck or ball tracking). One API call, both features. */
+  estimateWithObjects?(input: { gcsUri: string; aspectRatio: number }): Promise<{ track: PoseTrack; objects: ObjectTrackCandidate[] }>
+}
+
+type ObjectAnnotation = {
+  entity?: { description?: string | null } | null
+  confidence?: number | null
+  frames?: { normalizedBoundingBox?: { left?: number | null; top?: number | null; right?: number | null; bottom?: number | null } | null; timeOffset?: unknown }[] | null
+}
+
+/** Maps Video Intelligence object annotations to candidates. Exported for tests. */
+export function toObjectCandidates(annotations: readonly ObjectAnnotation[]): ObjectTrackCandidate[] {
+  return annotations
+    .filter((a) => a.entity?.description && a.frames?.length)
+    .map((a) => ({
+      label: a.entity!.description!,
+      confidence: a.confidence ?? 0,
+      observations: a.frames!.map((f) => ({
+        t: seconds(f.timeOffset as Duration),
+        box: { left: f.normalizedBoundingBox?.left ?? 0, top: f.normalizedBoundingBox?.top ?? 0, right: f.normalizedBoundingBox?.right ?? 0, bottom: f.normalizedBoundingBox?.bottom ?? 0 },
+      })),
+    }))
 }
 
 export class NoPersonDetectedError extends Error {
@@ -43,10 +66,19 @@ export class GoogleVideoIntelligencePoseEstimator implements PoseEstimator {
   }
 
   async estimate({ gcsUri, aspectRatio }: { gcsUri: string; aspectRatio: number }): Promise<PoseTrack> {
+    return (await this.run(gcsUri, aspectRatio, false)).track
+  }
+
+  async estimateWithObjects({ gcsUri, aspectRatio }: { gcsUri: string; aspectRatio: number }): Promise<{ track: PoseTrack; objects: ObjectTrackCandidate[] }> {
+    return this.run(gcsUri, aspectRatio, true)
+  }
+
+  private async run(gcsUri: string, aspectRatio: number, trackObjects: boolean): Promise<{ track: PoseTrack; objects: ObjectTrackCandidate[] }> {
+    const Feature = protos.google.cloud.videointelligence.v1.Feature
     const [operation] = await this.client.annotateVideo(
       {
         inputUri: gcsUri,
-        features: [protos.google.cloud.videointelligence.v1.Feature.PERSON_DETECTION],
+        features: trackObjects ? [Feature.PERSON_DETECTION, Feature.OBJECT_TRACKING] : [Feature.PERSON_DETECTION],
         videoContext: {
           personDetectionConfig: { includeBoundingBoxes: true, includePoseLandmarks: true, includeAttributes: false },
         },
@@ -54,7 +86,8 @@ export class GoogleVideoIntelligencePoseEstimator implements PoseEstimator {
       { timeout: 60_000 },
     )
     const [response] = await operation.promise()
-    const tracks = response.annotationResults?.[0]?.personDetectionAnnotations?.flatMap((a) => a.tracks ?? []) ?? []
+    const results = response.annotationResults ?? []
+    const tracks = results.flatMap((r) => r.personDetectionAnnotations ?? []).flatMap((a) => a.tracks ?? [])
     const subject = tracks.sort((a, b) => (b.timestampedObjects?.length ?? 0) - (a.timestampedObjects?.length ?? 0))[0]
     if (!subject?.timestampedObjects?.length) throw new NoPersonDetectedError()
 
@@ -70,6 +103,7 @@ export class GoogleVideoIntelligencePoseEstimator implements PoseEstimator {
       }
       return { t: seconds(obj.timeOffset as Duration), keypoints }
     })
-    return { aspectRatio, frames }
+    const objects = trackObjects ? toObjectCandidates(results.flatMap((r) => (r.objectAnnotations ?? []) as ObjectAnnotation[])) : []
+    return { track: { aspectRatio, frames }, objects }
   }
 }

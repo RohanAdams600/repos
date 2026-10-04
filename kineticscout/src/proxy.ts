@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { E2E_SESSION_COOKIE, e2eStubEnabled, readE2eSession } from '@/lib/auth/e2e-stub'
 import { NextResponse, type NextRequest } from 'next/server'
 import { hardenCookieOptions, isSecureCookieEnvironment } from '@/lib/auth/cookies'
 import { analyticsAllowedOn, CONSENT_COOKIE, parseConsent, UTM_COOKIE, UTM_MAX_AGE } from '@/lib/consent'
@@ -95,6 +96,9 @@ export async function proxy(request: NextRequest) {
       authenticated = false
     }
   }
+
+  // Local end-to-end tests only (see src/lib/auth/e2e-stub.ts); inert in every deployed environment.
+  if (!authenticated && e2eStubEnabled()) authenticated = readE2eSession(request.cookies.get(E2E_SESSION_COOKIE)?.value, process.env.HASH_PEPPER) !== null
 
   // 4. Coarse route guards. Redirects carry any refreshed cookies so the session is not lost.
   const redirectTo = (target: string) => {
