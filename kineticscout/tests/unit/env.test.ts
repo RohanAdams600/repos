@@ -65,8 +65,13 @@ describe('server environment validation', () => {
   })
 
   it('lets the worker run without web-only secrets', () => {
-    const { SUPABASE_URL: _u, SUPABASE_PUBLISHABLE_KEY: _k, SUPABASE_SECRET_KEY: _s, STRIPE_SECRET_KEY: _st, ...rest } = production
+    const { SUPABASE_PUBLISHABLE_KEY: _k, STRIPE_WEBHOOK_SECRET: _w, STRIPE_PRICE_PRO_MONTHLY: _m, STRIPE_PRICE_PRO_YEARLY: _y, ...rest } = production
     expect(parseServerEnv({ ...rest, SERVICE_ROLE: 'worker' }).SERVICE_ROLE).toBe('worker')
+  })
+
+  it('requires the worker to hold the keys it needs to carry out account deletions', () => {
+    const { SUPABASE_SECRET_KEY: _s, STRIPE_SECRET_KEY: _st, ...rest } = production
+    expect(() => parseServerEnv({ ...rest, SERVICE_ROLE: 'worker' })).toThrow(/SUPABASE_SECRET_KEY[\s\S]*STRIPE_SECRET_KEY|STRIPE_SECRET_KEY[\s\S]*SUPABASE_SECRET_KEY/)
   })
 
   it('rejects weak peppers', () => {

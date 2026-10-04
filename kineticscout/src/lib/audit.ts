@@ -8,9 +8,11 @@ export type AuditAction =
   | 'auth.sign_in_failed'
   | 'auth.account_completed'
   | 'auth.age_screen_refused'
+  | 'auth.reauth_failed'
   | 'guardian.consent_requested'
   | 'guardian.consent_granted'
   | 'profile.created'
+  | 'profile.updated'
   | 'billing.checkout_started'
   | 'billing.subscription_synced'
   | 'billing.duplicate_subscription_canceled'
@@ -21,6 +23,14 @@ export type AuditAction =
   | 'admin.testimonial_created'
   | 'admin.testimonial_reviewed'
   | 'upload.rejected'
+  | 'account.data_exported'
+  | 'account.deletion_scheduled'
+  | 'account.deletion_canceled'
+  | 'account.deleted'
+  | 'email.preferences_updated'
+  | 'guardian.consent_revoked'
+  | 'guardian.manage_link_sent'
+  | 'legal.terms_accepted'
 
 /** Records a security-relevant event. Never throws: auditing must not break the user flow. */
 export async function audit(

@@ -12,6 +12,7 @@ import {
 } from '@/lib/auth/permissions'
 import { createSupabaseServerClient } from '@/lib/auth/supabase'
 import { db } from '@/lib/db'
+import { CURRENT_TERMS_VERSION } from '@/lib/legal'
 
 /**
  * Data Access Layer for identity. Every page, Server Action, Route Handler and tRPC procedure
@@ -46,6 +47,8 @@ export const getAuthState = cache(async (): Promise<AuthState> => {
       role: true,
       subscriptionTier: true,
       dateOfBirth: true,
+      termsVersion: true,
+      deletionScheduledFor: true,
       guardianConsent: { select: { status: true } },
       athleteProfile: { select: { userId: true } },
     },
@@ -69,6 +72,8 @@ export const getAuthState = cache(async (): Promise<AuthState> => {
       ageBand: band,
       guardianConsent,
       hasAthleteProfile: row.athleteProfile !== null,
+      termsCurrent: row.termsVersion === CURRENT_TERMS_VERSION,
+      deletionScheduledFor: row.deletionScheduledFor,
     },
   }
 })
@@ -83,6 +88,7 @@ export async function requireUser(nextPath = '/dashboard'): Promise<SessionUser>
   const state = await getAuthState()
   if (state.status === 'anonymous') redirect(`/sign-in?next=${encodeURIComponent(nextPath)}`)
   if (state.status === 'needs-account') redirect('/onboarding')
+  if (!state.user.termsCurrent) redirect(`/terms-update?next=${encodeURIComponent(nextPath)}`)
   return state.user
 }
 

@@ -23,6 +23,16 @@ FAQ page with five detailed, expandable answers (also on the home page, with FAQ
 
 **Content rules.** Reviews must belong to a real account holder who agreed to publication. Case studies need a written-consent date. Team members go in `content/team.json`, with photos in `public/team/`. Until real content exists, each section shows an honest empty state or stays hidden.
 
+## What is in Phase 3
+
+Privacy controls that work without contacting support:
+
+- **Settings** (`/dashboard/settings`): account details, product email opt-in, guardian status, Download my data (JSON), Delete my account.
+- **Account deletion**: confirmed with the password and a typed `DELETE`. A 7-day window follows, during which the account can be canceled; the profile is private, marketing is off and renewal is switched off. Then the worker deletes the Stripe customer, stored videos, the login and all rows, recording each step so failures resume. Staff can enter emailed requests in `/admin`.
+- **Guardian management link**: emailed after consent. Without signing in, a guardian can withdraw consent (immediate), stop renewal, consent again, or request or cancel deletion. A new link can be requested from `/legal/your-data`.
+- **Email**: one-click unsubscribe (RFC 8058) at `/api/email/unsubscribe` and a preference centre at `/email/preferences`, both authenticated by a signed token. `sendMarketingEmail` is the only way to send marketing.
+- **Profile editing** (`/dashboard/profile`), a **terms re-acceptance** gate when `CURRENT_TERMS_VERSION` changes, and a public **Your data** page.
+
 ## Local development
 
 Requirements: Node 22.12+, PostgreSQL 15+, Redis 7+.

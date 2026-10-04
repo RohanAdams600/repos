@@ -17,6 +17,10 @@ export type SessionUser = {
   ageBand: Exclude<AgeBand, 'UNDER_13'>
   guardianConsent: GuardianConsentState
   hasAthleteProfile: boolean
+  /** False when the Terms or Privacy Policy changed since the user last accepted them. */
+  termsCurrent: boolean
+  /** Set while a deletion request is in its cancellation window. */
+  deletionScheduledFor: Date | null
 }
 
 export const FREE_MONTHLY_METRIC_LIMIT = 3

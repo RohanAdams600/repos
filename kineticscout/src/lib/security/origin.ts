@@ -9,8 +9,11 @@
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
-/** Paths authenticated by other means (webhook signatures, shared secrets). */
-export const CSRF_EXEMPT_PREFIXES = ['/api/webhooks/', '/api/internal/', '/api/health']
+/**
+ * Paths authenticated by other means: webhook signatures, shared secrets, and the signed token on
+ * RFC 8058 one-click unsubscribe (POSTed by mail providers' servers, which send no Origin header).
+ */
+export const CSRF_EXEMPT_PREFIXES = ['/api/webhooks/', '/api/internal/', '/api/health', '/api/email/unsubscribe']
 
 export type OriginCheckInput = {
   method: string

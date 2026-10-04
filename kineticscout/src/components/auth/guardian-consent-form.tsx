@@ -12,7 +12,7 @@ export function GuardianConsentForm({ token }: { token: string }) {
   if (state.status === 'success') {
     return (
       <Alert tone="success" title="Consent recorded" focusOnMount>
-        {state.message} You can withdraw consent at any time by emailing support; the profile will return to private.
+        {state.message} We emailed you a confirmation with a private link you can use at any time to withdraw consent, cancel a subscription, or have the account deleted.
       </Alert>
     )
   }

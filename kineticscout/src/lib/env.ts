@@ -98,20 +98,28 @@ export const serverEnvSchema = z
 
     if (deployed) {
       const webOnly = [
-        'SUPABASE_SECRET_KEY',
+        'SUPABASE_PUBLISHABLE_KEY',
         'UPSTASH_REDIS_REST_URL',
         'UPSTASH_REDIS_REST_TOKEN',
-        'STRIPE_SECRET_KEY',
         'STRIPE_WEBHOOK_SECRET',
         'STRIPE_PRICE_PRO_MONTHLY',
         'STRIPE_PRICE_PRO_YEARLY',
-        'RESEND_API_KEY',
         'BUSINESS_LEGAL_NAME',
         'BUSINESS_POSTAL_ADDRESS',
         'BUSINESS_SUPPORT_EMAIL',
         'BUSINESS_GOVERNING_LAW',
       ] as const
-      const everywhere = ['REDIS_URL', 'OPENAI_API_KEY', 'GCP_PROJECT_ID', 'GCS_UPLOAD_BUCKET'] as const
+      // The worker executes account deletions (Stripe, storage, auth) and sends their confirmation emails.
+      const everywhere = [
+        'REDIS_URL',
+        'OPENAI_API_KEY',
+        'GCP_PROJECT_ID',
+        'GCS_UPLOAD_BUCKET',
+        'SUPABASE_URL',
+        'SUPABASE_SECRET_KEY',
+        'STRIPE_SECRET_KEY',
+        'RESEND_API_KEY',
+      ] as const
       const required = env.SERVICE_ROLE === 'web' ? [...webOnly, ...everywhere] : everywhere
       for (const key of required) {
         if (!env[key]) issue(key, `required when DEPLOY_ENV=${env.DEPLOY_ENV}`)

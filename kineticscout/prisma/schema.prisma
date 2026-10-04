@@ -188,6 +188,12 @@ enum AgentRunStatus {
   SKIPPED
 }
 
+enum DeletionRequester {
+  USER
+  GUARDIAN
+  ADMIN
+}
+
 enum AiFeature {
   GROWTH_AGENT
   SEO_AGENT
@@ -210,6 +216,10 @@ model User {
   dateOfBirth         DateTime         @map("date_of_birth") @db.Date
   /// Marketing email is strictly opt-in. Transactional email does not depend on this flag.
   marketingEmailOptIn Boolean          @default(false) @map("marketing_email_opt_in")
+  /// When the marketing preference last changed (evidence of opt-in or opt-out).
+  marketingOptInUpdatedAt DateTime?    @map("marketing_opt_in_updated_at")
+  /// Self-serve or guardian deletion request. The worker deletes everything once this time passes.
+  deletionScheduledFor DateTime?       @map("deletion_scheduled_for")
   termsVersion        String           @map("terms_version") @db.VarChar(16)
   termsAcceptedAt     DateTime         @map("terms_accepted_at")
   /// First-touch UTM values, captured only with analytics consent. Shape: { utm_source, utm_medium, ... }.
@@ -225,6 +235,7 @@ model User {
   testimonials     Testimonial[]
 
   @@index([role])
+  @@index([deletionScheduledFor])
   @@map("users")
 }
 
@@ -238,6 +249,9 @@ model GuardianConsent {
   expiresAt     DateTime              @map("expires_at")
   grantedAt     DateTime?             @map("granted_at")
   revokedAt     DateTime?             @map("revoked_at")
+  /// SHA-256 of the guardian's long-lived management link token (withdraw consent, request deletion).
+  manageTokenHash      String?        @unique @map("manage_token_hash") @db.Char(64)
+  manageTokenExpiresAt DateTime?      @map("manage_token_expires_at")
   createdAt     DateTime              @default(now()) @map("created_at")
   updatedAt     DateTime              @updatedAt @map("updated_at")
 
@@ -610,4 +624,23 @@ model ContactMessage {
 
   @@index([createdAt])
   @@map("contact_messages")
+}
+
+/// Proof that a deletion request was received and completed. Holds no personal data: the subject is
+/// a keyed hash of the deleted user id, so a later inquiry can be answered without keeping the account.
+model DataDeletionReceipt {
+  id           String            @id @default(uuid(7)) @db.Uuid
+  subjectHash  String            @map("subject_hash") @db.Char(64)
+  requestedBy  DeletionRequester @map("requested_by")
+  requestedAt  DateTime          @map("requested_at")
+  scheduledFor DateTime          @map("scheduled_for")
+  canceledAt   DateTime?         @map("canceled_at")
+  completedAt  DateTime?         @map("completed_at")
+  /// Steps finished so far (stripe, storage, auth, database). Makes retries resume, not repeat.
+  steps        Json              @default("[]")
+  createdAt    DateTime          @default(now()) @map("created_at")
+
+  @@index([subjectHash])
+  @@index([completedAt, scheduledFor])
+  @@map("data_deletion_receipts")
 }

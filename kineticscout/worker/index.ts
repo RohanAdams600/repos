@@ -89,7 +89,7 @@ async function main(): Promise<void> {
       AGENT_SCHEDULES.sweep,
       async () => {
         const result = await sweepStuckWork()
-        if (result.requeued || result.expired || result.purged || result.logsPurged) logger.info(result, 'sweep completed')
+        if (Object.values(result).some((count) => count > 0)) logger.info(result, 'sweep completed')
       },
       { timezone: tz, name: 'sweep', noOverlap: true },
     ),

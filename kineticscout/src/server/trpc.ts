@@ -71,6 +71,7 @@ export const publicProcedure = t.procedure.use(errorMapping).use(rateLimited)
 
 export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Sign in to continue.' })
+  if (!ctx.user.termsCurrent) throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Accept the updated Terms of Service to continue.' })
   return next({ ctx: { ...ctx, user: ctx.user as SessionUser } })
 })
 

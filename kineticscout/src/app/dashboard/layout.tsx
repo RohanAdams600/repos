@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { activeDeletionRequest } from '@/lib/account/deletion'
 import { hasProAccess } from '@/lib/auth/permissions'
 import { requireUser } from '@/lib/auth/session'
 import { TrpcProviders } from '@/trpc/client'
@@ -11,6 +12,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const pro = hasProAccess(user)
   const links = [
     { href: '/dashboard', label: 'Overview' },
+    ...(user.role === 'ATHLETE' && user.hasAthleteProfile ? [{ href: '/dashboard/profile', label: 'Profile' }] : []),
     ...(user.role !== 'COACH'
       ? [
           { href: '/dashboard/analysis', label: 'Video analysis', pro: true },
@@ -18,7 +20,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
         ]
       : []),
     { href: '/dashboard/billing', label: 'Plan and billing' },
+    { href: '/dashboard/settings', label: 'Settings' },
   ]
+  const deletion = user.deletionScheduledFor ? await activeDeletionRequest(user.id) : null
   return (
     <TrpcProviders>
       <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
@@ -34,7 +38,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
             ))}
           </ul>
         </nav>
-        <div className="min-w-0">{children}</div>
+        <div className="flex min-w-0 flex-col gap-8">
+          {deletion && (
+            <div role="status" className="flex flex-col gap-2 border-2 border-danger p-4 sm:flex-row sm:items-center sm:justify-between">
+              <p>
+                <strong>Account scheduled for deletion</strong> on{' '}
+                {deletion.scheduledFor.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}.
+                {deletion.requestedBy === 'GUARDIAN' ? ' Requested by your parent or guardian.' : ''}
+              </p>
+              <Link href="/dashboard/settings" className="shrink-0 font-bold">
+                {deletion.requestedBy === 'GUARDIAN' ? 'Details' : 'Review or cancel'}
+              </Link>
+            </div>
+          )}
+          <div>{children}</div>
+        </div>
       </div>
     </TrpcProviders>
   )

@@ -20,6 +20,10 @@ export const RATE_LIMITS = {
   ai: { tokens: 10, window: '1 h' },
   contact: { tokens: 5, window: '1 h' },
   search: { tokens: 30, window: '1 m' },
+  dataExport: { tokens: 5, window: '1 h' },
+  accountDelete: { tokens: 5, window: '1 h' },
+  emailPreferences: { tokens: 20, window: '1 h' },
+  guardianManage: { tokens: 5, window: '1 h' },
 } as const satisfies Record<string, { tokens: number; window: Duration }>
 
 export type RateLimitName = keyof typeof RATE_LIMITS

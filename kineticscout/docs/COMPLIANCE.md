@@ -6,6 +6,7 @@ This document records how the product meets the "do not get sued" checklist, and
 
 - **COPPA (under 13).** Sign-up uses a neutral date-of-birth screen. If the date is under 13, the server stores nothing, sends nothing to Supabase, and sets a 24-hour cookie so the form cannot simply be resubmitted with a different date. The message does not reveal the cutoff. If an under-13 date reaches onboarding (an interrupted sign-up), the Supabase auth user is deleted.
 - **Teens (13 to 17).** A parent or guardian email is required. Until the guardian consents through an emailed one-time link (confirmed by POST, with an attestation checkbox), the profile stays private and purchases and coach outreach are blocked (`src/lib/auth/permissions.ts`). Guardian tokens are stored hashed, are single-use, and expire after 7 days.
+- **Ongoing guardian control.** The consent confirmation email carries a private management link (`/consent/guardian/manage`, valid 1 year, re-requestable from `/legal/your-data` without revealing whether an address is on file). It lets the guardian withdraw consent (immediate: profile private, purchases and outreach blocked, teen notified), optionally stop renewal, give consent again with a fresh attestation, and request or cancel deletion of the account.
 - **Advertising.** Paid ads target adults only: the Meta client refuses any ad set whose `age_min` is under 18, and ad copy is checked for promises aimed at children.
 
 ## Data minimisation and inventory
@@ -15,6 +16,8 @@ This document records how the product meets the "do not get sued" checklist, and
 | Email, password hash (Supabase) | Account access | Until deletion |
 | Date of birth | Age rules (COPPA, minor protections) | Until deletion |
 | Guardian email | Consent for minors | Until deletion |
+| Marketing choice and its timestamp | Proof of opt-in or opt-out | Until deletion |
+| Deletion receipt (keyed hash, dates, steps) | Proof a deletion request was honored | Kept; contains no personal data |
 | Name, class, sport, position | Profile, percentiles, matching | Until deletion |
 | Height, weight, GPA, high school, X handle, bats/throws | Optional; matching and profile | Until deletion |
 | Metrics | Core feature | Until deletion |
@@ -29,8 +32,11 @@ Not collected: location, contacts, device identifiers, advertising identifiers, 
 
 ## User rights
 
-- Deletion cascades from `users` through every owned table (tested). Phase 1 handles requests by email (the Privacy Policy promises confirmation within 2 business days and completion within 30 days). Phase 3 adds a self-serve "Delete my data" flow and data export.
-- Marketing email is opt-in only (unchecked by default). `sendEmail` attaches `List-Unsubscribe` and one-click headers whenever an unsubscribe URL is given. The unsubscribe endpoint ships in Phase 3, **before any marketing email is sent**.
+- **Access and portability.** Settings → Download my data returns a JSON file covering every table that holds the user's data (account, guardian consent, profile, metrics, pipeline, analyses with reports, subscriptions, reviews, contact messages, AI feature use, security events). Audited as `account.data_exported`.
+- **Rectification.** Athletes edit every profile field at `/dashboard/profile`; email and date of birth changes go through support (they drive authentication and age rules).
+- **Deletion.** Self-serve from Settings with password re-entry, or by a guardian, or entered by staff for an emailed request. 7-day cancellable window (profile private, marketing off, renewal switched off), then the worker deletes the Stripe customer, stored videos, the login and every database row (cascade, tested). A `DataDeletionReceipt` with a keyed hash records when it was requested and completed.
+- **Marketing email.** Opt-in only (unchecked by default), with the time of each choice recorded (`marketing_opt_in_updated_at`). `sendMarketingEmail` is the only sending path; it re-checks consent at send time, skips minors without guardian consent and accounts pending deletion, and adds RFC 8058 one-click unsubscribe headers, a visible preferences link and the postal address (CAN-SPAM). The preference centre works without signing in.
+- **Changes to terms.** Bumping `CURRENT_TERMS_VERSION` gates the dashboard and API behind `/terms-update`, where users can accept, or download their data and delete the account instead. Acceptance is audited with the version. The business must still email account holders before a material change takes effect, as the policy promises.
 
 ## Consent and cookies
 

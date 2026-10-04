@@ -52,8 +52,10 @@ export default function TermsPage() {
 
       <h2>Ending your account</h2>
       <p>
-        You can close your account at any time. We may suspend accounts that break these terms, and will tell you why unless the law prevents
-        it.
+        You can delete your account at any time from Settings. Deletion is carried out 7 days after your request, and you can cancel until
+        then. When it is carried out, any subscription ends immediately and your data is deleted as described in the{' '}
+        <Link href="/legal/privacy">Privacy Policy</Link>. A parent or guardian of an athlete under 18 can also request deletion. We may
+        suspend accounts that break these terms, and will tell you why unless the law prevents it.
       </p>
 
       <h2>Disclaimers and liability</h2>

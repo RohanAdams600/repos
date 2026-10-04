@@ -79,3 +79,9 @@ export async function readObjectHead(objectKey: string, bytes = 64): Promise<Uin
 export async function deleteObject(objectKey: string): Promise<void> {
   await bucket().file(objectKey).delete({ ignoreNotFound: true })
 }
+
+/** Deletes every object under a prefix (used when an account is deleted). */
+export async function deletePrefix(prefix: string): Promise<void> {
+  if (!/^videos\/[0-9a-f-]{36}\/$/i.test(prefix)) throw new Error('Refusing to delete an unexpected prefix')
+  await bucket().deleteFiles({ prefix, force: true })
+}

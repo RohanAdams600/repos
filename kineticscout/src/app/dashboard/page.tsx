@@ -59,7 +59,7 @@ export default async function DashboardPage({ searchParams }: PageProps<'/dashbo
       </div>
 
       {notice && <Alert tone="success">{notice}</Alert>}
-      {user.ageBand === 'MINOR' && user.guardianConsent !== 'GRANTED' && <GuardianBanner />}
+      {user.ageBand === 'MINOR' && user.guardianConsent !== 'GRANTED' && <GuardianBanner revoked={user.guardianConsent === 'REVOKED'} />}
 
       <section aria-labelledby="log-title" className="flex flex-col gap-4">
         <h2 id="log-title" className="text-xl font-bold">

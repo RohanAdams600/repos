@@ -1,3 +1,4 @@
+import { processDueDeletions } from '@/lib/account/deletion'
 import { db } from '@/lib/db'
 import { errorFields, logger } from '@/lib/logger'
 import { enqueueVideoAnalysis } from '@/lib/queue/queues'
@@ -9,10 +10,13 @@ import { workerEnv } from '@worker/env'
  *   - re-enqueues analyses stuck in QUEUED (e.g. the web app's enqueue failed after the DB write);
  *   - expires uploads that were never completed and removes their objects;
  *   - deletes raw videos past the retention window, keeping the derived report;
- *   - purges security logs and billing bookkeeping rows past their retention period.
+ *   - purges security logs and billing bookkeeping rows past their retention period;
+ *   - carries out account deletions whose 7-day cancellation window has ended.
  * Every step is idempotent, so overlapping sweeps on several replicas are harmless.
  */
-export async function sweepStuckWork(now: Date = new Date()): Promise<{ requeued: number; expired: number; purged: number; logsPurged: number }> {
+export async function sweepStuckWork(
+  now: Date = new Date(),
+): Promise<{ requeued: number; expired: number; purged: number; logsPurged: number; accountsDeleted: number; deletionFailures: number }> {
   const stuck = await db.videoAnalysis.findMany({
     where: { status: 'QUEUED', createdAt: { lt: new Date(now.getTime() - 10 * 60_000) } },
     select: { id: true },
@@ -60,5 +64,14 @@ export async function sweepStuckWork(now: Date = new Date()): Promise<{ requeued
     db.checkoutSession.deleteMany({ where: { status: { not: 'OPEN' }, createdAt: { lt: new Date(now.getTime() - 90 * day) } } }),
   ])
 
-  return { requeued: stuck.length, expired: abandoned.length, purged: expiredVideos.length, logsPurged: logs.count }
+  const deletions = await processDueDeletions(now)
+
+  return {
+    requeued: stuck.length,
+    expired: abandoned.length,
+    purged: expiredVideos.length,
+    logsPurged: logs.count,
+    accountsDeleted: deletions.deleted,
+    deletionFailures: deletions.failed,
+  }
 }

@@ -2,9 +2,10 @@ import { randomUUID } from 'node:crypto'
 import type { Position, SubscriptionTier } from '@/generated/prisma/enums'
 import type { SessionUser } from '@/lib/auth/permissions'
 import { db } from '@/lib/db'
+import { CURRENT_TERMS_VERSION } from '@/lib/legal'
 
 const TABLES = [
-  'testimonials', 'contact_messages',
+  'data_deletion_receipts', 'testimonials', 'contact_messages',
   'ai_usage', 'audit_logs', 'marketing_assets', 'blog_posts', 'agent_runs', 'percentile_baselines', 'video_analyses',
   'stripe_events', 'checkout_sessions', 'subscriptions', 'recruiting_pipeline', 'college_programs', 'metrics',
   'athlete_profiles', 'guardian_consents', 'users',
@@ -23,7 +24,7 @@ export async function createAthlete(options: { tier?: SubscriptionTier; gradYear
       dateOfBirth: new Date(Date.UTC(2008, 0, 15)),
       subscriptionTier: options.tier ?? 'FREE',
       stripeCustomerId: options.stripeCustomerId,
-      termsVersion: 'test',
+      termsVersion: CURRENT_TERMS_VERSION,
       termsAcceptedAt: new Date(),
       athleteProfile: {
         create: {
@@ -43,5 +44,7 @@ export async function createAthlete(options: { tier?: SubscriptionTier; gradYear
     ageBand: 'ADULT',
     guardianConsent: 'NOT_REQUIRED',
     hasAthleteProfile: true,
+    termsCurrent: true,
+    deletionScheduledFor: null,
   }
 }

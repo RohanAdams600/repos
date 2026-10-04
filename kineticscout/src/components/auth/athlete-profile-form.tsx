@@ -4,20 +4,32 @@ import { useActionState, useState } from 'react'
 import { Alert } from '@/components/ui/alert'
 import { Field, Select, TextInput } from '@/components/ui/field'
 import { SubmitButton } from '@/components/ui/submit-button'
-import { createAthleteProfileAction } from '@/lib/athletes/actions'
+import { createAthleteProfileAction, updateAthleteProfileAction } from '@/lib/athletes/actions'
 import { POSITIONS_BY_SPORT, type Sport } from '@/lib/athletes/positions'
 import { initialFormState } from '@/lib/forms'
 
-export function AthleteProfileForm({ gradYears }: { gradYears: number[] }) {
-  const [state, action] = useActionState(createAthleteProfileAction, initialFormState)
+type AthleteProfileFormProps = {
+  gradYears: number[]
+  /** Edit mode pre-fills the saved profile and updates it in place. */
+  initial?: Record<string, string>
+}
+
+export function AthleteProfileForm({ gradYears, initial }: AthleteProfileFormProps) {
+  const editing = initial !== undefined
+  const [state, action] = useActionState(editing ? updateAthleteProfileAction : createAthleteProfileAction, initialFormState)
   const errors = state.status === 'error' ? (state.fieldErrors ?? {}) : {}
-  const values = state.status === 'error' ? (state.values ?? {}) : {}
+  const values = state.status === 'error' ? (state.values ?? {}) : (initial ?? {})
   const [sport, setSport] = useState<Sport>((values.sport as Sport) ?? 'BASEBALL')
 
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       {state.status === 'error' && (
         <Alert tone="error" focusOnMount>
+          {state.message}
+        </Alert>
+      )}
+      {state.status === 'success' && (
+        <Alert tone="success" focusOnMount>
           {state.message}
         </Alert>
       )}
@@ -107,8 +119,8 @@ export function AthleteProfileForm({ gradYears }: { gradYears: number[] }) {
       <Field label="X (Twitter) handle" name="twitterHandle" error={errors.twitterHandle} hint="Shown on your public profile if you make it public.">
         {(p) => <TextInput {...p} autoComplete="off" spellCheck={false} defaultValue={values.twitterHandle} />}
       </Field>
-      <p className="text-sm text-fg-muted">Your profile starts private. You choose if and when to make it public.</p>
-      <SubmitButton pendingLabel="Saving profile">Save profile</SubmitButton>
+      {!editing && <p className="text-sm text-fg-muted">Your profile starts private. You choose if and when to make it public.</p>}
+      <SubmitButton pendingLabel="Saving profile">{editing ? 'Save changes' : 'Save profile'}</SubmitButton>
     </form>
   )
 }

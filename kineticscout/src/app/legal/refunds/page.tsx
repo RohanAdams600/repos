@@ -13,6 +13,7 @@ export default function RefundsPage() {
         <li>New subscriptions: if Pro is not for you, email us within 14 days of your first payment for a full refund.</li>
         <li>Yearly renewals: email us within 14 days of a yearly renewal charge for a full refund.</li>
         <li>Monthly renewals: cancel any time to stop future charges. Pro stays active until the end of the paid month; partial months are not refunded.</li>
+        <li>Account deletion: any subscription ends when the deletion is carried out, 7 days after the request. The refund windows above still apply; email us before the deletion date so we can match the payment to your account.</li>
       </ul>
       <p>
         To request a refund, email <a href={`mailto:${b.supportEmail}`}>{b.supportEmail}</a> from your account address. Refunds go back to the

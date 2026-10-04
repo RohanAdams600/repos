@@ -21,6 +21,8 @@ const user = (overrides: Partial<SessionUser> = {}): SessionUser => ({
   ageBand: 'ADULT',
   guardianConsent: 'NOT_REQUIRED',
   hasAthleteProfile: true,
+  termsCurrent: true,
+  deletionScheduledFor: null,
   ...overrides,
 })
 

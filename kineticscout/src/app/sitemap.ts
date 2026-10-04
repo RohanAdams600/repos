@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = process.env.APP_URL ?? 'http://localhost:3000'
-  const staticRoutes = ['/', '/pricing', '/faq', '/about', '/contact', '/reviews', '/case-studies', '/blog', '/sign-up', '/legal/privacy', '/legal/terms', '/legal/refunds', '/legal/cookies'].map((path) => ({
+  const staticRoutes = ['/', '/pricing', '/faq', '/about', '/contact', '/reviews', '/case-studies', '/blog', '/sign-up', '/legal/privacy', '/legal/terms', '/legal/refunds', '/legal/cookies', '/legal/your-data'].map((path) => ({
     url: `${base}${path}`,
     changeFrequency: 'weekly' as const,
   }))

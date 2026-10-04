@@ -27,6 +27,7 @@ export function SiteFooter() {
           <Link href="/legal/terms">Terms of Service</Link>
           <Link href="/legal/refunds">Refund Policy</Link>
           <Link href="/legal/cookies">Cookie Policy</Link>
+          <Link href="/legal/your-data">Your data and privacy choices</Link>
           {process.env.GA_MEASUREMENT_ID && (
             <form action={resetConsentAction}>
               <button type="submit" className="underline underline-offset-[3px] hover:decoration-2">

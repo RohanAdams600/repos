@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { scheduleDeletion } from '@/lib/account/deletion'
 import { parseDateOnly } from '@/lib/auth/age'
 import { slugify } from '@/lib/content/fact-check'
 import { sanitizeText } from '@/lib/security/sanitize'
@@ -171,4 +172,18 @@ export const adminRouter = createRouter({
     await db.contactMessage.updateMany({ where: { id: input.id, repliedAt: null }, data: { repliedAt: new Date() } })
     return { ok: true }
   }),
+
+  /**
+   * Enters a deletion request received outside the app (email from the account address, or post).
+   * The same 7-day window, confirmation email and cancellation rights apply as for a self-serve request.
+   */
+  scheduleAccountDeletion: adminProcedure
+    .input(z.object({ email: emailSchema, verified: z.literal(true, { error: 'Confirm the request came from the account holder' }) }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await db.user.findUnique({ where: { email: input.email }, select: { id: true, role: true } })
+      if (!user) throw new TRPCError({ code: 'NOT_FOUND', message: 'No account uses that email address.' })
+      if (user.role === 'ADMIN') throw new TRPCError({ code: 'FORBIDDEN', message: 'Staff accounts are removed by the account owner, not from this console.' })
+      const result = await scheduleDeletion(user.id, 'ADMIN', new Date(), ctx.user.id)
+      return { scheduledFor: result.scheduledFor, alreadyScheduled: result.alreadyScheduled }
+    }),
 })

@@ -59,9 +59,20 @@ Each item from the brief, mapped to where it is enforced and how it is verified.
 | Concurrency simulation | Integration tests fire simultaneous metric submissions, webhooks, AI reservations and agent triggers. `npm run load:simulate` drives N virtual users against a deployment with latency and error budgets. |
 | Backups | `npm run backup:verify` dumps, restores into a scratch database, and compares row counts, migrations and RLS. Run it weekly in CI against a staging replica. |
 
+## Privacy controls (Phase 3)
+
+| Control | Implementation |
+|---|---|
+| Destructive actions need fresh proof | Account deletion requires the password, checked with a throwaway Supabase client that never touches the session cookies, plus a typed confirmation and a modal. Limited to 5 attempts per hour; failures are audited as `auth.reauth_failed`. |
+| Hijack resistance | Deletion waits 7 days and emails the account holder immediately with a cancel path; a guardian-requested deletion also cannot be canceled by the teen. |
+| Export isolation | `/api/account/export` checks the origin, reads only rows owned by the session user (tested against a second account), is rate limited (5 per hour), and is served `no-store` as an attachment. |
+| One-click unsubscribe | The only CSRF-exempt path that changes data. It accepts only a valid HMAC for that user and can only turn marketing **off**. |
+| Deletion completeness | External systems first (Stripe customer, GCS prefix restricted by regex to `videos/<uuid>/`, Supabase login), each step recorded so retries resume; then one transaction deletes the user (cascade) and contact messages. Only a keyed hash remains on the receipt. |
+
 ## Known residual risks and follow-ups
 
 - Rate limits fail open during an Upstash outage (a deliberate availability trade-off).
 - Video analysis relies on a third-party pose model. The report states its 2D limits and confidence.
-- Phase 3 must add in-app data export and deletion and a one-click unsubscribe endpoint before marketing email is sent.
+- Guardian management links are bearer links (hashed at rest, 1-year expiry, replaced when a new one is requested). Anyone holding one can withdraw consent or request deletion, so the page tells guardians to keep it private, and every action emails the teen. Requests for a new link answer identically whether or not the address is on file and are rate limited per IP and per address.
+- Email preference tokens are HMACs of the user id with `HASH_PEPPER` and do not expire; rotating `HASH_PEPPER` invalidates all of them (and every other peppered hash), so plan a rotation with that in mind.
 - Configure in Supabase: email confirmation on, leaked-password protection on, minimum password length 12, email templates pointing to `/auth/confirm?token_hash={{ .TokenHash }}&type=…&next=…`, and the site URL set to `APP_URL`.

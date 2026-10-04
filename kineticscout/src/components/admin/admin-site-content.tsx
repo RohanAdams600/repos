@@ -192,10 +192,58 @@ function ContactInbox() {
   )
 }
 
+function DeletionRequestAdmin() {
+  const trpc = useTRPC()
+  const [email, setEmail] = useState('')
+  const [verified, setVerified] = useState(false)
+  const schedule = useMutation(trpc.admin.scheduleAccountDeletion.mutationOptions())
+  return (
+    <section aria-labelledby="deletion-admin-title" className="flex flex-col gap-4">
+      <h2 id="deletion-admin-title" className="text-2xl font-bold">
+        Deletion requests received by email
+      </h2>
+      <p className="text-fg-muted">
+        Account holders can delete their account from Settings. Use this only for a request sent from the account&apos;s own email address
+        or otherwise verified. The account holder is emailed and can cancel within 7 days.
+      </p>
+      <form
+        className="flex flex-col gap-4 border-2 border-border-subtle p-4"
+        onSubmit={(e) => {
+          e.preventDefault()
+          schedule.mutate({ email, verified: verified as true }, { onSuccess: () => { setEmail(''); setVerified(false) } })
+        }}
+      >
+        {schedule.isError && <Alert tone="error">{errorMessage(schedule.error)}</Alert>}
+        {schedule.data && (
+          <Alert tone="success">
+            {schedule.data.alreadyScheduled ? 'Deletion was already scheduled' : 'Deletion scheduled'} for{' '}
+            {new Date(schedule.data.scheduledFor).toISOString().slice(0, 10)}.
+          </Alert>
+        )}
+        <Field label="Account email" name="deletionEmail" required>
+          {(props) => <TextInput {...props} type="email" autoComplete="off" value={email} onChange={(e) => setEmail(e.target.value)} />}
+        </Field>
+        <Checkbox
+          name="deletionVerified"
+          required
+          checked={verified}
+          onChange={(e) => setVerified(e.target.checked)}
+          label="I confirmed this request came from the account holder. (Parents and guardians use their own management link, which they can request on the Your data page.)"
+        />
+        <Button type="submit" variant="danger" className="self-start" disabled={schedule.isPending}>
+          {schedule.isPending ? <Spinner label="Scheduling" /> : null}
+          Schedule deletion
+        </Button>
+      </form>
+    </section>
+  )
+}
+
 export function AdminSiteContent() {
   return (
     <div className="flex flex-col gap-12">
       <ContactInbox />
+      <DeletionRequestAdmin />
       <TestimonialAdmin />
       <CaseStudyAdmin />
     </div>

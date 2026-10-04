@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { audit } from '@/lib/audit'
 import { grantGuardianConsent, sendGuardianConsentRequest } from '@/lib/auth/guardian'
@@ -57,6 +58,44 @@ export async function createAthleteProfileAction(_prev: FormState, formData: For
     }
   }
   redirect('/dashboard?notice=profile-created')
+}
+
+/** Correcting profile details (right to rectification). Empty optional fields clear the stored value. */
+export async function updateAthleteProfileAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const state = await getAuthState()
+  if (state.status === 'anonymous') redirect('/sign-in?next=/dashboard/profile')
+  if (state.status === 'needs-account') redirect('/onboarding')
+  const user = state.user
+  if (!user.termsCurrent) redirect('/terms-update?next=/dashboard/profile')
+  if (!user.hasAthleteProfile) redirect('/onboarding')
+
+  const values = formValues(formData)
+  const parsed = athleteProfileSchema.safeParse(Object.fromEntries(formData))
+  if (!parsed.success) {
+    return { status: 'error', message: 'Check the highlighted fields.', fieldErrors: fieldErrorsFrom(parsed.error), values }
+  }
+  const input = parsed.data
+  const baseball = input.sport === 'BASEBALL'
+  await db.athleteProfile.update({
+    where: { userId: user.id },
+    data: {
+      firstName: input.firstName,
+      lastName: input.lastName,
+      sport: input.sport,
+      primaryPosition: input.primaryPosition,
+      gradYear: input.gradYear,
+      heightInches: input.heightInches ?? null,
+      weightLbs: input.weightLbs ?? null,
+      gpa: input.gpa ?? null,
+      highSchool: input.highSchool ?? null,
+      twitterHandle: input.twitterHandle ?? null,
+      bats: baseball ? (input.bats ?? null) : null,
+      throws: baseball ? (input.throws ?? null) : null,
+    },
+  })
+  await audit('profile.updated', { actorId: user.id, targetType: 'athlete_profile', targetId: user.id })
+  revalidatePath('/dashboard', 'layout')
+  return { status: 'success', message: 'Profile saved.' }
 }
 
 export async function resendGuardianConsentAction(_prev: FormState): Promise<FormState> {

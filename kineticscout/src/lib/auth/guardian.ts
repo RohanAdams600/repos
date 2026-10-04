@@ -1,5 +1,6 @@
 import 'server-only'
 import { audit } from '@/lib/audit'
+import { sendConsentConfirmation } from '@/lib/auth/guardian-manage'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
 import { env } from '@/lib/env'
@@ -98,7 +99,9 @@ export async function grantGuardianConsent(token: string): Promise<boolean> {
     data: { status: 'GRANTED', grantedAt: new Date() },
   })
   if (result.count !== 1) return false
-  const consent = await db.guardianConsent.findUnique({ where: { tokenHash }, select: { userId: true } })
+  const consent = await db.guardianConsent.findUnique({ where: { tokenHash }, select: { id: true, userId: true } })
   await audit('guardian.consent_granted', { targetType: 'guardian_consent', targetId: consent?.userId })
+  // The confirmation carries the guardian's management link (withdraw, cancel, delete).
+  if (consent) await sendConsentConfirmation(consent.id)
   return true
 }
