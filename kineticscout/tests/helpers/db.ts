@@ -4,6 +4,7 @@ import type { SessionUser } from '@/lib/auth/permissions'
 import { db } from '@/lib/db'
 
 const TABLES = [
+  'testimonials', 'contact_messages',
   'ai_usage', 'audit_logs', 'marketing_assets', 'blog_posts', 'agent_runs', 'percentile_baselines', 'video_analyses',
   'stripe_events', 'checkout_sessions', 'subscriptions', 'recruiting_pipeline', 'college_programs', 'metrics',
   'athlete_profiles', 'guardian_consents', 'users',

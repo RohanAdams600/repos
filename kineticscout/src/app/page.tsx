@@ -1,16 +1,27 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { JsonLd } from '@/components/json-ld'
+import { FaqList } from '@/components/marketing/faq-list'
 import { buttonVariants } from '@/components/ui/button'
 import { FREE_FEATURES, PRO_FEATURES, PRO_PRICES } from '@/lib/billing/plans'
+import { FAQS, faqJsonLd } from '@/lib/content/faq'
+import { organizationJsonLd } from '@/lib/content/organization'
+import { db } from '@/lib/db'
 
 export const metadata: Metadata = {
   title: { absolute: 'KineticScout: performance data for high school athletes' },
   alternates: { canonical: '/' },
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const org = organizationJsonLd()
+  const reviews = await db.testimonial
+    .findMany({ where: { status: 'PUBLISHED' }, orderBy: { publishedAt: 'desc' }, take: 3, select: { id: true, displayName: true, descriptor: true, quote: true } })
+    .catch(() => [])
   return (
     <div className="flex flex-col gap-24">
+      <JsonLd data={faqJsonLd()} />
+      {org && <JsonLd data={org} />}
       <section aria-labelledby="hero-title" className="grid gap-8 pt-4 lg:grid-cols-[3fr_2fr] lg:items-end">
         <div className="flex flex-col gap-6">
           <h1 id="hero-title" className="text-4xl leading-tight font-bold tracking-tight sm:text-6xl">
@@ -114,6 +125,34 @@ export default function HomePage() {
           Prices shown are the prices charged. Cancel any time from your billing page in one step.{' '}
           <Link href="/legal/refunds">Refund policy</Link>
         </p>
+      </section>
+      {reviews.length > 0 && (
+        <section aria-labelledby="reviews-title" className="flex flex-col gap-6">
+          <h2 id="reviews-title" className="text-3xl font-bold">
+            From athletes and parents
+          </h2>
+          <ul className="grid gap-6 md:grid-cols-3">
+            {reviews.map((r) => (
+              <li key={r.id}>
+                <figure className="flex h-full flex-col gap-4 border-2 border-border-subtle p-6">
+                  <blockquote>&ldquo;{r.quote}&rdquo;</blockquote>
+                  <figcaption className="mt-auto text-sm text-fg-muted">
+                    <span className="font-bold text-fg">{r.displayName}</span>, {r.descriptor}
+                  </figcaption>
+                </figure>
+              </li>
+            ))}
+          </ul>
+          <Link href="/reviews">Read all reviews</Link>
+        </section>
+      )}
+
+      <section aria-labelledby="faq-title" className="flex flex-col gap-6">
+        <h2 id="faq-title" className="text-3xl font-bold">
+          Questions families ask
+        </h2>
+        <FaqList faqs={FAQS} />
+        <Link href="/faq">All answers on the FAQ page</Link>
       </section>
     </div>
   )

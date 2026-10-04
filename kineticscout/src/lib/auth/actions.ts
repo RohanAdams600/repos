@@ -12,7 +12,9 @@ import { createSupabaseServerClient } from '@/lib/auth/supabase'
 import { db } from '@/lib/db'
 import { env } from '@/lib/env'
 import { fieldErrorsFrom, formValues, type FormState } from '@/lib/forms'
+import { UTM_COOKIE } from '@/lib/consent'
 import { CURRENT_TERMS_VERSION } from '@/lib/legal'
+import { parseUtm } from '@/lib/marketing/utm'
 import { errorFields, logger } from '@/lib/logger'
 import { pepperedHash } from '@/lib/security/hash'
 import { safeRedirectPath } from '@/lib/security/origin'
@@ -40,6 +42,19 @@ async function setAgeScreenCookie(): Promise<void> {
     ...hardenCookieOptions({}, isSecureCookieEnvironment(env().APP_URL)),
     maxAge: AGE_SCREEN_COOKIE_MAX_AGE,
   })
+}
+
+/** First-touch UTM values; the cookie only exists if the visitor granted analytics consent. */
+async function acquisitionFromCookie(): Promise<Record<string, string> | undefined> {
+  const raw = (await cookies()).get(UTM_COOKIE)?.value
+  if (!raw) return undefined
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>
+    const utm = parseUtm(new URLSearchParams(Object.entries(parsed).filter((e): e is [string, string] => typeof e[1] === 'string')))
+    return Object.keys(utm).length ? utm : undefined
+  } catch {
+    return undefined
+  }
 }
 
 async function ageScreenAlreadyFailed(): Promise<boolean> {
@@ -121,6 +136,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
           marketingEmailOptIn: input.marketingOptIn === 'on',
           termsVersion: CURRENT_TERMS_VERSION,
           termsAcceptedAt: new Date(),
+          acquisition: await acquisitionFromCookie(),
         },
         // Never overwrite an existing row from an unauthenticated request.
         update: {},
@@ -279,6 +295,7 @@ export async function completeAccountAction(_prev: FormState, formData: FormData
       marketingEmailOptIn: input.marketingOptIn === 'on',
       termsVersion: CURRENT_TERMS_VERSION,
       termsAcceptedAt: new Date(),
+      acquisition: await acquisitionFromCookie(),
     },
     update: {},
   })

@@ -17,6 +17,12 @@ Performance data and recruiting tools for high school athletes. Athletes log mea
 | Pro dashboard | AI biomechanics video analysis (signed uploads with progress, pose estimation, kinematic sequence report, frame-synced skeleton overlay) and College Matchmaker (fit bands, per-metric comparison, filters, pagination, pipeline) |
 | Also | Metric logging with the free-tier quota, class percentiles, progression chart, admin review console, blog, legal pages, 404/error pages, robots, sitemap, OG image |
 
+## What is in Phase 2
+
+FAQ page with five detailed, expandable answers (also on the home page, with FAQPage schema), site search, a contact form with a thank-you page, a floating contact button and sticky mobile sign-up bar, reading progress on long pages, an About page (team, address, directions), and reviews and case studies pages. Google Analytics 4 sits behind an equal-choice consent banner and runs on public pages only. Campaign UTM tags are attributed on a first-touch basis, and each article gets its own share image. Staff manage reviews, case studies and the contact inbox in `/admin`.
+
+**Content rules.** Reviews must belong to a real account holder who agreed to publication. Case studies need a written-consent date. Team members go in `content/team.json`, with photos in `public/team/`. Until real content exists, each section shows an honest empty state or stays hidden.
+
 ## Local development
 
 Requirements: Node 22.12+, PostgreSQL 15+, Redis 7+.
@@ -73,4 +79,4 @@ Create a private bucket with uniform access, apply `infra/gcs-cors.json` (`gclou
 
 ## Testing
 
-131 tests: 106 unit and 25 integration. They cover the kinematic analysis (synthetic pose tracks with known peak timing), matchmaker scoring, percentile ranks, CSP/CSRF/redirect/cookie rules, env validation, COPPA age bands, permissions, marketing compliance and article fact checking, and WCAG AAA contrast computed from the CSS tokens. Against Postgres they test the free-tier quota under 12 concurrent submissions, Stripe webhook idempotency, out-of-order and concurrent delivery, duplicate-subscription refunds, k-anonymous percentile SQL, AI budget caps under a race, exactly-once agent runs, RLS on every table and tRPC authorization.
+146 tests: 117 unit and 29 integration. They cover the kinematic analysis (synthetic pose tracks with known peak timing), matchmaker scoring, percentile ranks, CSP/CSRF/redirect/cookie rules, env validation, COPPA age bands, permissions, marketing compliance and article fact checking, and WCAG AAA contrast computed from the CSS tokens. Against Postgres they test the free-tier quota under 12 concurrent submissions, Stripe webhook idempotency, out-of-order and concurrent delivery, duplicate-subscription refunds, k-anonymous percentile SQL, AI budget caps under a race, exactly-once agent runs, RLS on every table and tRPC authorization.

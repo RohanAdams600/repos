@@ -16,7 +16,7 @@
 | AI | OpenAI Chat Completions (Structured Outputs) for copy and articles; Google Cloud Video Intelligence for pose landmarks | Every paid call reserves budget against hard monthly caps. |
 | Storage | Google Cloud Storage (private bucket, V4 signed URLs) | The upload size cap is enforced by GCS through the signed `x-goog-content-length-range` header. |
 | Email | Resend HTTP API | Timeouts, retry, idempotency keys. |
-| Tests | Vitest 5 (unit + Postgres integration), Playwright smoke | 131 tests. |
+| Tests | Vitest 5 (unit + Postgres integration), Playwright smoke | 146 tests. |
 
 ## Deployable units
 
@@ -65,6 +65,7 @@ kineticscout/
 │   │   ├── dashboard/             overview, analysis, matchmaker, billing (auth required)
 │   │   ├── admin/                 growth agent output + article drafts (ADMIN, else 404)
 │   │   ├── blog/                  articles published by the Data and SEO agent
+│   │   ├── faq/ search/ contact/ about/ reviews/ case-studies/   marketing site (Phase 2)
 │   │   ├── legal/                 privacy, terms, refunds, cookies
 │   │   └── api/                   trpc, webhooks/stripe, billing/*, health, internal/revalidate
 │   ├── components/                ui/ primitives, layout/, auth/, dashboard/, admin/, brand/
@@ -77,7 +78,9 @@ kineticscout/
 │   │   ├── metrics/               metric catalogue, quota-safe logging, percentile ranks
 │   │   ├── ai/                    OpenAI client with structured output, budget reservations
 │   │   ├── marketing/             claims/policy checker, UTM
-│   │   ├── content/               article fact checker
+│   │   ├── content/               article fact checker, FAQ, team, Organization schema, post lookup
+│   │   ├── search/                site search (static index + published posts)
+│   │   ├── consent.ts             analytics consent cookie and page allow-list
 │   │   ├── storage/               GCS signed URLs, upload policy, magic-byte sniffing
 │   │   ├── queue/                 BullMQ queues
 │   │   └── env.ts, db.ts, logger.ts, cache.ts, audit.ts, legal.ts
@@ -119,6 +122,6 @@ Column names follow the brief exactly (`stripe_customer_id`, `subscription_tier`
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Project structure, schema and migrations, security and auth, Stripe billing, Agents 1 and 2, video analysis pipeline, Pro dashboard (video analysis and College Matchmaker), legal pages, admin review console | **Done** (this commit) |
-| 2 | Marketing site: FAQ (5 detailed), case studies with real customers, reviews only from real users, site search, floating contact, scroll progress, team photo, maps, GA4 behind a consent banner, UTM first-touch capture | Planned |
-| 3 | In-app data deletion request and export, email unsubscribe endpoint and preference centre, guardian consent revocation UI, cookie consent banner (needed once analytics ships) | Planned |
+| 2 | Marketing site: FAQ (5 detailed, expandable, FAQPage schema), site search, contact form + thank-you page, floating contact button and sticky mobile CTA, scroll progress, reviews and case studies (admin-curated, consent-backed, empty until real ones exist), About page with team (from `content/team.json`) and directions link, Organization schema, GA4 behind an equal-choice consent banner (public pages only), UTM first-touch attribution, per-article share images | **Done**. Content still needed from the business: real reviews, case studies, team photos |
+| 3 | In-app data deletion request and export, email unsubscribe endpoint and preference centre, guardian consent revocation UI | Planned |
 | 4 | Agent 3 (coaching-change monitor and outreach drafts), verified metric badges, side-by-side pro comparison (needs licensed reference footage), one-click PDF export and share URL, public profiles, biometric percentile engine, cross-sport projectability score | Planned |

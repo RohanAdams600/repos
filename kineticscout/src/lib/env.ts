@@ -81,6 +81,9 @@ export const serverEnvSchema = z
     /** e.g. "the State of Texas". Used in the Terms of Service governing-law clause. */
     BUSINESS_GOVERNING_LAW: optionalString(z.string().min(3).max(80)),
 
+    /** Google Analytics 4 measurement id (G-XXXXXXX). Loaded only after consent, on marketing pages only. */
+    GA_MEASUREMENT_ID: optionalString(z.string().regex(/^G-[A-Z0-9]{4,12}$/, 'must look like G-XXXXXXX')),
+
     /** Allow sk_test_ keys outside local development (staging only). */
     ALLOW_TEST_PAYMENTS: booleanFlag,
   })

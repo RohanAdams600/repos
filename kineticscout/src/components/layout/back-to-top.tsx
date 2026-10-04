@@ -22,7 +22,7 @@ export function BackToTop() {
         document.getElementById('main')?.focus()
       }}
       aria-label="Back to top"
-      className="fixed right-4 bottom-4 z-30 flex size-12 items-center justify-center border-2 border-primary-button-border bg-accent text-on-accent hover:bg-fg hover:text-bg"
+      className="fixed right-4 bottom-20 z-30 md:bottom-4 flex size-12 items-center justify-center border-2 border-primary-button-border bg-accent text-on-accent hover:bg-fg hover:text-bg"
     >
       <ArrowUpIcon />
     </button>

@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { AdminSiteContent } from '@/components/admin/admin-site-content'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { CopyButton } from '@/components/ui/copy-button'
@@ -108,7 +109,7 @@ function BlogDrafts() {
   return (
     <section aria-labelledby="blog-title" className="flex flex-col gap-4">
       <h2 id="blog-title" className="text-2xl font-bold">
-        Data report drafts
+        Drafts: data reports and case studies
       </h2>
       {review.isError && <Alert tone="error">{errorMessage(review.error)}</Alert>}
       {query.isPending && <Spinner label="Loading drafts" />}
@@ -119,6 +120,9 @@ function BlogDrafts() {
           const report = post.validationReport as { unknownNumbers?: string[]; bannedPhrases?: string[] } | null
           return (
             <li key={post.id} className="flex flex-col gap-3 border-2 border-border-subtle p-4">
+              <p className="text-xs font-bold tracking-wide text-fg-muted uppercase">
+                {post.kind === 'CASE_STUDY' ? `Case study${post.consentRecordedAt ? ', consent recorded' : ', consent missing'}` : 'Data report'}
+              </p>
               <p className="text-lg font-bold">{post.title}</p>
               <p className="text-fg-muted">{post.metaDescription}</p>
               {report?.unknownNumbers?.length ? <p className="text-sm"><span className="font-bold">Unverified numbers:</span> {report.unknownNumbers.join(', ')}</p> : null}
@@ -144,6 +148,7 @@ export function AdminConsole() {
     <div className="flex flex-col gap-12">
       <MarketingQueue />
       <BlogDrafts />
+      <AdminSiteContent />
     </div>
   )
 }

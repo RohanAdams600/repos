@@ -155,6 +155,11 @@ enum ContentStatus {
   REJECTED
 }
 
+enum ContentKind {
+  DATA_REPORT
+  CASE_STUDY
+}
+
 enum MarketingChannel {
   META_AD
   INSTAGRAM_POST
@@ -207,6 +212,8 @@ model User {
   marketingEmailOptIn Boolean          @default(false) @map("marketing_email_opt_in")
   termsVersion        String           @map("terms_version") @db.VarChar(16)
   termsAcceptedAt     DateTime         @map("terms_accepted_at")
+  /// First-touch UTM values, captured only with analytics consent. Shape: { utm_source, utm_medium, ... }.
+  acquisition         Json?
   createdAt           DateTime         @default(now()) @map("created_at")
   updatedAt           DateTime         @updatedAt @map("updated_at")
 
@@ -215,6 +222,7 @@ model User {
   subscriptions    Subscription[]
   checkoutSessions CheckoutSession[]
   aiUsage          AiUsage[]
+  testimonials     Testimonial[]
 
   @@index([role])
   @@map("users")
@@ -474,6 +482,9 @@ model BlogPost {
   validationReport Json?         @map("validation_report")
   /// Model identifier when AI-assisted. Shown to readers as a disclosure.
   generatedBy      String?       @map("generated_by") @db.VarChar(64)
+  kind             ContentKind   @default(DATA_REPORT)
+  /// Case studies only: when the featured athlete (and guardian, for minors) gave written consent to publish.
+  consentRecordedAt DateTime?    @map("consent_recorded_at")
   agentRunId       String?       @map("agent_run_id") @db.Uuid
   publishedAt      DateTime?     @map("published_at")
   createdAt        DateTime      @default(now()) @map("created_at")
@@ -482,6 +493,7 @@ model BlogPost {
   agentRun AgentRun? @relation(fields: [agentRunId], references: [id], onDelete: SetNull)
 
   @@index([status, publishedAt(sort: Desc)])
+  @@index([kind, status, publishedAt(sort: Desc)])
   @@map("blog_posts")
 }
 
@@ -558,4 +570,44 @@ model AuditLog {
   @@index([actorId, createdAt])
   @@index([action, createdAt])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Marketing site
+// ---------------------------------------------------------------------------
+
+/// Reviews from real users only. Published only with recorded consent; admins cannot invent an author.
+model Testimonial {
+  id                String        @id @default(uuid(7)) @db.Uuid
+  /// The KineticScout account that gave the review. Deleting the account deletes the review.
+  userId            String        @map("user_id") @db.Uuid
+  displayName       String        @map("display_name") @db.VarChar(80)
+  /// e.g. "Parent of a 2027 shortstop", written or approved by the author.
+  descriptor        String        @db.VarChar(120)
+  quote             String        @db.VarChar(600)
+  rating            Int?          @db.SmallInt
+  status            ContentStatus @default(DRAFT)
+  consentRecordedAt DateTime      @map("consent_recorded_at")
+  publishedAt       DateTime?     @map("published_at")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@map("testimonials")
+}
+
+/// Contact form submissions. Purged after 12 months by the worker sweep.
+model ContactMessage {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  name       String    @db.VarChar(100)
+  email      String    @db.VarChar(254)
+  topic      String    @db.VarChar(32)
+  message    String    @db.VarChar(4000)
+  repliedAt  DateTime? @map("replied_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("contact_messages")
 }

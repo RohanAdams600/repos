@@ -16,13 +16,13 @@ export default async function BlogIndex({ searchParams }: PageProps<'/blog'>) {
   const page = Math.max(1, Math.min(500, Number(params.page) || 1))
   const [posts, total] = await Promise.all([
     db.blogPost.findMany({
-      where: { status: 'PUBLISHED' },
+      where: { status: 'PUBLISHED', kind: 'DATA_REPORT' },
       orderBy: { publishedAt: 'desc' },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       select: { slug: true, title: true, metaDescription: true, publishedAt: true },
     }),
-    db.blogPost.count({ where: { status: 'PUBLISHED' } }),
+    db.blogPost.count({ where: { status: 'PUBLISHED', kind: 'DATA_REPORT' } }),
   ])
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
 

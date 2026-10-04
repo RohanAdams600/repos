@@ -1,9 +1,14 @@
 import type { Metadata, Viewport } from 'next'
 import { Roboto_Mono } from 'next/font/google'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { BackToTop } from '@/components/layout/back-to-top'
 import { SiteFooter } from '@/components/layout/site-footer'
 import { SiteHeader } from '@/components/layout/site-header'
+import { Analytics } from '@/components/marketing/analytics'
+import { ConsentBanner } from '@/components/marketing/consent-banner'
+import { ContactDock } from '@/components/marketing/contact-dock'
+import { getAuthIdentity } from '@/lib/auth/session'
+import { CONSENT_COOKIE, parseConsent } from '@/lib/consent'
 import { parseTheme, THEME_COOKIE } from '@/lib/theme'
 import './globals.css'
 
@@ -31,16 +36,25 @@ export const viewport: Viewport = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value)
+  const cookieStore = await cookies()
+  const theme = parseTheme(cookieStore.get(THEME_COOKIE)?.value)
+  const consent = parseConsent(cookieStore.get(CONSENT_COOKIE)?.value)
+  // Read directly: the root layout must render even when optional configuration is absent.
+  const gaId = /^G-[A-Z0-9]{4,12}$/.test(process.env.GA_MEASUREMENT_ID ?? '') ? process.env.GA_MEASUREMENT_ID! : null
+  const nonce = (await headers()).get('x-nonce') ?? undefined
+  const signedIn = Boolean(await getAuthIdentity().catch(() => null))
   return (
     <html lang="en" data-theme={theme} className={robotoMono.variable}>
       <body className="flex min-h-dvh flex-col">
         <SiteHeader />
-        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 outline-none sm:py-12">
+        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-6xl flex-1 px-4 pt-8 pb-24 outline-none sm:pt-12 md:pb-12">
           {children}
         </main>
         <SiteFooter />
         <BackToTop />
+        <ContactDock signedIn={signedIn} />
+        {gaId && !consent && <ConsentBanner />}
+        {gaId && consent?.analytics && <Analytics measurementId={gaId} nonce={nonce} />}
       </body>
     </html>
   )

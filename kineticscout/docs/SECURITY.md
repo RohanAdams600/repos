@@ -49,6 +49,7 @@ Each item from the brief, mapped to where it is enforced and how it is verified.
 
 | Control | Implementation |
 |---|---|
+| Public forms | Contact form: honeypot field, 5 messages per hour per IP, zod validation and sanitisation, messages escaped in the staff notification email, no auto-reply to arbitrary addresses (prevents email bombing). Site search: 30 queries per minute per IP, parameterised `ILIKE` with escaped wildcards. |
 | Rate limiting / API limits | Upstash sliding windows (fail-open with an error log after 1 s, so a Redis outage cannot take down sign-in; Supabase applies its own auth limits). tRPC body cap 64 KB, Server Action cap 64 KB, webhook cap 512 KB. |
 | Caching repeat requests | Program catalogue (10 min) and matchmaker results keyed by metrics and filters (5 min) through `src/lib/cache.ts`. |
 | Failed requests and timeouts | Client: 20 s fetch timeout, no retries on 4xx, plain-language errors. Server: Stripe (10 s, 2 retries with idempotency keys), OpenAI (60 s, 2 retries, one schema-repair attempt), Resend (8 s, 1 retry), Meta (15 s, retries on transient errors), X API (8 s per call), Postgres `statement_timeout` 10 s and pool timeouts. |

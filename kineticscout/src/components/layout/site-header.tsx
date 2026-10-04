@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Logo } from '@/components/brand/logo'
+import { SearchIcon } from '@/components/icons'
 import { MobileNav, type NavLink } from '@/components/layout/mobile-nav'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -12,6 +13,7 @@ export async function SiteHeader() {
   const identity = await getAuthIdentity().catch(() => null)
   const links: NavLink[] = [
     { href: '/pricing', label: 'Pricing' },
+    { href: '/faq', label: 'FAQ' },
     { href: '/blog', label: 'Data reports' },
     ...(identity ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
   ]
@@ -39,6 +41,9 @@ export async function SiteHeader() {
             </ul>
           </nav>
           <div className="flex items-center gap-2">
+            <Link href="/search" aria-label="Search the site" className={buttonVariants({ variant: 'ghost', size: 'icon' })}>
+              <SearchIcon />
+            </Link>
             <ThemeToggle />
             <div className="hidden items-center gap-2 md:flex">
               {identity ? (

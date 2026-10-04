@@ -13,11 +13,16 @@ export type CspOptions = {
   storageOrigins?: string[]
   /** Add upgrade-insecure-requests (only meaningful when the site itself is served over https). */
   upgradeInsecureRequests?: boolean
+  /** Allow Google Analytics endpoints. Only set when analytics is configured and the visitor consented. */
+  analytics?: boolean
 }
+
+export const ANALYTICS_CONNECT_ORIGINS = ['https://*.google-analytics.com', 'https://*.analytics.google.com', 'https://www.googletagmanager.com']
+export const ANALYTICS_IMG_ORIGINS = ['https://*.google-analytics.com', 'https://www.googletagmanager.com']
 
 export const STRIPE_REDIRECT_ORIGINS = ['https://checkout.stripe.com', 'https://billing.stripe.com']
 
-export function buildCsp({ nonce, isDev, storageOrigins = [], upgradeInsecureRequests = !isDev }: CspOptions): string {
+export function buildCsp({ nonce, isDev, storageOrigins = [], upgradeInsecureRequests = !isDev, analytics = false }: CspOptions): string {
   if (!/^[A-Za-z0-9+/=_-]{16,}$/.test(nonce)) {
     throw new Error('CSP nonce must be at least 16 base64 characters')
   }
@@ -27,10 +32,10 @@ export function buildCsp({ nonce, isDev, storageOrigins = [], upgradeInsecureReq
     'script-src': `'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ''}`,
     'style-src': `'self' 'nonce-${nonce}'`,
     'style-src-attr': "'unsafe-inline'",
-    'img-src': "'self' blob: data:",
+    'img-src': `'self' blob: data:${analytics ? ` ${ANALYTICS_IMG_ORIGINS.join(' ')}` : ''}`,
     'font-src': "'self'",
     'media-src': `'self' blob: ${storage}`.trim(),
-    'connect-src': `'self' ${storage}${isDev ? ' ws: wss:' : ''}`.trim(),
+    'connect-src': `'self' ${storage}${analytics ? ` ${ANALYTICS_CONNECT_ORIGINS.join(' ')}` : ''}${isDev ? ' ws: wss:' : ''}`.replace(/\s+/g, ' ').trim(),
     'worker-src': "'self' blob:",
     'frame-src': "'none'",
     'object-src': "'none'",

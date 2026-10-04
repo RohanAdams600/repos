@@ -31,8 +31,10 @@ export default function PrivacyPage() {
         <li>Colleges you add to your recruiting pipeline and their status.</li>
         <li>Billing: your Stripe customer identifier and subscription status. Card details go directly to Stripe; we never see or store card numbers.</li>
         <li>Security data: request IP addresses are used to prevent abuse and are stored only as keyed hashes, never in readable form. We log security events such as failed sign-ins.</li>
+        <li>Contact form: your name, email, topic and message, used only to answer you and deleted after 12 months.</li>
+        <li>Analytics, only if you accept analytics cookies: Google Analytics measures visits to our public pages (never your dashboard), and we remember the campaign link (UTM tags) you first arrived from, for up to 30 days, so we know which outreach works.</li>
       </ul>
-      <p>We do not collect location, contacts, or advertising identifiers, and we do not use third-party analytics or advertising cookies.</p>
+      <p>We do not collect location, contacts, or advertising identifiers, and we do not use advertising cookies. Analytics stays off unless you choose Accept.</p>
 
       <h2>How we use it</h2>
       <ul>
@@ -51,6 +53,7 @@ export default function PrivacyPage() {
         <li>Upstash: rate limiting and short-lived caching.</li>
         <li>Resend: delivery of account emails.</li>
         <li>OpenAI: drafting marketing copy and data reports from aggregate statistics only. No personal information is sent.</li>
+        <li>Google Analytics: anonymous usage of public pages, only with your consent, with Google signals and ad personalisation turned off.</li>
         <li>Our hosting provider, which serves the website.</li>
       </ul>
       <p>
@@ -63,6 +66,7 @@ export default function PrivacyPage() {
         <li>Account and profile data: until you delete your account.</li>
         <li>Uploaded videos: deleted 12 months after upload. The analysis report is kept with your account.</li>
         <li>Security logs: up to 24 months.</li>
+        <li>Contact form messages: 12 months.</li>
         <li>Billing records: as long as tax and accounting law requires, held by Stripe.</li>
       </ul>
 

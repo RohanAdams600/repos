@@ -1,19 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { cache } from 'react'
-import ReactMarkdown from 'react-markdown'
+import { ArticleBody } from '@/components/article-body'
 import { JsonLd } from '@/components/json-ld'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
-import { db } from '@/lib/db'
+import { ScrollProgress } from '@/components/marketing/scroll-progress'
+import { getPublishedPost } from '@/lib/content/posts'
 import { env } from '@/lib/env'
 
-const getPost = cache(async (slug: string) => {
-  if (!/^[a-z0-9-]{1,120}$/.test(slug)) return null
-  return db.blogPost.findFirst({
-    where: { slug, status: 'PUBLISHED' },
-    select: { slug: true, title: true, metaDescription: true, bodyMarkdown: true, publishedAt: true, updatedAt: true, generatedBy: true },
-  })
-})
+const getPost = (slug: string) => getPublishedPost('DATA_REPORT', slug)
 
 export async function generateMetadata({ params }: PageProps<'/blog/[slug]'>): Promise<Metadata> {
   const post = await getPost((await params).slug)
@@ -33,6 +27,7 @@ export default async function BlogPostPage({ params }: PageProps<'/blog/[slug]'>
 
   return (
     <article className="mx-auto flex max-w-3xl flex-col gap-6">
+      <ScrollProgress />
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -58,18 +53,7 @@ export default async function BlogPostPage({ params }: PageProps<'/blog/[slug]'>
           Last updated <time dateTime={post.updatedAt.toISOString()}>{post.updatedAt.toISOString().slice(0, 10)}</time>.
         </p>
       </header>
-      {/* react-markdown renders Markdown only: raw HTML in the source is shown as text, never executed. */}
-      <div className="flex flex-col gap-4 leading-relaxed [&_h2]:mt-6 [&_h2]:text-2xl [&_h2]:font-bold [&_li]:ml-5 [&_li]:list-disc [&_p]:text-fg-muted">
-        <ReactMarkdown
-          skipHtml
-          components={{
-            a: ({ href, children }) => (href?.startsWith('/') ? <a href={href}>{children}</a> : <span>{children}</span>),
-            img: () => null,
-          }}
-        >
-          {post.bodyMarkdown}
-        </ReactMarkdown>
-      </div>
+      <ArticleBody markdown={post.bodyMarkdown} />
     </article>
   )
 }

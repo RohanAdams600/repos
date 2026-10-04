@@ -17,6 +17,9 @@ export type AuditAction =
   | 'billing.duplicate_refund_failed'
   | 'admin.marketing_asset_reviewed'
   | 'admin.blog_post_reviewed'
+  | 'admin.case_study_created'
+  | 'admin.testimonial_created'
+  | 'admin.testimonial_reviewed'
   | 'upload.rejected'
 
 /** Records a security-relevant event. Never throws: auditing must not break the user flow. */

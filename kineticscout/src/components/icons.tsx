@@ -98,3 +98,8 @@ export const PauseIcon = (p: IconProps) => (
     <path d="M7 4v16M17 4v16" />
   </Icon>
 )
+export const SearchIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM15.5 15.5L21 21" />
+  </Icon>
+)

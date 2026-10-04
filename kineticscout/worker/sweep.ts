@@ -55,6 +55,8 @@ export async function sweepStuckWork(now: Date = new Date()): Promise<{ requeued
   const [logs] = await Promise.all([
     db.auditLog.deleteMany({ where: { createdAt: { lt: new Date(now.getTime() - 730 * day) } } }),
     db.stripeEvent.deleteMany({ where: { processedAt: { lt: new Date(now.getTime() - 90 * day) } } }),
+    // Contact form messages: 12 months, as stated on the contact page and in the Privacy Policy.
+    db.contactMessage.deleteMany({ where: { createdAt: { lt: new Date(now.getTime() - 365 * day) } } }),
     db.checkoutSession.deleteMany({ where: { status: { not: 'OPEN' }, createdAt: { lt: new Date(now.getTime() - 90 * day) } } }),
   ])
 

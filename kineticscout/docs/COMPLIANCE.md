@@ -22,6 +22,8 @@ This document records how the product meets the "do not get sued" checklist, and
 | Pose track and report | Analysis results | Until deletion |
 | Stripe customer id, subscription status | Billing | Until deletion; Stripe keeps invoices as required by law |
 | Hashed IPs, audit events | Security | 24 months, purged by the worker |
+| Contact form messages | Answering the visitor | 12 months, purged by the worker |
+| First-touch UTM values (with consent) | Campaign attribution | Until deletion (cookie: 30 days) |
 
 Not collected: location, contacts, device identifiers, advertising identifiers, third-party analytics.
 
@@ -32,7 +34,13 @@ Not collected: location, contacts, device identifiers, advertising identifiers, 
 
 ## Consent and cookies
 
-Only strictly necessary cookies are set (auth session, theme preference, age-screen block), so a consent banner is not required yet. The cookie policy lists each cookie. Adding Google Analytics (Phase 2) must ship together with a consent banner that defaults to off and loads GA only after opt-in.
+Strictly necessary cookies (auth session, theme, age-screen block, the consent choice itself) are always set. Google Analytics is optional and only active when `GA_MEASUREMENT_ID` is configured:
+
+- The banner offers Reject and Accept with equal size and weight. Nothing is preselected and the site works fully either way.
+- Before a choice, no request goes to Google (verified in a browser test). After Reject, none ever does.
+- After Accept, GA4 loads only on public marketing pages, never on the dashboard, admin, sign-up or consent pages, which teens use. Google signals and ad personalisation are off, and no user ids are sent.
+- First-touch UTM attribution (`ks_utm`, 30 days) is stored only after Accept and is copied to the account at sign-up.
+- "Cookie settings" in the footer clears the choice so the banner asks again. The CSP opens Google's endpoints only for consenting visitors on allowed pages.
 
 ## Third-party SDK audit
 
@@ -45,8 +53,9 @@ Only strictly necessary cookies are set (auth session, theme preference, age-scr
 | @google-cloud/storage, @google-cloud/video-intelligence | Video storage and pose | Uploaded videos | No (browser uploads to a signed URL) |
 | @upstash/ratelimit, @upstash/redis, bullmq, ioredis | Rate limiting, cache, queues | Hashed keys, user ids, job ids | No |
 | recharts, @radix-ui/*, @tanstack/react-query, @trpc/* | UI and data fetching | None to third parties | Yes, no network calls of their own |
+| Google Analytics 4 (gtag.js, loaded by URL, not an npm package) | Public page analytics | Page views, device and approximate location as collected by GA; no user ids | Yes, only after Accept, public pages only |
 
-No third-party script, pixel or font is loaded in the browser. CSP enforces this: `script-src 'self' 'nonce-…'`, and `connect-src` allows only our own origin plus GCS for signed uploads.
+No third-party script, pixel or font is loaded in the browser except Google Analytics after explicit consent. CSP enforces this: `script-src 'self' 'nonce-…'`, and `connect-src` allows only our own origin plus GCS for signed uploads (plus Google Analytics endpoints for consenting visitors on public pages).
 
 ## Fonts, images, copyright
 
@@ -57,7 +66,7 @@ No third-party script, pixel or font is loaded in the browser. CSP enforces this
 ## Honest marketing (no dark patterns, no hidden fees)
 
 - Prices shown are checked against the live Stripe price before every checkout. Tax is shown before payment only if Stripe Tax is enabled. There are no cancellation fees, and cancellation is one step in the Stripe portal.
-- No fake reviews, testimonials or statistics. The Growth agent's compliance checker blocks guarantees, recruiting promises, unsupported numbers and superlatives, fake urgency, and third-party trademarks in ads. The SEO agent's fact checker holds back any article that contains a number not found in its data snapshot. Articles carry an AI-assistance disclosure and a methodology section.
+- No fake reviews, testimonials or statistics. Reviews can only be attached to an existing account, require an attested consent, are deleted with the account, and pages show an empty state until real ones exist. Case studies cannot be published without a recorded consent date (enforced by a database constraint). The team section stays hidden until real people are added to `content/team.json`. The Growth agent's compliance checker blocks guarantees, recruiting promises, unsupported numbers and superlatives, fake urgency, and third-party trademarks in ads. The SEO agent's fact checker holds back any article that contains a number not found in its data snapshot. Articles carry an AI-assistance disclosure and a methodology section.
 - Fit bands describe how measurables compare and are never presented as a prediction of an offer.
 
 ## Decisions needed from the business
@@ -65,4 +74,5 @@ No third-party script, pixel or font is loaded in the browser. CSP enforces this
 1. Real legal entity, postal address, support email, phone and governing law (`BUSINESS_*` variables). Deployed environments refuse to boot without them.
 2. Counsel review of `/legal/*` pages and the refund terms (14-day window as drafted).
 3. Real college program data from a licensed or public source, with `data_source_url` and `data_verified_at`; development fixtures are fictional and blocked outside local.
-4. Whether to enable `SEO_AUTOPUBLISH`, `GROWTH_AUTO_APPROVE`, `META_AUTOPUBLISH` and `META_ADS_AUTO_ACTIVATE`. All default to off: drafts wait for review in `/admin`.
+4. Real reviews, case studies (with written consent) and team photos the business owns or licenses.
+5. Whether to enable `SEO_AUTOPUBLISH`, `GROWTH_AUTO_APPROVE`, `META_AUTOPUBLISH` and `META_ADS_AUTO_ACTIVATE`. All default to off: drafts wait for review in `/admin`.

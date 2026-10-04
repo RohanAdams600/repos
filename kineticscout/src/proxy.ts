@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { hardenCookieOptions, isSecureCookieEnvironment } from '@/lib/auth/cookies'
+import { analyticsAllowedOn, CONSENT_COOKIE, parseConsent, UTM_COOKIE, UTM_MAX_AGE } from '@/lib/consent'
+import { parseUtm } from '@/lib/marketing/utm'
 import { buildCsp, generateNonce } from '@/lib/security/csp'
 import { checkRequestOrigin } from '@/lib/security/origin'
 
@@ -48,7 +50,9 @@ export async function proxy(request: NextRequest) {
   // 2. Per-request nonce. Next.js reads it from the request CSP header and applies it to its scripts.
   const isApi = pathname.startsWith('/api/')
   const nonce = generateNonce()
-  const csp = buildCsp({ nonce, isDev, storageOrigins: STORAGE_ORIGINS, upgradeInsecureRequests: appUrl.startsWith('https://') })
+  const consent = parseConsent(request.cookies.get(CONSENT_COOKIE)?.value)
+  const analytics = Boolean(process.env.GA_MEASUREMENT_ID) && consent?.analytics === true && analyticsAllowedOn(pathname)
+  const csp = buildCsp({ nonce, isDev, storageOrigins: STORAGE_ORIGINS, upgradeInsecureRequests: appUrl.startsWith('https://'), analytics })
   const forwardHeaders = () => {
     const headers = new Headers(request.headers)
     headers.set('x-nonce', nonce)
@@ -104,6 +108,14 @@ export async function proxy(request: NextRequest) {
   }
   if (authenticated && SIGNED_OUT_ONLY.includes(pathname)) {
     return redirectTo('/dashboard')
+  }
+
+  // First-touch attribution, only for visitors who already granted analytics consent.
+  if (!isApi && consent?.analytics && !request.cookies.has(UTM_COOKIE)) {
+    const utm = parseUtm(request.nextUrl.searchParams)
+    if (Object.keys(utm).length > 0) {
+      response.cookies.set(UTM_COOKIE, JSON.stringify(utm), { httpOnly: true, secure, sameSite: 'lax', path: '/', maxAge: UTM_MAX_AGE })
+    }
   }
 
   if (!isApi) response.headers.set('Content-Security-Policy', csp)

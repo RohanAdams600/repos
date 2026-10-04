@@ -11,6 +11,8 @@ export type EmailMessage = {
   idempotencyKey: string
   /** Marketing messages must carry an unsubscribe URL; transactional messages must not need one. */
   unsubscribeUrl?: string
+  /** Where replies should go (e.g. the visitor who used the contact form). */
+  replyTo?: string
 }
 
 export class EmailDeliveryError extends Error {
@@ -48,6 +50,7 @@ export async function sendEmail(message: EmailMessage): Promise<{ id: string | n
     text: message.text,
     html: message.html,
     headers,
+    ...(message.replyTo ? { reply_to: message.replyTo } : {}),
   })
 
   for (let attempt = 1; attempt <= 2; attempt++) {
