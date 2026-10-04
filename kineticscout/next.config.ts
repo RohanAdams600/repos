@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false,
   // Packages with native bindings or dynamic requires stay out of the server bundle.
   serverExternalPackages: ['pino', 'pg', '@google-cloud/storage', '@google-cloud/video-intelligence'],
+  // PDF routes read the embedded Roboto Mono files at runtime.
+  outputFileTracingIncludes: {
+    '/p/[slug]/pdf': ['./assets/fonts/**'],
+    '/api/profile/pdf': ['./assets/fonts/**'],
+  },
   images: {
     // No remote image hosts are allowed. All imagery is first-party and served from /public.
     remotePatterns: [],

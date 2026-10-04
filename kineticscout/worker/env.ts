@@ -44,6 +44,11 @@ export const workerEnvSchema = z.object({
   /** Publish automatically when every number in the draft traces back to the data snapshot. */
   SEO_AUTOPUBLISH: flag,
 
+  // Recruiting assistant (Agent 3)
+  /** Licensed program data feed (coaching staff and roster needs), polled daily. See src/lib/recruiting/changes.ts. */
+  PROGRAM_DATA_FEED_URL: optional(z.url().refine((v) => v.startsWith('https://'), 'must be https')),
+  PROGRAM_DATA_FEED_TOKEN: optional(z.string().min(16)),
+
   // Retention
   VIDEO_RETENTION_DAYS: z.coerce.number().int().min(30).max(3650).default(365),
 })

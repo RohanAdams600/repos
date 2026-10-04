@@ -22,7 +22,7 @@ export function parseConsent(value: string | undefined): ConsentState | null {
 }
 
 /** Marketing pages only. Analytics never runs on the dashboard, admin, auth or consent pages. */
-const ANALYTICS_PATHS = [/^\/$/, /^\/pricing$/, /^\/faq$/, /^\/about$/, /^\/reviews$/, /^\/search$/, /^\/contact(\/thanks)?$/, /^\/blog(\/[a-z0-9-]+)?$/, /^\/case-studies(\/[a-z0-9-]+)?$/, /^\/legal\/[a-z]+$/]
+const ANALYTICS_PATHS = [/^\/$/, /^\/pricing$/, /^\/faq$/, /^\/about$/, /^\/reviews$/, /^\/search$/, /^\/contact(\/thanks)?$/, /^\/blog(\/[a-z0-9-]+)?$/, /^\/case-studies(\/[a-z0-9-]+)?$/, /^\/legal\/[a-z]+$/, /^\/tools\/percentile-calculator$/]
 
 export function analyticsAllowedOn(pathname: string): boolean {
   return ANALYTICS_PATHS.some((re) => re.test(pathname))

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { activeDeletionRequest } from '@/lib/account/deletion'
 import { hasProAccess } from '@/lib/auth/permissions'
+import { unreadCount } from '@/lib/notifications/service'
 import { requireUser } from '@/lib/auth/session'
 import { TrpcProviders } from '@/trpc/client'
 
@@ -12,16 +13,25 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const pro = hasProAccess(user)
   const links = [
     { href: '/dashboard', label: 'Overview' },
-    ...(user.role === 'ATHLETE' && user.hasAthleteProfile ? [{ href: '/dashboard/profile', label: 'Profile' }] : []),
+    ...(user.role === 'ATHLETE' && user.hasAthleteProfile
+      ? [
+          { href: '/dashboard/profile', label: 'Profile and sharing' },
+          { href: '/dashboard/metrics', label: 'Measurements' },
+          { href: '/dashboard/insights', label: 'Insights' },
+        ]
+      : []),
     ...(user.role !== 'COACH'
       ? [
           { href: '/dashboard/analysis', label: 'Video analysis', pro: true },
           { href: '/dashboard/matchmaker', label: 'College matchmaker', pro: true },
+          { href: '/dashboard/recruiting', label: 'Recruiting assistant', pro: true },
         ]
       : []),
     { href: '/dashboard/billing', label: 'Plan and billing' },
+    { href: '/dashboard/notifications', label: 'Notifications' },
     { href: '/dashboard/settings', label: 'Settings' },
   ]
+  const unread = await unreadCount(user.id)
   const deletion = user.deletionScheduledFor ? await activeDeletionRequest(user.id) : null
   return (
     <TrpcProviders>
@@ -33,6 +43,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <Link href={link.href} className="flex min-h-11 items-center gap-2 border-2 border-border-subtle px-3 font-bold no-underline hover:border-fg">
                   {link.label}
                   {'pro' in link && link.pro && !pro && <span className="text-xs font-normal text-fg-muted">Pro</span>}
+                  {link.href === '/dashboard/notifications' && unread > 0 && (
+                    <span className="tabular rounded-sm bg-[#E6FF00] px-1.5 text-sm text-[#121212]">
+                      {unread > 99 ? '99+' : unread}
+                      <span className="sr-only"> unread</span>
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}

@@ -33,6 +33,14 @@ Privacy controls that work without contacting support:
 - **Email**: one-click unsubscribe (RFC 8058) at `/api/email/unsubscribe` and a preference centre at `/email/preferences`, both authenticated by a signed token. `sendMarketingEmail` is the only way to send marketing.
 - **Profile editing** (`/dashboard/profile`), a **terms re-acceptance** gate when `CURRENT_TERMS_VERSION` changes, and a public **Your data** page.
 
+## What is in Phase 4
+
+- **Public profile and PDF**: a private share link (`/p/<name>-<random>`), share image and one-page PDF that always show current numbers, with view and download counts. Athletes choose whether GPA and high school appear.
+- **Verified badges**: send a clip of a measurement; automatic checks run first, then a staff reviewer confirms the value in `/admin`.
+- **Insights**: percentiles against athletes of a similar age, height and weight, plus cross-sport equivalents. A public calculator lives at `/tools/percentile-calculator`.
+- **Recruiting assistant (Agent 3, Pro)**: watches pipeline programs for coaching changes and roster needs (staff entry in `/admin` or a licensed feed via `PROGRAM_DATA_FEED_URL`), alerts the athlete and drafts an introduction from verified facts.
+- **Side-by-side comparison (Pro)**: two clips synced at foot strike with skeleton overlays and a kinematic sequence timeline, against the athlete's own clips or licensed reference footage uploaded in `/admin`.
+
 ## Local development
 
 Requirements: Node 22.12+, PostgreSQL 15+, Redis 7+.

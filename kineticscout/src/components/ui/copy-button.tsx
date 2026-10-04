@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { CheckIcon, CopyIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 
-export function CopyButton({ value, label = 'Copy' }: { value: string; label?: string }) {
+export function CopyButton({ value, label = 'Copy', onCopied }: { value: string; label?: string; onCopied?: () => void }) {
   const [state, setState] = useState<'idle' | 'copied' | 'failed'>('idle')
   return (
     <span className="inline-flex items-center gap-2">
@@ -15,6 +15,7 @@ export function CopyButton({ value, label = 'Copy' }: { value: string; label?: s
           try {
             await navigator.clipboard.writeText(value)
             setState('copied')
+            onCopied?.()
           } catch {
             setState('failed')
           }

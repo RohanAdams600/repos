@@ -76,6 +76,33 @@ export async function bestMetrics(athleteId: string, sinceMonths = 18, now: Date
   return out
 }
 
+export type ClassStanding = { percentile: number; cohortSize: number }
+
+/**
+ * Standing of each value within the athlete's graduating class, from the latest weekly snapshot.
+ * Snapshots only exist for cohorts of at least 25 athletes, so small groups return nothing.
+ */
+export async function classStandings(gradYear: number, values: Partial<Record<MetricType, number>>): Promise<Partial<Record<MetricType, ClassStanding>>> {
+  const types = Object.keys(values) as MetricType[]
+  if (types.length === 0) return {}
+  const baselines = await db.percentileBaseline.findMany({
+    where: { metricType: { in: types }, gradYear, position: null },
+    orderBy: { computedFor: 'desc' },
+    distinct: ['metricType'],
+    select: { metricType: true, sampleSize: true, p10: true, p25: true, p50: true, p75: true, p90: true },
+  })
+  const out: Partial<Record<MetricType, ClassStanding>> = {}
+  for (const b of baselines) {
+    const value = values[b.metricType]
+    if (value === undefined) continue
+    out[b.metricType] = {
+      percentile: percentileRank(b.metricType, value, { p10: Number(b.p10), p25: Number(b.p25), p50: Number(b.p50), p75: Number(b.p75), p90: Number(b.p90) }),
+      cohortSize: b.sampleSize,
+    }
+  }
+  return out
+}
+
 export type MetricSummaryItem = {
   metricType: MetricType
   best: number
@@ -101,32 +128,16 @@ export async function metricSummary(user: SessionUser, now: Date = new Date()) {
   )
 
   // Latest weekly snapshot for the athlete's class, one cohort per metric.
-  const baselines = types.length
-    ? await db.percentileBaseline.findMany({
-        where: { metricType: { in: types }, gradYear: profile.gradYear, position: null },
-        orderBy: { computedFor: 'desc' },
-        distinct: ['metricType'],
-        select: { metricType: true, sampleSize: true, p10: true, p25: true, p50: true, p75: true, p90: true },
-      })
-    : []
+  const standings = await classStandings(profile.gradYear, best)
 
   const items: MetricSummaryItem[] = types.map((metricType, i) => {
     const latest = latestRows[i]!
-    const baseline = baselines.find((b) => b.metricType === metricType)
     return {
       metricType,
       best: best[metricType]!,
       latest: { value: Number(latest.value), date: latest.date.toISOString().slice(0, 10), verified: latest.verified },
-      classPercentile: baseline
-        ? percentileRank(metricType, best[metricType]!, {
-            p10: Number(baseline.p10),
-            p25: Number(baseline.p25),
-            p50: Number(baseline.p50),
-            p75: Number(baseline.p75),
-            p90: Number(baseline.p90),
-          })
-        : null,
-      cohortSize: baseline?.sampleSize ?? null,
+      classPercentile: standings[metricType]?.percentile ?? null,
+      cohortSize: standings[metricType]?.cohortSize ?? null,
     }
   })
 

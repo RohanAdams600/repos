@@ -6,6 +6,8 @@ export const AGENT_SCHEDULES = {
   growth: '0 10 * * 2,4',
   /** Data and SEO agent: Sundays at 00:00. */
   seo: '0 0 * * 0',
+  /** Agent 3: daily program data feed import (only when PROGRAM_DATA_FEED_URL is set). */
+  programFeed: '15 6 * * *',
   /** Reconciliation sweep for stuck uploads and analyses. */
   sweep: '*/10 * * * *',
 } as const

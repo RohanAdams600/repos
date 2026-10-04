@@ -28,7 +28,10 @@ export default function PrivacyPage() {
         <li>Athlete profile: name, graduating class, sport, position, and optionally height, weight, GPA, high school, batting and throwing side, and X handle.</li>
         <li>Performance data: the metrics you log and the dates they were measured.</li>
         <li>Videos you upload for analysis, the body keypoints detected in them, and the resulting report.</li>
-        <li>Colleges you add to your recruiting pipeline and their status.</li>
+        <li>Verification clips you send to have a measurement verified, the automatic check results (file type, length, recording date from the file, and a fingerprint of the file), and the reviewer&apos;s decision.</li>
+        <li>Colleges you add to your recruiting pipeline and their status, your recruiting assistant settings, and the outreach drafts written for you.</li>
+        <li>Public profile choices (whether it is public, whether GPA and high school are shown) and daily counts of profile views and PDF downloads. We do not record who viewed your profile.</li>
+        <li>In-app notifications we send you, such as verification results and recruiting alerts.</li>
         <li>Billing: your Stripe customer identifier and subscription status. Card details go directly to Stripe; we never see or store card numbers.</li>
         <li>Security data: request IP addresses are used to prevent abuse and are stored only as keyed hashes, never in readable form. We log security events such as failed sign-ins.</li>
         <li>Contact form: your name, email, topic and message, used only to answer you and deleted after 12 months.</li>
@@ -38,7 +41,16 @@ export default function PrivacyPage() {
 
       <h2>How we use it</h2>
       <ul>
-        <li>To run your account and the features you use: percentiles, progression charts, video analysis and college matching.</li>
+        <li>To run your account and the features you use: percentiles (including comparisons with athletes of a similar age, height and weight), progression charts, video analysis, side-by-side comparisons and college matching.</li>
+        <li>
+          To show your public profile and PDF to anyone you share the link with, only if you make the profile public. Public profiles are never
+          listed in search engines, and you can change the link or make the profile private at any time.
+        </li>
+        <li>To verify measurements: a KineticScout reviewer watches the clip you send to confirm the value. The clip is never shown on your profile.</li>
+        <li>
+          To run the recruiting assistant if you use it: we watch coaching changes and roster needs at programs in your pipeline and draft
+          introductions for you to review and send yourself. We never contact coaches for you.
+        </li>
         <li>To publish anonymized statistics. Each published figure describes a group of at least 25 athletes, with one value per athlete, so no individual can be identified.</li>
         <li>To send account emails (confirmations, password resets, guardian consent requests, billing notices).</li>
         <li>To send product news only if you opted in. Every marketing email has an unsubscribe link and supports one-click unsubscribe; you can also change your choice in Settings or from the preferences link in any email. We record when you made each choice.</li>
@@ -48,11 +60,16 @@ export default function PrivacyPage() {
       <h2>Who processes data for us</h2>
       <ul>
         <li>Supabase: authentication and database hosting.</li>
-        <li>Google Cloud: private video storage and pose detection (Video Intelligence API).</li>
+        <li>Google Cloud: private storage of analysis and verification videos, and pose detection (Video Intelligence API).</li>
         <li>Stripe: payments and subscriptions.</li>
         <li>Upstash: rate limiting and short-lived caching.</li>
         <li>Resend: delivery of account emails.</li>
-        <li>OpenAI: drafting marketing copy and data reports from aggregate statistics only. No personal information is sent.</li>
+        <li>
+          OpenAI: drafting marketing copy and data reports from aggregate statistics, and, only when you use the recruiting assistant, drafting
+          outreach messages. For a draft we send your name, graduating class, position, best measurements and, if you entered them, height,
+          weight, GPA and high school, plus facts about the program. We never send your email address, date of birth or videos. Under OpenAI&apos;s API
+          terms this data is not used to train their models.
+        </li>
         <li>Google Analytics: anonymous usage of public pages, only with your consent, with Google signals and ad personalisation turned off.</li>
         <li>Our hosting provider, which serves the website.</li>
       </ul>
@@ -66,6 +83,8 @@ export default function PrivacyPage() {
         <li>Account and profile data: until you delete your account. Deletion is carried out 7 days after the request.</li>
         <li>After deletion we keep only an anonymous receipt (a keyed hash, not your id or email) showing that the request was completed.</li>
         <li>Uploaded videos: deleted 12 months after upload. The analysis report is kept with your account.</li>
+        <li>Verification clips: deleted 30 days after the reviewer&apos;s decision (immediately if the automatic checks reject them). The decision and the file fingerprint are kept with the measurement.</li>
+        <li>Outreach drafts and notifications: until you delete them or your account.</li>
         <li>Security logs: up to 24 months.</li>
         <li>Contact form messages: 12 months.</li>
         <li>Billing records: as long as tax and accounting law requires, held by Stripe.</li>

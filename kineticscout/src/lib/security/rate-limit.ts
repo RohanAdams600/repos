@@ -24,6 +24,11 @@ export const RATE_LIMITS = {
   accountDelete: { tokens: 5, window: '1 h' },
   emailPreferences: { tokens: 20, window: '1 h' },
   guardianManage: { tokens: 5, window: '1 h' },
+  profilePdf: { tokens: 30, window: '1 h' },
+  calculator: { tokens: 30, window: '1 h' },
+  outreachDraft: { tokens: 20, window: '1 d' },
+  /** One counted profile view per visitor per profile per hour. */
+  profileViewDedupe: { tokens: 1, window: '1 h' },
 } as const satisfies Record<string, { tokens: number; window: Duration }>
 
 export type RateLimitName = keyof typeof RATE_LIMITS

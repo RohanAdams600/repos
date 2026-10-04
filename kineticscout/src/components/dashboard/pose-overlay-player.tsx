@@ -1,27 +1,12 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { SKELETON_EDGES, decodePoseTrack } from '@/lib/biomechanics/codec'
-import type { CompactPoseTrack, PoseFrame } from '@/lib/biomechanics/types'
+import { drawSkeleton, nearestFrame } from '@/components/dashboard/skeleton-draw'
+import { decodePoseTrack } from '@/lib/biomechanics/codec'
+import type { CompactPoseTrack } from '@/lib/biomechanics/types'
 import { Button } from '@/components/ui/button'
 
 type Props = { videoUrl: string; pose: CompactPoseTrack; footStrikeTime: number | null }
-
-function nearestFrame(frames: PoseFrame[], t: number): PoseFrame | null {
-  if (!frames.length) return null
-  let lo = 0
-  let hi = frames.length - 1
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1
-    if (frames[mid]!.t < t) lo = mid + 1
-    else hi = mid
-  }
-  const candidate = frames[lo]!
-  const previous = frames[lo - 1]
-  const best = previous && Math.abs(previous.t - t) < Math.abs(candidate.t - t) ? previous : candidate
-  // Do not draw a stale skeleton across gaps in tracking.
-  return Math.abs(best.t - t) <= 0.1 ? best : null
-}
 
 /**
  * Plays the athlete's video with the tracked skeleton drawn on top, synchronised per video frame
@@ -43,52 +28,7 @@ export function PoseOverlayPlayer({ videoUrl, pose, footStrikeTime }: Props) {
     let handle = 0
     let cancelled = false
 
-    const draw = () => {
-      const { clientWidth: w, clientHeight: h } = canvas
-      const dpr = window.devicePixelRatio || 1
-      if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
-        canvas.width = Math.round(w * dpr)
-        canvas.height = Math.round(h * dpr)
-      }
-      context.setTransform(dpr, 0, 0, dpr, 0, 0)
-      context.clearRect(0, 0, w, h)
-      if (!showSkeleton) return
-      const frame = nearestFrame(track.frames, video.currentTime)
-      if (!frame) return
-      const point = (name: keyof PoseFrame['keypoints']) => {
-        const kp = frame.keypoints[name]
-        return kp && kp.score >= 0.3 ? { x: kp.x * w, y: kp.y * h } : null
-      }
-      // Dark underlay keeps the volt skeleton visible on bright and dark footage alike.
-      for (const [width, color] of [
-        [6, 'rgba(18,18,18,0.85)'],
-        [3, '#E6FF00'],
-      ] as const) {
-        context.lineWidth = width
-        context.strokeStyle = color
-        context.lineCap = 'round'
-        for (const [a, b] of SKELETON_EDGES) {
-          const p = point(a)
-          const q = point(b)
-          if (!p || !q) continue
-          context.beginPath()
-          context.moveTo(p.x, p.y)
-          context.lineTo(q.x, q.y)
-          context.stroke()
-        }
-      }
-      for (const name of Object.keys(frame.keypoints) as (keyof PoseFrame['keypoints'])[]) {
-        const p = point(name)
-        if (!p) continue
-        context.beginPath()
-        context.arc(p.x, p.y, 4, 0, Math.PI * 2)
-        context.fillStyle = '#E6FF00'
-        context.fill()
-        context.lineWidth = 2
-        context.strokeStyle = '#121212'
-        context.stroke()
-      }
-    }
+    const draw = () => drawSkeleton(canvas, context, showSkeleton ? nearestFrame(track.frames, video.currentTime) : null)
 
     const hasVfc = 'requestVideoFrameCallback' in HTMLVideoElement.prototype
     const loop = () => {

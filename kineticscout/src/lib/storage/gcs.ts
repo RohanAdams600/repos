@@ -1,4 +1,5 @@
 import 'server-only'
+import { createHash } from 'node:crypto'
 import { Storage } from '@google-cloud/storage'
 import { requireEnv } from '@/lib/env'
 import { VIDEO_UPLOAD_POLICY } from '@/lib/storage/video-files'
@@ -74,6 +75,27 @@ export async function getObjectInfo(objectKey: string): Promise<{ exists: boolea
 export async function readObjectHead(objectKey: string, bytes = 64): Promise<Uint8Array> {
   const [buffer] = await bucket().file(objectKey).download({ start: 0, end: bytes - 1 })
   return new Uint8Array(buffer)
+}
+
+/** Inclusive-exclusive byte range [start, start + length). */
+export async function readObjectRange(objectKey: string, start: number, length: number): Promise<Uint8Array> {
+  if (length <= 0) return new Uint8Array(0)
+  const [buffer] = await bucket().file(objectKey).download({ start, end: start + length - 1 })
+  return new Uint8Array(buffer)
+}
+
+/** SHA-256 of the whole object, streamed so large files are never held in memory. */
+export async function objectSha256(objectKey: string): Promise<string> {
+  const hash = createHash('sha256')
+  await new Promise<void>((resolve, reject) => {
+    bucket()
+      .file(objectKey)
+      .createReadStream({ validation: false })
+      .on('data', (chunk: Buffer) => hash.update(chunk))
+      .on('end', () => resolve())
+      .on('error', reject)
+  })
+  return hash.digest('hex')
 }
 
 export async function deleteObject(objectKey: string): Promise<void> {

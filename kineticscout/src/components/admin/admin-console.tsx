@@ -2,6 +2,9 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { ProgramDataAdmin } from '@/components/admin/admin-programs'
+import { ReferenceClipAdmin } from '@/components/admin/admin-reference-clips'
+import { VerificationQueue } from '@/components/admin/admin-verification'
 import { AdminSiteContent } from '@/components/admin/admin-site-content'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -146,6 +149,9 @@ function BlogDrafts() {
 export function AdminConsole() {
   return (
     <div className="flex flex-col gap-12">
+      <VerificationQueue />
+      <ProgramDataAdmin />
+      <ReferenceClipAdmin />
       <MarketingQueue />
       <BlogDrafts />
       <AdminSiteContent />

@@ -69,6 +69,19 @@ Each item from the brief, mapped to where it is enforced and how it is verified.
 | One-click unsubscribe | The only CSRF-exempt path that changes data. It accepts only a valid HMAC for that user and can only turn marketing **off**. |
 | Deletion completeness | External systems first (Stripe customer, GCS prefix restricted by regex to `videos/<uuid>/`, Supabase login), each step recorded so retries resume; then one transaction deletes the user (cascade) and contact messages. Only a keyed hash remains on the receipt. |
 
+## Phase 4 controls
+
+| Control | Implementation |
+|---|---|
+| Profile link enumeration | Slugs carry about 40 bits of randomness and must match a strict pattern before any lookup; rotation invalidates the old link instantly. |
+| Public data exposure | Visibility, guardian consent and pending deletion are re-checked on every page, image and PDF request; responses are `noindex`. |
+| PDF abuse | Public PDF generation is rate limited per IP (30 per hour), owner downloads per account; fonts are local files, no remote fetches. |
+| Evidence uploads | Server-generated keys, signed size-capped uploads, magic-byte checks on completion, MP4 parsing bounded (box count, 8 MB moov cap, bounds-checked sizes), streamed hashing. |
+| Reviewer decisions | Admin-only (non-admins get 404), single-transition updates (`IN_REVIEW` only) so double clicks cannot flip a decision; audited. |
+| LLM output | Structured output plus zod validation and a fact-sheet check (numbers, coach name, link, banned wording) before any draft is stored; per-user daily cap and AI budget. |
+| Program feed | HTTPS only, bearer token optional, 30 s timeout, 10 MB cap, redirects refused, schema-validated, updates existing programs only. |
+| Reference footage | Licence fields required by CHECK constraint; playability (active, processed, unexpired) re-checked on each request; 15-minute signed URLs. |
+
 ## Known residual risks and follow-ups
 
 - Rate limits fail open during an Upstash outage (a deliberate availability trade-off).

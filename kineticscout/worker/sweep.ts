@@ -1,7 +1,8 @@
 import { processDueDeletions } from '@/lib/account/deletion'
 import { db } from '@/lib/db'
 import { errorFields, logger } from '@/lib/logger'
-import { enqueueVideoAnalysis } from '@/lib/queue/queues'
+import { enqueueEvidenceCheck, enqueueProgramChange, enqueueVideoAnalysis } from '@/lib/queue/queues'
+import { purgeEvidence } from '@/lib/verification/service'
 import { deleteObject } from '@/lib/storage/gcs'
 import { workerEnv } from '@worker/env'
 
@@ -11,12 +12,24 @@ import { workerEnv } from '@worker/env'
  *   - expires uploads that were never completed and removes their objects;
  *   - deletes raw videos past the retention window, keeping the derived report;
  *   - purges security logs and billing bookkeeping rows past their retention period;
- *   - carries out account deletions whose 7-day cancellation window has ended.
+ *   - carries out account deletions whose 7-day cancellation window has ended;
+ *   - re-enqueues stuck verification checks and deletes evidence clips past their retention;
+ *   - re-enqueues program changes Agent 3 has not processed (an enqueue that failed at write time).
  * Every step is idempotent, so overlapping sweeps on several replicas are harmless.
  */
 export async function sweepStuckWork(
   now: Date = new Date(),
-): Promise<{ requeued: number; expired: number; purged: number; logsPurged: number; accountsDeleted: number; deletionFailures: number }> {
+): Promise<{
+  requeued: number
+  expired: number
+  purged: number
+  logsPurged: number
+  accountsDeleted: number
+  deletionFailures: number
+  evidenceRequeued: number
+  evidencePurged: number
+  changesRequeued: number
+}> {
   const stuck = await db.videoAnalysis.findMany({
     where: { status: 'QUEUED', createdAt: { lt: new Date(now.getTime() - 10 * 60_000) } },
     select: { id: true },
@@ -66,6 +79,22 @@ export async function sweepStuckWork(
 
   const deletions = await processDueDeletions(now)
 
+  const stuckEvidence = await db.metricVerification.findMany({
+    where: { status: 'CHECKING', updatedAt: { lt: new Date(now.getTime() - 10 * 60_000) } },
+    select: { metricId: true },
+    take: 100,
+  })
+  for (const { metricId } of stuckEvidence) await enqueueEvidenceCheck(metricId)
+  const evidence = await purgeEvidence(now)
+
+  const pendingChanges = await db.programChange.findMany({
+    where: { processedAt: null, detectedAt: { lt: new Date(now.getTime() - 2 * 60_000) } },
+    select: { id: true },
+    take: 100,
+  })
+  const attemptKey = `sweep-${Math.floor(now.getTime() / 600_000)}`
+  for (const { id } of pendingChanges) await enqueueProgramChange(id, attemptKey)
+
   return {
     requeued: stuck.length,
     expired: abandoned.length,
@@ -73,5 +102,8 @@ export async function sweepStuckWork(
     logsPurged: logs.count,
     accountsDeleted: deletions.deleted,
     deletionFailures: deletions.failed,
+    evidenceRequeued: stuckEvidence.length,
+    evidencePurged: evidence.purged + evidence.abandoned,
+    changesRequeued: pendingChanges.length,
   }
 }

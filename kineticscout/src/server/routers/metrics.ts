@@ -29,6 +29,40 @@ export const metricsRouter = createRouter({
       }
     }),
 
+  /** Every logged measurement with its verification state (all plans: it is the athlete's own data). */
+  entries: athleteProcedure
+    .input(z.object({ cursor: z.uuid().nullish(), limit: z.number().int().min(1).max(50).default(20) }))
+    .query(async ({ ctx, input }) => {
+      const rows = await db.metric.findMany({
+        where: { athleteId: ctx.user.id },
+        orderBy: [{ date: 'desc' }, { id: 'desc' }],
+        take: input.limit + 1,
+        ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+        select: {
+          id: true,
+          metricType: true,
+          value: true,
+          date: true,
+          verified: true,
+          verification: { select: { status: true, rejectionReason: true, reviewerNote: true, reviewedAt: true } },
+        },
+      })
+      const page = rows.slice(0, input.limit)
+      return {
+        items: page.map((r) => ({
+          id: r.id,
+          metricType: r.metricType,
+          value: Number(r.value),
+          date: r.date.toISOString().slice(0, 10),
+          verified: r.verified,
+          verification: r.verification
+            ? { status: r.verification.status, rejectionReason: r.verification.rejectionReason, reviewerNote: r.verification.reviewerNote, reviewedAt: r.verification.reviewedAt?.toISOString() ?? null }
+            : null,
+        })),
+        nextCursor: rows.length > input.limit ? (page[page.length - 1]?.id ?? null) : null,
+      }
+    }),
+
   /** Pro: full progression history for charts, paginated by date. */
   history: proProcedure('progression')
     .input(z.object({ metricType: z.enum(MetricType), limit: z.number().int().min(1).max(200).default(100) }))

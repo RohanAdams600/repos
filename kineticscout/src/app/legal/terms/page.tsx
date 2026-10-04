@@ -34,6 +34,26 @@ export default function TermsPage() {
         You own the metrics and videos you provide. You give us a limited license to store and process them to run the service, and to include
         your values in anonymized statistics of at least 25 athletes. You can delete your content at any time.
       </p>
+      <p>
+        If you make your profile public, anyone with the link can see it and download its PDF. You are responsible for keeping it accurate, and
+        you can make it private or change the link at any time.
+      </p>
+
+      <h2>Verification, comparisons and the recruiting assistant</h2>
+      <ul>
+        <li>
+          A Verified badge means a KineticScout reviewer saw the logged value in the video you sent. It is not an official certification, and we
+          remove a badge if we find the evidence was misleading.
+        </li>
+        <li>Do not send another athlete&apos;s video or a video that does not show the measurement. Doing so can lead to suspension.</li>
+        <li>
+          Professional reference clips are shown under licence for comparison inside KineticScout only. Do not record, download or share them.
+        </li>
+        <li>
+          Outreach drafts are written by an AI system from your profile and published program facts. Read and edit every draft before sending; you
+          are responsible for the messages you send. KineticScout never sends messages to coaches for you.
+        </li>
+      </ul>
 
       <h2>What KineticScout does and does not do</h2>
       <p>

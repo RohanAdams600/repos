@@ -12,16 +12,18 @@ export const PRO_PRICES: Record<BillingPeriod, { amountCents: number; currency: 
 }
 
 export const FREE_FEATURES = [
-  'Public profile you control',
+  'Public profile link and one-page PDF for recruiters',
   'Log up to 3 metrics per month',
-  'Percentile ranking against your graduating class',
+  'Percentiles against your graduating class and athletes your size',
+  'Verified badges for measurements backed by video',
 ] as const
 
 export const PRO_FEATURES = [
   'Unlimited metric logging with progression charts',
   'AI biomechanics video analysis with skeletal overlay',
+  'Side-by-side comparison synced at foot strike',
   'College Matchmaker against program recruiting averages',
-  'AI-drafted outreach emails to college coaches',
+  'Recruiting assistant: coaching-change and roster-need alerts with AI-drafted outreach',
 ] as const
 
 /** Yearly savings versus twelve monthly payments, in whole dollars, for honest comparison copy. */

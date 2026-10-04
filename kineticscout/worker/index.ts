@@ -21,6 +21,10 @@ import { runGrowthAgent } from '@worker/agents/growth/run'
 import { withAgentRun } from '@worker/agents/run-guard'
 import { runSeoAgent } from '@worker/agents/seo/run'
 import { workerEnv } from '@worker/env'
+import { importProgramFeed } from '@worker/agents/recruiting/feed'
+import { processMetricEvidence } from '@worker/jobs/metric-evidence'
+import { createRecruitingProcessor } from '@worker/jobs/recruiting'
+import { createReferenceClipProcessor } from '@worker/jobs/reference-clip'
 import { createVideoAnalysisProcessor } from '@worker/jobs/video-analysis'
 import { GoogleVideoIntelligencePoseEstimator } from '@worker/pose/google-video-intelligence'
 import { AGENT_SCHEDULES, scheduleSlot } from '@worker/schedule'
@@ -75,6 +79,9 @@ async function main(): Promise<void> {
       concurrency: 2,
       lockDuration: 15 * 60_000,
     }),
+    new Worker(QUEUE_NAMES.metricEvidence, processMetricEvidence, { connection, concurrency: 2, lockDuration: 5 * 60_000 }),
+    new Worker(QUEUE_NAMES.recruitingAssistant, createRecruitingProcessor(llm), { connection, concurrency: 2, lockDuration: 5 * 60_000 }),
+    new Worker(QUEUE_NAMES.referenceClip, createReferenceClipProcessor(() => new GoogleVideoIntelligencePoseEstimator()), { connection, concurrency: 1, lockDuration: 15 * 60_000 }),
   ]
   for (const worker of workers) {
     worker.on('failed', (job, error) => logger.error({ queue: worker.name, jobId: job?.id, ...errorFields(error) }, 'job failed'))
@@ -85,6 +92,15 @@ async function main(): Promise<void> {
   const tasks: ScheduledTask[] = [
     cron.schedule(AGENT_SCHEDULES.growth, (ctx) => enqueueAgent('growth', scheduleSlot(ctx.date, tz), 'schedule'), { timezone: tz, name: 'growth-agent', noOverlap: true }),
     cron.schedule(AGENT_SCHEDULES.seo, (ctx) => enqueueAgent('seo', scheduleSlot(ctx.date, tz), 'schedule'), { timezone: tz, name: 'seo-agent', noOverlap: true }),
+    ...(config.PROGRAM_DATA_FEED_URL
+      ? [
+          cron.schedule(AGENT_SCHEDULES.programFeed, () => importProgramFeed(config.PROGRAM_DATA_FEED_URL!, config.PROGRAM_DATA_FEED_TOKEN).then(() => undefined), {
+            timezone: tz,
+            name: 'program-feed',
+            noOverlap: true,
+          }),
+        ]
+      : []),
     cron.schedule(
       AGENT_SCHEDULES.sweep,
       async () => {

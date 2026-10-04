@@ -10,65 +10,17 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { ProgressBar } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
 import { isAllowedVideoType, VIDEO_UPLOAD_POLICY } from '@/lib/storage/video-files'
+import { putWithProgress, UPLOAD_ERRORS } from '@/lib/upload/put'
+import { readVideoMetadata, type VideoMeta } from '@/lib/upload/video-metadata'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
 type Motion = 'SWING' | 'PITCH'
 type Hand = 'RIGHT' | 'LEFT'
-type VideoMeta = { durationMs: number; width: number; height: number }
 type Phase = 'idle' | 'checking' | 'ready' | 'uploading' | 'finalizing' | 'error'
 
 const MB = 1024 * 1024
 
-/** Reads duration and dimensions locally from the file before anything is uploaded. */
-function readVideoMetadata(file: File): Promise<VideoMeta> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file)
-    const video = document.createElement('video')
-    video.preload = 'metadata'
-    video.muted = true
-    const cleanup = () => URL.revokeObjectURL(url)
-    video.onloadedmetadata = () => {
-      const meta = { durationMs: Math.round(video.duration * 1000), width: video.videoWidth, height: video.videoHeight }
-      cleanup()
-      if (!Number.isFinite(meta.durationMs) || !meta.width || !meta.height) reject(new Error('unreadable'))
-      else resolve(meta)
-    }
-    video.onerror = () => {
-      cleanup()
-      reject(new Error('unreadable'))
-    }
-    video.src = url
-  })
-}
 
-/** PUT to the signed URL with progress events (fetch has no upload progress). Abortable. */
-function putWithProgress(url: string, headers: Record<string, string>, file: File, onProgress: (pct: number) => void, signal: AbortSignal): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.open('PUT', url)
-    for (const [key, value] of Object.entries(headers)) xhr.setRequestHeader(key, value)
-    xhr.timeout = 10 * 60_000
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) onProgress((event.loaded / event.total) * 100)
-    }
-    xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(xhr.status === 400 || xhr.status === 403 ? 'rejected' : 'failed')))
-    xhr.onerror = () => reject(new Error('network'))
-    xhr.ontimeout = () => reject(new Error('timeout'))
-    signal.addEventListener('abort', () => {
-      xhr.abort()
-      reject(new Error('aborted'))
-    })
-    xhr.send(file)
-  })
-}
-
-const UPLOAD_ERRORS: Record<string, string> = {
-  network: 'The upload was interrupted. Check your connection and try again.',
-  timeout: 'The upload took too long. Try a shorter clip or a faster connection.',
-  rejected: 'Storage rejected the file. It may be larger than declared, or the upload link expired. Start again.',
-  failed: 'The upload failed. Try again in a moment.',
-  aborted: 'Upload canceled.',
-}
 
 export function VideoUpload({ monthlyLimit }: { monthlyLimit: number }) {
   const trpc = useTRPC()

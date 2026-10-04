@@ -57,3 +57,8 @@ export async function invalidate(key: string): Promise<void> {
     logger.warn({ key, ...errorFields(error) }, 'cache invalidation failed')
   }
 }
+
+/** Clears this process's fallback cache (tests, and local development after reseeding). */
+export function clearLocalCache(): void {
+  memory.clear()
+}

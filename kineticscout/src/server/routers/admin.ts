@@ -2,6 +2,13 @@ import { TRPCError } from '@trpc/server'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { scheduleDeletion } from '@/lib/account/deletion'
+import { VerificationRejection } from '@/generated/prisma/enums'
+import { METRIC_DEFINITIONS } from '@/lib/metrics/definitions'
+import { createSignedPlaybackUrl } from '@/lib/storage/gcs'
+import { decideEvidence } from '@/lib/verification/service'
+import { completeReferenceUpload, createReferenceUpload, deleteReferenceClip, setReferenceClipActive } from '@/lib/reference/service'
+import { Handedness, MotionType } from '@/generated/prisma/enums'
+import { postRosterNeed, rosterNeedSchema, staffUpdateSchema, updateProgramStaff } from '@/lib/recruiting/changes'
 import { parseDateOnly } from '@/lib/auth/age'
 import { slugify } from '@/lib/content/fact-check'
 import { sanitizeText } from '@/lib/security/sanitize'
@@ -186,4 +193,180 @@ export const adminRouter = createRouter({
       const result = await scheduleDeletion(user.id, 'ADMIN', new Date(), ctx.user.id)
       return { scheduledFor: result.scheduledFor, alreadyScheduled: result.alreadyScheduled }
     }),
+
+  /** Oldest first, so athletes wait as little as possible. */
+  verificationQueue: adminProcedure.input(z.object({ limit: z.number().int().min(1).max(20).default(10) })).query(async ({ input }) => {
+    const [rows, total] = await Promise.all([
+      db.metricVerification.findMany({
+        where: { status: 'IN_REVIEW' },
+        orderBy: { createdAt: 'asc' },
+        take: input.limit,
+        select: {
+          metricId: true,
+          objectKey: true,
+          checks: true,
+          durationMs: true,
+          recordedAt: true,
+          createdAt: true,
+          metric: { select: { metricType: true, value: true, date: true, athlete: { select: { firstName: true, lastName: true, gradYear: true } } } },
+        },
+      }),
+      db.metricVerification.count({ where: { status: 'IN_REVIEW' } }),
+    ])
+    const items = await Promise.all(
+      rows.map(async (r) => ({
+        metricId: r.metricId,
+        athlete: `${r.metric.athlete.firstName} ${r.metric.athlete.lastName}, class of ${r.metric.athlete.gradYear}`,
+        metricLabel: METRIC_DEFINITIONS[r.metric.metricType].label,
+        value: Number(r.metric.value),
+        unit: METRIC_DEFINITIONS[r.metric.metricType].unit,
+        measuredOn: r.metric.date.toISOString().slice(0, 10),
+        recordedAt: r.recordedAt?.toISOString() ?? null,
+        durationMs: r.durationMs,
+        checks: r.checks as Record<string, unknown> | null,
+        submittedAt: r.createdAt.toISOString(),
+        videoUrl: r.objectKey ? await createSignedPlaybackUrl(r.objectKey, 30 * 60) : null,
+      })),
+    )
+    return { items, total }
+  }),
+
+  decideVerification: adminProcedure
+    .input(
+      z.discriminatedUnion('approve', [
+        z.object({ metricId: z.uuid(), approve: z.literal(true) }),
+        z.object({ metricId: z.uuid(), approve: z.literal(false), reason: z.enum(VerificationRejection), note: z.string().trim().max(500).optional() }),
+      ]),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const decided = await decideEvidence(
+        ctx.user.id,
+        input.metricId,
+        input.approve ? { approve: true } : { approve: false, reason: input.reason, note: input.note ? sanitizeText(input.note) : undefined },
+      )
+      if (!decided) throw new TRPCError({ code: 'CONFLICT', message: 'This submission was already decided.' })
+      return { ok: true }
+    }),
+
+  programSearch: adminProcedure.input(z.object({ q: z.string().trim().min(2).max(80) })).query(({ input }) =>
+    db.collegeProgram.findMany({
+      where: { schoolName: { contains: input.q, mode: 'insensitive' } },
+      orderBy: { schoolName: 'asc' },
+      take: 10,
+      select: { id: true, schoolName: true, sport: true, division: true, headCoachName: true, headCoachEmail: true, headCoachSince: true, headCoachBackground: true, recentSeasonSummary: true, dataSourceUrl: true },
+    }),
+  ),
+
+  /** A changed head coach is recorded as a ProgramChange and Agent 3 alerts watching athletes. */
+  updateProgramStaff: adminProcedure
+    .input(z.object({ programId: z.uuid(), headCoachSince: z.string().nullable().optional() }).extend(staffUpdateSchema.omit({ headCoachSince: true }).shape))
+    .mutation(async ({ ctx, input }) => {
+      const { programId, headCoachSince, ...rest } = input
+      const since = headCoachSince === undefined ? undefined : headCoachSince === null || headCoachSince === '' ? null : parseDateOnly(headCoachSince)
+      if (since === null && headCoachSince) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Enter the start date as YYYY-MM-DD.' })
+      return updateProgramStaff(programId, { ...rest, ...(since !== undefined ? { headCoachSince: since } : {}) }, ctx.user.id)
+    }),
+
+  postRosterNeed: adminProcedure
+    .input(
+      z.object({
+        programId: z.uuid(),
+        position: rosterNeedSchema.shape.position,
+        gradYear: rosterNeedSchema.shape.gradYear,
+        note: z.string().min(5).max(300),
+        sourceUrl: z.string(),
+        postedAt: z.string(),
+        expiresAt: z.string().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const postedAt = parseDateOnly(input.postedAt)
+      const expiresAt = input.expiresAt ? parseDateOnly(input.expiresAt) : null
+      if (!postedAt || (input.expiresAt && !expiresAt)) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Enter dates as YYYY-MM-DD.' })
+      const parsed = rosterNeedSchema.safeParse({ position: input.position, gradYear: input.gradYear, note: input.note, sourceUrl: input.sourceUrl, postedAt, expiresAt })
+      if (!parsed.success) throw new TRPCError({ code: 'BAD_REQUEST', message: parsed.error.issues[0]?.message ?? 'Invalid roster need' })
+      return postRosterNeed(input.programId, parsed.data, ctx.user.id)
+    }),
+
+  recentProgramChanges: adminProcedure.query(async () => {
+    const rows = await db.programChange.findMany({
+      orderBy: { detectedAt: 'desc' },
+      take: 20,
+      select: { id: true, kind: true, newValue: true, detectedAt: true, processedAt: true, college: { select: { schoolName: true } }, _count: { select: { drafts: true } } },
+    })
+    return rows.map((r) => ({ ...r, detectedAt: r.detectedAt.toISOString(), processedAt: r.processedAt?.toISOString() ?? null }))
+  }),
+
+  referenceClips: adminProcedure.query(async () => {
+    const rows = await db.referenceClip.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+      select: { id: true, title: true, playerName: true, level: true, motionType: true, handedness: true, status: true, errorCode: true, active: true, licensor: true, licenseReference: true, licenseExpiresAt: true, attribution: true, createdAt: true },
+    })
+    const now = Date.now()
+    return rows.map((r) => ({ ...r, licenseExpired: r.licenseExpiresAt !== null && r.licenseExpiresAt.getTime() <= now }))
+  }),
+
+  /** Requires the licence details up front; the clip stays inactive until processed and switched on. */
+  createReferenceClip: adminProcedure
+    .input(
+      z.object({
+        title: z.string().trim().min(3).max(120),
+        playerName: z.string().trim().min(2).max(120),
+        level: z.string().trim().min(2).max(40),
+        motionType: z.enum(MotionType),
+        handedness: z.enum(Handedness),
+        contentType: z.string().max(64),
+        sizeBytes: z.number().int().positive(),
+        durationMs: z.number().int().positive(),
+        width: z.number().int().min(160).max(8192),
+        height: z.number().int().min(160).max(8192),
+        licensor: z.string().trim().min(2).max(160),
+        licenseReference: z.string().trim().min(2).max(160),
+        licenseExpiresAt: z.string().nullable(),
+        attribution: z.string().trim().min(5).max(300),
+        licenseConfirmed: z.literal(true, { error: 'Confirm that the licence covers this use' }),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const expires = input.licenseExpiresAt ? parseDateOnly(input.licenseExpiresAt) : null
+      if (input.licenseExpiresAt && !expires) throw new TRPCError({ code: 'BAD_REQUEST', message: 'Enter the licence end date as YYYY-MM-DD.' })
+      if (expires && expires.getTime() <= Date.now()) throw new TRPCError({ code: 'BAD_REQUEST', message: 'That licence has already expired.' })
+      try {
+        return await createReferenceUpload(ctx.user.id, {
+          ...input,
+          title: sanitizeText(input.title),
+          playerName: sanitizeText(input.playerName),
+          level: sanitizeText(input.level),
+          licensor: sanitizeText(input.licensor),
+          licenseReference: sanitizeText(input.licenseReference),
+          attribution: sanitizeText(input.attribution),
+          licenseExpiresAt: expires,
+        })
+      } catch (error) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: (error as Error).message })
+      }
+    }),
+
+  completeReferenceClip: adminProcedure.input(z.object({ clipId: z.uuid() })).mutation(async ({ input }) => {
+    try {
+      return { status: await completeReferenceUpload(input.clipId) }
+    } catch (error) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: (error as Error).message })
+    }
+  }),
+
+  setReferenceClipActive: adminProcedure.input(z.object({ clipId: z.uuid(), active: z.boolean() })).mutation(async ({ ctx, input }) => {
+    try {
+      await setReferenceClipActive(ctx.user.id, input.clipId, input.active)
+      return { ok: true }
+    } catch (error) {
+      throw new TRPCError({ code: 'BAD_REQUEST', message: (error as Error).message })
+    }
+  }),
+
+  deleteReferenceClip: adminProcedure.input(z.object({ clipId: z.uuid() })).mutation(async ({ ctx, input }) => {
+    await deleteReferenceClip(ctx.user.id, input.clipId)
+    return { ok: true }
+  }),
 })

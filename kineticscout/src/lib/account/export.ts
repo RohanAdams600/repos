@@ -42,9 +42,27 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
           throws: true,
           isPublic: true,
           publicSlug: true,
+          publicShowGpa: true,
+          publicShowSchool: true,
+          publicSince: true,
+          recruitingAlerts: true,
+          recruitingAlertEmails: true,
           createdAt: true,
           updatedAt: true,
-          metrics: { orderBy: { date: 'asc' }, select: { id: true, date: true, metricType: true, value: true, verified: true, createdAt: true } },
+          metrics: {
+            orderBy: { date: 'asc' },
+            select: {
+              id: true,
+              date: true,
+              metricType: true,
+              value: true,
+              verified: true,
+              createdAt: true,
+              verification: { select: { status: true, rejectionReason: true, reviewerNote: true, recordedAt: true, durationMs: true, reviewedAt: true, createdAt: true, videoDeletedAt: true } },
+            },
+          },
+          outreachDrafts: { orderBy: { createdAt: 'asc' }, select: { trigger: true, channel: true, subject: true, body: true, createdAt: true, copiedAt: true, college: { select: { schoolName: true } } } },
+          profileViews: { orderBy: { day: 'asc' }, select: { day: true, views: true, pdfDownloads: true } },
           pipeline: {
             orderBy: { createdAt: 'asc' },
             select: { status: true, lastContactDate: true, createdAt: true, college: { select: { schoolName: true, division: true, state: true } } },
@@ -58,6 +76,7 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
       subscriptions: { select: { id: true, status: true, interval: true, currentPeriodEnd: true, cancelAtPeriodEnd: true, createdAt: true } },
       testimonials: { select: { displayName: true, descriptor: true, quote: true, rating: true, status: true, consentRecordedAt: true, publishedAt: true } },
       aiUsage: { orderBy: { createdAt: 'asc' }, select: { feature: true, createdAt: true } },
+      notifications: { orderBy: { createdAt: 'asc' }, select: { kind: true, title: true, body: true, createdAt: true, readAt: true } },
     },
   })
 
@@ -73,6 +92,8 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
     notes: [
       'Dates are ISO 8601 in UTC. Metric units: mph for velocities, seconds for timed events, yards for distance, percent for spiral efficiency.',
       'Video files are not embedded. Videos you uploaded can be viewed in the dashboard until they are deleted under the retention policy.',
+      'Verification evidence clips are reviewed privately and deleted 30 days after the decision; the decision is kept with the measurement.',
+      'Public profile counts are daily totals with no information about who viewed your profile.',
       'Payment card details are held by Stripe, not KineticScout. Invoices are available from the billing portal.',
     ],
     account: {
@@ -106,6 +127,11 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
           throws: profile.throws,
           isPublic: profile.isPublic,
           publicSlug: profile.publicSlug,
+          publicShowGpa: profile.publicShowGpa,
+          publicShowSchool: profile.publicShowSchool,
+          publicSince: profile.publicSince,
+          recruitingAlerts: profile.recruitingAlerts,
+          recruitingAlertEmails: profile.recruitingAlertEmails,
           createdAt: profile.createdAt,
           updatedAt: profile.updatedAt,
         }
@@ -116,6 +142,9 @@ export async function buildAccountExport(userId: string, now: Date = new Date())
     subscriptions: user.subscriptions,
     reviews: user.testimonials,
     contactMessages,
+    outreachDrafts: (profile?.outreachDrafts ?? []).map((d) => ({ ...d, college: d.college.schoolName })),
+    publicProfileDailyCounts: (profile?.profileViews ?? []).map((v) => ({ ...v, day: v.day.toISOString().slice(0, 10) })),
+    notifications: user.notifications,
     aiFeatureUse: user.aiUsage,
     securityEvents,
   }

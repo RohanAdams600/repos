@@ -16,6 +16,9 @@ This document records how the product meets the "do not get sued" checklist, and
 | Email, password hash (Supabase) | Account access | Until deletion |
 | Date of birth | Age rules (COPPA, minor protections) | Until deletion |
 | Guardian email | Consent for minors | Until deletion |
+| Public profile choices, daily view and PDF counts | Sharing with recruiters | Until deletion (no visitor identifiers stored) |
+| Verification clip, check results, file hash, decision | Verified badges | Clip: 30 days after decision (immediately if auto-rejected). Decision and hash: until deletion |
+| Outreach drafts, recruiting alert settings, notifications | Recruiting assistant | Until the athlete deletes them or the account |
 | Marketing choice and its timestamp | Proof of opt-in or opt-out | Until deletion |
 | Deletion receipt (keyed hash, dates, steps) | Proof a deletion request was honored | Kept; contains no personal data |
 | Name, class, sport, position | Profile, percentiles, matching | Until deletion |
@@ -38,6 +41,13 @@ Not collected: location, contacts, device identifiers, advertising identifiers, 
 - **Marketing email.** Opt-in only (unchecked by default), with the time of each choice recorded (`marketing_opt_in_updated_at`). `sendMarketingEmail` is the only sending path; it re-checks consent at send time, skips minors without guardian consent and accounts pending deletion, and adds RFC 8058 one-click unsubscribe headers, a visible preferences link and the postal address (CAN-SPAM). The preference centre works without signing in.
 - **Changes to terms.** Bumping `CURRENT_TERMS_VERSION` gates the dashboard and API behind `/terms-update`, where users can accept, or download their data and delete the account instead. Acceptance is audited with the version. The business must still email account holders before a material change takes effect, as the policy promises.
 
+## Phase 4 privacy notes
+
+- **Public profiles** are opt-in, need guardian consent for minors (re-checked on every view), are `noindex`, never put a last name in the URL, and can be made private or given a new link at any time. GPA and high school are hidden unless chosen.
+- **Verification clips** are viewed only by staff reviewers through short-lived signed URLs, never shown publicly, and deleted 30 days after the decision.
+- **Outreach** is drafted, never sent: the athlete copies or opens the draft in their own email. Drafts can only use facts on the athlete's own profile and sourced program facts, and minors need guardian consent before the feature is available.
+- **Aggregates**: build-cohort percentiles and cross-sport equivalents use groups of at least 25 athletes; the anonymous calculator rounds to the nearest 5 and stores nothing it is given.
+
 ## Consent and cookies
 
 Strictly necessary cookies (auth session, theme, age-screen block, the consent choice itself) are always set. Google Analytics is optional and only active when `GA_MEASUREMENT_ID` is configured:
@@ -55,7 +65,8 @@ Strictly necessary cookies (auth session, theme, age-screen block, the consent c
 | @supabase/ssr, @supabase/supabase-js | Auth | Email, password (sign-in), session | No |
 | @prisma/client, pg | Database | All app data (our database) | No |
 | stripe | Payments | Email, Stripe customer id | No (Checkout is a Stripe-hosted page) |
-| openai | Copy and articles | Aggregate statistics and product facts only | No |
+| openai | Copy, articles and outreach drafts | Aggregate statistics and product facts; for outreach drafts (Pro, consent required for minors), the athlete's name, class, position, best measurements and optional height, weight, GPA and high school, plus sourced program facts. Never email, date of birth or video | No |
+| pdf-lib, @pdf-lib/fontkit | Profile PDF | None (runs on our server) | No |
 | @google-cloud/storage, @google-cloud/video-intelligence | Video storage and pose | Uploaded videos | No (browser uploads to a signed URL) |
 | @upstash/ratelimit, @upstash/redis, bullmq, ioredis | Rate limiting, cache, queues | Hashed keys, user ids, job ids | No |
 | recharts, @radix-ui/*, @tanstack/react-query, @trpc/* | UI and data fetching | None to third parties | Yes, no network calls of their own |
@@ -65,9 +76,9 @@ No third-party script, pixel or font is loaded in the browser except Google Anal
 
 ## Fonts, images, copyright
 
-- Roboto Mono: Apache License 2.0, self-hosted at build. Helvetica Neue / system-ui come from the visitor's own system.
+- Roboto Mono: SIL Open Font License 1.1 (current upstream releases), self-hosted at build and embedded as a subset in profile PDFs; the licence text ships in `assets/fonts/LICENSE-RobotoMono.txt`. Helvetica Neue / system-ui come from the visitor's own system; PDFs use the standard Helvetica font.
 - No stock photography or third-party images. The logo, favicon and social share image are original vector or code-generated artwork.
-- Phase 4 side-by-side comparisons need **licensed** reference footage of professional players; MLB footage cannot be used without a licence.
+- Side-by-side comparisons use **licensed** reference footage only. A clip cannot be created without licensor, licence reference and attribution (database CHECK), the uploader confirms the licence covers this use, playback stops automatically at the licence end date, and the player hides download and picture-in-picture controls. Until licensed footage exists, athletes compare their own clips.
 
 ## Honest marketing (no dark patterns, no hidden fees)
 
@@ -82,3 +93,6 @@ No third-party script, pixel or font is loaded in the browser except Google Anal
 3. Real college program data from a licensed or public source, with `data_source_url` and `data_verified_at`; development fixtures are fictional and blocked outside local.
 4. Real reviews, case studies (with written consent) and team photos the business owns or licenses.
 5. Whether to enable `SEO_AUTOPUBLISH`, `GROWTH_AUTO_APPROVE`, `META_AUTOPUBLISH` and `META_ADS_AUTO_ACTIVATE`. All default to off: drafts wait for review in `/admin`.
+6. Licensed reference footage for side-by-side comparisons, and a licensed source of coaching-staff and roster-need data (or staff time to enter changes from school announcements).
+7. Staff time to review verification clips (the dashboard promises a decision within about 2 business days).
+8. Before deploying Phase 4: email account holders about the updated Privacy Policy (outreach drafts now send profile facts to OpenAI). `CURRENT_TERMS_VERSION` is bumped, so signed-in users are asked to accept the new version.

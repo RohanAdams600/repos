@@ -11,6 +11,7 @@ import { enqueueVideoAnalysis } from '@/lib/queue/queues'
 import { createSignedPlaybackUrl, createSignedUpload, deleteObject, getObjectInfo, readObjectHead } from '@/lib/storage/gcs'
 import { extensionFor, isAllowedVideoType, sniffVideoContainer, VIDEO_UPLOAD_POLICY } from '@/lib/storage/video-files'
 import { enforceRateLimit, RateLimitError } from '@/lib/security/rate-limit'
+import { playableReferenceWhere } from '@/lib/reference/service'
 import { createRouter, proProcedure } from '@/server/trpc'
 
 const videoProcedure = proProcedure('video-analysis')
@@ -146,4 +147,61 @@ export const analysisRouter = createRouter({
       videoUrl: playable ? await createSignedPlaybackUrl(row.objectKey) : null,
     }
   }),
+
+  /** What this analysis can be compared with: the athlete's other synced clips and licensed reference clips. */
+  compareOptions: videoProcedure.input(z.object({ analysisId: z.uuid() })).query(async ({ ctx, input }) => {
+    const base = await db.videoAnalysis.findFirst({ where: { id: input.analysisId, athleteId: ctx.user.id }, select: { motionType: true, status: true, report: true, errorCode: true } })
+    if (!base) throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found.' })
+    const syncable = base.status === 'COMPLETE' && base.errorCode !== 'VIDEO_PURGED' && (base.report as KinematicReport | null)?.footStrikeTime != null
+    const [own, references] = await Promise.all([
+      db.videoAnalysis.findMany({
+        where: { athleteId: ctx.user.id, motionType: base.motionType, status: 'COMPLETE', id: { not: input.analysisId }, OR: [{ errorCode: null }, { errorCode: { not: 'VIDEO_PURGED' } }] },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+        select: { id: true, createdAt: true, handedness: true, report: true },
+      }),
+      db.referenceClip.findMany({ where: playableReferenceWhere(base.motionType), orderBy: { playerName: 'asc' }, select: { id: true, title: true, playerName: true, level: true, handedness: true, attribution: true } }),
+    ])
+    return {
+      syncable,
+      own: own.filter((o) => (o.report as KinematicReport | null)?.footStrikeTime != null).map((o) => ({ id: o.id, createdAt: o.createdAt.toISOString(), handedness: o.handedness })),
+      references,
+    }
+  }),
+
+  comparison: videoProcedure
+    .input(z.object({ analysisId: z.uuid(), other: z.object({ kind: z.enum(['own', 'reference']), id: z.uuid() }) }))
+    .query(async ({ ctx, input }) => {
+      const select = { id: true, handedness: true, objectKey: true, report: true, poseData: true, createdAt: true } as const
+      const base = await db.videoAnalysis.findFirst({ where: { id: input.analysisId, athleteId: ctx.user.id, status: 'COMPLETE' }, select: { ...select, errorCode: true } })
+      if (!base || base.errorCode === 'VIDEO_PURGED' || !base.poseData) throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found.' })
+      const baseReport = base.report as KinematicReport
+      if (baseReport.footStrikeTime === null) throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Foot strike was not detected in this clip, so it cannot be synced.' })
+
+      type Side = { label: string; videoUrl: string; pose: CompactPoseTrack; report: KinematicReport; handedness: 'RIGHT' | 'LEFT'; attribution: string | null }
+      const side = async (row: { objectKey: string; poseData: unknown; report: unknown; handedness: 'RIGHT' | 'LEFT' }, label: string, attribution: string | null): Promise<Side> => ({
+        label,
+        videoUrl: await createSignedPlaybackUrl(row.objectKey),
+        pose: row.poseData as CompactPoseTrack,
+        report: row.report as KinematicReport,
+        handedness: row.handedness,
+        attribution,
+      })
+
+      let other: Side
+      if (input.other.kind === 'own') {
+        const row = await db.videoAnalysis.findFirst({ where: { id: input.other.id, athleteId: ctx.user.id, status: 'COMPLETE' }, select: { ...select, errorCode: true } })
+        if (!row || row.errorCode === 'VIDEO_PURGED' || !row.poseData || (row.report as KinematicReport).footStrikeTime === null) throw new TRPCError({ code: 'NOT_FOUND', message: 'That clip cannot be compared.' })
+        other = await side(row, `Your clip from ${row.createdAt.toISOString().slice(0, 10)}`, null)
+      } else {
+        // Playable only while active, processed and licensed: checked again on every request.
+        const clip = await db.referenceClip.findFirst({
+          where: { id: input.other.id, ...playableReferenceWhere((await db.videoAnalysis.findUniqueOrThrow({ where: { id: base.id }, select: { motionType: true } })).motionType) },
+          select: { objectKey: true, poseData: true, report: true, handedness: true, playerName: true, level: true, attribution: true },
+        })
+        if (!clip?.poseData || !clip.report) throw new TRPCError({ code: 'NOT_FOUND', message: 'That reference clip is not available.' })
+        other = await side(clip, `${clip.playerName} (${clip.level})`, clip.attribution)
+      }
+      return { a: await side(base, `Your clip from ${base.createdAt.toISOString().slice(0, 10)}`, null), b: other }
+    }),
 })

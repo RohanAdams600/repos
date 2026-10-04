@@ -6,6 +6,7 @@ import { ANALYSIS_FAILURES, STATUS_LABELS } from '@/components/dashboard/analysi
 import { KinematicReportView } from '@/components/dashboard/kinematic-report'
 import { PoseOverlayPlayer } from '@/components/dashboard/pose-overlay-player'
 import { Alert } from '@/components/ui/alert'
+import { buttonVariants } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
@@ -47,6 +48,11 @@ export function AnalysisDetail({ id }: { id: string }) {
         <PoseOverlayPlayer videoUrl={analysis.videoUrl} pose={analysis.pose} footStrikeTime={analysis.report.footStrikeTime} />
       ) : (
         <p className="text-fg-muted">The original video has been deleted under our retention policy. The report below is kept.</p>
+      )}
+      {analysis.videoUrl && analysis.report.footStrikeTime !== null && (
+        <Link href={`/dashboard/analysis/${analysis.id}/compare`} className={buttonVariants({ variant: 'secondary' })}>
+          Compare side by side
+        </Link>
       )}
       <KinematicReportView report={analysis.report} />
     </div>

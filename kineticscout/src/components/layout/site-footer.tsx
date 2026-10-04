@@ -19,6 +19,7 @@ export function SiteFooter() {
           <Link href="/faq">FAQ</Link>
           <Link href="/case-studies">Case studies</Link>
           <Link href="/reviews">Reviews</Link>
+          <Link href="/tools/percentile-calculator">Percentile calculator</Link>
           <Link href="/contact">Contact</Link>
         </nav>
         <nav aria-label="Legal" className="flex flex-col gap-2">
