@@ -25,10 +25,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Scan full history for committed secrets
+      # Scans every commit reachable from the commit under test (its full history), not other
+      # projects' branches in this repository, which have their own reviews.
+      - name: Scan this branch's full history for committed secrets
         run: |
           curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz | tar -xz gitleaks
-          ./gitleaks detect --source .. --redact --verbose --exit-code 1
+          ./gitleaks detect --source .. --log-opts="HEAD" --redact --verbose --exit-code 1
 
   verify:
     runs-on: ubuntu-latest
