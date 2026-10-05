@@ -8,6 +8,10 @@ import { Checkbox } from '@/components/ui/field'
 import { Modal } from '@/components/ui/modal'
 import { Spinner } from '@/components/ui/spinner'
 import { CONTACT_POLICY, contactMessageProblem } from '@/lib/coach/rules'
+import { useMessages } from '@/i18n/client'
+import { coachMessages } from '@/i18n/messages/coach'
+import { useServerText } from '@/i18n/server-text-client'
+import { UiText } from '@/components/ui/ui-text'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
 export function ContactDialog({ athleteId, athleteName, gradYear, disabled }: { athleteId: string; athleteName: string; gradYear: number; disabled?: boolean }) {
@@ -27,14 +31,17 @@ export function ContactDialog({ athleteId, athleteName, gradYear, disabled }: { 
       },
     }),
   )
-  const problem = submitted ? contactMessageProblem(message) : null
-  const attestError = submitted && !attested ? "Confirm that your association's recruiting rules allow contact now." : undefined
+  const m = useMessages(coachMessages).contact
+  const serverText = useServerText()
+  const rawProblem = submitted ? contactMessageProblem(message) : null
+  const problem = rawProblem ? serverText(rawProblem) : null
+  const attestError = submitted && !attested ? m.attest : undefined
   const messageId = `contact-message-${athleteId}`
 
   return (
     <>
       <Button size="sm" variant="secondary" disabled={disabled} onClick={() => setOpen(true)}>
-        Request contact
+        {m.open}
       </Button>
       <Modal
         open={open}
@@ -45,12 +52,12 @@ export function ContactDialog({ athleteId, athleteName, gradYear, disabled }: { 
             setSubmitted(false)
           }
         }}
-        title={`Request contact with ${athleteName}`}
-        description="Introduce yourself. The athlete decides whether to share their email address; for athletes under 18 a parent or guardian must approve too."
+        title={m.title(athleteName)}
+        description={m.intro}
       >
         {send.isSuccess ? (
           <Alert tone="success" focusOnMount>
-            Request sent. You will be notified when {athleteName} responds. Requests expire after {CONTACT_POLICY.expiresDays} days.
+            {m.sent(athleteName, CONTACT_POLICY.expiresDays)}
           </Alert>
         ) : (
           <form
@@ -76,10 +83,10 @@ export function ContactDialog({ athleteId, athleteName, gradYear, disabled }: { 
             )}
             <div className="flex flex-col gap-2">
               <label htmlFor={messageId} className="font-bold">
-                Message <span className="font-normal text-fg-muted">(required)</span>
+                {m.message} <span className="font-normal text-fg-muted"><UiText k="required" /></span>
               </label>
               <p id={`${messageId}-hint`} className="text-sm text-fg-muted">
-                No links or phone numbers in a first message. Up to {CONTACT_POLICY.messageMax} characters.
+                {m.hint(CONTACT_POLICY.messageMax)}
               </p>
               <textarea
                 id={messageId}
@@ -104,11 +111,11 @@ export function ContactDialog({ athleteId, athleteName, gradYear, disabled }: { 
               onChange={(e) => setAttested(e.target.checked)}
               required
               error={attestError}
-              label={`Contact with this class of ${gradYear} athlete is allowed now under my association's recruiting rules.`}
+              label={m.rules(gradYear)}
             />
             <Button type="submit" disabled={send.isPending} className="self-start">
-              {send.isPending ? <Spinner label="Sending" /> : null}
-              Send request
+              {send.isPending ? <Spinner label={m.sending} /> : null}
+              {m.send}
             </Button>
           </form>
         )}

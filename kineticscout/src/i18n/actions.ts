@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation'
 import { getAuthIdentity } from '@/lib/auth/session'
 import { db } from '@/lib/db'
 import { env } from '@/lib/env'
+import { createSupabaseServerClient } from '@/lib/auth/supabase'
+import { errorFields, logger } from '@/lib/logger'
 import { isLocale, LOCALE_COOKIE, SPANISH_ENABLED } from '@/i18n/config'
 
 /** Only paths on this site, so the switch cannot be used as an open redirect. */
@@ -21,6 +23,14 @@ export async function setLocaleAction(formData: FormData): Promise<void> {
   if (!SPANISH_ENABLED || !isLocale(locale)) redirect(target)
   ;(await cookies()).set(LOCALE_COOKIE, locale, { path: '/', maxAge: 31_536_000, sameSite: 'lax', httpOnly: true, secure: env().APP_URL.startsWith('https://') })
   const identity = await getAuthIdentity().catch(() => null)
-  if (identity) await db.user.updateMany({ where: { id: identity.id }, data: { locale } })
+  if (identity) {
+    await db.user.updateMany({ where: { id: identity.id }, data: { locale } })
+    // Supabase's own emails (password reset) read the language from the user's metadata.
+    try {
+      await (await createSupabaseServerClient()).auth.updateUser({ data: { locale } })
+    } catch (error) {
+      logger.warn(errorFields(error), 'could not save language for auth emails')
+    }
+  }
   redirect(target)
 }

@@ -7,9 +7,11 @@ import { endTeamOperations } from '@/lib/teams/service'
 import { stripe } from '@/lib/billing/stripe'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
-import { renderEmail } from '@/lib/email/templates'
+import { renderLocalizedEmail, withLocale, type LocalizedEmail } from '@/lib/email/localized'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
+import { isLocale, type Locale } from '@/i18n/config'
+import type { Localized } from '@/i18n/define'
 import { randomToken, sha256Hex } from '@/lib/security/hash'
 
 /**
@@ -33,8 +35,8 @@ async function issueManageToken(consentId: string): Promise<string> {
   return token
 }
 
-async function safeSend(to: string, subject: string, paragraphs: string[], key: string, action?: { label: string; url: string }) {
-  const { text, html } = renderEmail({ paragraphs, action })
+async function safeSend(to: string, locale: Locale, message: LocalizedEmail, key: string) {
+  const { subject, text, html } = renderLocalizedEmail(message, locale)
   try {
     await sendEmail({ to, subject, text, html, idempotencyKey: key })
   } catch (error) {
@@ -46,19 +48,27 @@ async function safeSend(to: string, subject: string, paragraphs: string[], key: 
 export async function sendConsentConfirmation(consentId: string): Promise<void> {
   const consent = await db.guardianConsent.findUniqueOrThrow({
     where: { id: consentId },
-    select: { guardianEmail: true, user: { select: { athleteProfile: { select: { firstName: true } } } } },
+    select: { guardianEmail: true, locale: true, user: { select: { athleteProfile: { select: { firstName: true } } } } },
   })
   const token = await issueManageToken(consentId)
-  const name = consent.user.athleteProfile?.firstName ?? 'your teen'
+  const first = consent.user.athleteProfile?.firstName
+  const en = first ?? 'your teen'
+  const es = first ?? 'tu hijo o hija'
   await safeSend(
     consent.guardianEmail,
-    `Consent recorded for ${name}'s KineticScout account`,
-    [
-      `Thank you. Your consent for ${name}'s KineticScout account is recorded.`,
-      'Keep this email. The link below lets you withdraw consent, cancel a subscription, or ask us to delete the account at any time, without signing in. It works for one year; you can request a new one from our website.',
-    ],
+    isLocale(consent.locale) ? consent.locale : 'en',
+    {
+      subject: { en: `Consent recorded for ${en}'s KineticScout account`, es: `Consentimiento registrado para la cuenta de KineticScout de ${es}` },
+      paragraphs: [
+        { en: `Thank you. Your consent for ${en}'s KineticScout account is recorded.`, es: `Gracias. Quedó registrado tu consentimiento para la cuenta de KineticScout de ${es}.` },
+        {
+          en: 'Keep this email. The link below lets you withdraw consent, cancel a subscription, or ask us to delete the account at any time, without signing in. It works for one year; you can request a new one from our website.',
+          es: 'Guarda este correo. El enlace de abajo te permite retirar el consentimiento, cancelar una suscripción o pedirnos que eliminemos la cuenta en cualquier momento, sin iniciar sesión. Funciona durante un año; puedes pedir uno nuevo desde nuestro sitio web.',
+        },
+      ],
+      action: { label: { en: 'Manage consent', es: 'Gestionar el consentimiento' }, url: manageUrl(token) },
+    },
     `guardian-confirmation-${consentId}-${token.slice(0, 8)}`,
-    { label: 'Manage consent', url: manageUrl(token) },
   )
 }
 
@@ -66,18 +76,28 @@ export async function sendConsentConfirmation(consentId: string): Promise<void> 
 export async function requestManageLinks(guardianEmail: string): Promise<void> {
   const consents = await db.guardianConsent.findMany({
     where: { guardianEmail, status: { in: ['GRANTED', 'REVOKED'] } },
-    select: { id: true, user: { select: { athleteProfile: { select: { firstName: true } } } } },
+    select: { id: true, locale: true, user: { select: { athleteProfile: { select: { firstName: true } } } } },
   })
   if (consents.length === 0) return
-  const links: string[] = []
+  const locale = isLocale(consents[0]!.locale) ? consents[0]!.locale : 'en'
+  const links: Localized[] = []
   for (const consent of consents) {
     const token = await issueManageToken(consent.id)
-    links.push(`${consent.user.athleteProfile?.firstName ?? 'Athlete'}: ${manageUrl(token)}`)
+    const url = manageUrl(token)
+    const first = consent.user.athleteProfile?.firstName
+    links.push({ en: `${first ?? 'Athlete'}: ${url}`, es: `${first ?? 'Atleta'}: ${withLocale(url, 'es')}` })
   }
   await safeSend(
     guardianEmail,
-    'Your KineticScout consent management links',
-    ['Here are your private links to manage consent for each KineticScout account you are listed on. Each works for one year.', ...links, 'If you did not ask for these links, you can ignore this email.'],
+    locale,
+    {
+      subject: { en: 'Your KineticScout consent management links', es: 'Tus enlaces para gestionar el consentimiento en KineticScout' },
+      paragraphs: [
+        { en: 'Here are your private links to manage consent for each KineticScout account you are listed on. Each works for one year.', es: 'Estos son tus enlaces privados para gestionar el consentimiento de cada cuenta de KineticScout en la que apareces. Cada uno funciona durante un año.' },
+        ...links,
+        { en: 'If you did not ask for these links, you can ignore this email.', es: 'Si no pediste estos enlaces, puedes ignorar este correo.' },
+      ],
+    },
     `guardian-links-${sha256Hex(guardianEmail).slice(0, 16)}-${Math.floor(Date.now() / 3_600_000)}`,
   )
   await audit('guardian.manage_link_sent', { targetType: 'guardian_consent', targetId: consents[0]!.id, metadata: { count: consents.length } })
@@ -154,15 +174,21 @@ export async function revokeConsent(ctx: ManageContext, options: { cancelSubscri
     await db.subscription.update({ where: { id: ctx.liveSubscriptionId }, data: { cancelAtPeriodEnd: true } })
   }
   await audit('guardian.consent_revoked', { actorId: options.guardianUserId, targetType: 'guardian_consent', targetId: ctx.consentId, metadata: { cancelSubscription: options.cancelSubscription, via: options.guardianUserId ? 'account' : 'link' } })
-  const user = await db.user.findUnique({ where: { id: ctx.userId }, select: { email: true } })
+  const user = await db.user.findUnique({ where: { id: ctx.userId }, select: { email: true, locale: true } })
   if (user) {
     await safeSend(
       user.email,
-      'Your parent or guardian withdrew consent',
-      [
-        'Your parent or guardian has withdrawn consent for your KineticScout account.',
-        'Your profile is now private, and purchases and messages to coaches are paused. You can still log metrics and see your own numbers. Talk with your parent or guardian if you think this was a mistake.',
-      ],
+      isLocale(user.locale) ? user.locale : 'en',
+      {
+        subject: { en: 'Your parent or guardian withdrew consent', es: 'Tu padre, madre o tutor retiró el consentimiento' },
+        paragraphs: [
+          { en: 'Your parent or guardian has withdrawn consent for your KineticScout account.', es: 'Tu padre, madre o tutor retiró el consentimiento para tu cuenta de KineticScout.' },
+          {
+            en: 'Your profile is now private, and purchases and messages to coaches are paused. You can still log metrics and see your own numbers. Talk with your parent or guardian if you think this was a mistake.',
+            es: 'Tu perfil ahora es privado, y las compras y los mensajes a entrenadores están en pausa. Todavía puedes registrar métricas y ver tus propias cifras. Habla con tu padre, madre o tutor si crees que fue un error.',
+          },
+        ],
+      },
       `guardian-revoked-${ctx.consentId}-${Date.now()}`,
     )
   }

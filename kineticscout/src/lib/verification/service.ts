@@ -5,14 +5,18 @@ import { audit } from '@/lib/audit'
 import type { SessionUser } from '@/lib/auth/permissions'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
-import { renderEmail } from '@/lib/email/templates'
+import { renderLocalizedEmail } from '@/lib/email/localized'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
-import { METRIC_DEFINITIONS, formatMetric } from '@/lib/metrics/definitions'
+import { formatMetric } from '@/lib/metrics/definitions'
 import { notify } from '@/lib/notifications/service'
 import { enqueueEvidenceCheck } from '@/lib/queue/queues'
 import { createSignedUpload, deleteObject, getObjectInfo, readObjectHead, type SignedUpload } from '@/lib/storage/gcs'
 import { extensionFor, isAllowedVideoType, sniffVideoContainer } from '@/lib/storage/video-files'
+import { isLocale } from '@/i18n/config'
+import { metricName } from '@/i18n/messages/domain'
+import { translateServerText } from '@/i18n/messages/server-text'
+import { textIn, type Text } from '@/i18n/recipient'
 import { EVIDENCE_POLICY, REJECTION_LABELS } from '@/lib/verification/policy'
 
 export class VerificationError extends Error {
@@ -94,12 +98,13 @@ export async function completeEvidenceUpload(user: SessionUser, metricId: string
   return 'CHECKING'
 }
 
-async function emailAthlete(athleteId: string, subject: string, paragraphs: string[], key: string) {
-  const user = await db.user.findUnique({ where: { id: athleteId }, select: { email: true } })
+async function emailAthlete(athleteId: string, subject: Text, paragraphs: Text[], key: string) {
+  const user = await db.user.findUnique({ where: { id: athleteId }, select: { email: true, locale: true } })
   if (!user) return
-  const { text, html } = renderEmail({ paragraphs, action: { label: 'Open your measurements', url: `${env().APP_URL}/dashboard/metrics` } })
+  const locale = isLocale(user.locale) ? user.locale : 'en'
+  const { text, html } = renderLocalizedEmail({ subject, paragraphs, action: { label: { en: 'Open your measurements', es: 'Abrir tus mediciones' }, url: `${env().APP_URL}/dashboard/metrics` } }, locale)
   try {
-    await sendEmail({ to: user.email, subject, text, html, idempotencyKey: key })
+    await sendEmail({ to: user.email, subject: textIn(subject, locale), text, html, idempotencyKey: key })
   } catch (error) {
     logger.error(errorFields(error), 'verification email failed')
   }
@@ -134,16 +139,58 @@ export async function decideEvidence(
   })
   if (!updated) return false
 
-  const label = `${METRIC_DEFINITIONS[updated.metricType].label} ${formatMetric(updated.metricType, Number(updated.value))}`
+  const name = metricName(updated.metricType)
+  const value = formatMetric(updated.metricType, Number(updated.value))
+  const label = { en: `${name.en} ${value}`, es: `${name.es} ${value}` }
   if (decision.approve) {
     await audit('verification.approved', { actorId: reviewerId, targetType: 'metric', targetId: metricId })
-    await notify({ userId: updated.athleteId, kind: 'METRIC_VERIFIED', title: `${label} is verified`, body: 'A reviewer confirmed this measurement from your video. It now shows a Verified badge on your profile and PDF.', href: '/dashboard/metrics', dedupeKey: `verified:${metricId}:${now.getTime()}` })
-    await emailAthlete(updated.athleteId, `Your ${METRIC_DEFINITIONS[updated.metricType].label.toLowerCase()} is verified`, [`A KineticScout reviewer confirmed your ${label} from the video you sent. It now shows a Verified badge on your profile and PDF.`], `verified-${metricId}-${now.getTime()}`)
+    await notify({
+      userId: updated.athleteId,
+      kind: 'METRIC_VERIFIED',
+      title: { en: `${label.en} is verified`, es: `${label.es}: verificado` },
+      body: {
+        en: 'A reviewer confirmed this measurement from your video. It now shows a Verified badge on your profile and PDF.',
+        es: 'Un revisor confirmó esta medición con tu video. Ahora muestra una insignia de Verificado en tu perfil y en tu PDF.',
+      },
+      href: '/dashboard/metrics',
+      dedupeKey: `verified:${metricId}:${now.getTime()}`,
+    })
+    await emailAthlete(
+      updated.athleteId,
+      { en: `Your ${name.en.toLowerCase()} is verified`, es: `Se verificó tu medición de ${name.es.toLowerCase()}` },
+      [
+        {
+          en: `A KineticScout reviewer confirmed your ${label.en} from the video you sent. It now shows a Verified badge on your profile and PDF.`,
+          es: `Un revisor de KineticScout confirmó tu ${label.es} con el video que enviaste. Ahora muestra una insignia de Verificado en tu perfil y en tu PDF.`,
+        },
+      ],
+      `verified-${metricId}-${now.getTime()}`,
+    )
   } else {
-    const reason = REJECTION_LABELS[decision.reason]
+    const reason = { en: REJECTION_LABELS[decision.reason], es: translateServerText(REJECTION_LABELS[decision.reason], 'es') }
+    const note = decision.note
     await audit('verification.rejected', { actorId: reviewerId, targetType: 'metric', targetId: metricId, metadata: { reason: decision.reason } })
-    await notify({ userId: updated.athleteId, kind: 'METRIC_REJECTED', title: `${label} could not be verified`, body: `${reason}${decision.note ? ` Reviewer note: ${decision.note}` : ''} You can send a new clip.`, href: '/dashboard/metrics', dedupeKey: `rejected:${metricId}:${now.getTime()}` })
-    await emailAthlete(updated.athleteId, `We could not verify your ${METRIC_DEFINITIONS[updated.metricType].label.toLowerCase()}`, [`We could not verify your ${label}. ${reason}`, ...(decision.note ? [`Reviewer note: ${decision.note}`] : []), 'You can send a new clip from your measurements page. The measurement stays on your profile as self-reported.'], `rejected-${metricId}-${now.getTime()}`)
+    await notify({
+      userId: updated.athleteId,
+      kind: 'METRIC_REJECTED',
+      title: { en: `${label.en} could not be verified`, es: `No se pudo verificar: ${label.es}` },
+      body: { en: `${reason.en}${note ? ` Reviewer note: ${note}` : ''} You can send a new clip.`, es: `${reason.es}${note ? ` Nota del revisor: ${note}` : ''} Puedes enviar un clip nuevo.` },
+      href: '/dashboard/metrics',
+      dedupeKey: `rejected:${metricId}:${now.getTime()}`,
+    })
+    await emailAthlete(
+      updated.athleteId,
+      { en: `We could not verify your ${name.en.toLowerCase()}`, es: `No pudimos verificar tu medición de ${name.es.toLowerCase()}` },
+      [
+        { en: `We could not verify your ${label.en}. ${reason.en}`, es: `No pudimos verificar tu ${label.es}. ${reason.es}` },
+        ...(note ? [{ en: `Reviewer note: ${note}`, es: `Nota del revisor: ${note}` }] : []),
+        {
+          en: 'You can send a new clip from your measurements page. The measurement stays on your profile as self-reported.',
+          es: 'Puedes enviar un clip nuevo desde tu página de mediciones. La medición sigue en tu perfil como registrada por ti.',
+        },
+      ],
+      `rejected-${metricId}-${now.getTime()}`,
+    )
   }
   return true
 }

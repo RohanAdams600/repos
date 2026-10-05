@@ -6,7 +6,8 @@ import { sendEmail } from '@/lib/email/send'
 import { env } from '@/lib/env'
 import { notifyGuardianAccount } from '@/lib/family/notify'
 import { randomToken, sha256Hex } from '@/lib/security/hash'
-import { escapeHtml } from '@/lib/security/sanitize'
+import { guardianLocale } from '@/i18n/recipient'
+import { renderLocalizedEmail, withLocale } from '@/lib/email/localized'
 
 const CONSENT_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
@@ -47,34 +48,42 @@ export async function sendGuardianConsentRequest(userId: string): Promise<'sent'
 
   const appUrl = env().APP_URL
   const link = `${appUrl}/consent/guardian?token=${encodeURIComponent(token)}`
-  const athleteName = consent.user.athleteProfile?.firstName ?? 'Your teen'
-  const lines = [
-    `${athleteName} created a KineticScout account and listed you as their parent or guardian.`,
-    '',
-    'KineticScout lets high school athletes record performance numbers (for example exit velocity or 60-yard dash time), see how they compare with other athletes, and share a profile with college coaches.',
-    '',
-    'Until you give consent, the account stays private: the profile cannot be made public, no messages can be sent to coaches, and no purchase can be made.',
-    '',
-    `To review what we collect and give consent, open this link within 7 days:\n${link}`,
-    '',
-    `Privacy policy: ${appUrl}/legal/privacy`,
-    '',
-    `If you have a KineticScout parent account under this email address, you can also answer from your Family page: ${appUrl}/dashboard/family`,
-    '',
-    'If you do not recognise this request, ignore this email. Nothing becomes public without your consent.',
-  ]
+  const locale = await guardianLocale(userId)
+  const first = consent.user.athleteProfile?.firstName
+  const name = { en: first ?? 'Your teen', es: first ?? 'Tu hijo o hija' }
+  const message = renderLocalizedEmail(
+    {
+      subject: { en: `Consent request for ${first ? `${first}'s` : 'your teen’s'} KineticScout account`, es: `Solicitud de consentimiento para la cuenta de KineticScout de ${first ?? 'tu hijo o hija'}` },
+      paragraphs: [
+        { en: `${name.en} created a KineticScout account and listed you as their parent or guardian.`, es: `${name.es} creó una cuenta de KineticScout y te indicó como su padre, madre o tutor.` },
+        {
+          en: 'KineticScout lets high school athletes record performance numbers (for example exit velocity or 60-yard dash time), see how they compare with other athletes, and share a profile with college coaches.',
+          es: 'KineticScout permite a atletas de secundaria registrar cifras de rendimiento (por ejemplo, la velocidad de salida o el tiempo en 60 yardas), ver cómo se comparan con otros atletas y compartir un perfil con entrenadores universitarios.',
+        },
+        {
+          en: 'Until you give consent, the account stays private: the profile cannot be made public, no messages can be sent to coaches, and no purchase can be made.',
+          es: 'Hasta que des tu consentimiento, la cuenta sigue siendo privada: el perfil no se puede hacer público, no se pueden enviar mensajes a entrenadores y no se puede hacer ninguna compra.',
+        },
+        { en: 'To review what we collect and give consent, open the link below within 7 days.', es: 'Para revisar qué datos recopilamos y dar tu consentimiento, abre el enlace de abajo en un plazo de 7 días.' },
+        { en: `Privacy policy: ${appUrl}/legal/privacy`, es: `Política de privacidad: ${withLocale(`${appUrl}/legal/privacy`, 'es')}` },
+        {
+          en: `If you have a KineticScout parent account under this email address, you can also answer from your Family page: ${appUrl}/dashboard/family`,
+          es: `Si tienes una cuenta de padre en KineticScout con este correo, también puedes responder desde tu página Familia: ${withLocale(`${appUrl}/dashboard/family`, 'es')}`,
+        },
+        { en: 'If you do not recognise this request, ignore this email. Nothing becomes public without your consent.', es: 'Si no reconoces esta solicitud, ignora este correo. Nada se hace público sin tu consentimiento.' },
+      ],
+      action: { label: { en: 'Review and give consent', es: 'Revisar y dar el consentimiento' }, url: link },
+    },
+    locale,
+  )
 
-  await sendEmail({
-    to: consent.guardianEmail,
-    subject: `Consent request for ${athleteName}'s KineticScout account`,
-    text: lines.join('\n'),
-    html: lines
-      .map((line) => (line === '' ? '<br>' : `<p>${escapeHtml(line).replace(/\n/g, '<br>')}</p>`))
-      .join('\n'),
-    idempotencyKey: `guardian-consent-${tokenHash.slice(0, 32)}`,
-  })
+  await sendEmail({ to: consent.guardianEmail, subject: message.subject, text: message.text, html: message.html, idempotencyKey: `guardian-consent-${tokenHash.slice(0, 32)}` })
   await audit('guardian.consent_requested', { actorId: userId, targetType: 'guardian_consent', targetId: userId })
-  await notifyGuardianAccount(userId, { title: `${athleteName} listed you as their parent or guardian`, body: 'Review what we collect and give or decline consent on your Family page.', dedupeKey: `guardian-consent-${tokenHash.slice(0, 32)}` })
+  await notifyGuardianAccount(userId, {
+    title: { en: `${name.en} listed you as their parent or guardian`, es: `${name.es} te indicó como su padre, madre o tutor` },
+    body: { en: 'Review what we collect and give or decline consent on your Family page.', es: 'Revisa qué datos recopilamos y da o rechaza el consentimiento en tu página Familia.' },
+    dedupeKey: `guardian-consent-${tokenHash.slice(0, 32)}`,
+  })
   return 'sent'
 }
 

@@ -5,6 +5,7 @@ import { hardenCookieOptions, isSecureCookieEnvironment } from '@/lib/auth/cooki
 import { analyticsAllowedOn, CONSENT_COOKIE, parseConsent, UTM_COOKIE, UTM_MAX_AGE } from '@/lib/consent'
 import { parseUtm } from '@/lib/marketing/utm'
 import { buildCsp, generateNonce } from '@/lib/security/csp'
+import { isLocale, LINK_LOCALE_HEADER } from '@/i18n/config'
 import { checkRequestOrigin } from '@/lib/security/origin'
 
 /**
@@ -57,6 +58,10 @@ export async function proxy(request: NextRequest) {
   const forwardHeaders = () => {
     const headers = new Headers(request.headers)
     headers.set('x-nonce', nonce)
+    // Emailed links carry ?lang= so the page opens in the language the email was written in.
+    headers.delete(LINK_LOCALE_HEADER)
+    const linkLocale = request.nextUrl.searchParams.get('lang')
+    if (isLocale(linkLocale)) headers.set(LINK_LOCALE_HEADER, linkLocale)
     headers.set('content-security-policy', csp)
     return headers
   }

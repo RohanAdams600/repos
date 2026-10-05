@@ -5,6 +5,11 @@ import { Alert } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/field'
 import { SubmitButton } from '@/components/ui/submit-button'
 import { familyAction } from '@/lib/family/actions'
+import { useMessages } from '@/i18n/client'
+import { consentMessages } from '@/i18n/messages/consent'
+import { familyMessages } from '@/i18n/messages/family'
+import { useServerText } from '@/i18n/server-text-client'
+import { UiText } from '@/components/ui/ui-text'
 import { initialFormState } from '@/lib/forms'
 
 type Props = {
@@ -58,6 +63,9 @@ export function FamilyActionForm({ athleteId, intent, itemId, title, description
 export function FamilyReportForm({ athleteId, threadId, messageId }: { athleteId: string; threadId: string; messageId: string }) {
   const [state, action] = useActionState(familyAction, initialFormState)
   const fieldError = state.status === 'error' ? state.fieldErrors?.reason : undefined
+  const g = useMessages(consentMessages).messages
+  const f = useMessages(familyMessages)
+  const serverText = useServerText()
   return (
     <form action={action} className="mt-3 flex flex-col gap-3">
       {state.status === 'error' && (
@@ -70,7 +78,7 @@ export function FamilyReportForm({ athleteId, threadId, messageId }: { athleteId
       <input type="hidden" name="itemId" value={threadId} />
       <input type="hidden" name="messageId" value={messageId} />
       <label htmlFor={`reason-${messageId}`} className="font-bold">
-        What is wrong? <span className="font-normal text-fg-muted">(required)</span>
+        {g.whatWrong} <span className="font-normal text-fg-muted"><UiText k="required" /></span>
       </label>
       <textarea
         id={`reason-${messageId}`}
@@ -84,11 +92,11 @@ export function FamilyReportForm({ athleteId, threadId, messageId }: { athleteId
       />
       {fieldError && (
         <p id={`reason-${messageId}-error`} className="text-sm font-bold text-danger">
-          {fieldError}
+          {serverText(fieldError)}
         </p>
       )}
-      <SubmitButton pendingLabel="Sending" size="sm" className="self-start">
-        Send report
+      <SubmitButton pendingLabel={f.sending} size="sm" className="self-start">
+        {g.sendReport}
       </SubmitButton>
     </form>
   )

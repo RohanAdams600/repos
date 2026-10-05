@@ -11,16 +11,12 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Field, Select } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
-import { positionLabel } from '@/lib/athletes/positions'
+import { positionLabel, type Position } from '@/lib/athletes/positions'
 import { formatJoinCode, TEAM_POLICY } from '@/lib/teams/rules'
+import { useMessages } from '@/i18n/client'
+import { coachMessages } from '@/i18n/messages/coach'
+import { domainMessages } from '@/i18n/messages/domain'
 import { errorMessage, useTRPC } from '@/trpc/client'
-
-const STATUS_TEXT = {
-  PENDING: 'Waiting for staff review. We check your staff page, usually within 2 business days.',
-  VERIFIED: 'Approved. Share the team code with your players.',
-  REJECTED: 'Not approved. Correct the details below and resubmit.',
-  SUSPENDED: 'Suspended. Recording and new members are paused.',
-} as const
 
 function Roster({ teamId, verified }: { teamId: string; verified: boolean }) {
   const trpc = useTRPC()
@@ -32,39 +28,39 @@ function Roster({ teamId, verified }: { teamId: string; verified: boolean }) {
   }
   const decide = useMutation(trpc.team.decideJoin.mutationOptions({ onSuccess: refresh }))
   const remove = useMutation(trpc.team.removeMember.mutationOptions({ onSuccess: refresh }))
+  const m = useMessages(coachMessages).team
+  const d = useMessages(domainMessages)
+  const position = (p: Position) => d.position[p] ?? positionLabel(p)
 
-  if (roster.isPending) return <Spinner label="Loading roster" />
+  if (roster.isPending) return <Spinner label={m.loadingRoster} />
   if (roster.isError) return <Alert tone="error">{errorMessage(roster.error)}</Alert>
-  const requested = roster.data.members.filter((m) => m.status === 'REQUESTED')
-  const awaiting = roster.data.members.filter((m) => m.status === 'AWAITING_GUARDIAN')
-  const active = roster.data.members.filter((m) => m.status === 'ACTIVE')
-  const who = (m: (typeof active)[number]) => `${m.athlete.firstName} ${m.athlete.lastName}`
+  const requested = roster.data.members.filter((x) => x.status === 'REQUESTED')
+  const awaiting = roster.data.members.filter((x) => x.status === 'AWAITING_GUARDIAN')
+  const active = roster.data.members.filter((x) => x.status === 'ACTIVE')
+  const who = (x: (typeof active)[number]) => `${x.athlete.firstName} ${x.athlete.lastName}`
 
   return (
     <div className="flex flex-col gap-8">
       {(decide.isError || remove.isError) && <Alert tone="error">{errorMessage(decide.error ?? remove.error)}</Alert>}
       <section aria-labelledby={`requests-${teamId}`} className="flex flex-col gap-3">
         <h3 id={`requests-${teamId}`} className="text-xl font-bold">
-          Join requests
+          {m.requests}
         </h3>
         {requested.length === 0 ? (
-          <p className="text-fg-muted">No one is waiting. Players ask to join with your team code.</p>
+          <p className="text-fg-muted">{m.noRequests}</p>
         ) : (
           <ul className="flex flex-col divide-y-2 divide-border-subtle border-2 border-border-subtle">
-            {requested.map((m) => (
-              <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+            {requested.map((x) => (
+              <li key={x.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
                 <span>
-                  <span className="font-bold">{who(m)}</span>{' '}
-                  <span className="text-fg-muted">
-                    Class of <span className="tabular">{m.athlete.gradYear}</span>, {positionLabel(m.athlete.primaryPosition)}
-                  </span>
+                  <span className="font-bold">{who(x)}</span> <span className="text-fg-muted">{m.classPosition(x.athlete.gradYear, position(x.athlete.primaryPosition))}</span>
                 </span>
                 <span className="flex flex-wrap gap-2">
-                  <Button size="sm" disabled={decide.isPending} onClick={() => decide.mutate({ memberId: m.id, approve: true })}>
-                    Approve {m.athlete.firstName}
+                  <Button size="sm" disabled={decide.isPending} onClick={() => decide.mutate({ memberId: x.id, approve: true })}>
+                    {m.approve(x.athlete.firstName)}
                   </Button>
-                  <Button size="sm" variant="secondary" disabled={decide.isPending} onClick={() => decide.mutate({ memberId: m.id, approve: false })}>
-                    Decline
+                  <Button size="sm" variant="secondary" disabled={decide.isPending} onClick={() => decide.mutate({ memberId: x.id, approve: false })}>
+                    {m.decline}
                   </Button>
                 </span>
               </li>
@@ -73,7 +69,7 @@ function Roster({ teamId, verified }: { teamId: string; verified: boolean }) {
         )}
         {awaiting.length > 0 && (
           <p className="text-fg-muted">
-            Waiting for a parent or guardian to approve: {awaiting.map(who).join(', ')}. We emailed them; the link lasts {TEAM_POLICY.guardianLinkDays} days.
+            {m.awaiting(awaiting.map(who).join(', '), TEAM_POLICY.guardianLinkDays)}
           </p>
         )}
       </section>
@@ -81,37 +77,34 @@ function Roster({ teamId, verified }: { teamId: string; verified: boolean }) {
       <section aria-labelledby={`roster-${teamId}`} className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 id={`roster-${teamId}`} className="text-xl font-bold">
-            Roster <span className="tabular font-normal text-fg-muted">({active.length})</span>
+            {m.roster} <span className="tabular font-normal text-fg-muted">({active.length})</span>
           </h3>
           {verified && active.length > 0 && (
             <Link href={`/dashboard/team/${teamId}/record`} className={buttonVariants({ size: 'sm' })}>
-              Record a testing day
+              {m.record}
             </Link>
           )}
         </div>
         {active.length === 0 ? (
-          <EmptyState title="No players yet">Approved players appear here. You see their name, class and position, and the results you record.</EmptyState>
+          <EmptyState title={m.noPlayersTitle}>{m.noPlayersBody}</EmptyState>
         ) : (
           <ul className="flex flex-col divide-y-2 divide-border-subtle border-2 border-border-subtle">
-            {active.map((m) => (
-              <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+            {active.map((x) => (
+              <li key={x.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
                 <span>
-                  <span className="font-bold">{who(m)}</span>{' '}
-                  <span className="text-fg-muted">
-                    <span className="tabular">{m.athlete.gradYear}</span>, {positionLabel(m.athlete.primaryPosition)}
-                  </span>
+                  <span className="font-bold">{who(x)}</span> <span className="tabular text-fg-muted">{m.yearPosition(x.athlete.gradYear, position(x.athlete.primaryPosition))}</span>
                 </span>
                 <ConfirmDialog
                   trigger={
                     <Button size="sm" variant="ghost">
-                      Remove {m.athlete.firstName}
+                      {m.remove(x.athlete.firstName)}
                     </Button>
                   }
-                  title={`Remove ${who(m)} from the team?`}
-                  description="Results they have not answered are withdrawn. Values they already accepted stay on their profile."
-                  confirmLabel="Remove"
+                  title={m.removeTitle(who(x))}
+                  description={m.removeBody}
+                  confirmLabel={m.removeConfirm}
                   tone="danger"
-                  onConfirm={() => remove.mutate({ memberId: m.id })}
+                  onConfirm={() => remove.mutate({ memberId: x.id })}
                 />
               </li>
             ))}
@@ -121,10 +114,10 @@ function Roster({ teamId, verified }: { teamId: string; verified: boolean }) {
 
       <section aria-labelledby={`sessions-${teamId}`} className="flex flex-col gap-3">
         <h3 id={`sessions-${teamId}`} className="text-xl font-bold">
-          Testing days
+          {m.sessions}
         </h3>
         {roster.data.sessions.length === 0 ? (
-          <p className="text-fg-muted">None yet.</p>
+          <p className="text-fg-muted">{m.none}</p>
         ) : (
           <ul className="flex flex-col divide-y-2 divide-border-subtle border-2 border-border-subtle">
             {roster.data.sessions.map((s) => (
@@ -134,7 +127,7 @@ function Roster({ teamId, verified }: { teamId: string; verified: boolean }) {
                   {s.location ? <span className="text-fg-muted">, {s.location}</span> : null}
                 </span>
                 <Link href={`/dashboard/team/session/${s.id}`} className="font-bold">
-                  <span className="tabular">{s.entries}</span> results
+                  <span className="tabular">{m.results(s.entries)}</span>
                 </Link>
               </li>
             ))}
@@ -153,19 +146,17 @@ export function TeamConsole() {
   const [adding, setAdding] = useState(false)
   const refresh = () => queryClient.invalidateQueries({ queryKey: trpc.team.mine.queryKey() })
   const regenerate = useMutation(trpc.team.regenerateCode.mutationOptions({ onSuccess: refresh }))
+  const m = useMessages(coachMessages).team
 
-  if (teams.isPending) return <Spinner label="Loading teams" />
+  if (teams.isPending) return <Spinner label={m.loadingTeams} />
   if (teams.isError) return <Alert tone="error">{errorMessage(teams.error)}</Alert>
   if (teams.data.length === 0 || adding) {
     return (
       <section aria-labelledby="new-team-title" className="flex flex-col gap-4">
         <h2 id="new-team-title" className="text-2xl font-bold">
-          {teams.data.length === 0 ? 'Set up your team' : 'Add a team'}
+          {teams.data.length === 0 ? m.setUp : m.add}
         </h2>
-        <p className="text-fg-muted">
-          Our staff match you to the staff page you give before players can join. Players ask to join with a code you share; you approve each one,
-          and a parent or guardian approves for players under 18.
-        </p>
+        <p className="text-fg-muted">{m.setUpIntro}</p>
         <TeamForm
           onDone={() => {
             setAdding(false)
@@ -174,7 +165,7 @@ export function TeamConsole() {
         />
         {adding && (
           <Button variant="ghost" className="self-start" onClick={() => setAdding(false)}>
-            Cancel
+            {m.cancel}
           </Button>
         )}
       </section>
@@ -186,7 +177,7 @@ export function TeamConsole() {
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         {teams.data.length > 1 ? (
-          <Field label="Team" name="team-select" required className="min-w-64">
+          <Field label={m.team} name="team-select" required className="min-w-64">
             {(p) => (
               <Select {...p} value={team.id} onChange={(e) => setSelected(e.target.value)}>
                 {teams.data.map((t) => (
@@ -202,36 +193,36 @@ export function TeamConsole() {
         )}
         {teams.data.length < TEAM_POLICY.maxTeamsPerCoach && (
           <Button variant="secondary" size="sm" onClick={() => setAdding(true)}>
-            Add a team
+            {m.add}
           </Button>
         )}
       </div>
 
       <section aria-labelledby="team-status-title" className="flex flex-col gap-3 border-2 border-border-subtle p-4">
         <h2 id="team-status-title" className="sr-only">
-          Team status
+          {m.teamStatus}
         </h2>
         <p className="text-fg-muted">
           {team.organization}, {team.state}. {team.coachName}, {team.coachTitle}.
         </p>
         <Alert tone={team.status === 'VERIFIED' ? 'success' : team.status === 'PENDING' ? 'info' : 'error'}>
-          {STATUS_TEXT[team.status]}
-          {team.reviewNote && team.status !== 'VERIFIED' ? ` Note from our staff: ${team.reviewNote}` : ''}
+          {m.status[team.status]}
+          {team.reviewNote && team.status !== 'VERIFIED' ? m.staffNote(team.reviewNote) : ''}
         </Alert>
         {team.status === 'VERIFIED' && (
           <div className="flex flex-wrap items-center gap-3">
-            <span>Team code</span>
+            <span>{m.code}</span>
             <span className="tabular text-2xl font-bold">{formatJoinCode(team.joinCode)}</span>
-            <CopyButton value={team.joinCode} label="Copy code" />
+            <CopyButton value={team.joinCode} label={m.copyCode} />
             <ConfirmDialog
               trigger={
                 <Button size="sm" variant="ghost">
-                  New code
+                  {m.newCode}
                 </Button>
               }
-              title="Replace the team code?"
-              description="The old code stops working at once. Requests already sent stay in your list."
-              confirmLabel="Replace code"
+              title={m.replaceTitle}
+              description={m.replaceBody}
+              confirmLabel={m.replace}
               onConfirm={() => regenerate.mutate({ teamId: team.id })}
             />
           </div>

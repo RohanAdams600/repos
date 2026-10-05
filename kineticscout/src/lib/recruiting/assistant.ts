@@ -5,10 +5,12 @@ import type { LlmClient } from '@/lib/ai/llm'
 import { ageBand } from '@/lib/auth/age'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
-import { renderEmail } from '@/lib/email/templates'
+import { renderLocalizedEmail } from '@/lib/email/localized'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
 import { notify } from '@/lib/notifications/service'
+import type { Localized } from '@/i18n/define'
+import { recipientLocale } from '@/i18n/recipient'
 import { draftOutreach } from '@/lib/recruiting/outreach'
 
 /**
@@ -63,12 +65,20 @@ export async function processProgramChange(changeId: string, enqueueDraft: (chan
   return { watchers: watchers.length }
 }
 
-function describeChange(change: { kind: string; newValue: unknown; college: { schoolName: string } }): { title: string; detail: string } {
+function describeChange(change: { kind: string; newValue: unknown; college: { schoolName: string } }): { title: Localized; detail: Localized } {
   const value = change.newValue as { name?: string; note?: string }
+  const school = change.college.schoolName
   if (change.kind === 'HEAD_COACH_CHANGED') {
-    return { title: `New head coach at ${change.college.schoolName}`, detail: `${value.name ?? 'A new coach'} is now the head coach at ${change.college.schoolName}.` }
+    return {
+      title: { en: `New head coach at ${school}`, es: `Nuevo entrenador principal en ${school}` },
+      detail: { en: `${value.name ?? 'A new coach'} is now the head coach at ${school}.`, es: `${value.name ?? 'Un nuevo entrenador'} es ahora el entrenador principal en ${school}.` },
+    }
   }
-  return { title: `${change.college.schoolName} posted a roster need`, detail: value.note ?? 'The program posted a new roster need.' }
+  return {
+    title: { en: `${school} posted a roster need`, es: `${school} publicó una necesidad de plantilla` },
+    // The note is copied from the program's own posting, so it stays in its original language.
+    detail: value.note ? { en: value.note, es: value.note } : { en: 'The program posted a new roster need.', es: 'El programa publicó una nueva necesidad de plantilla.' },
+  }
 }
 
 /**
@@ -101,16 +111,32 @@ export async function processDraftForAthlete(
   }
 
   const { title, detail } = describeChange(change)
-  const body = drafted ? `${detail} We drafted an introduction for you to review and send.` : `${detail} Open the recruiting assistant to write an introduction.`
+  const body = drafted
+    ? { en: `${detail.en} We drafted an introduction for you to review and send.`, es: `${detail.es} Redactamos una presentación para que la revises y la envíes.` }
+    : { en: `${detail.en} Open the recruiting assistant to write an introduction.`, es: `${detail.es} Abre el asistente de reclutamiento para escribir una presentación.` }
   const fresh = await notify({ userId: athleteId, kind: change.kind === 'HEAD_COACH_CHANGED' ? 'COACH_CHANGE' : 'ROSTER_NEED', title, body, href: '/dashboard/recruiting', dedupeKey: `change:${changeId}` })
   if (fresh && watcher.emailAlerts) {
-    const { text, html } = renderEmail({
-      paragraphs: [`Hi ${watcher.firstName},`, detail, ...(drafted ? ['We drafted an introduction you can review, edit and send from your own email.'] : []), ...(change.sourceUrl ? [`Source: ${change.sourceUrl}`] : [])],
-      action: { label: 'Open the recruiting assistant', url: `${env().APP_URL}/dashboard/recruiting` },
-      footer: ['You get these alerts because you turned on the recruiting assistant. Turn them off on the recruiting assistant page.'],
-    })
+    const { subject, text, html } = renderLocalizedEmail(
+      {
+        subject: title,
+        paragraphs: [
+          { en: `Hi ${watcher.firstName},`, es: `Hola, ${watcher.firstName}:` },
+          detail,
+          ...(drafted ? [{ en: 'We drafted an introduction you can review, edit and send from your own email.', es: 'Redactamos una presentación que puedes revisar, editar y enviar desde tu propio correo. Está en inglés, porque va dirigida al entrenador.' }] : []),
+          ...(change.sourceUrl ? [{ en: `Source: ${change.sourceUrl}`, es: `Fuente: ${change.sourceUrl}` }] : []),
+        ],
+        action: { label: { en: 'Open the recruiting assistant', es: 'Abrir el asistente de reclutamiento' }, url: `${env().APP_URL}/dashboard/recruiting` },
+        footer: [
+          {
+            en: 'You get these alerts because you turned on the recruiting assistant. Turn them off on the recruiting assistant page.',
+            es: 'Recibes estas alertas porque activaste el asistente de reclutamiento. Puedes desactivarlas en la página del asistente de reclutamiento.',
+          },
+        ],
+      },
+      await recipientLocale(athleteId),
+    )
     try {
-      await sendEmail({ to: watcher.email, subject: title, text, html, idempotencyKey: `change-${changeId}-${athleteId}` })
+      await sendEmail({ to: watcher.email, subject, text, html, idempotencyKey: `change-${changeId}-${athleteId}` })
     } catch (error) {
       logger.error({ changeId, ...errorFields(error) }, 'recruiting alert email failed')
     }

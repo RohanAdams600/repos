@@ -3,35 +3,39 @@ import Link from 'next/link'
 import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { EmptyState } from '@/components/ui/empty-state'
 import { requireGuardian } from '@/lib/auth/session'
+import { pick } from '@/i18n/define'
+import { accountMessages } from '@/i18n/messages/account'
+import { domain } from '@/i18n/messages/domain'
+import { familyMessages } from '@/i18n/messages/family'
+import { getLocale, messages } from '@/i18n/server'
 import { familyOverview } from '@/lib/family/service'
-import { SPORT_LABEL } from '@/lib/sports'
 
-export const metadata: Metadata = { title: 'Family' }
-
-const CONSENT_LABEL = { PENDING: 'Waiting for your consent', GRANTED: 'Consent given', REVOKED: 'Consent withdrawn' } as const
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await messages(familyMessages)).title }
+}
 
 export default async function FamilyPage() {
   const user = await requireGuardian()
   const children = await familyOverview(user)
+  const locale = await getLocale()
+  const m = pick(familyMessages, locale)
+  const d = domain(locale)
+  const dash = pick(accountMessages, locale).dashboard
   return (
     <div className="flex max-w-3xl flex-col gap-8">
       <div className="flex flex-col gap-3">
-        <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Family' }]} />
-        <h1 className="text-3xl font-bold">Family</h1>
-        <p className="text-fg-muted">
-          Athletes under 18 who listed <strong className="text-fg">{user.email}</strong> as their parent or guardian appear here. You can give or withdraw consent, approve team and
-          coach contact requests, read conversations with college coaches, download their data, or delete their account.
-        </p>
+        <Breadcrumbs items={[{ label: dash, href: '/dashboard' }, { label: m.title }]} />
+        <h1 className="text-3xl font-bold">{m.title}</h1>
+        <p className="text-fg-muted">{m.intro(user.email)}</p>
       </div>
       {children.length === 0 ? (
-        <EmptyState title="No athletes linked yet">
+        <EmptyState title={m.noneTitle}>
           <p>
-            An athlete appears here once they sign up and enter {user.email} as their parent or guardian email. If they used a different address, sign in with that address
-            instead, or ask us to change it through our <Link href="/contact">contact page</Link>.
+            {m.none(user.email)} <Link href="/contact">{m.contactPage}</Link>.
           </p>
         </EmptyState>
       ) : (
-        <ul className="flex flex-col gap-4" aria-label="Your athletes">
+        <ul className="flex flex-col gap-4" aria-label={m.list}>
           {children.map((child) => {
             const waiting = child.pendingTeams + child.pendingContacts
             return (
@@ -42,17 +46,13 @@ export default async function FamilyPage() {
                       {child.firstName} {child.lastName}
                     </Link>
                   </h2>
-                  <span className={child.consentStatus === 'GRANTED' ? 'font-bold' : 'font-bold text-danger'}>{CONSENT_LABEL[child.consentStatus]}</span>
+                  <span className={child.consentStatus === 'GRANTED' ? 'font-bold' : 'font-bold text-danger'}>{m.consent[child.consentStatus]}</span>
                 </div>
-                <p className="text-fg-muted">
-                  {SPORT_LABEL[child.sport]}, class of <span className="tabular">{child.gradYear}</span>. Profile is {child.isPublic ? 'public' : 'private'}.
-                </p>
+                <p className="text-fg-muted">{m.summary(d.sport[child.sport], child.gradYear, child.isPublic)}</p>
                 {waiting > 0 && (
-                  <p className="font-bold">
-                    <span className="tabular">{waiting}</span> {waiting === 1 ? 'request needs' : 'requests need'} your answer.
-                  </p>
+                  <p className="font-bold">{m.waiting(waiting)}</p>
                 )}
-                {child.deletionScheduledFor && <p className="font-bold text-danger">Account scheduled for deletion.</p>}
+                {child.deletionScheduledFor && <p className="font-bold text-danger">{m.deletionScheduled}</p>}
               </li>
             )
           })}

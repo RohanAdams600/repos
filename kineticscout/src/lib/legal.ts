@@ -7,7 +7,7 @@ import { env } from '@/lib/env'
  * page or API call (requireUser and the tRPC protectedProcedure enforce it), and account holders are
  * emailed before the change takes effect, as the Privacy Policy promises.
  */
-export const CURRENT_TERMS_VERSION = '2026-10-05.2'
+export const CURRENT_TERMS_VERSION = '2026-10-05.3'
 export const LEGAL_LAST_UPDATED = 'October 5, 2026'
 /** The same date, for formatting in other languages. Keep in step with LEGAL_LAST_UPDATED. */
 export const LEGAL_UPDATED_ON = new Date(Date.UTC(2026, 9, 5))
@@ -18,6 +18,7 @@ export const TERMS_HIGHLIGHTS: readonly string[] = [
   'New: showcases, camps and combines, checked by our staff against the organizer\'s page. Mark the events you are going to; verified college coaches see that only if you choose to show it and your profile is public.',
   'New: a recruiting calendar copied from the published calendars, with each source linked. It is a summary, not rules advice.',
   'New for Pro: four-week training plans built from your video analysis, with drills from our staff coaches. Plans show the measurements you log next to your starting value, without claiming the drills caused a change.',
+  'New: KineticScout in Spanish. Your language choice is saved on your account so the site and our emails use it. Spanish versions of our policies are a courtesy; if they differ, the English version governs.',
   'You can download all of your data, or delete your account, yourself from Settings. Deletion happens after a 7-day window in which you can cancel.',
   'We never sell personal information, and published statistics always describe groups of at least 25 athletes.',
 ]
@@ -27,7 +28,7 @@ export const TERMS_HIGHLIGHTS_ES: readonly string[] = [
   'Nuevo: showcases, campamentos y combines, revisados por nuestro personal con la página del organizador. Marca los eventos a los que vas a ir; los entrenadores universitarios verificados solo lo ven si decides mostrarlo y tu perfil es público.',
   'Nuevo: un calendario de reclutamiento copiado de los calendarios publicados, con cada fuente enlazada. Es un resumen, no asesoría sobre reglas.',
   'Nuevo en Pro: planes de entrenamiento de cuatro semanas creados a partir de tu análisis de video, con ejercicios de nuestros entrenadores. Los planes muestran las mediciones que registras junto a tu valor inicial, sin afirmar que los ejercicios causaron un cambio.',
-  'Nuevo: KineticScout en español. Las versiones en español de nuestras políticas se ofrecen para tu comodidad; si hay diferencias, rige la versión en inglés.',
+  'Nuevo: KineticScout en español. Tu elección de idioma se guarda en tu cuenta para que el sitio y nuestros correos la usen. Las versiones en español de nuestras políticas se ofrecen como cortesía; si hay diferencias, rige la versión en inglés.',
   'Puedes descargar todos tus datos o eliminar tu cuenta tú mismo desde Configuración. La eliminación ocurre después de 7 días, durante los cuales puedes cancelarla.',
   'Nunca vendemos información personal, y las estadísticas que publicamos siempre describen grupos de al menos 25 atletas.',
 ]

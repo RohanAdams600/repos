@@ -63,6 +63,10 @@ Privacy controls that work without contacting support:
 - **Events and camps**: coaches and parents submit showcases, camps, combines and tournaments; staff check each against the organizer's page before it is listed (public pages with schema.org event data). Athletes mark events they are going to and choose whether verified college coaches may see it (only with a public profile, so guardian consent for minors). A recruiting calendar shows contact, evaluation, quiet and dead periods that staff copy from the published calendars, each with its source.
 - **Training plans (Pro)**: four-week plans built from the focus areas of a video analysis, using drills written or licensed by staff coaches and published only after a second staff member reviews them. Athletes mark practice days; the plan shows measurements logged afterwards next to the starting value, without claiming cause.
 
+## What is in Phase 7 (part 2)
+
+- **Spanish**: every page athletes, parents and coaches use is available in Spanish (the staff console stays English). The language comes from the switch in the header and footer, the language saved in Settings, the link that opened the page, or the browser. Emails and notifications go out in each person's language, including emails to a parent or guardian in the language the athlete chose for them. Legal pages are courtesy translations that say the English text governs. Catalogues live in `src/i18n/messages/` and are type-checked against the English, so a missing translation fails the build. Drill instructions, outreach drafts to US coaches and the profile PDF stay in English.
+
 ## Local development
 
 Requirements: Node 22.12+, PostgreSQL 15+, Redis 7+.
@@ -84,9 +88,20 @@ Generate the secrets with `openssl rand -base64 48`. Without Stripe, OpenAI, GCS
 1. Create a project. Copy the URL, publishable key and secret key into `.env`. Use the pooled connection string for `DATABASE_URL` and the direct one for `DIRECT_DATABASE_URL`.
 2. Authentication → Providers → Email: confirm email **on**, minimum password length **12**, leaked password protection **on**.
 3. Authentication → URL configuration: Site URL = `APP_URL`; add `APP_URL/auth/confirm` to the redirect allow list.
-4. Authentication → Email templates: point the links at the POST-confirmed page:
-   - Confirm signup: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/onboarding`
-   - Reset password: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password`
+4. Authentication → Email templates: point the links at the POST-confirmed page, and add `&lang={{ .Data.locale }}` so the page opens in the account's language:
+   - Confirm signup: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next=/onboarding&lang={{ .Data.locale }}`
+   - Reset password: `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password&lang={{ .Data.locale }}`
+
+   The app stores the account language in the user's metadata (`locale`, `en` or `es`), so each template can be written in both languages. Subject and body:
+
+   ```
+   Confirm signup subject: {{ if eq .Data.locale "es" }}Confirma tu correo de KineticScout{{ else }}Confirm your KineticScout email{{ end }}
+   Confirm signup body:    {{ if eq .Data.locale "es" }}<p>Confirma tu correo para activar tu cuenta de KineticScout.</p><p><a href="LINK">Confirmar mi correo</a></p>{{ else }}<p>Confirm your email to activate your KineticScout account.</p><p><a href="LINK">Confirm my email</a></p>{{ end }}
+   Reset subject:          {{ if eq .Data.locale "es" }}Restablece tu contraseña de KineticScout{{ else }}Reset your KineticScout password{{ end }}
+   Reset body:             {{ if eq .Data.locale "es" }}<p>Usa este enlace para elegir una contraseña nueva. Si no lo pediste, ignora este correo.</p><p><a href="LINK">Elegir una contraseña nueva</a></p>{{ else }}<p>Use this link to choose a new password. If you did not ask for this, ignore this email.</p><p><a href="LINK">Choose a new password</a></p>{{ end }}
+   ```
+
+   Replace `LINK` with the matching URL above.
 5. Run `npx prisma migrate deploy` against the direct URL. The migration enables RLS and revokes Data API grants.
 
 ### Stripe setup

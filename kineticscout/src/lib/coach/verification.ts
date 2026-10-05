@@ -4,12 +4,14 @@ import { audit } from '@/lib/audit'
 import { db } from '@/lib/db'
 import { closeThreadsOperation } from '@/lib/messaging/service'
 import { sendEmail } from '@/lib/email/send'
-import { renderEmail } from '@/lib/email/templates'
+import { renderLocalizedEmail } from '@/lib/email/localized'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
 import { notify } from '@/lib/notifications/service'
 import { randomToken, sha256Hex } from '@/lib/security/hash'
 import { normalizeEmail, sanitizeText } from '@/lib/security/sanitize'
+import { isLocale } from '@/i18n/config'
+import { recipientLocale } from '@/i18n/recipient'
 import { workEmailAllowed } from '@/lib/coach/rules'
 
 const TOKEN_TTL_MS = 48 * 3600_000
@@ -82,14 +84,21 @@ export async function submitCoachProfile(userId: string, input: CoachProfileInpu
   await audit('coach.verification_submitted', { actorId: userId, targetType: 'coach_profile', targetId: userId, metadata: { collegeId: input.collegeId } })
 
   const link = `${env().APP_URL}/coach/verify-email?token=${encodeURIComponent(token)}`
-  const { text, html } = renderEmail({
-    paragraphs: [
-      `Confirm that ${input.workEmail} is your address at ${program.schoolName}.`,
-      'After you confirm, a KineticScout staff member checks your program staff directory, usually within 2 business days. If you did not request this, ignore this email.',
-    ],
-    action: { label: 'Confirm my school email', url: link },
-  })
-  await sendEmail({ to: input.workEmail, subject: 'Confirm your school email for KineticScout', text, html, idempotencyKey: `coach-email-${userId}-${data.workEmailTokenHash.slice(0, 12)}` })
+  const { subject, text, html } = renderLocalizedEmail(
+    {
+      subject: { en: 'Confirm your school email for KineticScout', es: 'Confirma tu correo de la universidad para KineticScout' },
+      paragraphs: [
+        { en: `Confirm that ${input.workEmail} is your address at ${program.schoolName}.`, es: `Confirma que ${input.workEmail} es tu dirección en ${program.schoolName}.` },
+        {
+          en: 'After you confirm, a KineticScout staff member checks your program staff directory, usually within 2 business days. If you did not request this, ignore this email.',
+          es: 'Después de confirmar, una persona del equipo de KineticScout revisa el directorio de personal de tu programa, normalmente en un plazo de 2 días hábiles. Si no lo solicitaste, ignora este correo.',
+        },
+      ],
+      action: { label: { en: 'Confirm my school email', es: 'Confirmar mi correo de la universidad' }, url: link },
+    },
+    await recipientLocale(userId),
+  )
+  await sendEmail({ to: input.workEmail, subject, text, html, idempotencyKey: `coach-email-${userId}-${data.workEmailTokenHash.slice(0, 12)}` })
 }
 
 /** Step 2: the link from the school inbox. Moves the coach to staff review. */
@@ -118,18 +127,31 @@ export async function decideCoach(reviewerId: string, coachId: string, decision:
     ])
   }
   await audit(decision === 'VERIFIED' ? 'coach.verified' : decision === 'REJECTED' ? 'coach.rejected' : 'coach.suspended', { actorId: reviewerId, targetType: 'coach_profile', targetId: coachId })
-  const titles = { VERIFIED: 'Your coach account is verified', REJECTED: 'We could not verify your coach account', SUSPENDED: 'Your coach account is suspended' } as const
+  const titles = {
+    VERIFIED: { en: 'Your coach account is verified', es: 'Tu cuenta de entrenador está verificada' },
+    REJECTED: { en: 'We could not verify your coach account', es: 'No pudimos verificar tu cuenta de entrenador' },
+    SUSPENDED: { en: 'Your coach account is suspended', es: 'Tu cuenta de entrenador está suspendida' },
+  }
   const bodies = {
-    VERIFIED: 'You can now search public athlete profiles, save prospects and send contact requests.',
-    REJECTED: `We could not match you to your program staff directory.${note ? ` Reviewer note: ${note}` : ''} You can update your details and submit again.`,
-    SUSPENDED: `Your coach account is suspended after a review.${note ? ` Reason: ${note}` : ''} Contact support if you think this is a mistake.`,
-  } as const
+    VERIFIED: { en: 'You can now search public athlete profiles, save prospects and send contact requests.', es: 'Ya puedes buscar perfiles públicos de atletas, guardar prospectos y enviar solicitudes de contacto.' },
+    REJECTED: {
+      en: `We could not match you to your program staff directory.${note ? ` Reviewer note: ${note}` : ''} You can update your details and submit again.`,
+      es: `No pudimos encontrarte en el directorio de personal de tu programa.${note ? ` Nota del revisor: ${note}` : ''} Puedes actualizar tus datos y volver a enviarlos.`,
+    },
+    SUSPENDED: {
+      en: `Your coach account is suspended after a review.${note ? ` Reason: ${note}` : ''} Contact support if you think this is a mistake.`,
+      es: `Tu cuenta de entrenador quedó suspendida después de una revisión.${note ? ` Motivo: ${note}` : ''} Contacta a soporte si crees que es un error.`,
+    },
+  }
   await notify({ userId: coachId, kind: 'COACH_VERIFICATION', title: titles[decision], body: bodies[decision], href: '/dashboard', dedupeKey: `coach-${decision}-${Date.now()}` })
-  const user = await db.user.findUnique({ where: { id: coachId }, select: { email: true } })
+  const user = await db.user.findUnique({ where: { id: coachId }, select: { email: true, locale: true } })
   if (user) {
-    const { text, html } = renderEmail({ paragraphs: [bodies[decision]], action: { label: 'Open KineticScout', url: `${env().APP_URL}/dashboard` } })
+    const { subject, text, html } = renderLocalizedEmail(
+      { subject: titles[decision], paragraphs: [bodies[decision]], action: { label: { en: 'Open KineticScout', es: 'Abrir KineticScout' }, url: `${env().APP_URL}/dashboard` } },
+      isLocale(user.locale) ? user.locale : 'en',
+    )
     try {
-      await sendEmail({ to: user.email, subject: titles[decision], text, html, idempotencyKey: `coach-decision-${coachId}-${decision}-${Date.now()}` })
+      await sendEmail({ to: user.email, subject, text, html, idempotencyKey: `coach-decision-${coachId}-${decision}-${Date.now()}` })
     } catch (error) {
       logger.error(errorFields(error), 'coach decision email failed')
     }

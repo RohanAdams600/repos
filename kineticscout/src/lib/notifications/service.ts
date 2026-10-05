@@ -3,9 +3,11 @@ import type { NotificationKind } from '@/generated/prisma/enums'
 import { db } from '@/lib/db'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
+import { isLocalized, recipientLocale, textIn, type Text } from '@/i18n/recipient'
 import { enqueuePush } from '@/lib/queue/queues'
 
-export type NewNotification = { userId: string; kind: NotificationKind; title: string; body: string; href?: string; dedupeKey?: string }
+/** Title and body are stored in the recipient's language: give both languages, or one fixed string. */
+export type NewNotification = { userId: string; kind: NotificationKind; title: Text; body: Text; href?: string; dedupeKey?: string }
 
 /** Idempotent when a dedupe key is given: a retried job never notifies twice. Returns false for a duplicate. */
 export async function notify(input: NewNotification): Promise<boolean> {
@@ -13,9 +15,10 @@ export async function notify(input: NewNotification): Promise<boolean> {
     const existing = await db.notification.findUnique({ where: { userId_dedupeKey: { userId: input.userId, dedupeKey: input.dedupeKey } }, select: { id: true } })
     if (existing) return false
   }
+  const locale = isLocalized(input.title) || isLocalized(input.body) ? await recipientLocale(input.userId) : 'en'
   try {
     const created = await db.notification.create({
-      data: { userId: input.userId, kind: input.kind, title: input.title.slice(0, 160), body: input.body.slice(0, 1000), href: input.href, dedupeKey: input.dedupeKey },
+      data: { userId: input.userId, kind: input.kind, title: textIn(input.title, locale).slice(0, 160), body: textIn(input.body, locale).slice(0, 1000), href: input.href, dedupeKey: input.dedupeKey },
       select: { id: true },
     })
     await queuePush(input.userId, created.id)

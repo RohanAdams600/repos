@@ -1,5 +1,6 @@
 import 'server-only'
 import { db } from '@/lib/db'
+import type { Text } from '@/i18n/recipient'
 import { notify } from '@/lib/notifications/service'
 
 /**
@@ -7,7 +8,7 @@ import { notify } from '@/lib/notifications/service'
  * address the athlete named. The email the guardian already receives is unchanged; this only adds
  * the item to their Family page and notifications.
  */
-export async function notifyGuardianAccount(athleteId: string, input: { title: string; body: string; dedupeKey: string }): Promise<boolean> {
+export async function notifyGuardianAccount(athleteId: string, input: { title: Text; body: Text; dedupeKey: string }): Promise<boolean> {
   const consent = await db.guardianConsent.findUnique({ where: { userId: athleteId }, select: { guardianEmail: true } })
   if (!consent) return false
   const guardian = await db.user.findFirst({ where: { email: consent.guardianEmail.toLowerCase(), role: 'GUARDIAN', deletionScheduledFor: null }, select: { id: true } })

@@ -15,7 +15,7 @@ someone ticks, not background reading. Commands run from `kineticscout/`.
 
 ### Accounts and services
 
-- [ ] **Supabase:** project created; email confirmation on; minimum password length 12; leaked-password protection on; Site URL = `APP_URL`; `APP_URL/auth/confirm` on the redirect allow list; email templates point at `/auth/confirm` (exact templates in README, "Supabase setup").
+- [ ] **Supabase:** project created; email confirmation on; minimum password length 12; leaked-password protection on; Site URL = `APP_URL`; `APP_URL/auth/confirm` on the redirect allow list; email templates point at `/auth/confirm` and are written in English and Spanish (exact templates in README, "Supabase setup").
 - [ ] **Postgres:** pooled (transaction mode) URL in `DATABASE_URL`, direct URL in `DIRECT_DATABASE_URL`. Point-in-time recovery enabled on the plan.
 - [ ] **Stripe (live mode):** one product, two prices matching `/pricing` exactly ($14.99 monthly, $129 yearly); webhook at `APP_URL/api/webhooks/stripe` for `checkout.session.completed`, `checkout.session.expired`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `customer.subscription.paused`, `customer.subscription.resumed`, `invoice.paid`, `invoice.payment_failed`; Billing Portal allows cancellation and plan switching; Stripe Tax configured if `STRIPE_AUTOMATIC_TAX=true`.
 - [ ] **Google Cloud:** private bucket with uniform access; `infra/gcs-cors.json` applied with the production origin; Video Intelligence API enabled; a service account with `roles/storage.objectAdmin` on the bucket and Video Intelligence access, attached to the worker (no key files in the repo).
@@ -65,6 +65,7 @@ and names the variable in the error. `.env.example` lists every variable with a 
 - [ ] Open a known public test profile at `/p/<slug>` and download its PDF.
 - [ ] The worker logged its startup line and the heartbeat monitor is green.
 - [ ] `/events` and `/recruiting-calendar` load signed out.
+- [ ] The language switch in the header turns the home page and `/legal/privacy` into Spanish (`<html lang="es">`, the "English governs" notice on the legal page) and back.
 - [ ] No new alerts fired in the 15 minutes after release.
 
 ## 3. Monitoring

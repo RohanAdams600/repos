@@ -5,10 +5,13 @@ import { deleteAuthUser } from '@/lib/auth/supabase-admin'
 import { stripe } from '@/lib/billing/stripe'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
-import { renderEmail } from '@/lib/email/templates'
+import { renderLocalizedEmail, type LocalizedEmail } from '@/lib/email/localized'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
 import { pepperedHash } from '@/lib/security/hash'
+import { isLocale, type Locale } from '@/i18n/config'
+import type { Localized } from '@/i18n/define'
+import { formatDay } from '@/i18n/messages/domain'
 import { deleteObject, deletePrefix } from '@/lib/storage/gcs'
 
 /**
@@ -32,9 +35,11 @@ export function deletionSubjectHash(userId: string): string {
   return pepperedHash(`deletion-subject:${userId}`)
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
+function formatDate(date: Date): Localized {
+  return { en: formatDay(date, 'en'), es: formatDay(date, 'es') }
 }
+
+const asLocale = (value: string | null | undefined): Locale => (isLocale(value) ? value : 'en')
 
 const LIVE_STATUSES = ['ACTIVE', 'TRIALING', 'PAST_DUE'] as const
 /** Marks renewals we switched off for a pending deletion, so canceling the deletion restores only those. */
@@ -68,8 +73,8 @@ async function resumeRenewals(userId: string): Promise<void> {
   }
 }
 
-async function notify(to: string, subject: string, paragraphs: string[], key: string, action?: { label: string; url: string }) {
-  const { text, html } = renderEmail({ paragraphs, action })
+async function notify(to: string, locale: Locale, message: LocalizedEmail, key: string) {
+  const { subject, text, html } = renderLocalizedEmail(message, locale)
   try {
     await sendEmail({ to, subject, text, html, idempotencyKey: key })
   } catch (error) {
@@ -87,7 +92,7 @@ export async function scheduleDeletion(
   const result = await db.$transaction(async (tx) => {
     const user = await tx.user.findUniqueOrThrow({
       where: { id: userId },
-      select: { email: true, deletionScheduledFor: true, guardianConsent: { select: { guardianEmail: true, status: true } } },
+      select: { email: true, locale: true, deletionScheduledFor: true, guardianConsent: { select: { guardianEmail: true, status: true, locale: true } } },
     })
     if (user.deletionScheduledFor) return { scheduledFor: user.deletionScheduledFor, alreadyScheduled: true, user }
     const scheduledFor = new Date(now.getTime() + DELETION_GRACE_DAYS * DAY_MS)
@@ -105,27 +110,48 @@ export async function scheduleDeletion(
     await audit('account.deletion_scheduled', { actorId, targetType: 'user', targetId: userId, metadata: { requestedBy } })
     const when = formatDate(result.scheduledFor)
     const signIn = `${env().APP_URL}/dashboard/settings`
+    const byGuardian = requestedBy === 'GUARDIAN'
     await notify(
       result.user.email,
-      'Your KineticScout account is scheduled for deletion',
-      [
-        requestedBy === 'GUARDIAN'
-          ? 'Your parent or guardian asked us to delete your KineticScout account.'
-          : 'We received a request to delete your KineticScout account.',
-        `Your account and all of its data (profile, metrics, videos, analyses and billing details) will be permanently deleted on ${when}. Until then your profile is private, and any Pro subscription is set not to renew.`,
-        requestedBy === 'GUARDIAN'
-          ? 'Only your parent or guardian can cancel this request, using the link in their consent emails. Talk with them if you think this is a mistake.'
-          : 'Changed your mind, or did not make this request? Sign in and cancel the deletion before that date. If you did not request this, also change your password.',
-      ],
+      asLocale(result.user.locale),
+      {
+        subject: { en: 'Your KineticScout account is scheduled for deletion', es: 'Tu cuenta de KineticScout está programada para eliminarse' },
+        paragraphs: [
+          byGuardian
+            ? { en: 'Your parent or guardian asked us to delete your KineticScout account.', es: 'Tu padre, madre o tutor nos pidió eliminar tu cuenta de KineticScout.' }
+            : { en: 'We received a request to delete your KineticScout account.', es: 'Recibimos una solicitud para eliminar tu cuenta de KineticScout.' },
+          {
+            en: `Your account and all of its data (profile, metrics, videos, analyses and billing details) will be permanently deleted on ${when.en}. Until then your profile is private, and any Pro subscription is set not to renew.`,
+            es: `Tu cuenta y todos sus datos (perfil, métricas, videos, análisis y datos de facturación) se eliminarán de forma permanente el ${when.es}. Hasta entonces tu perfil es privado, y cualquier suscripción Pro queda sin renovación.`,
+          },
+          byGuardian
+            ? {
+                en: 'Only your parent or guardian can cancel this request, using the link in their consent emails. Talk with them if you think this is a mistake.',
+                es: 'Solo tu padre, madre o tutor puede cancelar esta solicitud, con el enlace de sus correos de consentimiento. Habla con esa persona si crees que es un error.',
+              }
+            : {
+                en: 'Changed your mind, or did not make this request? Sign in and cancel the deletion before that date. If you did not request this, also change your password.',
+                es: '¿Cambiaste de opinión o no hiciste esta solicitud? Inicia sesión y cancela la eliminación antes de esa fecha. Si no la solicitaste, cambia también tu contraseña.',
+              },
+        ],
+        action: byGuardian ? undefined : { label: { en: 'Review or cancel deletion', es: 'Revisar o cancelar la eliminación' }, url: signIn },
+      },
       `deletion-scheduled-${userId}-${result.scheduledFor.getTime()}`,
-      requestedBy === 'GUARDIAN' ? undefined : { label: 'Review or cancel deletion', url: signIn },
     )
     const guardian = result.user.guardianConsent
-    if (guardian && requestedBy !== 'GUARDIAN') {
+    if (guardian && !byGuardian) {
       await notify(
         guardian.guardianEmail,
-        "Your teen's KineticScout account is scheduled for deletion",
-        [`The KineticScout account you are listed as parent or guardian for will be permanently deleted on ${when}, at the account holder's request. No action is needed.`],
+        asLocale(guardian.locale),
+        {
+          subject: { en: "Your teen's KineticScout account is scheduled for deletion", es: 'La cuenta de KineticScout de tu hijo o hija está programada para eliminarse' },
+          paragraphs: [
+            {
+              en: `The KineticScout account you are listed as parent or guardian for will be permanently deleted on ${when.en}, at the account holder's request. No action is needed.`,
+              es: `La cuenta de KineticScout en la que apareces como padre, madre o tutor se eliminará de forma permanente el ${when.es}, a petición del titular de la cuenta. No necesitas hacer nada.`,
+            },
+          ],
+        },
         `deletion-scheduled-guardian-${userId}-${result.scheduledFor.getTime()}`,
       )
     }
@@ -159,7 +185,7 @@ export async function cancelDeletion(userId: string, by: 'USER' | 'GUARDIAN', no
   if (!request || request.scheduledFor.getTime() <= now.getTime()) return 'not-scheduled'
   const allowed = request.requestedBy === 'GUARDIAN' ? by === 'GUARDIAN' : by === 'USER'
   if (!allowed) return request.requestedBy === 'GUARDIAN' ? 'guardian-requested' : 'user-requested'
-  const user = await db.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true } })
+  const user = await db.user.findUniqueOrThrow({ where: { id: userId }, select: { email: true, locale: true } })
   await db.$transaction([
     db.user.update({ where: { id: userId }, data: { deletionScheduledFor: null } }),
     db.dataDeletionReceipt.updateMany({ where: { subjectHash: deletionSubjectHash(userId), completedAt: null, canceledAt: null }, data: { canceledAt: now } }),
@@ -168,13 +194,19 @@ export async function cancelDeletion(userId: string, by: 'USER' | 'GUARDIAN', no
   await audit('account.deletion_canceled', { actorId: by === 'USER' ? userId : null, targetType: 'user', targetId: userId, metadata: { by } })
   await notify(
     user.email,
-    'Your KineticScout account will not be deleted',
-    [
-      by === 'GUARDIAN'
-        ? 'Your parent or guardian canceled the deletion request for your KineticScout account. Your data is unchanged.'
-        : 'The deletion request for your KineticScout account was canceled. Your data is unchanged.',
-      'Your profile stays private until you choose to make it public again. If a Pro subscription was set not to renew because of the deletion request, renewal is switched back on.',
-    ],
+    asLocale(user.locale),
+    {
+      subject: { en: 'Your KineticScout account will not be deleted', es: 'Tu cuenta de KineticScout no se eliminará' },
+      paragraphs: [
+        by === 'GUARDIAN'
+          ? { en: 'Your parent or guardian canceled the deletion request for your KineticScout account. Your data is unchanged.', es: 'Tu padre, madre o tutor canceló la solicitud para eliminar tu cuenta de KineticScout. Tus datos no cambiaron.' }
+          : { en: 'The deletion request for your KineticScout account was canceled. Your data is unchanged.', es: 'Se canceló la solicitud para eliminar tu cuenta de KineticScout. Tus datos no cambiaron.' },
+        {
+          en: 'Your profile stays private until you choose to make it public again. If a Pro subscription was set not to renew because of the deletion request, renewal is switched back on.',
+          es: 'Tu perfil sigue siendo privado hasta que decidas hacerlo público de nuevo. Si una suscripción Pro quedó sin renovación por la solicitud de eliminación, la renovación vuelve a activarse.',
+        },
+      ],
+    },
     `deletion-canceled-${userId}-${now.getTime()}`,
   )
   return 'canceled'
@@ -184,7 +216,7 @@ export type DeletionDeps = {
   deleteStripeCustomer: (customerId: string) => Promise<void>
   deleteStoredVideos: (userId: string, objectKeys: string[]) => Promise<void>
   deleteAuthUser: (userId: string) => Promise<void>
-  notify: (to: string, subject: string, paragraphs: string[], key: string) => Promise<void>
+  notify: (to: string, locale: Locale, message: LocalizedEmail, key: string) => Promise<void>
 }
 
 export const defaultDeletionDeps: DeletionDeps = {
@@ -216,9 +248,10 @@ export async function executeDeletion(userId: string, deps: DeletionDeps = defau
     where: { id: userId },
     select: {
       email: true,
+      locale: true,
       stripeCustomerId: true,
       deletionScheduledFor: true,
-      guardianConsent: { select: { guardianEmail: true } },
+      guardianConsent: { select: { guardianEmail: true, locale: true } },
       athleteProfile: { select: { videoAnalyses: { select: { objectKey: true } } } },
     },
   })
@@ -256,15 +289,32 @@ export async function executeDeletion(userId: string, deps: DeletionDeps = defau
 
   await deps.notify(
     user.email,
-    'Your KineticScout account has been deleted',
-    [
-      'Your KineticScout account and its data have been permanently deleted: profile, metrics, videos, analyses, recruiting pipeline and login. Any subscription was canceled.',
-      `For our records we keep only an anonymous receipt (reference ${receipt.id}) showing that the request was completed.`,
-    ],
+    asLocale(user.locale),
+    {
+      subject: { en: 'Your KineticScout account has been deleted', es: 'Se eliminó tu cuenta de KineticScout' },
+      paragraphs: [
+        {
+          en: 'Your KineticScout account and its data have been permanently deleted: profile, metrics, videos, analyses, recruiting pipeline and login. Any subscription was canceled.',
+          es: 'Tu cuenta de KineticScout y sus datos se eliminaron de forma permanente: perfil, métricas, videos, análisis, lista de reclutamiento y acceso. Cualquier suscripción se canceló.',
+        },
+        {
+          en: `For our records we keep only an anonymous receipt (reference ${receipt.id}) showing that the request was completed.`,
+          es: `Para nuestros registros solo guardamos un comprobante anónimo (referencia ${receipt.id}) que muestra que la solicitud se completó.`,
+        },
+      ],
+    },
     `deletion-completed-${receipt.id}`,
   )
   if (user.guardianConsent) {
-    await deps.notify(user.guardianConsent.guardianEmail, "Your teen's KineticScout account has been deleted", ['The KineticScout account you were listed as parent or guardian for has been permanently deleted.'], `deletion-completed-guardian-${receipt.id}`)
+    await deps.notify(
+      user.guardianConsent.guardianEmail,
+      asLocale(user.guardianConsent.locale),
+      {
+        subject: { en: "Your teen's KineticScout account has been deleted", es: 'Se eliminó la cuenta de KineticScout de tu hijo o hija' },
+        paragraphs: [{ en: 'The KineticScout account you were listed as parent or guardian for has been permanently deleted.', es: 'La cuenta de KineticScout en la que aparecías como padre, madre o tutor se eliminó de forma permanente.' }],
+      },
+      `deletion-completed-guardian-${receipt.id}`,
+    )
   }
   return 'deleted'
 }

@@ -8,6 +8,7 @@ import { verifiedCoach } from '@/lib/coach/verification'
 import { db } from '@/lib/db'
 import { EVENT_POLICY, overlaps, utcDay, type EventInput, type PeriodInput } from '@/lib/events/rules'
 import { notifyGuardianAccount } from '@/lib/family/notify'
+import type { Text } from '@/i18n/recipient'
 import { notify } from '@/lib/notifications/service'
 
 export class EventError extends Error {
@@ -53,8 +54,11 @@ export async function reviewEvent(adminId: string, eventId: string, decision: 'P
     await notify({
       userId: event.submittedById,
       kind: 'EVENT',
-      title: decision === 'PUBLISHED' ? `${event.name} is now listed` : `${event.name} was not listed`,
-      body: decision === 'PUBLISHED' ? 'Thank you. Athletes can now find it on the events page.' : (note ?? 'We could not match the listing to the organizer’s page.'),
+      title: decision === 'PUBLISHED' ? { en: `${event.name} is now listed`, es: `${event.name} ya está publicado` } : { en: `${event.name} was not listed`, es: `${event.name} no se publicó` },
+      body:
+        decision === 'PUBLISHED'
+          ? { en: 'Thank you. Athletes can now find it on the events page.', es: 'Gracias. Los atletas ya pueden encontrarlo en la página de eventos.' }
+          : (note ?? { en: 'We could not match the listing to the organizer’s page.', es: 'No pudimos comprobar el anuncio con la página del organizador.' }),
       href: decision === 'PUBLISHED' ? `/events/${eventId}` : '/events/submit',
       dedupeKey: `event-review-${eventId}`,
     })
@@ -66,7 +70,12 @@ export async function updateEvent(adminId: string, eventId: string, input: Event
   const updated = await db.event.updateMany({ where: { id: eventId, status: 'PUBLISHED' }, data: input })
   if (updated.count === 0) throw new EventError('NOT_FOUND', 'Only listed events can be edited.')
   await audit('event.updated', { actorId: adminId, targetType: 'event', targetId: eventId })
-  await notifyAttendees(eventId, `${input.name} changed`, 'The organizer’s details changed. Check the dates and location.', `event-updated-${eventId}-${Date.now()}`)
+  await notifyAttendees(
+    eventId,
+    { en: `${input.name} changed`, es: `${input.name} cambió` },
+    { en: 'The organizer’s details changed. Check the dates and location.', es: 'Cambiaron los datos del organizador. Revisa las fechas y el lugar.' },
+    `event-updated-${eventId}-${Date.now()}`,
+  )
 }
 
 export async function cancelEvent(adminId: string, eventId: string, note: string | null, now: Date = new Date()): Promise<void> {
@@ -74,10 +83,10 @@ export async function cancelEvent(adminId: string, eventId: string, note: string
   if (updated.count === 0) throw new EventError('NOT_FOUND', 'This event is not listed.')
   const event = await db.event.findUniqueOrThrow({ where: { id: eventId }, select: { name: true } })
   await audit('event.canceled', { actorId: adminId, targetType: 'event', targetId: eventId })
-  await notifyAttendees(eventId, `${event.name} was canceled`, note ?? 'The organizer canceled this event.', `event-canceled-${eventId}`)
+  await notifyAttendees(eventId, { en: `${event.name} was canceled`, es: `${event.name} se canceló` }, note ?? { en: 'The organizer canceled this event.', es: 'El organizador canceló este evento.' }, `event-canceled-${eventId}`)
 }
 
-async function notifyAttendees(eventId: string, title: string, body: string, dedupeKey: string) {
+async function notifyAttendees(eventId: string, title: Text, body: Text, dedupeKey: string) {
   const going = await db.eventAttendance.findMany({ where: { eventId }, select: { athleteId: true }, take: 2000 })
   for (const { athleteId } of going) {
     await notify({ userId: athleteId, kind: 'EVENT', title, body, href: `/events/${eventId}`, dedupeKey })

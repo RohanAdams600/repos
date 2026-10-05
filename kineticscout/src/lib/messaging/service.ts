@@ -3,12 +3,13 @@ import type { SessionUser } from '@/lib/auth/permissions'
 import { audit } from '@/lib/audit'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
-import { renderEmail } from '@/lib/email/templates'
+import { renderLocalizedEmail } from '@/lib/email/localized'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
 import { MESSAGE_POLICY, messageProblem, unansweredRun } from '@/lib/messaging/rules'
 import { notify } from '@/lib/notifications/service'
 import { sanitizeText } from '@/lib/security/sanitize'
+import { guardianLocale } from '@/i18n/recipient'
 import { signSubject, verifySubject } from '@/lib/security/signed-token'
 
 const GUARDIAN_PURPOSE = 'thread-guardian-v1'
@@ -126,20 +127,29 @@ export async function threadView(user: SessionUser, threadId: string) {
   }
 }
 
-async function guardianCopyEmail(thread: { id: string; athlete: { firstName: string; user: { guardianConsent: { guardianEmail: string; status: string } | null } }; coach: { firstName: string; lastName: string } }, senderLabel: string, body: string, messageId: string) {
+async function guardianCopyEmail(thread: { id: string; athleteId: string; athlete: { firstName: string; user: { guardianConsent: { guardianEmail: string; status: string } | null } }; coach: { firstName: string; lastName: string } }, senderLabel: string, body: string, messageId: string) {
   const guardian = thread.athlete.user.guardianConsent
   if (!guardian || guardian.status !== 'GRANTED') return
-  const { text, html } = renderEmail({
-    paragraphs: [
-      `A copy of a message between ${thread.athlete.firstName} and ${coachName(thread.coach)} on KineticScout. You receive every message in this conversation.`,
-      `${senderLabel} wrote:`,
-      body,
-      'If anything here worries you, you can report it or end the conversation from the link below.',
-    ],
-    action: { label: 'Read the conversation', url: guardianThreadUrl(thread.id) },
-  })
+  const n = thread.athlete.firstName
+  const coach = coachName(thread.coach)
+  const { subject, text, html } = renderLocalizedEmail(
+    {
+      subject: { en: `Message between ${n} and ${coach}`, es: `Mensaje entre ${n} y ${coach}` },
+      paragraphs: [
+        {
+          en: `A copy of a message between ${n} and ${coach} on KineticScout. You receive every message in this conversation.`,
+          es: `Una copia de un mensaje entre ${n} y ${coach} en KineticScout. Recibes cada mensaje de esta conversación.`,
+        },
+        { en: `${senderLabel} wrote:`, es: `${senderLabel} escribió:` },
+        body,
+        { en: 'If anything here worries you, you can report it or end the conversation from the link below.', es: 'Si algo aquí te preocupa, puedes reportarlo o terminar la conversación desde el enlace de abajo.' },
+      ],
+      action: { label: { en: 'Read the conversation', es: 'Leer la conversación' }, url: guardianThreadUrl(thread.id) },
+    },
+    await guardianLocale(thread.athleteId),
+  )
   try {
-    await sendEmail({ to: guardian.guardianEmail, subject: `Message between ${thread.athlete.firstName} and ${coachName(thread.coach)}`, text, html, idempotencyKey: `message-guardian-${messageId}` })
+    await sendEmail({ to: guardian.guardianEmail, subject, text, html, idempotencyKey: `message-guardian-${messageId}` })
   } catch (error) {
     logger.error(errorFields(error), 'guardian message copy failed')
   }
@@ -166,7 +176,7 @@ export async function sendMessage(user: SessionUser, threadId: string, rawBody: 
   ])
   const recipientId = role === 'coach' ? thread.athleteId : thread.coachId
   const senderLabel = role === 'coach' ? coachName(thread.coach) : thread.athlete.firstName
-  await notify({ userId: recipientId, kind: 'MESSAGE', title: `New message from ${senderLabel}`, body: body.slice(0, 140), href: `/dashboard/messages/${threadId}`, dedupeKey: `message-${message.id}` })
+  await notify({ userId: recipientId, kind: 'MESSAGE', title: { en: `New message from ${senderLabel}`, es: `Mensaje nuevo de ${senderLabel}` }, body: body.slice(0, 140), href: `/dashboard/messages/${threadId}`, dedupeKey: `message-${message.id}` })
   if (thread.guardianCopy) await guardianCopyEmail(thread, senderLabel, body, message.id)
   return message
 }

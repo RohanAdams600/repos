@@ -222,6 +222,9 @@ const ES: Record<string, string> = {
   'This conversation ended because parental consent was withdrawn.': 'Esta conversación terminó porque se retiró el consentimiento parental.',
   'This conversation ended because the coach account was suspended.': 'Esta conversación terminó porque se suspendió la cuenta del entrenador.',
   'KineticScout staff ended this conversation.': 'El personal de KineticScout terminó esta conversación.',
+  'Write at least a couple of sentences about why you are reaching out.': 'Escribe al menos un par de frases sobre por qué quieres contactar.',
+  'Leave links out of the first message. Once the athlete accepts, you can email them directly.': 'No incluyas enlaces en el primer mensaje. Cuando el atleta acepte, podrás escribirle por correo directamente.',
+  'Leave phone numbers out of the first message. Once the athlete accepts, you can email them directly.': 'No incluyas números de teléfono en el primer mensaje. Cuando el atleta acepte, podrás escribirle por correo directamente.',
   // Teams
   'Team not found.': 'No se encontró el equipo.',
   'Teams are for high school and travel coach accounts.': 'Los equipos son para cuentas de entrenador de high school o de club.',
@@ -325,6 +328,7 @@ const PATTERNS: [RegExp, (m: RegExpMatchArray, t: (s: string) => string) => stri
   [/^Type (\S+) to confirm$/, (m) => `Escribe ${m[1]} para confirmar`],
   [/^Your clip from (\d{4}-\d{2}-\d{2})$/, (m) => `Tu clip del ${m[1]}`],
   [/^Class of (\d{4})$/, (m) => `Generación ${m[1]}`],
+  [/^Keep the message under (\d+) characters\.$/, (m) => `El mensaje debe tener menos de ${m[1]} caracteres.`],
 ]
 
 const ES_VALID: Record<string, string> = { 'start date': 'una fecha de inicio válida', 'end date': 'una fecha de fin válida' }

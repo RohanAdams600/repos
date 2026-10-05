@@ -104,7 +104,8 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   const { data, error } = await supabase.auth.signUp({
     email: input.email,
     password: input.password,
-    options: { emailRedirectTo: `${env().APP_URL}/auth/confirm?next=/onboarding` },
+    // The locale lets the Supabase email templates write the confirmation email in the right language.
+    options: { emailRedirectTo: `${env().APP_URL}/auth/confirm?next=/onboarding`, data: { locale } },
   })
 
   if (error) {

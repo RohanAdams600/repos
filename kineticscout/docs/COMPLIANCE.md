@@ -7,6 +7,7 @@ This document records how the product meets the "do not get sued" checklist, and
 - **COPPA (under 13).** Sign-up uses a neutral date-of-birth screen. If the date is under 13, the server stores nothing, sends nothing to Supabase, and sets a 24-hour cookie so the form cannot simply be resubmitted with a different date. The message does not reveal the cutoff. If an under-13 date reaches onboarding (an interrupted sign-up), the Supabase auth user is deleted.
 - **Teens (13 to 17).** A parent or guardian email is required. Until the guardian consents through an emailed one-time link (confirmed by POST, with an attestation checkbox), the profile stays private and purchases and coach outreach are blocked (`src/lib/auth/permissions.ts`). Guardian tokens are stored hashed, are single-use, and expire after 7 days.
 - **Ongoing guardian control.** The consent confirmation email carries a private management link (`/consent/guardian/manage`, valid 1 year, re-requestable from `/legal/your-data` without revealing whether an address is on file). It lets the guardian withdraw consent (immediate: profile private, purchases and outreach blocked, open coach contact requests declined and shared addresses cleared from coaches' pages, teen notified), optionally stop renewal, give consent again with a fresh attestation, and request or cancel deletion of the account.
+- **Language of the consent notice.** At sign-up a teen chooses whether emails to their parent or guardian are in English or Spanish (`guardian_consents.locale`). The consent request, the confirmation with the management link, team and coach contact approvals, message copies and deletion notices are all written in that language, and their links open the page in the same language. The Spanish versions are courtesy translations pending professional review (item 19 below).
 - **Advertising.** Paid ads target adults only: the Meta client refuses any ad set whose `age_min` is under 18, and ad copy is checked for promises aimed at children.
 
 ## Data minimisation and inventory
@@ -16,6 +17,7 @@ This document records how the product meets the "do not get sued" checklist, and
 | Email, password hash (Supabase) | Account access | Until deletion |
 | Date of birth | Age rules (COPPA, minor protections) | Until deletion |
 | Guardian email | Consent for minors | Until deletion |
+| Language (account, and the language chosen for a guardian's emails) | Show the site and write emails in that language | Until deletion |
 | Public profile choices, daily view and PDF counts | Sharing with recruiters | Until deletion (no visitor identifiers stored) |
 | Verification clip, check results, file hash, decision | Verified badges | Clip: 30 days after decision (immediately if auto-rejected). Decision and hash: until deletion |
 | Outreach drafts, recruiting alert settings, notifications | Recruiting assistant | Until the athlete deletes them or the account |
@@ -140,4 +142,8 @@ No third-party script, pixel or font is loaded in the browser except Google Anal
 15. VAPID keys for Web Push per environment, if notifications should be offered.
 16. Drill content for training plans, written by named, qualified staff coaches (or licensed, with the licence on file), and a second staff member to review each drill. Without published drills, athletes see that the library does not cover their focus areas yet.
 17. Staff time to review event listings (alert after 3 days) and to enter recruiting periods from the published calendars each year, with the source document linked.
-18. Before deploying Phase 7: email account holders about the updated Privacy Policy and Terms (parent accounts, events and attendance visibility, training plans). `CURRENT_TERMS_VERSION` is bumped to `2026-10-05.2`. Set `LEGAL_LAST_UPDATED` to the actual publication date.
+18. Before deploying Phase 7: email account holders about the updated Privacy Policy, Terms and Cookie Policy (parent accounts, events and attendance visibility, training plans, the Spanish version and the saved language, the `ks_locale` cookie, and the clause that the English text governs). `CURRENT_TERMS_VERSION` is bumped to `2026-10-05.3`. Set `LEGAL_LAST_UPDATED` and `LEGAL_UPDATED_ON` to the actual publication date. Send the email in each account's language.
+19. A professional review of the Spanish translations, starting with the Privacy Policy, Terms, Cookie Policy, the guardian consent page and the guardian consent email (COPPA notice), by a translator and counsel. Until then the Spanish legal pages are courtesy translations and the English text governs.
+20. Spanish versions of the drill instructions, written or checked by a qualified coach. Until then drills show in English inside Spanish pages, with a note saying so.
+21. The bilingual Supabase email templates for sign-up confirmation and password reset (README, "Supabase setup"). Without them those two emails stay English.
+22. Product-news (marketing) campaigns are written by staff in English. Decide whether to write Spanish campaigns before sending them to Spanish-language accounts.

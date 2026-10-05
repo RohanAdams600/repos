@@ -7,44 +7,18 @@ import { Breadcrumbs } from '@/components/layout/breadcrumbs'
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { guardedAthlete, requireGuardian } from '@/lib/auth/session'
-import { formatEventDates } from '@/lib/events/rules'
+import { pick } from '@/i18n/define'
+import { accountMessages } from '@/i18n/messages/account'
+import { consentMessages } from '@/i18n/messages/consent'
+import { domain, formatDay, formatDayRange } from '@/i18n/messages/domain'
+import { familyMessages } from '@/i18n/messages/family'
+import { getLocale, messages } from '@/i18n/server'
+import { trainingMessages } from '@/i18n/messages/training'
 import { childDetail } from '@/lib/family/service'
-import { MOTION_LABEL } from '@/lib/training/rules'
-import { SPORT_LABEL } from '@/lib/sports'
 
-export const metadata: Metadata = { title: 'Family' }
-
-const STATUS_TEXT = {
-  GRANTED: 'Consent is given. The profile can be public if they choose, and purchases, coach contact and teams are allowed with your approval.',
-  REVOKED: 'Consent is withdrawn. The profile is private, and purchases, contact with coaches and team memberships have stopped.',
-  PENDING: 'Consent is not given yet. The account stays private, and purchases and coach outreach are blocked until you decide.',
-} as const
-
-function doneMessage(done: unknown, name: string): string | null {
-  switch (done) {
-    case 'grant':
-    case 'regrant':
-      return `Consent recorded for ${name}'s account. We emailed you a confirmation with a management link you can use without signing in.`
-    case 'revoke':
-      return `Consent withdrawn. ${name}'s profile is now private, and purchases, contact with coaches and team memberships have stopped.`
-    case 'delete':
-      return `Deletion scheduled. We emailed you and ${name} to confirm. You can cancel here until the date below.`
-    case 'cancel-deletion':
-      return `Deletion canceled. ${name}'s account and data are unchanged.`
-    case 'team-approve':
-      return `Approved. ${name} is now on the team.`
-    case 'team-decline':
-      return `Declined. ${name} was not added to the team.`
-    case 'contact-approve':
-      return `Approved. The coach now has ${name}'s email address and yours.`
-    case 'contact-decline':
-      return 'Declined. No contact details were shared with the coach.'
-    default:
-      return null
-  }
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await messages(familyMessages)).title }
 }
-
-const day = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
 
 export default async function FamilyAthletePage({ params, searchParams }: PageProps<'/dashboard/family/[athleteId]'>) {
   const user = await requireGuardian()
@@ -53,20 +27,25 @@ export default async function FamilyAthletePage({ params, searchParams }: PagePr
   if (!athlete) notFound()
   const detail = await childDetail(athlete)
   const name = athlete.firstName
-  const done = doneMessage((await searchParams).done, name)
+  const doneKey = (await searchParams).done
+  const locale = await getLocale()
+  const m = pick(familyMessages, locale)
+  const c = pick(consentMessages, locale).manage
+  const d = domain(locale)
+  const dash = pick(accountMessages, locale).dashboard
+  const day = (date: Date) => formatDay(date, locale)
+  const t = pick(trainingMessages, locale)
+  const done = typeof doneKey === 'string' && doneKey in m.done ? m.done[doneKey]!(name) : null
 
   return (
     <div className="flex max-w-3xl flex-col gap-10">
       <div className="flex flex-col gap-3">
-        <Breadcrumbs items={[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Family', href: '/dashboard/family' }, { label: `${athlete.firstName} ${athlete.lastName}` }]} />
+        <Breadcrumbs items={[{ label: dash, href: '/dashboard' }, { label: m.title, href: '/dashboard/family' }, { label: `${athlete.firstName} ${athlete.lastName}` }]} />
         <h1 className="text-3xl font-bold">
           {athlete.firstName} {athlete.lastName}
         </h1>
-        <p className="text-fg-muted">
-          {SPORT_LABEL[detail.sport]}, class of <span className="tabular">{detail.gradYear}</span>
-          {detail.highSchool ? `, ${detail.highSchool}` : ''}. Profile is {detail.isPublic ? 'public' : 'private'}.
-        </p>
-        <p>{STATUS_TEXT[athlete.consentStatus]}</p>
+        <p className="text-fg-muted">{m.summarySchool(d.sport[detail.sport], detail.gradYear, detail.highSchool, detail.isPublic)}</p>
+        <p>{m.status[athlete.consentStatus]}</p>
       </div>
 
       {done && (
@@ -75,50 +54,50 @@ export default async function FamilyAthletePage({ params, searchParams }: PagePr
         </Alert>
       )}
       {detail.deletion && (
-        <Alert tone="info" title="Deletion scheduled">
-          {name}&apos;s account will be permanently deleted on {day(detail.deletion.scheduledFor)}
-          {detail.deletion.requestedBy === 'GUARDIAN' ? ', at your request.' : ', at their own request.'}
+        <Alert tone="info" title={c.deletionTitle}>
+          {c.deletionOn(name, day(detail.deletion.scheduledFor), detail.deletion.requestedBy === 'GUARDIAN')}
         </Alert>
       )}
 
       {athlete.consentStatus === 'PENDING' ? (
         <section aria-labelledby="consent-heading" className="flex flex-col gap-6">
           <h2 id="consent-heading" className="text-2xl font-bold">
-            Consent
+            {m.consentTitle}
           </h2>
-          <p className="text-fg-muted">{name} listed you as their parent or guardian. Here is what you are agreeing to.</p>
+          <p className="text-fg-muted">{m.listedYou(name)}</p>
           <ConsentDisclosures headingLevel={3} />
           <FamilyActionForm
             athleteId={athlete.athleteId}
             intent="grant"
-            title="Give consent"
-            submitLabel="Give consent"
-            pendingLabel="Recording consent"
-            checkbox={{ name: 'attest', label: `I am ${name}'s parent or legal guardian, I have read the Privacy Policy, and I consent to these uses.`, required: true }}
+            title={c.regrant.title}
+            submitLabel={c.regrant.submit}
+            pendingLabel={c.regrant.pending}
+            checkbox={{ name: 'attest', label: c.regrant.attest(name), required: true }}
           />
-          <p className="text-fg-muted">If you do not consent, you do not need to do anything: the account stays private. You can ask us to delete it through our <Link href="/contact">contact page</Link>.</p>
+          <p className="text-fg-muted">
+            {m.noConsent} <Link href="/contact">{m.contactPage}</Link>.
+          </p>
         </section>
       ) : (
         <>
           <section aria-labelledby="requests-heading" className="flex flex-col gap-4">
             <h2 id="requests-heading" className="text-2xl font-bold">
-              Requests waiting for you
+              {m.requests}
             </h2>
             {detail.pendingTeams.length === 0 && detail.pendingContacts.length === 0 ? (
-              <p className="text-fg-muted">Nothing is waiting for your answer.</p>
+              <p className="text-fg-muted">{m.nothing}</p>
             ) : (
               <ul className="flex flex-col gap-4">
-                {detail.pendingTeams.map((m) => (
-                  <li key={m.id} className="flex flex-col gap-3 border-2 border-border-subtle p-5">
-                    <h3 className="text-lg font-bold">Join {m.team.name}</h3>
+                {detail.pendingTeams.map((t) => (
+                  <li key={t.id} className="flex flex-col gap-3 border-2 border-border-subtle p-5">
+                    <h3 className="text-lg font-bold">{m.join(t.team.name)}</h3>
                     <p className="text-fg-muted">
-                      {m.team.organization}, {SPORT_LABEL[m.team.sport]}. Coach: {m.team.coachName}, {m.team.coachTitle}.{' '}
-                      {m.team.reviewedAt ? 'Our staff checked this coach against the school or club staff page.' : ''}
+                      {m.teamLine(t.team.organization, d.sport[t.team.sport], t.team.coachName, t.team.coachTitle)} {t.team.reviewedAt ? m.teamChecked : ''}
                     </p>
-                    <p className="text-fg-muted">If you approve, the coach sees {name}&apos;s name and can record testing-day results, which {name} accepts or declines one by one.</p>
+                    <p className="text-fg-muted">{m.teamIf(name)}</p>
                     <div className="flex flex-wrap gap-3">
-                      <FamilyActionForm bare athleteId={athlete.athleteId} intent="team-approve" itemId={m.id} submitLabel={`Approve ${m.team.name}`} pendingLabel="Approving" />
-                      <FamilyActionForm bare athleteId={athlete.athleteId} intent="team-decline" itemId={m.id} submitLabel={`Decline ${m.team.name}`} pendingLabel="Declining" />
+                      <FamilyActionForm bare athleteId={athlete.athleteId} intent="team-approve" itemId={t.id} submitLabel={m.approve(t.team.name)} pendingLabel={m.approving} />
+                      <FamilyActionForm bare athleteId={athlete.athleteId} intent="team-decline" itemId={t.id} submitLabel={m.decline(t.team.name)} pendingLabel={m.declining} />
                     </div>
                   </li>
                 ))}
@@ -126,17 +105,17 @@ export default async function FamilyAthletePage({ params, searchParams }: PagePr
                   const coach = `Coach ${r.coach.firstName} ${r.coach.lastName}`
                   return (
                     <li key={r.id} className="flex flex-col gap-3 border-2 border-border-subtle p-5">
-                      <h3 className="text-lg font-bold">Contact from {coach}</h3>
+                      <h3 className="text-lg font-bold">{m.contactFrom(coach)}</h3>
                       <p className="text-fg-muted">
                         {r.coach.title}
-                        {r.coach.college ? `, ${r.coach.college.schoolName} (${r.coach.college.division})` : ''}. {name} would like to accept.
-                        {r.coach.reviewedAt ? ' Our staff matched this coach to the program staff directory.' : ''}
+                        {r.coach.college ? `, ${r.coach.college.schoolName} (${r.coach.college.division})` : ''}.{m.wouldAccept(name)}
+                        {r.coach.reviewedAt ? m.contactChecked : ''}
                       </p>
                       <p className="border-2 border-border-subtle p-4 break-words whitespace-pre-wrap">{r.message}</p>
-                      <p className="text-fg-muted">If you approve, the coach receives {name}&apos;s email address and yours, and messages on KineticScout are copied to you.</p>
+                      <p className="text-fg-muted">{m.contactIf(name)}</p>
                       <div className="flex flex-wrap gap-3">
-                        <FamilyActionForm bare athleteId={athlete.athleteId} intent="contact-approve" itemId={r.id} submitLabel={`Approve ${coach}`} pendingLabel="Approving" />
-                        <FamilyActionForm bare athleteId={athlete.athleteId} intent="contact-decline" itemId={r.id} submitLabel={`Decline ${coach}`} pendingLabel="Declining" />
+                        <FamilyActionForm bare athleteId={athlete.athleteId} intent="contact-approve" itemId={r.id} submitLabel={m.approve(coach)} pendingLabel={m.approving} />
+                        <FamilyActionForm bare athleteId={athlete.athleteId} intent="contact-decline" itemId={r.id} submitLabel={m.decline(coach)} pendingLabel={m.declining} />
                       </div>
                     </li>
                   )
@@ -147,10 +126,10 @@ export default async function FamilyAthletePage({ params, searchParams }: PagePr
 
           <section aria-labelledby="conversations-heading" className="flex flex-col gap-4">
             <h2 id="conversations-heading" className="text-2xl font-bold">
-              Conversations with college coaches
+              {m.conversations}
             </h2>
             {detail.threads.length === 0 ? (
-              <p className="text-fg-muted">No conversations yet. When a coach and {name} message each other on KineticScout, every message is copied to you here and by email.</p>
+              <p className="text-fg-muted">{m.noConversations(name)}</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {detail.threads.map((t) => (
@@ -158,10 +137,7 @@ export default async function FamilyAthletePage({ params, searchParams }: PagePr
                     <Link href={`/dashboard/family/${athlete.athleteId}/messages/${t.id}`} className="font-bold">
                       {t.coachLabel}
                     </Link>
-                    <span className="text-sm text-fg-muted">
-                      <span className="tabular">{t.messageCount}</span> {t.messageCount === 1 ? 'message' : 'messages'}
-                      {t.status === 'CLOSED' ? ', ended' : ''}
-                    </span>
+                    <span className="tabular text-sm text-fg-muted">{m.messageCount(t.messageCount, t.status === 'CLOSED')}</span>
                   </li>
                 ))}
               </ul>
@@ -170,10 +146,10 @@ export default async function FamilyAthletePage({ params, searchParams }: PagePr
 
           <section aria-labelledby="teams-heading" className="flex flex-col gap-3">
             <h2 id="teams-heading" className="text-2xl font-bold">
-              Teams
+              {m.teams}
             </h2>
             {detail.activeTeams.length === 0 ? (
-              <p className="text-fg-muted">{name} is not on a team on KineticScout.</p>
+              <p className="text-fg-muted">{m.noTeams(name)}</p>
             ) : (
               <ul className="flex list-disc flex-col gap-1 pl-5">
                 {detail.activeTeams.map((t) => (
@@ -187,10 +163,10 @@ export default async function FamilyAthletePage({ params, searchParams }: PagePr
 
           <section aria-labelledby="events-heading" className="flex flex-col gap-3">
             <h2 id="events-heading" className="text-2xl font-bold">
-              Events
+              {m.events}
             </h2>
             {detail.events.length === 0 ? (
-              <p className="text-fg-muted">{name} has not marked any upcoming events.</p>
+              <p className="text-fg-muted">{m.noEvents(name)}</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {detail.events.map(({ event, shareWithCoaches }) => (
@@ -199,8 +175,8 @@ export default async function FamilyAthletePage({ params, searchParams }: PagePr
                       {event.name}
                     </Link>
                     <span className="text-sm text-fg-muted">
-                      {formatEventDates(event.startDate, event.endDate)}, {event.city}, {event.state}.{' '}
-                      {event.status === 'CANCELED' ? 'Canceled.' : shareWithCoaches ? 'Shown to verified college coaches.' : 'Not shown to coaches.'}
+                      {formatDayRange(event.startDate, event.endDate, locale)}, {event.city}, {event.state}.{' '}
+                      {event.status === 'CANCELED' ? m.canceled : shareWithCoaches ? m.shown : m.notShown}
                     </span>
                   </li>
                 ))}
@@ -210,16 +186,16 @@ export default async function FamilyAthletePage({ params, searchParams }: PagePr
 
           <section aria-labelledby="training-heading" className="flex flex-col gap-3">
             <h2 id="training-heading" className="text-2xl font-bold">
-              Training plans
+              {m.training}
             </h2>
             {detail.plans.length === 0 ? (
-              <p className="text-fg-muted">{name} has no training plan in progress.</p>
+              <p className="text-fg-muted">{m.noPlans(name)}</p>
             ) : (
               <ul className="flex list-disc flex-col gap-1 pl-5">
                 {detail.plans.map((p) => (
                   <li key={p.id}>
                     <Link href={`/dashboard/family/${athlete.athleteId}/training/${p.id}`}>
-                      {MOTION_LABEL[p.motionType]} plan, {formatEventDates(p.startsOn, p.endsOn)}
+                      {t.finishedItem(d.motion[p.motionType], formatDayRange(p.startsOn, p.endsOn, locale))}
                     </Link>
                   </li>
                 ))}
@@ -229,55 +205,55 @@ export default async function FamilyAthletePage({ params, searchParams }: PagePr
 
           <section aria-labelledby="data-heading" className="flex flex-col gap-3">
             <h2 id="data-heading" className="text-2xl font-bold">
-              Their data
+              {m.data}
             </h2>
-            <p className="text-fg-muted">Download everything we hold about {name}&apos;s account as a JSON file: profile, measurements, analyses, teams, contact requests and conversations.</p>
+            <p className="text-fg-muted">{m.dataIntro(name)}</p>
             <form method="post" action={`/api/family/${athlete.athleteId}/export`}>
               <Button type="submit" variant="secondary">
-                Download {name}&apos;s data
+                {m.download(name)}
               </Button>
             </form>
           </section>
 
           <section aria-labelledby="controls-heading" className="flex flex-col gap-4">
             <h2 id="controls-heading" className="text-2xl font-bold">
-              Consent and account
+              {m.controls}
             </h2>
             {athlete.consentStatus === 'GRANTED' ? (
               <FamilyActionForm
                 athleteId={athlete.athleteId}
                 intent="revoke"
-                title="Withdraw consent"
-                description={`Takes effect immediately: ${name}'s profile becomes private, purchases and contact with coaches stop, open coach contact requests are declined, conversations with college coaches end, team memberships end, and email addresses already shared with coaches are removed from their KineticScout pages (a coach who already wrote one down keeps it). ${name} can still log metrics and see their own numbers, and we email them to say consent was withdrawn.`}
-                submitLabel="Withdraw consent"
-                pendingLabel="Withdrawing"
-                checkbox={detail.subscription && !detail.subscription.cancelAtPeriodEnd ? { name: 'cancelSubscription', label: 'Also stop the Pro subscription from renewing (access continues until the end of the paid period).', required: false } : undefined}
+                title={c.revoke.title}
+                description={c.revoke.description(name)}
+                submitLabel={c.revoke.submit}
+                pendingLabel={c.revoke.pending}
+                checkbox={detail.subscription && !detail.subscription.cancelAtPeriodEnd ? { name: 'cancelSubscription', label: c.revoke.cancelSubscription, required: false } : undefined}
               />
             ) : (
               <FamilyActionForm
                 athleteId={athlete.athleteId}
                 intent="regrant"
-                title="Give consent again"
-                description={`Allows ${name} to make their profile public, draft outreach to college coaches, and lets an adult purchase Pro. Teams and coach contact still need your approval each time.`}
-                submitLabel="Give consent"
-                pendingLabel="Recording consent"
-                checkbox={{ name: 'attest', label: `I am ${name}'s parent or legal guardian, I have read the Privacy Policy, and I consent to these uses.`, required: true }}
+                title={m.regrantTitle}
+                description={m.regrantDescription(name)}
+                submitLabel={c.regrant.submit}
+                pendingLabel={c.regrant.pending}
+                checkbox={{ name: 'attest', label: c.regrant.attest(name), required: true }}
               />
             )}
             {detail.deletion ? (
               detail.deletion.requestedBy === 'GUARDIAN' && (
-                <FamilyActionForm athleteId={athlete.athleteId} intent="cancel-deletion" title="Cancel deletion" description={`Keeps ${name}'s account and data exactly as they are.`} submitLabel="Cancel deletion" pendingLabel="Canceling" />
+                <FamilyActionForm athleteId={athlete.athleteId} intent="cancel-deletion" title={c.cancelDeletion.title} description={c.cancelDeletion.description(name)} submitLabel={c.cancelDeletion.submit} pendingLabel={c.cancelDeletion.pending} />
               )
             ) : (
               <FamilyActionForm
                 athleteId={athlete.athleteId}
                 intent="delete"
                 danger
-                title="Delete the account"
-                description={`Permanently deletes ${name}'s profile, metrics, videos, analyses and login after 7 days, and cancels any subscription. You can cancel here during those 7 days. We email you and ${name} to confirm.`}
-                submitLabel="Delete the account"
-                pendingLabel="Scheduling deletion"
-                checkbox={{ name: 'confirmDelete', label: `I want ${name}'s KineticScout account and all of its data deleted.`, required: true }}
+                title={c.del.title}
+                description={m.cancelHere(name)}
+                submitLabel={c.del.submit}
+                pendingLabel={c.del.pending}
+                checkbox={{ name: 'confirmDelete', label: c.del.confirm(name), required: true }}
               />
             )}
           </section>

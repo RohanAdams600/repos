@@ -4,7 +4,7 @@ import { audit } from '@/lib/audit'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
 import { notifyGuardianAccount } from '@/lib/family/notify'
-import { renderEmail } from '@/lib/email/templates'
+import { renderLocalizedEmail, type LocalizedEmail } from '@/lib/email/localized'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
 import { closeThreadsOperation } from '@/lib/messaging/service'
@@ -12,6 +12,9 @@ import { notify } from '@/lib/notifications/service'
 import { isPubliclyVisible } from '@/lib/profile/public'
 import { randomToken, sha256Hex } from '@/lib/security/hash'
 import { sanitizeText } from '@/lib/security/sanitize'
+import type { Locale } from '@/i18n/config'
+import type { Localized } from '@/i18n/define'
+import { guardianLocale, recipientLocale } from '@/i18n/recipient'
 import { CONTACT_POLICY, contactMessageProblem } from '@/lib/coach/rules'
 
 const DAY = 86_400_000
@@ -26,8 +29,8 @@ export class ContactError extends Error {
   }
 }
 
-async function email(to: string, subject: string, paragraphs: string[], key: string, action?: { label: string; url: string }) {
-  const { text, html } = renderEmail({ paragraphs, action })
+async function email(to: string, locale: Locale, message: LocalizedEmail, key: string) {
+  const { subject, text, html } = renderLocalizedEmail(message, locale)
   try {
     await sendEmail({ to, subject, text, html, idempotencyKey: key })
   } catch (error) {
@@ -35,9 +38,12 @@ async function email(to: string, subject: string, paragraphs: string[], key: str
   }
 }
 
-function coachLine(coach: { firstName: string; lastName: string; title: string; college: { schoolName: string } | null }): string {
-  return `${coach.firstName} ${coach.lastName}, ${coach.title}${coach.college ? ` at ${coach.college.schoolName}` : ''}`
+function coachLine(coach: { firstName: string; lastName: string; title: string; college: { schoolName: string } | null }): Localized {
+  const base = `${coach.firstName} ${coach.lastName}, ${coach.title}`
+  return { en: `${base}${coach.college ? ` at ${coach.college.schoolName}` : ''}`, es: `${base}${coach.college ? ` en ${coach.college.schoolName}` : ''}` }
 }
+
+const OPEN_REQUESTS: Localized = { en: 'Open contact requests', es: 'Abrir solicitudes de contacto' }
 
 /**
  * A verified coach asks to contact a public athlete. The coach attests the contact is allowed under
@@ -78,13 +84,27 @@ export async function sendContactRequest(coachId: string, athleteId: string, inp
   }
   await audit('contact.requested', { actorId: coachId, targetType: 'contact_request', targetId: id })
   const who = coachLine(coach)
-  await notify({ userId: athleteId, kind: 'CONTACT_REQUEST', title: `${who} would like to contact you`, body: 'Read the message and decide whether to share your email address. Nothing is shared unless you accept.', href: '/dashboard/contact-requests', dedupeKey: `contact:${id}` })
+  await notify({
+    userId: athleteId,
+    kind: 'CONTACT_REQUEST',
+    title: { en: `${who.en} would like to contact you`, es: `${who.es} quiere contactarte` },
+    body: { en: 'Read the message and decide whether to share your email address. Nothing is shared unless you accept.', es: 'Lee el mensaje y decide si compartes tu correo. No se comparte nada a menos que aceptes.' },
+    href: '/dashboard/contact-requests',
+    dedupeKey: `contact:${id}`,
+  })
   await email(
     athlete.user.email,
-    `A verified coach would like to contact you`,
-    [`Hi ${athlete.firstName},`, `${who} sent you a contact request on KineticScout. KineticScout staff verified that this coach works at the program.`, 'Your email address is shared only if you accept.'],
+    await recipientLocale(athleteId),
+    {
+      subject: { en: 'A verified coach would like to contact you', es: 'Un entrenador verificado quiere contactarte' },
+      paragraphs: [
+        { en: `Hi ${athlete.firstName},`, es: `Hola, ${athlete.firstName}:` },
+        { en: `${who.en} sent you a contact request on KineticScout. KineticScout staff verified that this coach works at the program.`, es: `${who.es} te envió una solicitud de contacto en KineticScout. El personal de KineticScout verificó que este entrenador trabaja en el programa.` },
+        { en: 'Your email address is shared only if you accept.', es: 'Tu correo se comparte solo si aceptas.' },
+      ],
+      action: { label: { en: 'Read the request', es: 'Leer la solicitud' }, url: `${env().APP_URL}/dashboard/contact-requests` },
+    },
     `contact-new-${id}`,
-    { label: 'Read the request', url: `${env().APP_URL}/dashboard/contact-requests` },
   )
   return id
 }
@@ -103,7 +123,7 @@ export async function respondAsAthlete(athleteId: string, requestId: string, dec
     await db.contactRequest.update({ where: { id: requestId }, data: { status: 'DECLINED', athleteRespondedAt: now } })
     if (options.block) await blockCoach(athleteId, request.coachId)
     await audit('contact.declined', { actorId: athleteId, targetType: 'contact_request', targetId: requestId, metadata: { by: 'athlete', blocked: Boolean(options.block) } })
-    await notify({ userId: request.coachId, kind: 'CONTACT_UPDATE', title: `${request.athlete.firstName} declined your request`, body: 'The athlete chose not to share contact details.', href: '/dashboard/contact-requests', dedupeKey: `contact-declined:${requestId}` })
+    await notify({ userId: request.coachId, kind: 'CONTACT_UPDATE', title: { en: `${request.athlete.firstName} declined your request`, es: `${request.athlete.firstName} rechazó tu solicitud` }, body: { en: 'The athlete chose not to share contact details.', es: 'El atleta decidió no compartir sus datos de contacto.' }, href: '/dashboard/contact-requests', dedupeKey: `contact-declined:${requestId}` })
     return 'declined'
   }
 
@@ -113,24 +133,44 @@ export async function respondAsAthlete(athleteId: string, requestId: string, dec
     const token = randomToken()
     await db.contactRequest.update({ where: { id: requestId }, data: { status: 'ATHLETE_ACCEPTED', athleteRespondedAt: now, guardianTokenHash: sha256Hex(token), guardianTokenExpiresAt: new Date(now.getTime() + 14 * DAY) } })
     await audit('contact.accepted', { actorId: athleteId, targetType: 'contact_request', targetId: requestId, metadata: { awaitingGuardian: true } })
+    const n = request.athlete.firstName
     await email(
       guardian.guardianEmail,
-      `${request.athlete.firstName} would like to share contact details with a college coach`,
-      [
-        `${who} asked to contact ${request.athlete.firstName} through KineticScout, and ${request.athlete.firstName} would like to accept. KineticScout staff verified that this coach works at the program.`,
-        `If you approve, the coach receives ${request.athlete.firstName}'s email address and yours. If you decline, nothing is shared.`,
-      ],
+      await guardianLocale(athleteId),
+      {
+        subject: { en: `${n} would like to share contact details with a college coach`, es: `${n} quiere compartir sus datos de contacto con un entrenador universitario` },
+        paragraphs: [
+          {
+            en: `${who.en} asked to contact ${n} through KineticScout, and ${n} would like to accept. KineticScout staff verified that this coach works at the program.`,
+            es: `${who.es} pidió contactar a ${n} a través de KineticScout, y ${n} quiere aceptar. El personal de KineticScout verificó que este entrenador trabaja en el programa.`,
+          },
+          { en: `If you approve, the coach receives ${n}'s email address and yours. If you decline, nothing is shared.`, es: `Si lo apruebas, el entrenador recibe el correo de ${n} y el tuyo. Si lo rechazas, no se comparte nada.` },
+        ],
+        action: { label: { en: 'Review the request', es: 'Revisar la solicitud' }, url: `${env().APP_URL}/consent/guardian/contact?token=${encodeURIComponent(token)}` },
+      },
       `contact-guardian-${requestId}`,
-      { label: 'Review the request', url: `${env().APP_URL}/consent/guardian/contact?token=${encodeURIComponent(token)}` },
     )
-    await notifyGuardianAccount(athleteId, { title: `${request.athlete.firstName} would like to share contact details with a college coach`, body: 'Review the request on your Family page. Nothing is shared unless you approve.', dedupeKey: `contact-guardian-${requestId}` })
+    await notifyGuardianAccount(athleteId, {
+      title: { en: `${n} would like to share contact details with a college coach`, es: `${n} quiere compartir sus datos de contacto con un entrenador universitario` },
+      body: { en: 'Review the request on your Family page. Nothing is shared unless you approve.', es: 'Revisa la solicitud en tu página Familia. No se comparte nada a menos que lo apruebes.' },
+      dedupeKey: `contact-guardian-${requestId}`,
+    })
     return 'awaiting-guardian'
   }
 
   await shareContact(requestId, [request.athlete.user.email], now)
   await audit('contact.accepted', { actorId: athleteId, targetType: 'contact_request', targetId: requestId })
-  await notify({ userId: request.coachId, kind: 'CONTACT_UPDATE', title: `${athleteName} accepted your request`, body: 'Their email address is now on your contact requests page.', href: '/dashboard/contact-requests', dedupeKey: `contact-accepted:${requestId}` })
-  await email(request.coach.user.email, `${athleteName} accepted your contact request`, [`${athleteName} accepted your request on KineticScout. Their email address is on your contact requests page.`], `contact-accepted-${requestId}`, { label: 'Open contact requests', url: `${env().APP_URL}/dashboard/contact-requests` })
+  await notify({ userId: request.coachId, kind: 'CONTACT_UPDATE', title: { en: `${athleteName} accepted your request`, es: `${athleteName} aceptó tu solicitud` }, body: { en: 'Their email address is now on your contact requests page.', es: 'Su correo ya aparece en tu página de solicitudes de contacto.' }, href: '/dashboard/contact-requests', dedupeKey: `contact-accepted:${requestId}` })
+  await email(
+    request.coach.user.email,
+    await recipientLocale(request.coachId),
+    {
+      subject: { en: `${athleteName} accepted your contact request`, es: `${athleteName} aceptó tu solicitud de contacto` },
+      paragraphs: [{ en: `${athleteName} accepted your request on KineticScout. Their email address is on your contact requests page.`, es: `${athleteName} aceptó tu solicitud en KineticScout. Su correo aparece en tu página de solicitudes de contacto.` }],
+      action: { label: OPEN_REQUESTS, url: `${env().APP_URL}/dashboard/contact-requests` },
+    },
+    `contact-accepted-${requestId}`,
+  )
   return 'accepted'
 }
 
@@ -173,15 +213,39 @@ export async function guardianDecideContactRequest(requestId: string, approve: b
   if (!approve || guardian?.status !== 'GRANTED') {
     await db.contactRequest.update({ where: { id: request.id }, data: { status: 'DECLINED', guardianRespondedAt: now, guardianTokenHash: null, guardianTokenExpiresAt: null } })
     await audit('contact.guardian_declined', { actorId: guardianUserId, targetType: 'contact_request', targetId: request.id, metadata: { via: guardianUserId ? 'account' : 'link' } })
-    await notify({ userId: request.athleteId, kind: 'CONTACT_UPDATE', title: 'Your parent or guardian declined a contact request', body: 'No contact details were shared with the coach.', href: '/dashboard/contact-requests', dedupeKey: `contact-guardian-declined:${request.id}` })
-    await notify({ userId: request.coachId, kind: 'CONTACT_UPDATE', title: `Your request to ${request.athlete.firstName} was declined`, body: 'No contact details were shared.', href: '/dashboard/contact-requests', dedupeKey: `contact-declined:${request.id}` })
+    await notify({ userId: request.athleteId, kind: 'CONTACT_UPDATE', title: { en: 'Your parent or guardian declined a contact request', es: 'Tu padre, madre o tutor rechazó una solicitud de contacto' }, body: { en: 'No contact details were shared with the coach.', es: 'No se compartieron datos de contacto con el entrenador.' }, href: '/dashboard/contact-requests', dedupeKey: `contact-guardian-declined:${request.id}` })
+    await notify({ userId: request.coachId, kind: 'CONTACT_UPDATE', title: { en: `Your request to ${request.athlete.firstName} was declined`, es: `Se rechazó tu solicitud a ${request.athlete.firstName}` }, body: { en: 'No contact details were shared.', es: 'No se compartieron datos de contacto.' }, href: '/dashboard/contact-requests', dedupeKey: `contact-declined:${request.id}` })
     return 'declined'
   }
   await shareContact(request.id, [request.athlete.user.email, guardian.guardianEmail], now)
   await audit('contact.guardian_approved', { actorId: guardianUserId, targetType: 'contact_request', targetId: request.id, metadata: { via: guardianUserId ? 'account' : 'link' } })
-  await notify({ userId: request.athleteId, kind: 'CONTACT_UPDATE', title: 'Your parent or guardian approved a contact request', body: 'The coach now has your email address and your parent or guardian’s.', href: '/dashboard/contact-requests', dedupeKey: `contact-guardian-approved:${request.id}` })
-  await notify({ userId: request.coachId, kind: 'CONTACT_UPDATE', title: `${athleteName} accepted your request`, body: 'Their email address and their parent or guardian’s are on your contact requests page. Include the parent or guardian in your messages.', href: '/dashboard/contact-requests', dedupeKey: `contact-accepted:${request.id}` })
-  await email(request.coach.user.email, `${athleteName} accepted your contact request`, [`${athleteName} and their parent or guardian accepted your request on KineticScout. Both email addresses are on your contact requests page; please include the parent or guardian in your messages.`], `contact-accepted-${request.id}`, { label: 'Open contact requests', url: `${env().APP_URL}/dashboard/contact-requests` })
+  await notify({ userId: request.athleteId, kind: 'CONTACT_UPDATE', title: { en: 'Your parent or guardian approved a contact request', es: 'Tu padre, madre o tutor aprobó una solicitud de contacto' }, body: { en: 'The coach now has your email address and your parent or guardian’s.', es: 'El entrenador ahora tiene tu correo y el de tu padre, madre o tutor.' }, href: '/dashboard/contact-requests', dedupeKey: `contact-guardian-approved:${request.id}` })
+  await notify({
+    userId: request.coachId,
+    kind: 'CONTACT_UPDATE',
+    title: { en: `${athleteName} accepted your request`, es: `${athleteName} aceptó tu solicitud` },
+    body: {
+      en: 'Their email address and their parent or guardian’s are on your contact requests page. Include the parent or guardian in your messages.',
+      es: 'Su correo y el de su padre, madre o tutor aparecen en tu página de solicitudes de contacto. Incluye al padre, la madre o el tutor en tus mensajes.',
+    },
+    href: '/dashboard/contact-requests',
+    dedupeKey: `contact-accepted:${request.id}`,
+  })
+  await email(
+    request.coach.user.email,
+    await recipientLocale(request.coachId),
+    {
+      subject: { en: `${athleteName} accepted your contact request`, es: `${athleteName} aceptó tu solicitud de contacto` },
+      paragraphs: [
+        {
+          en: `${athleteName} and their parent or guardian accepted your request on KineticScout. Both email addresses are on your contact requests page; please include the parent or guardian in your messages.`,
+          es: `${athleteName} y su padre, madre o tutor aceptaron tu solicitud en KineticScout. Ambos correos aparecen en tu página de solicitudes de contacto; incluye al padre, la madre o el tutor en tus mensajes.`,
+        },
+      ],
+      action: { label: OPEN_REQUESTS, url: `${env().APP_URL}/dashboard/contact-requests` },
+    },
+    `contact-accepted-${request.id}`,
+  )
   return 'approved'
 }
 

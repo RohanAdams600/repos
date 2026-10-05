@@ -174,3 +174,8 @@ export function formatDayRange(start: Date, end: Date, locale: Locale): string {
 export function percentileLabel(n: number, locale: Locale): string {
   return locale === 'es' ? `percentil ${n}` : ordinal(n)
 }
+
+/** A metric's name in both languages, for notifications and emails written ahead of time. */
+export function metricName(type: MetricType): { en: string; es: string } {
+  return { en: domainMessages.en.metric[type], es: domainMessages.es.metric[type] }
+}

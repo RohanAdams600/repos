@@ -9,8 +9,11 @@ export const DEFAULT_LOCALE: Locale = 'en'
  * Spanish is switched on once every page it covers is translated. While false, every request is
  * served in English and the language switch is hidden, so no one sees a half-translated page.
  */
-export const SPANISH_ENABLED = false
+export const SPANISH_ENABLED = true
 /** Set when someone chooses a language; read on the server only. */
+/** Set by the proxy from an emailed link's ?lang= parameter. */
+export const LINK_LOCALE_HEADER = 'x-ks-link-locale'
+
 export const LOCALE_COOKIE = 'ks_locale'
 
 /** BCP 47 tags for dates and numbers. Spanish uses US conventions (dates, inches, mph). */

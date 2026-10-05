@@ -1,12 +1,14 @@
 import 'server-only'
 import type { Prisma } from '@/generated/prisma/client'
 import { db } from '@/lib/db'
-import { METRIC_DEFINITIONS, formatMetric } from '@/lib/metrics/definitions'
+import { formatMetric } from '@/lib/metrics/definitions'
 import { notify } from '@/lib/notifications/service'
 import { deleteObject, getObjectInfo, objectSha256, readObjectRange } from '@/lib/storage/gcs'
 import { sniffVideoContainer } from '@/lib/storage/video-files'
 import { evaluateEvidence } from '@/lib/verification/checks'
 import { findMoovBox, parseMovieHeader } from '@/lib/verification/mp4'
+import { metricName } from '@/i18n/messages/domain'
+import { translateServerText } from '@/i18n/messages/server-text'
 import { REJECTION_LABELS } from '@/lib/verification/policy'
 
 export type EvidenceStorage = {
@@ -77,8 +79,17 @@ export async function runEvidenceChecks(metricId: string, storage: EvidenceStora
     data: { ...common, status: 'REJECTED', rejectionReason: outcome.reason, reviewedAt: now, objectKey: null, videoDeletedAt: now },
   })
   if (moved.count) {
-    const label = `${METRIC_DEFINITIONS[row.metric.metricType].label} ${formatMetric(row.metric.metricType, Number(row.metric.value))}`
-    await notify({ userId: row.athleteId, kind: 'METRIC_REJECTED', title: `${label} could not be verified`, body: `${REJECTION_LABELS[outcome.reason]} You can send a different clip.`, href: '/dashboard/metrics', dedupeKey: `auto-rejected:${metricId}:${now.getTime()}` })
+    const name = metricName(row.metric.metricType)
+    const value = formatMetric(row.metric.metricType, Number(row.metric.value))
+    const reason = REJECTION_LABELS[outcome.reason]
+    await notify({
+      userId: row.athleteId,
+      kind: 'METRIC_REJECTED',
+      title: { en: `${name.en} ${value} could not be verified`, es: `No se pudo verificar: ${name.es} ${value}` },
+      body: { en: `${reason} You can send a different clip.`, es: `${translateServerText(reason, 'es')} Puedes enviar otro clip.` },
+      href: '/dashboard/metrics',
+      dedupeKey: `auto-rejected:${metricId}:${now.getTime()}`,
+    })
   }
   return moved.count ? 'REJECTED' : 'SKIPPED'
 }

@@ -4,13 +4,18 @@ import { MarketingPreferenceForm } from '@/components/account/marketing-preferen
 import { AuthShell } from '@/components/auth/auth-shell'
 import { Alert } from '@/components/ui/alert'
 import { db } from '@/lib/db'
+import { linksMessages } from '@/i18n/messages/links'
+import { messages } from '@/i18n/server'
 import { maskEmail, verifyPreferencesToken } from '@/lib/email/preferences'
 
-export const metadata: Metadata = { title: 'Email preferences', robots: { index: false, follow: false } }
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await messages(linksMessages)).preferences.title, robots: { index: false, follow: false } }
+}
 
 /** Reached from the link in every product email; works without signing in. */
 export default async function EmailPreferencesPage({ searchParams }: PageProps<'/email/preferences'>) {
   const params = await searchParams
+  const m = (await messages(linksMessages)).preferences
   const userId = typeof params.u === 'string' ? params.u : ''
   const token = typeof params.t === 'string' ? params.t : ''
   const user = verifyPreferencesToken(userId, token)
@@ -19,21 +24,21 @@ export default async function EmailPreferencesPage({ searchParams }: PageProps<'
 
   if (!user) {
     return (
-      <AuthShell title="Email preferences">
+      <AuthShell title={m.title}>
         <Alert tone="error">
-          This preferences link is not valid. Use the link in a recent KineticScout email, or <Link href="/sign-in?next=/dashboard/settings">sign in</Link>{' '}
-          and open Settings.
+          {m.invalid} <Link href="/sign-in?next=/dashboard/settings">{m.signIn}</Link>
+          {m.invalidTail}
         </Alert>
       </AuthShell>
     )
   }
 
   return (
-    <AuthShell title="Email preferences" intro={<p>Choices for {maskEmail(user.email)}.</p>}>
+    <AuthShell title={m.title} intro={<p>{m.choicesFor(maskEmail(user.email))}</p>}>
       <MarketingPreferenceForm mode="link" userId={userId} token={token} optedIn={user.marketingEmailOptIn} disabled={user.deletionScheduledFor !== null} />
       <p className="text-sm text-fg-muted">
-        Account emails (password resets, billing receipts, consent and deletion notices) are still sent while the account exists. To stop
-        those, <Link href="/sign-in?next=/dashboard/settings">sign in</Link> and delete the account from Settings.
+        {m.account} <Link href="/sign-in?next=/dashboard/settings">{m.signIn}</Link>
+        {m.accountTail}
       </p>
     </AuthShell>
   )

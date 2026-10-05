@@ -8,13 +8,15 @@ import { audit } from '@/lib/audit'
 import { db } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send'
 import { notifyGuardianAccount } from '@/lib/family/notify'
-import { renderEmail } from '@/lib/email/templates'
+import { renderLocalizedEmail, type LocalizedEmail } from '@/lib/email/localized'
 import { env } from '@/lib/env'
 import { errorFields, logger } from '@/lib/logger'
 import { METRIC_DEFINITIONS, isPlausibleMetricValue } from '@/lib/metrics/definitions'
 import { notify } from '@/lib/notifications/service'
 import { randomToken, sha256Hex } from '@/lib/security/hash'
 import { sanitizeText } from '@/lib/security/sanitize'
+import type { Locale } from '@/i18n/config'
+import { guardianLocale } from '@/i18n/recipient'
 import { isJoinCode, JOIN_CODE_ALPHABET, normalizeJoinCode, recordedByLabel, TEAM_POLICY, type TeamDetails } from '@/lib/teams/rules'
 
 const DAY = 86_400_000
@@ -46,8 +48,8 @@ function cleanDetails(input: TeamDetails) {
   }
 }
 
-async function email(to: string, subject: string, paragraphs: string[], key: string, action?: { label: string; url: string }) {
-  const { text, html } = renderEmail({ paragraphs, action })
+async function email(to: string, locale: Locale, message: LocalizedEmail, key: string) {
+  const { subject, text, html } = renderLocalizedEmail(message, locale)
   try {
     await sendEmail({ to, subject, text, html, idempotencyKey: key })
   } catch (error) {
@@ -168,11 +170,15 @@ export async function decideTeam(adminId: string, teamId: string, decision: 'VER
   const team = await db.team.findUniqueOrThrow({ where: { id: teamId }, select: { coachId: true, name: true } })
   const action = { VERIFIED: 'team.verified', REJECTED: 'team.rejected', SUSPENDED: 'team.suspended' } as const
   await audit(action[decision], { actorId: adminId, targetType: 'team', targetId: teamId, metadata: { revokeRecorded: Boolean(options.revokeRecorded) } })
-  const titles = { VERIFIED: `${team.name} is approved`, REJECTED: `${team.name} was not approved`, SUSPENDED: `${team.name} is suspended` }
+  const titles = {
+    VERIFIED: { en: `${team.name} is approved`, es: `${team.name} fue aprobado` },
+    REJECTED: { en: `${team.name} was not approved`, es: `${team.name} no fue aprobado` },
+    SUSPENDED: { en: `${team.name} is suspended`, es: `${team.name} está suspendido` },
+  }
   const bodies = {
-    VERIFIED: 'Share your team code with your players. You approve each request before anyone joins.',
-    REJECTED: note ?? 'We could not match you to the staff page you gave. You can correct the details and resubmit.',
-    SUSPENDED: note ?? 'Recording and new members are paused. Contact support if you think this is a mistake.',
+    VERIFIED: { en: 'Share your team code with your players. You approve each request before anyone joins.', es: 'Comparte el código del equipo con tus jugadores. Tú apruebas cada solicitud antes de que alguien se una.' },
+    REJECTED: note ?? { en: 'We could not match you to the staff page you gave. You can correct the details and resubmit.', es: 'No pudimos encontrarte en la página de personal que indicaste. Puedes corregir los datos y volver a enviarlos.' },
+    SUSPENDED: note ?? { en: 'Recording and new members are paused. Contact support if you think this is a mistake.', es: 'El registro de resultados y los nuevos miembros están en pausa. Contacta a soporte si crees que es un error.' },
   }
   await notify({ userId: team.coachId, kind: 'TEAM_UPDATE', title: titles[decision], body: bodies[decision], href: '/dashboard/team', dedupeKey: `team-${decision}-${teamId}-${now.getTime()}` })
   return true
@@ -198,7 +204,7 @@ export async function requestToJoin(athlete: SessionUser, rawCode: string): Prom
   }
   const profile = await db.athleteProfile.findUniqueOrThrow({ where: { userId: athlete.id }, select: { firstName: true, lastName: true, gradYear: true } })
   await audit('team.join_requested', { actorId: athlete.id, targetType: 'team', targetId: team.id })
-  await notify({ userId: team.coachId, kind: 'TEAM_UPDATE', title: `${profile.firstName} ${profile.lastName} asked to join`, body: `Class of ${profile.gradYear}. Approve or decline on your team page.`, href: '/dashboard/team', dedupeKey: `team-join-${team.id}-${athlete.id}-${Date.now()}` })
+  await notify({ userId: team.coachId, kind: 'TEAM_UPDATE', title: { en: `${profile.firstName} ${profile.lastName} asked to join`, es: `${profile.firstName} ${profile.lastName} pidió unirse` }, body: { en: `Class of ${profile.gradYear}. Approve or decline on your team page.`, es: `Generación ${profile.gradYear}. Aprueba o rechaza la solicitud en la página de tu equipo.` }, href: '/dashboard/team', dedupeKey: `team-join-${team.id}-${athlete.id}-${Date.now()}` })
   return { teamName: team.name }
 }
 
@@ -219,7 +225,7 @@ export async function decideJoin(coachId: string, memberId: string, approve: boo
   if (!approve) {
     await db.teamMember.update({ where: { id: memberId }, data: { status: 'DECLINED', coachDecidedAt: now } })
     await audit('team.join_decided', { actorId: coachId, targetType: 'team_member', targetId: memberId, metadata: { approved: false } })
-    await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: `Your request to join ${member.team.name} was declined`, body: 'Ask your coach if you think this is a mistake.', href: '/dashboard/teams', dedupeKey: `team-declined-${memberId}` })
+    await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: { en: `Your request to join ${member.team.name} was declined`, es: `Se rechazó tu solicitud para unirte a ${member.team.name}` }, body: { en: 'Ask your coach if you think this is a mistake.', es: 'Pregúntale a tu entrenador si crees que es un error.' }, href: '/dashboard/teams', dedupeKey: `team-declined-${memberId}` })
     return 'declined'
   }
 
@@ -229,24 +235,39 @@ export async function decideJoin(coachId: string, memberId: string, approve: boo
     const token = randomToken()
     await db.teamMember.update({ where: { id: memberId }, data: { status: 'AWAITING_GUARDIAN', coachDecidedAt: now, guardianTokenHash: sha256Hex(token), guardianTokenExpiresAt: new Date(now.getTime() + TEAM_POLICY.guardianLinkDays * DAY) } })
     await audit('team.join_decided', { actorId: coachId, targetType: 'team_member', targetId: memberId, metadata: { approved: true, awaitingGuardian: true } })
+    const n = member.athlete.firstName
+    const t = member.team
     await email(
       guardian.guardianEmail,
-      `${member.athlete.firstName} would like to join ${member.team.name} on KineticScout`,
-      [
-        `${member.athlete.firstName} asked to join ${member.team.name} (${member.team.organization}), and the coach, ${member.team.coachName} (${member.team.coachTitle}), approved. KineticScout staff checked this coach against the team's public staff page.`,
-        `If you approve, the coach sees ${member.athlete.firstName}'s name, class and position, and can record test results that ${member.athlete.firstName} then accepts or declines. The coach does not see ${member.athlete.firstName}'s email address or other measurements.`,
-      ],
+      await guardianLocale(member.athleteId),
+      {
+        subject: { en: `${n} would like to join ${t.name} on KineticScout`, es: `${n} quiere unirse a ${t.name} en KineticScout` },
+        paragraphs: [
+          {
+            en: `${n} asked to join ${t.name} (${t.organization}), and the coach, ${t.coachName} (${t.coachTitle}), approved. KineticScout staff checked this coach against the team's public staff page.`,
+            es: `${n} pidió unirse a ${t.name} (${t.organization}), y el entrenador, ${t.coachName} (${t.coachTitle}), lo aprobó. El personal de KineticScout comprobó a este entrenador con la página pública de personal del equipo.`,
+          },
+          {
+            en: `If you approve, the coach sees ${n}'s name, class and position, and can record test results that ${n} then accepts or declines. The coach does not see ${n}'s email address or other measurements.`,
+            es: `Si lo apruebas, el entrenador ve el nombre, la generación y la posición de ${n}, y puede registrar resultados de pruebas que ${n} después acepta o rechaza. El entrenador no ve el correo de ${n} ni sus otras mediciones.`,
+          },
+        ],
+        action: { label: { en: 'Review the request', es: 'Revisar la solicitud' }, url: `${env().APP_URL}/consent/guardian/team?token=${encodeURIComponent(token)}` },
+      },
       `team-guardian-${memberId}`,
-      { label: 'Review the request', url: `${env().APP_URL}/consent/guardian/team?token=${encodeURIComponent(token)}` },
     )
-    await notifyGuardianAccount(member.athleteId, { title: `${member.athlete.firstName} would like to join ${member.team.name}`, body: 'The coach approved. Review the request on your Family page.', dedupeKey: `team-guardian-${memberId}` })
-    await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: `${member.team.name} approved your request`, body: 'We emailed your parent or guardian to approve it too.', href: '/dashboard/teams', dedupeKey: `team-approved-${memberId}` })
+    await notifyGuardianAccount(member.athleteId, {
+      title: { en: `${n} would like to join ${t.name}`, es: `${n} quiere unirse a ${t.name}` },
+      body: { en: 'The coach approved. Review the request on your Family page.', es: 'El entrenador lo aprobó. Revisa la solicitud en tu página Familia.' },
+      dedupeKey: `team-guardian-${memberId}`,
+    })
+    await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: { en: `${t.name} approved your request`, es: `${t.name} aprobó tu solicitud` }, body: { en: 'We emailed your parent or guardian to approve it too.', es: 'Le enviamos un correo a tu padre, madre o tutor para que también lo apruebe.' }, href: '/dashboard/teams', dedupeKey: `team-approved-${memberId}` })
     return 'awaiting-guardian'
   }
 
   await db.teamMember.update({ where: { id: memberId }, data: { status: 'ACTIVE', coachDecidedAt: now } })
   await audit('team.join_decided', { actorId: coachId, targetType: 'team_member', targetId: memberId, metadata: { approved: true } })
-  await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: `You joined ${member.team.name}`, body: 'Your coach can now record test results for you to accept.', href: '/dashboard/teams', dedupeKey: `team-approved-${memberId}` })
+  await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: { en: `You joined ${member.team.name}`, es: `Te uniste a ${member.team.name}` }, body: { en: 'Your coach can now record test results for you to accept.', es: 'Tu entrenador ya puede registrar resultados de pruebas para que los aceptes.' }, href: '/dashboard/teams', dedupeKey: `team-approved-${memberId}` })
   return 'active'
 }
 
@@ -281,12 +302,12 @@ export async function guardianDecideTeamMember(memberId: string, approve: boolea
   await audit('team.guardian_decided', { actorId: guardianUserId, targetType: 'team_member', targetId: member.id, metadata: { approved: status === 'ACTIVE', via: guardianUserId ? 'account' : 'link' } })
   const name = `${member.athlete.firstName} ${member.athlete.lastName}`
   if (status === 'ACTIVE') {
-    await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: `You joined ${member.team.name}`, body: 'Your parent or guardian approved. Your coach can now record test results for you to accept.', href: '/dashboard/teams', dedupeKey: `team-guardian-${member.id}` })
-    await notify({ userId: member.team.coachId, kind: 'TEAM_UPDATE', title: `${name} joined ${member.team.name}`, body: 'Their parent or guardian approved.', href: '/dashboard/team', dedupeKey: `team-guardian-${member.id}` })
+    await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: { en: `You joined ${member.team.name}`, es: `Te uniste a ${member.team.name}` }, body: { en: 'Your parent or guardian approved. Your coach can now record test results for you to accept.', es: 'Tu padre, madre o tutor lo aprobó. Tu entrenador ya puede registrar resultados de pruebas para que los aceptes.' }, href: '/dashboard/teams', dedupeKey: `team-guardian-${member.id}` })
+    await notify({ userId: member.team.coachId, kind: 'TEAM_UPDATE', title: { en: `${name} joined ${member.team.name}`, es: `${name} se unió a ${member.team.name}` }, body: { en: 'Their parent or guardian approved.', es: 'Su padre, madre o tutor lo aprobó.' }, href: '/dashboard/team', dedupeKey: `team-guardian-${member.id}` })
     return 'approved'
   }
-  await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: `Your parent or guardian declined ${member.team.name}`, body: 'You were not added to the team.', href: '/dashboard/teams', dedupeKey: `team-guardian-${member.id}` })
-  await notify({ userId: member.team.coachId, kind: 'TEAM_UPDATE', title: `${name} was not added`, body: 'Their parent or guardian did not approve.', href: '/dashboard/team', dedupeKey: `team-guardian-${member.id}` })
+  await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: { en: `Your parent or guardian declined ${member.team.name}`, es: `Tu padre, madre o tutor rechazó ${member.team.name}` }, body: { en: 'You were not added to the team.', es: 'No se te agregó al equipo.' }, href: '/dashboard/teams', dedupeKey: `team-guardian-${member.id}` })
+  await notify({ userId: member.team.coachId, kind: 'TEAM_UPDATE', title: { en: `${name} was not added`, es: `${name} no se agregó` }, body: { en: 'Their parent or guardian did not approve.', es: 'Su padre, madre o tutor no lo aprobó.' }, href: '/dashboard/team', dedupeKey: `team-guardian-${member.id}` })
   return 'declined'
 }
 
@@ -318,7 +339,7 @@ export async function removeMember(coachId: string, memberId: string, now: Date 
     db.teamEntry.updateMany({ where: { athleteId: member.athleteId, teamId: member.teamId, status: 'PENDING' }, data: { status: 'WITHDRAWN', respondedAt: now } }),
   ])
   await audit('team.member_ended', { actorId: coachId, targetType: 'team_member', targetId: memberId, metadata: { by: 'coach' } })
-  await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: `You are no longer on ${member.team.name}`, body: 'Values you already accepted stay on your profile.', href: '/dashboard/teams', dedupeKey: `team-removed-${memberId}` })
+  await notify({ userId: member.athleteId, kind: 'TEAM_UPDATE', title: { en: `You are no longer on ${member.team.name}`, es: `Ya no estás en ${member.team.name}` }, body: { en: 'Values you already accepted stay on your profile.', es: 'Los valores que ya aceptaste se quedan en tu perfil.' }, href: '/dashboard/teams', dedupeKey: `team-removed-${memberId}` })
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -365,8 +386,11 @@ export async function recordTestingSession(coachId: string, teamId: string, inpu
     await notify({
       userId: athleteId,
       kind: 'TEAM_UPDATE',
-      title: `${team.coachName} recorded ${count} result${count === 1 ? '' : 's'} for you`,
-      body: `${team.name}, ${input.label}. Accept the ones that are right to add them to your measurements as coach-recorded.`,
+      title: { en: `${team.coachName} recorded ${count} result${count === 1 ? '' : 's'} for you`, es: `${team.coachName} registró ${count} ${count === 1 ? 'resultado' : 'resultados'} para ti` },
+      body: {
+        en: `${team.name}, ${input.label}. Accept the ones that are right to add them to your measurements as coach-recorded.`,
+        es: `${team.name}, ${input.label}. Acepta los correctos para agregarlos a tus mediciones como registrados por el entrenador.`,
+      },
       href: '/dashboard/teams',
       dedupeKey: `team-session-${session.id}`,
     })

@@ -8,13 +8,12 @@ import { Field, Select, TextInput } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import { fieldErrorsFrom } from '@/lib/forms'
 import { teamDetailsSchema, US_STATES, type TeamDetails } from '@/lib/teams/rules'
+import { useMessages } from '@/i18n/client'
+import { coachMessages } from '@/i18n/messages/coach'
+import { domainMessages } from '@/i18n/messages/domain'
 import { errorMessage, useTRPC } from '@/trpc/client'
 
-const SPORTS = [
-  ['BASEBALL', 'Baseball'],
-  ['HOCKEY', 'Hockey'],
-  ['FOOTBALL', 'Football'],
-] as const
+const SPORTS = ['BASEBALL', 'HOCKEY', 'FOOTBALL'] as const
 
 type Values = Record<keyof TeamDetails, string>
 const EMPTY: Values = { name: '', sport: 'BASEBALL', orgType: 'HIGH_SCHOOL', organization: '', state: '', coachName: '', coachTitle: '', directoryUrl: '' }
@@ -28,6 +27,8 @@ export function TeamForm({ teamId, initial, onDone }: { teamId?: string; initial
   const create = useMutation(trpc.team.create.mutationOptions({ onSuccess: onDone }))
   const resubmit = useMutation(trpc.team.resubmit.mutationOptions({ onSuccess: onDone }))
   const mutation = teamId ? resubmit : create
+  const m = useMessages(coachMessages).teamForm
+  const d = useMessages(domainMessages)
   const set = (key: keyof Values) => (e: { target: { value: string } }) => setValues({ ...values, [key]: e.target.value })
 
   return (
@@ -56,33 +57,33 @@ export function TeamForm({ teamId, initial, onDone }: { teamId?: string; initial
           {errorMessage(mutation.error)}
         </Alert>
       )}
-      <Field label="Team name" name="team-name" required error={errors.name} hint='For example "Westlake High School Varsity Baseball" or "Lone Star 16U".'>
+      <Field label={m.name} name="team-name" required error={errors.name} hint={m.nameHint}>
         {(p) => <TextInput {...p} maxLength={120} value={values.name} onChange={set('name')} />}
       </Field>
       <div className="grid gap-5 sm:grid-cols-3">
-        <Field label="Sport" name="team-sport" required error={errors.sport}>
+        <Field label={m.sport} name="team-sport" required error={errors.sport}>
           {(p) => (
             <Select {...p} value={values.sport} onChange={set('sport')}>
-              {SPORTS.map(([value, label]) => (
+              {SPORTS.map((value) => (
                 <option key={value} value={value}>
-                  {label}
+                  {d.sport[value]}
                 </option>
               ))}
             </Select>
           )}
         </Field>
-        <Field label="Type" name="team-orgType" required error={errors.orgType}>
+        <Field label={m.type} name="team-orgType" required error={errors.orgType}>
           {(p) => (
             <Select {...p} value={values.orgType} onChange={set('orgType')}>
-              <option value="HIGH_SCHOOL">High school team</option>
-              <option value="CLUB">Travel or club team</option>
+              <option value="HIGH_SCHOOL">{m.highSchool}</option>
+              <option value="CLUB">{m.club}</option>
             </Select>
           )}
         </Field>
-        <Field label="State" name="team-state" required error={errors.state}>
+        <Field label={m.state} name="team-state" required error={errors.state}>
           {(p) => (
             <Select {...p} value={values.state} onChange={set('state')}>
-              <option value="">Choose</option>
+              <option value="">{m.choose}</option>
               {US_STATES.map(([code, name]) => (
                 <option key={code} value={code}>
                   {name}
@@ -92,23 +93,23 @@ export function TeamForm({ teamId, initial, onDone }: { teamId?: string; initial
           )}
         </Field>
       </div>
-      <Field label="School or club" name="team-organization" required error={errors.organization}>
+      <Field label={m.organization} name="team-organization" required error={errors.organization}>
         {(p) => <TextInput {...p} autoComplete="organization" maxLength={160} value={values.organization} onChange={set('organization')} />}
       </Field>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Your name" name="team-coachName" required error={errors.coachName} hint="As it appears on the staff page.">
+        <Field label={m.yourName} name="team-coachName" required error={errors.coachName} hint={m.yourNameHint}>
           {(p) => <TextInput {...p} autoComplete="name" maxLength={120} value={values.coachName} onChange={set('coachName')} />}
         </Field>
-        <Field label="Your title" name="team-coachTitle" required error={errors.coachTitle}>
+        <Field label={m.yourTitle} name="team-coachTitle" required error={errors.coachTitle}>
           {(p) => <TextInput {...p} autoComplete="organization-title" maxLength={80} value={values.coachTitle} onChange={set('coachTitle')} />}
         </Field>
       </div>
-      <Field label="Staff page" name="team-directoryUrl" required error={errors.directoryUrl} hint="The https:// link to your school's athletics staff page or your club's coaches page, where your name appears.">
+      <Field label={m.staffPage} name="team-directoryUrl" required error={errors.directoryUrl} hint={m.staffPageHint}>
         {(p) => <TextInput {...p} type="url" inputMode="url" maxLength={512} value={values.directoryUrl} onChange={set('directoryUrl')} />}
       </Field>
       <Button type="submit" disabled={mutation.isPending} className="self-start">
-        {mutation.isPending ? <Spinner label="Submitting" /> : null}
-        {teamId ? 'Resubmit for review' : 'Submit for review'}
+        {mutation.isPending ? <Spinner label={m.submitting} /> : null}
+        {teamId ? m.resubmit : m.submit}
       </Button>
     </form>
   )
