@@ -52,7 +52,7 @@ test.describe('verified coach', () => {
     await expect(dialog).toBeVisible()
     await expectAccessible(page, 'contact dialog')
     await dialog.getByRole('button', { name: 'Send request' }).click()
-    await expect(dialog.getByText("Confirm that your association's recruiting rules allow contact now.")).toBeVisible()
+    await expect(dialog.getByText(/Confirm that your association.s recruiting rules allow contact now\./)).toBeVisible()
     await dialog.getByLabel(/^Message/).fill('Hi Riley, see our camp details at https://camp.example.com before you decide anything.')
     await dialog.getByLabel(/recruiting rules/).check()
     await dialog.getByRole('button', { name: 'Send request' }).click()
