@@ -27,6 +27,8 @@ function matchesPrefix(pathname: string, prefixes: readonly string[]): boolean {
   return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
 }
 
+const PAGE_METHODS = new Set(['GET', 'HEAD', 'POST'])
+
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl
   const isDev = process.env.NODE_ENV !== 'production'
@@ -44,6 +46,12 @@ export async function proxy(request: NextRequest) {
   })
   if (!origin.ok) {
     return new NextResponse('Cross-origin request rejected', { status: 403, headers: { 'Cache-Control': 'no-store' } })
+  }
+
+  // Pages answer GET and HEAD, and POST for server actions; anything else is refused. API routes
+  // declare their own methods and Next.js answers 405 for the rest.
+  if (!pathname.startsWith('/api/') && !PAGE_METHODS.has(request.method)) {
+    return new NextResponse(null, { status: 405, headers: { Allow: 'GET, HEAD, POST', 'Cache-Control': 'no-store' } })
   }
 
   // Webhooks and health checks carry no session and need no CSP.

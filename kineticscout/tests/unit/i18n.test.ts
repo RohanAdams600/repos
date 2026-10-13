@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { localeFromAcceptLanguage } from '@/i18n/config'
+import { safeReturn } from '@/i18n/return-path'
 import { hasPattern, SERVER_TEXT_ES, translateServerText } from '@/i18n/messages/server-text'
 import { CLOSED_BY_LABEL } from '@/lib/messaging/rules'
 import { UPLOAD_ERRORS } from '@/lib/upload/put'
@@ -86,5 +87,22 @@ describe('label maps shown through the server text translator', () => {
   it('has Spanish for every closed-conversation, rejection and upload message', () => {
     const texts = [...Object.values(CLOSED_BY_LABEL), ...Object.values(REJECTION_LABELS), ...Object.values(UPLOAD_ERRORS)]
     expect(texts.filter((t) => !(t in SERVER_TEXT_ES))).toEqual([])
+  })
+})
+
+describe('language switch return path', () => {
+  const app = 'https://kineticscout.example'
+  it('returns to a path on this site, query string included', () => {
+    expect(safeReturn('/pricing?from=email', null, app)).toBe('/pricing?from=email')
+    expect(safeReturn('', 'https://kineticscout.example/legal/privacy?x=1', app)).toBe('/legal/privacy?x=1')
+  })
+
+  it('never leaves the site', () => {
+    for (const attack of ['//evil.example', '/\\evil.example', '/\t/evil.example', '/\n/evil.example', 'https://evil.example/', 'javascript:alert(1)', '\\\\evil.example']) {
+      expect(safeReturn(attack, null, app), JSON.stringify(attack)).toBe('/')
+    }
+    expect(safeReturn('', 'https://evil.example/path', app)).toBe('/')
+    expect(safeReturn('', 'not a url', app)).toBe('/')
+    expect(safeReturn('/'.padEnd(3000, 'a'), null, app)).toBe('/')
   })
 })

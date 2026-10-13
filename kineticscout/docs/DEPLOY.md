@@ -25,6 +25,12 @@ someone ticks, not background reading. Commands run from `kineticscout/`.
 - [ ] **Optional integrations** (Meta, X, program data feed): leave unset unless the business decided to use them. All publishing switches default to off.
 - [ ] **Web Push (optional):** generate `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` once per environment (command in `.env.example`) and set `VAPID_SUBJECT` to a support mailto. Set them on both the web app and the worker. Never reuse staging keys in production; changing keys later invalidates every device's subscription.
 
+### Hosting and edge
+
+- [ ] The host or CDN rejects `TRACE` and `TRACK` (Vercel and Cloudflare do by default). Next.js answers them with a 500 before the app runs; the proxy already answers 405 for other unsupported methods on pages.
+- [ ] Capacity: serverless hosts scale on their own. Self-hosted, start with at least two web instances and add one per roughly 75 concurrent active users (docs/LOAD-TESTING.md, run of 2026-10-13).
+- [ ] The CDN does not cache HTML. Pages are sent as `private, no-store` because they depend on the session and the language; do not override that with an edge rule.
+
 ### Environment variables
 
 `src/lib/env.ts` refuses to boot a staging or production process with a missing or unsafe value,

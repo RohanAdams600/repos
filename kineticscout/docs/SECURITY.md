@@ -119,6 +119,25 @@ Each item from the brief, mapped to where it is enforced and how it is verified.
 | Language switch | `setLocaleAction` accepts only `en` or `es` and returns only to a path on this site (no scheme, no `//`, no backslash, at most 2,048 characters), so it cannot be used as an open redirect. The `ks_locale` cookie is HttpOnly, SameSite=Lax and Secure in production. The proxy strips any incoming `x-ks-link-locale` header and sets it only from a valid `?lang=` value. | `tests/unit/i18n.test.ts`, `e2e/specs/spanish.spec.ts` |
 | Translated messages | Server messages are translated only on display, by exact dictionary entries and anchored patterns; user-supplied text (names, notes, messages) is interpolated, never interpreted, and React escapes it. Emails escape every interpolated value in both languages. | `tests/unit/i18n.test.ts`, `tests/unit/i18n-delivery.test.ts`, `tests/integration/spanish-delivery.test.ts` |
 
+## Phase 8 launch audit (2026-10-13)
+
+| Check | Result | How to repeat |
+|---|---|---|
+| Production dependencies | 0 known vulnerabilities (`npm audit --omit=dev`). Patch releases and Next.js 16.4.0 applied. | `npm audit --omit=dev` |
+| Dev-only dependencies | 5 high findings, all one advisory: `braces` <= 3.0.3 (deep-nesting stack exhaustion, GHSA-vfj7-8cjw-p6xm) under `eslint-config-next`. No fixed release exists; it only parses our own lint globs and never ships. Accepted; re-check when a fix is published. | `npm audit` |
+| Licences (production tree) | All permissive except libvips (LGPL-3.0, dynamically loaded by `sharp`, unmodified) and `elkjs` (EPL-2.0, only inside Prisma Studio, never loaded at runtime). `caniuse-lite` data is CC-BY-4.0. | see the script in the audit commit message |
+| Committed secrets | gitleaks over the full history: clean (CI job). Local findings were only in gitignored build output and e2e seed state. | CI `secrets-scan` |
+| Secrets in the browser bundle | None of the secret values or secret variable names appear in any `.next/static` chunk. | grep the chunks for each secret value |
+| Headers | CSP with per-request nonce and `strict-dynamic`, `frame-ancestors 'none'`, `object-src 'none'`, nosniff, `X-Frame-Options: DENY`, COOP/CORP same-origin, restrictive Permissions-Policy, no `X-Powered-By`, HSTS (2 years, preload) when served over https. Pages are `private, no-store`, so no CDN can serve one visitor's page (or language) to another. | `curl -sI` |
+| Authorization matrix | New test calls every tRPC procedure (over 100) as signed out, outdated terms, athlete, college coach, team coach and parent: every one refuses the wrong caller before reading input. | `tests/integration/authorization-matrix.test.ts` |
+| Live probes | Cross-origin and cross-site POSTs 403; server actions from another origin 403; unsigned Stripe webhook 400; internal routes without the secret 401; signed-out API 401; forged e2e stub cookie ignored outside local; 15 MB body 413; unknown and traversal slugs 404. | see "Live probes" in docs/LAUNCH.md |
+| Row level security | RLS on every table in `public`, including `_prisma_migrations` (new migration, which also fails if any table is ever left without RLS); Data API grants on tables, sequences and functions revoked for `anon` and `authenticated`; trigger functions pinned to `search_path = public, pg_temp`. Verified again on a restored backup. | `npm run backup:verify` |
+| Raw SQL and HTML | All raw SQL is tagged-template (parameterized). The only raw HTML is JSON-LD with `<`, U+2028 and U+2029 escaped and the CSP nonce. Server-side fetches go only to fixed provider hosts and to push endpoints on an allowlist. | code review |
+
+**Fixed during the audit.**
+- **Open redirect in the language switch (Phase 7).** Its own return-path check let `/\t/evil.example` through; browsers drop tabs and newlines from URLs, which turns that into `//evil.example`. It now uses the shared `safeRedirectPath` guard (control characters rejected, path re-parsed against a placeholder origin). Tests cover tab, newline, backslash, scheme and protocol-relative forms.
+- **Unsupported methods on pages.** PUT, PATCH, DELETE and OPTIONS to a page rendered it; the proxy now answers 405 with `Allow: GET, HEAD, POST`. (`TRACE` is rejected by Next.js before our code runs with a 500 and no detail; block it at the edge, see docs/DEPLOY.md.)
+
 ## Known residual risks and follow-ups
 
 - Rate limits fail open during an Upstash outage (a deliberate availability trade-off).

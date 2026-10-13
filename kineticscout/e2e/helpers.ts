@@ -21,6 +21,9 @@ export async function signIn(context: BrowserContext, cookie: string | null, bas
 
 /** WCAG 2.2 A and AA, plus the AAA contrast rule the brand requires. */
 export async function expectAccessible(page: Page, label: string): Promise<void> {
+  // After a client-side navigation (such as a server action's redirect) Next.js streams the new <title>
+  // in after the page body. Wait for it so axe sees the settled page; a page with no title still fails here.
+  await expect(page, `${label} has no document title`).toHaveTitle(/\S/)
   // withTags and withRules each replace axe's runOnly setting, so the AAA contrast rule runs as a second pass.
   // Sequential: axe refuses to start a run while another is in progress on the same page.
   const standard = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze()

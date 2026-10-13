@@ -1,8 +1,7 @@
 import 'server-only'
 import { cookies, headers } from 'next/headers'
 import { cache } from 'react'
-import { getAuthIdentity } from '@/lib/auth/session'
-import { db } from '@/lib/db'
+import { getAuthState } from '@/lib/auth/session'
 import { DEFAULT_LOCALE, SPANISH_ENABLED, isLocale, LINK_LOCALE_HEADER, LOCALE_COOKIE, localeFromAcceptLanguage, type Locale } from '@/i18n/config'
 import { pick, type Catalog } from '@/i18n/define'
 
@@ -18,11 +17,9 @@ export const getLocale = cache(async (): Promise<Locale> => {
   const requestHeaders = await headers()
   const fromLink = requestHeaders.get(LINK_LOCALE_HEADER)
   if (isLocale(fromLink)) return fromLink
-  const identity = await getAuthIdentity().catch(() => null)
-  if (identity) {
-    const row = await db.user.findUnique({ where: { id: identity.id }, select: { locale: true } }).catch(() => null)
-    if (row && isLocale(row.locale) && row.locale !== DEFAULT_LOCALE) return row.locale
-  }
+  // The account row is already loaded for the session (cached per request), so this adds no query.
+  const state = await getAuthState().catch(() => null)
+  if (state?.status === 'ready' && isLocale(state.locale) && state.locale !== DEFAULT_LOCALE) return state.locale
   return localeFromAcceptLanguage(requestHeaders.get('accept-language'))
 })
 

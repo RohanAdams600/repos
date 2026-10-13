@@ -72,3 +72,35 @@ COOKIE=$(node -p "require('./e2e/.state.json').athlete.cookie")
 BASE_URL=http://localhost:3100 USERS=100 DURATION_S=60 PROFILE_SLUG=$SLUG \
   SESSION_COOKIE="ks_e2e_session=$COOKIE" npm run load:simulate
 ```
+
+## Run of 2026-10-13 (local, Phase 8 launch check)
+
+**Setup.** Same 4 vCPU Intel Xeon (2.1 GHz) container and method as the Phase 5 run: one `next start`
+production build (Next.js 16.4), Postgres 16 and the load generator on the same machine, in-memory
+rate limiter, dashboard group signed in through the local e2e stub. Each figure is from a warm server
+(a cold start right after `next start` measured about 10% lower).
+
+**Fix made during this run.** Since Phase 7 every signed-in request read the account's language
+with its own database query. The language now comes from the account row the session already
+loads, which removes one query per signed-in request.
+
+| Virtual users | Requests per second | Errors | p50 (all) | p95 (all) | Within budget |
+|---|---|---|---|---|---|
+| 50 | 68 | 0 | 85 ms | 407 ms | all groups |
+| 100 | 87 | 0 | 496 ms | 1224 ms | all groups (public profile p95 1473 ms against 1500 ms) |
+
+Single requests, one at a time: home 12 ms, pricing 9 ms, public profile 16 ms, calculator 10 ms,
+signed-in dashboard 18 ms (medians of 15). The latency under load is queueing on one Node.js process
+at full CPU, not slow queries: one process serves about 85 to 90 requests per second of this mix
+(Phase 5 measured about 120 with a smaller app). The 429s are the profile PDF's per-IP limit working,
+since every virtual user shares one IP.
+
+**Capacity guidance.** On a serverless host (Vercel) instances scale with traffic. Self-hosted, run
+at least two web instances behind the load balancer from day one, and add one for roughly every 75
+concurrent active users; keep `/api/health` p95 under 500 ms and page p95 under 1.5 s (the alert
+rules in `infra/monitoring/` page on both).
+
+**Page weight (production build, signed out).** Every public page has a layout shift of 0 and paints
+its largest element in under 0.3 s on desktop and on an emulated 4G phone. JavaScript is about 193 KB
+gzipped, of which React DOM and the Next.js router are about 145 KB; the dashboard chart library is
+never loaded on public pages. CSS is 29 KB.

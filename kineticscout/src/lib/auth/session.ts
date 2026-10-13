@@ -28,7 +28,8 @@ export type AuthState =
   | { status: 'anonymous' }
   /** Authenticated with Supabase but no application account row yet (sign-up interrupted). */
   | { status: 'needs-account'; authUserId: string; email: string }
-  | { status: 'ready'; user: SessionUser }
+  /** `locale` is the language saved on the account (see src/i18n/server.ts). */
+  | { status: 'ready'; user: SessionUser; locale: string }
 
 /** Verified identity from the session JWT (signature and expiry checked by Supabase). */
 export const getAuthIdentity = cache(async (): Promise<{ id: string; email: string } | null> => {
@@ -60,6 +61,7 @@ export const getAuthState = cache(async (): Promise<AuthState> => {
       dateOfBirth: true,
       termsVersion: true,
       deletionScheduledFor: true,
+      locale: true,
       guardianConsent: { select: { status: true } },
       athleteProfile: { select: { userId: true } },
     },
@@ -75,6 +77,7 @@ export const getAuthState = cache(async (): Promise<AuthState> => {
 
   return {
     status: 'ready',
+    locale: row.locale,
     user: {
       id: row.id,
       email: row.email,
