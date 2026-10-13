@@ -51,7 +51,7 @@ export function AnalysisDetail({ id }: { id: string }) {
       {analysis.videoUrl && analysis.pose ? (
         <PoseOverlayPlayer videoUrl={analysis.videoUrl} pose={analysis.pose} footStrikeTime={analysis.report.footStrikeTime} trajectory={analysis.projectile?.points} />
       ) : (
-        <p className="text-fg-muted">{m.deleted}</p>
+        <p className="text-fg-muted">{analysis.videoUnavailable ? m.videoUnavailable : m.deleted}</p>
       )}
       {analysis.videoUrl && (
         <Link href={`/dashboard/analysis/${analysis.id}/compare`} className={buttonVariants({ variant: 'secondary' })}>

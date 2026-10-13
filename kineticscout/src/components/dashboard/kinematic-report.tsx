@@ -70,7 +70,7 @@ export function KinematicReportView({ report, motion }: { report: KinematicRepor
           {m.title(report.sequenceIsIdeal)}
         </h2>
         <SequenceTimeline report={report} />
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <table className="w-full min-w-[480px] text-left">
             <caption className="sr-only">{m.tableCaption}</caption>
             <thead>

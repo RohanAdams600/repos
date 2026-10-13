@@ -28,9 +28,13 @@ vi.mock('next/headers', () => ({
 }))
 
 const deleted: string[] = []
+let playbackFails = false
 vi.mock('@/lib/storage/gcs', () => ({
   createSignedUpload: async (key: string) => ({ url: `https://storage.test/${key}`, headers: {}, expiresAt: new Date().toISOString() }),
-  createSignedPlaybackUrl: async (key: string) => `https://storage.test/play/${key}`,
+  createSignedPlaybackUrl: async (key: string) => {
+    if (playbackFails) throw new Error('storage unreachable')
+    return `https://storage.test/play/${key}`
+  },
   deleteObject: async (key: string) => void deleted.push(key),
   deletePrefix: async () => undefined,
   getObjectInfo: async () => ({ exists: true, sizeBytes: 1000, contentType: 'video/mp4' }),
@@ -46,6 +50,7 @@ beforeEach(async () => {
   await resetDb()
   clearLocalCache()
   deleted.length = 0
+  playbackFails = false
 })
 
 async function createMinor(consent: 'PENDING' | 'GRANTED' | 'REVOKED'): Promise<SessionUser> {
@@ -415,6 +420,21 @@ describe('side-by-side comparisons', () => {
       select: { id: true },
     })
   }
+
+  it('still returns the report when the video link cannot be created', async () => {
+    const athlete = await createAthlete({ tier: 'PRO' })
+    const a = await analysis(athlete.id)
+    const caller = appRouter.createCaller({ user: athlete, ipHash: 'test' })
+    playbackFails = true
+    const degraded = await caller.analysis.get({ id: a.id })
+    expect(degraded.report).not.toBeNull()
+    expect(degraded.videoUrl).toBeNull()
+    expect(degraded.videoUnavailable).toBe(true)
+    playbackFails = false
+    const normal = await caller.analysis.get({ id: a.id })
+    expect(normal.videoUrl).toBe(`https://storage.test/play/${(await db.videoAnalysis.findUniqueOrThrow({ where: { id: a.id } })).objectKey}`)
+    expect(normal.videoUnavailable).toBe(false)
+  })
 
   it('offers only licensed, active, processed clips and the athlete’s own synced clips', async () => {
     const athlete = await createAthlete({ tier: 'PRO' })

@@ -53,7 +53,7 @@ export function SequenceTimeline({ a, b, labelA, labelB }: { a: KinematicReport;
           </g>
         ))}
       </svg>
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="w-full min-w-[480px] text-left">
           <caption className="sr-only">{m.tableCaption(anchorLabel)}</caption>
           <thead>

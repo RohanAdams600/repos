@@ -13,6 +13,11 @@ The first version intended for production. It is ready to deploy once the blocki
 - Fixed: the language switch accepted a return path with a tab or newline that browsers turn into a
   link to another site.
 - Fixed: pages rendered for PUT, PATCH, DELETE and OPTIONS; they now answer 405.
+- Fixed: on phones, every athlete dashboard page, the recruiting calendar and some Family and
+  Spanish pages scrolled sideways. The dashboard menu and wide tables now scroll inside their own
+  boxes, and button labels wrap. A new end-to-end test checks every page at 360px in both languages.
+- Fixed: an analysis report failed to load when the video could not be signed for playback; the
+  report now shows with a note that the clip cannot be played right now.
 - The account's saved language is read with the session instead of a separate query.
 - Next.js 16.4.0 and patch updates of the other dependencies.
 - Load run, sizing guidance, launch checklist, live probes and this changelog.

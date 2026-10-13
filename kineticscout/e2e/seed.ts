@@ -28,6 +28,8 @@ export type E2EState = {
   parent: { id: string; cookie: string; jamieId: string; samId: string }
   /** A listed event Avery is going to (shared with coaches), another listed one, and one waiting for review. */
   events: { going: string; open: string; pending: string }
+  /** Avery's completed swing analysis (no video file exists, so the report shows without a player). */
+  analysisId: string
 }
 
 const root = path.resolve(HERE, '..')
@@ -229,10 +231,11 @@ export default async function globalSetup(): Promise<void> {
       warnings: [],
       confidence: 0.9,
     }
+    const analysisId = randomUUID()
     await db.query(
       `INSERT INTO video_analyses (id, athlete_id, motion_type, handedness, status, object_key, content_type, size_bytes, report, algorithm, completed_at)
        VALUES ($1, $2, 'SWING', 'RIGHT', 'COMPLETE', $3, 'video/mp4', 1000, $4, 'kseq-2d-v1', now())`,
-      [randomUUID(), athlete, `e2e/${randomUUID()}.mp4`, JSON.stringify(report)],
+      [analysisId, athlete, `e2e/${randomUUID()}.mp4`, JSON.stringify(report)],
     )
 
     // Fixture norm table covering Avery's age and build. Clearly labelled as test data.
@@ -259,6 +262,7 @@ export default async function globalSetup(): Promise<void> {
       guardian: { teamToken, threadId: minorThread, threadToken: createHmac('sha256', env.HASH_PEPPER).update(`thread-guardian-v1\u0000${minorThread}`, 'utf8').digest('base64url') },
       parent: { id: parent, cookie: cookieFor(parent, env.HASH_PEPPER), jamieId: minor, samId: sam },
       events: { going: goingEvent, open: openEvent, pending: pendingEvent },
+      analysisId,
     }
     writeFileSync(path.join(HERE, '.state.json'), JSON.stringify(state, null, 2))
   } finally {

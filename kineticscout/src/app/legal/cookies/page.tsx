@@ -76,7 +76,7 @@ const T = {
 
 function CookieTable({ rows, caption, cols }: { rows: readonly Row[]; caption: string; cols: readonly string[] }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <table className="w-full min-w-[560px] text-left">
         <caption className="sr-only">{caption}</caption>
         <thead>

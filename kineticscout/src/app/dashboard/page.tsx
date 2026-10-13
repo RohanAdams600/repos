@@ -91,7 +91,7 @@ export default async function DashboardPage({ searchParams }: PageProps<'/dashbo
         {summary.items.length === 0 ? (
           <EmptyState title={m.emptyTitle}>{m.emptyBody}</EmptyState>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="w-full min-w-[560px] text-left">
               <caption className="sr-only">{m.caption}</caption>
               <thead>

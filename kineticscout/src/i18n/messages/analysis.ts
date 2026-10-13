@@ -45,6 +45,7 @@ export const analysisMessages = defineMessages(
       another: 'Upload another clip',
       noReport: 'This analysis has no report.',
       deleted: 'The original video has been deleted under our retention policy. The report below is kept.',
+      videoUnavailable: 'The video cannot be played right now. Your report is below; try again in a few minutes to watch the clip.',
       compare: 'Compare side by side',
     },
     player: {
@@ -224,6 +225,7 @@ export const analysisMessages = defineMessages(
       another: 'Sube otro clip',
       noReport: 'Este análisis no tiene informe.',
       deleted: 'El video original se eliminó según nuestra política de conservación. El informe de abajo se conserva.',
+      videoUnavailable: 'El video no se puede reproducir en este momento. Tu informe está abajo; vuelve a intentarlo en unos minutos para ver el clip.',
       compare: 'Comparar lado a lado',
     },
     player: {

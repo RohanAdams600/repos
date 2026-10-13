@@ -80,9 +80,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const deletion = user.deletionScheduledFor ? await activeDeletionRequest(user.id) : null
   return (
     <TrpcProviders>
-      <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
-        <nav aria-label={n.label} className="lg:sticky lg:top-24 lg:self-start">
-          <ul className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[220px_1fr]">
+        <nav aria-label={n.label} className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+          <ul className="relative flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
             {links.map((link) => (
               <li key={link.href} className="shrink-0">
                 <Link href={link.href} className="flex min-h-11 items-center gap-2 border-2 border-border-subtle px-3 font-bold no-underline hover:border-fg">

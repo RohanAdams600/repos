@@ -5,10 +5,11 @@ import { cn } from '@/lib/cn'
 
 /**
  * Buttons change state instantly (no opacity fades). Hover inverts or underlines, so the state
- * change is visible to everyone, including people with low contrast sensitivity.
+ * change is visible to everyone, including people with low contrast sensitivity. Labels wrap rather
+ * than overflow, so long (often Spanish) labels stay on screen at phone widths.
  */
 export const buttonVariants = cva(
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-sm px-5 text-base font-bold whitespace-nowrap no-underline transition-none disabled:cursor-not-allowed disabled:border-dashed disabled:bg-surface disabled:text-fg-muted',
+  'inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-sm px-5 py-2 text-center text-base font-bold no-underline transition-none disabled:cursor-not-allowed disabled:border-dashed disabled:bg-surface disabled:text-fg-muted',
   {
     variants: {
       variant: {

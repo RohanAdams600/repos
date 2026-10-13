@@ -11,7 +11,7 @@ the business can do, and the order to do it in. The detailed steps live in
 |---|---|---|
 | Type checks, lint | Clean | `npm run typecheck`, `npm run lint` |
 | Unit and integration tests | All pass, including the authorization matrix over every API procedure | `npm run test:all` |
-| End-to-end and accessibility | Every page in English and Spanish, light and dark, WCAG 2.2 AA plus AAA contrast, no console or CSP errors, no horizontal scroll on phones | `npm run build && npm run test:e2e` |
+| End-to-end and accessibility | Every page in English and Spanish, light and dark, WCAG 2.2 AA plus AAA contrast, no console or CSP errors; every page for every role fits a 360px phone screen in both languages | `npm run build && npm run test:e2e` |
 | Security audit | No known vulnerabilities in production dependencies; headers, CSRF, webhooks, internal routes, RLS and the bundle checked; two issues found and fixed | [SECURITY.md](SECURITY.md), "Phase 8 launch audit" |
 | Database | 19 migrations apply cleanly with no drift; RLS on every table; a dump restores with matching row counts | `npm run backup:verify` |
 | Links and SEO | No broken internal links across the 29 public pages in either language; robots blocks indexing everywhere except production; sitemap, canonical, Open Graph and the 404 page checked | link crawl during the Phase 8 audit |

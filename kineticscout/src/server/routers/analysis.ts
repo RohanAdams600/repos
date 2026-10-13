@@ -144,6 +144,13 @@ export const analysisRouter = createRouter({
     })
     if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found.' })
     const playable = row.status === 'COMPLETE' && row.errorCode !== 'VIDEO_PURGED'
+    // The report is stored with us; if video storage is unreachable, only the player is missing.
+    const videoUrl = playable
+      ? await createSignedPlaybackUrl(row.objectKey).catch((error: unknown) => {
+          logger.warn({ analysisId: row.id, ...errorFields(error) }, 'could not sign analysis playback url')
+          return null
+        })
+      : null
     return {
       id: row.id,
       motionType: row.motionType,
@@ -155,7 +162,8 @@ export const analysisRouter = createRouter({
       pose: row.poseData as CompactPoseTrack | null,
       trackObject: row.trackObject,
       projectile: row.projectile as ProjectileEstimate | null,
-      videoUrl: playable ? await createSignedPlaybackUrl(row.objectKey) : null,
+      videoUrl,
+      videoUnavailable: playable && videoUrl === null,
     }
   }),
 

@@ -82,7 +82,7 @@ export default async function RecruitingCalendarPage({ searchParams }: PageProps
           <p>{m.empty(sport ? d.sport[sport].toLowerCase() : m.thisSelection, division ?? null)}</p>
         </EmptyState>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse text-left">
             <caption className="sr-only">{m.caption}</caption>
             <thead>
