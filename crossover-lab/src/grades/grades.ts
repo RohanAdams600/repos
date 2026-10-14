@@ -362,8 +362,10 @@ export interface Overall {
 }
 
 export function overall(a: Athlete, grades = gradesFor(a)): Overall {
+  // Weights follow the athlete's own position group where one is set (kickers and punters have
+  // weights but no norm table of their own), then the norm group, then the league default.
   const group = groupFor(a.positionGroup, a.league)
-  const weights: Record<string, number> = OVERALL_WEIGHTS[group] ?? OVERALL_WEIGHTS[LEAGUE_DEFAULT[a.league]] ?? {}
+  const weights: Record<string, number> = OVERALL_WEIGHTS[a.positionGroup] ?? OVERALL_WEIGHTS[group] ?? OVERALL_WEIGHTS[LEAGUE_DEFAULT[a.league]] ?? {}
   const rows: Overall['weights'] = []
   for (const [id, weight] of Object.entries(weights)) {
     const g = grades.find((x) => x.id === id)

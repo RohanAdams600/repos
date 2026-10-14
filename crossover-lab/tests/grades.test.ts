@@ -92,3 +92,15 @@ describe('grades', () => {
     expect(best.season).toBe('2022-23')
   })
 })
+
+describe('overall weights by position group', () => {
+  it('weights a kicker with the special-teams mix, not the league default', () => {
+    const base = BUILT_IN.find((a) => a.league === 'NFL')!
+    const kicker: Athlete = { ...base, id: 'kicker', position: 'K', positionGroup: 'ST' }
+    const ids = overall(kicker).weights.map((w) => w.id)
+    const rb = overall(base).weights.map((w) => w.id)
+    expect(ids).toContain('awareness')
+    expect(ids).toContain('durability')
+    expect(ids.join()).not.toBe(rb.join())
+  })
+})
