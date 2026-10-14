@@ -2,7 +2,7 @@ import { allAthletes } from '../../data/roster'
 import { groundReaction, peakRate, sampleAngles, type AngleSamples } from '../../sim/biomech'
 import { MOTIONS, type MotionId } from '../../stage/motion-library'
 import { lineChart } from '../charts'
-import { qualityChip, selectField } from '../components'
+import { qualityChip, seg, selectField } from '../components'
 import { h } from '../dom'
 import { athleteColor } from '../settings'
 import type { AthleteScope } from './athlete'
@@ -17,7 +17,7 @@ const CHARTS: { key: keyof Omit<AngleSamples, 'u'>; label: string }[] = [
   { key: 'trunkTwist', label: 'Trunk rotation' },
 ]
 
-let labState: { other?: string; motion?: MotionId } = {}
+let labState: { other?: string; motion?: MotionId; joint?: (typeof CHARTS)[number]['key'] } = {}
 
 export function labTab(scope: AthleteScope): HTMLElement {
   const a = scope.athlete
@@ -40,20 +40,33 @@ export function labTab(scope: AthleteScope): HTMLElement {
   const durA = spec.duration(a)
   const durB = spec.duration(other)
 
-  const charts = CHARTS.map((c) =>
-    h(
-      'figure',
-      { class: 'stack', style: { margin: '0', gap: '4px' } },
-      h('figcaption', null, h('strong', null, c.label), h('span', { class: 'src' }, ' · degrees through one cycle')),
-      lineChart(
-        [
-          { label: a.name, color: athleteColor(0), points: mine.u.map((u, i) => ({ x: Math.round(u * 100), y: Math.round(mine[c.key][i]!), quality: 'SIMULATED' as const })).filter((_, i) => i % 6 === 0) },
-          { label: other.name, color: athleteColor(1), dashed: true, points: theirs.u.map((u, i) => ({ x: Math.round(u * 100), y: Math.round(theirs[c.key][i]!), quality: 'SIMULATED' as const })).filter((_, i) => i % 6 === 0) },
-        ],
-        { title: `${c.label}: ${a.name} vs ${other.name}`, height: 170, xLabels: [0, 25, 50, 75, 100].map((x) => ({ x, label: `${x}%` })) },
+  // One primary chart per view: pick the joint to plot.
+  const chartBox = h('div')
+  const drawChart = (key: (typeof CHARTS)[number]['key']) => {
+    const c = CHARTS.find((x) => x.key === key)!
+    labState = { ...labState, joint: key }
+    chartBox.replaceChildren(
+      h(
+        'figure',
+        { class: 'stack', style: { margin: '0', gap: '4px' } },
+        h('figcaption', null, h('strong', null, c.label), h('span', { class: 'src' }, ' · degrees through one cycle')),
+        lineChart(
+          [
+            { label: a.name, color: athleteColor(0), points: mine.u.map((u, i) => ({ x: Math.round(u * 100), y: Math.round(mine[c.key][i]!), quality: 'SIMULATED' as const })).filter((_, i) => i % 6 === 0) },
+            { label: other.name, color: athleteColor(1), dashed: true, points: theirs.u.map((u, i) => ({ x: Math.round(u * 100), y: Math.round(theirs[c.key][i]!), quality: 'SIMULATED' as const })).filter((_, i) => i % 6 === 0) },
+          ],
+          { title: `${c.label}: ${a.name} vs ${other.name}`, height: 200, xLabels: [0, 25, 50, 75, 100].map((x) => ({ x, label: `${x}%` })) },
+        ),
       ),
-    ),
+    )
+  }
+  const jointSeg = seg(
+    CHARTS.map((c) => ({ value: c.key, label: c.label.replace('Right ', '').replace(' flexion', '') })),
+    labState.joint ?? 'kneeR',
+    (k) => drawChart(k),
+    'Joint',
   )
+  drawChart(labState.joint ?? 'kneeR')
 
   const row = (label: string, x: string, y: string) => h('tr', null, h('td', null, label), h('td', { class: 'n' }, x), h('td', { class: 'n' }, y))
   const peak = (s: number[]) => `${Math.round(Math.max(...s.map(Math.abs)))}°`
@@ -93,7 +106,7 @@ export function labTab(scope: AthleteScope): HTMLElement {
         other.id,
         (v) => {
           labState = { ...labState, other: v }
-          scope.ctx.navigate(`#a.${a.id}.lab`, true)
+          scope.ctx.navigate(`#a.${a.id}.movement`, true)
         },
       ),
       selectField(
@@ -103,14 +116,14 @@ export function labTab(scope: AthleteScope): HTMLElement {
         motion,
         (v) => {
           labState = { ...labState, motion: v }
-          scope.ctx.navigate(`#a.${a.id}.lab`, true)
+          scope.ctx.navigate(`#a.${a.id}.movement`, true)
         },
       ),
     ),
-    h('p', { class: 'note' }, h('strong', null, 'Ghost overlay. '), `${other.name} is drawn see-through on the same spot doing the same motion, scaled to his own body. Joint angles come from each athlete's movement signature `, qualityChip(a.movement.quality), ' and ', qualityChip(other.movement.quality), '.'),
+    h('p', { class: 'note' }, h('strong', null, 'Ghost overlay. '), `${other.name} is drawn see-through on the same spot doing the same motion, scaled to their own body. Joint angles come from each athlete's movement signature `, qualityChip(a.movement.quality), ' and ', qualityChip(other.movement.quality), '.'),
     table,
     h('p', { class: 'src' }, grfA.method, ' ', qualityChip(grfA.quality)),
-    h('section', { class: 'section' }, h('h2', null, 'Joint angles'), ...charts),
+    h('section', { class: 'section' }, h('div', { class: 'section-head' }, h('h2', null, 'Joint angles'), jointSeg), chartBox),
   )
 }
 

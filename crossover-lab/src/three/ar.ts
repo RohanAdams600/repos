@@ -13,7 +13,7 @@ import type { Viewer } from './viewer'
 export async function openAR(viewer: Viewer, athlete: Athlete, gear: Record<string, { worn: boolean; variant?: string }>): Promise<void> {
   const xr = (navigator as Navigator & { xr?: XRSystem }).xr
   const supported = xr ? await xr.isSessionSupported('immersive-ar').catch(() => false) : false
-  const status = h('p', { class: 'muted' }, supported ? 'Point your phone at the floor, then tap to place him at life size.' : 'This device or browser does not offer WebXR AR. Download the model to view it in your phone’s AR viewer.')
+  const status = h('p', { class: 'muted' }, supported ? 'Point your phone at the floor, then tap to place the figure at life size.' : 'This device or browser does not offer WebXR AR. Download the model to view it in your phone’s AR viewer.')
   const dialog = h(
     'dialog',
     { 'aria-label': 'View in AR' },

@@ -10,6 +10,8 @@ import { BONES, buildBody, morphFor, type BodyGeometry } from './figure/body'
 import { brows, ears, facialHair, hairCap, lips, rimRoots, scalpRoots, sculptHead, type HeadShape } from './figure/head'
 import { collarGeometry, footGeometry, handGeometry, mittGeometry, nailGeometry, shoeGeometry, type ShoeKind } from './figure/extremities'
 import { StrandHair, STRAND_STYLES, type Collider } from './figure/hair'
+import { ClothDriver, clothMaterial, setSwayWeights } from './figure/cloth'
+import { smoothstep } from './figure/body'
 import { battingHelmet, braceBars, capGeometry, chinStrap, elbowGuard, facemask, footballHelmet, headband, legGuard, visorShield, type FacemaskStyle, type FootballHelmet } from './figure/gear'
 import { garment, numberAnchor, type GarmentSlot } from './figure/garments'
 import { lipColor, material, type Finish } from './figure/materials'
@@ -52,17 +54,26 @@ export function dimensionsFor(a: Athlete): Dimensions {
   const span = (resolveMetric(a, 'wingspanIn')?.value ?? (resolveMetric(a, 'heightIn')?.value ?? 74) * 1.02) * IN_TO_M
   const shoulderHalf = H * (0.1 + 0.012 * (girth - 1))
   const armTotal = Math.max(0.3 * H, span / 2 - shoulderHalf)
+  // Hands from hand length when measured, else from hand span (length is about 0.84 of span);
+  // the arm keeps the measured wingspan by giving the rest to the upper arm and forearm.
+  const handLength = resolveMetric(a, 'handLengthIn')?.value
+  const handSpan = resolveMetric(a, 'handSizeIn')?.value
+  const handM = handLength ? handLength * IN_TO_M : handSpan ? handSpan * 0.84 * IN_TO_M : armTotal * 0.245
+  const hand = Math.min(armTotal * 0.3, Math.max(armTotal * 0.2, handM))
+  // Feet from US men's shoe size: last length (in) = (size + 22) / 3, foot about half an inch shorter.
+  const shoe = resolveMetric(a, 'shoeSizeUs')?.value
+  const foot = shoe ? Math.min(0.18 * H, Math.max(0.13 * H, ((shoe + 22) / 3 - 0.5) * IN_TO_M)) : 0.15 * H
   return {
     height: H,
     ankle: 0.045 * H,
     shin: 0.245 * H,
     thigh: 0.245 * H,
     hipY: 0.555 * H,
-    foot: 0.15 * H,
+    foot,
     torso: 0.3 * H,
-    upperArm: armTotal * 0.423,
-    forearm: armTotal * 0.332,
-    hand: armTotal * 0.245,
+    upperArm: (armTotal - hand) * 0.56,
+    forearm: (armTotal - hand) * 0.44,
+    hand,
     shoulderHalf,
     // Hip joint centres sit about 10 cm either side of the midline on a 1.85 m athlete.
     hipHalf: 0.055 * H,
@@ -103,6 +114,8 @@ export class Rig {
   private readonly hands: Partial<Record<'L' | 'R', THREE.Mesh>> = {}
   private readonly nails: Partial<Record<'L' | 'R', THREE.Mesh>> = {}
   private hair?: StrandHair
+  private readonly cloth: ClothDriver
+  private clothMats: THREE.Material[] = []
   private helmet?: FootballHelmet
   /** Cap or batting helmet: a sphere the hair rests against. */
   private headgear?: { center: THREE.Vector3; radius: number }
@@ -125,6 +138,7 @@ export class Rig {
     const group = athlete.positionGroup || positionGroupFor(athlete.league, athlete.position)
     this.body = buildBody({ ...d }, morphFor(group))
     this.head = sculptHead(H, d.girth)
+    this.cloth = new ClothDriver(H)
     this.buildSegments()
     this.buildBodyMeshes()
     for (const g of athlete.gear) this.gearState.set(g.id, { worn: g.worn, variant: g.defaultVariant })
@@ -332,6 +346,9 @@ export class Rig {
     const leadSide: 'L' | 'R' = this.athlete.bats === 'L' ? 'R' : 'L'
     this.soleLift = 0
     this.helmet = undefined
+    for (const m of this.clothMats) m.dispose()
+    this.clothMats = []
+    this.cloth.targets.length = 0
     let gloved = false
     let mittSide: 'L' | 'R' | undefined
     this.headgear = undefined
@@ -346,6 +363,18 @@ export class Rig {
         const geo = garment(this.body, slot, league, style)
         if (geo) this.addSkinned(geo, material(finish, c), 'chest', item.id)
       }
+      /** Loose fabric: a per-rig material whose free edge sways with the hips. */
+      const looseG = (slot: GarmentSlot, finish: Finish, weight: (p: THREE.Vector3) => number, c = color, style?: string) => {
+        const geo = garment(this.body, slot, league, style)
+        if (!geo) return null
+        setSwayWeights(geo, weight)
+        const { material: mat, uniforms } = clothMaterial(material(finish, c))
+        this.clothMats.push(mat)
+        this.cloth.targets.push(uniforms)
+        this.addSkinned(geo, mat, 'chest', item.id)
+        return geo
+      }
+      const J = this.body.joints
       switch (item.slot) {
         case 'helmet': {
           const h = this.helmet!
@@ -376,9 +405,13 @@ export class Rig {
           this.addRigid('head', headband(this.head, H), material('knit', color), 'head', item.id)
           break
         case 'jersey': {
-          const geo = garment(this.body, 'jersey', league)
+          // Football jerseys are tight over pads; basketball and baseball hems hang free.
+          const geo =
+            league === 'NFL'
+              ? garment(this.body, 'jersey', league)
+              : looseG('jersey', 'jersey', (p) => smoothstep(J.chest.y, J.hips.y - 0.02 * H, p.y) * (league === 'NBA' ? 0.7 : 0.45))
           if (!geo) break
-          this.addSkinned(geo, material('jersey', color), 'chest', item.id)
+          if (league === 'NFL') this.addSkinned(geo, material('jersey', color), 'chest', item.id)
           if (item.accent) shellG('sleeveStripe', 'jersey', accent)
           this.addNumbers(item, geo)
           break
@@ -387,11 +420,12 @@ export class Rig {
           shellG('undershirt', 'knit')
           break
         case 'pants':
-          shellG('pants', 'pants', color, this.variantStyle(item))
+          if (league === 'MLB') looseG('pants', 'pants', (p) => smoothstep(J.hipL.y, J.kneeL.y - 0.1 * H, p.y) * 0.5, color, this.variantStyle(item))
+          else shellG('pants', 'pants', color, this.variantStyle(item))
           if (item.accent) shellG('pantsStripe', 'pants', accent)
           break
         case 'shorts':
-          shellG('shorts', 'jersey')
+          looseG('shorts', 'jersey', (p) => smoothstep(J.hipL.y - 0.02 * H, J.kneeL.y + 0.01 * H, p.y))
           break
         case 'socks':
           shellG('socks', 'knit')
@@ -685,11 +719,16 @@ export class Rig {
     const sin = Math.sin(base.yaw)
     this.root.position.set(base.x + pose.root.x * cos + pose.root.z * sin, (base.y ?? 0) + pose.root.y + this.soleLift, base.z - pose.root.x * sin + pose.root.z * cos)
     this.root.rotation.set(pose.root.pitch, base.yaw + pose.root.yaw, pose.root.roll, 'YXZ')
-    if (this.hair && this.hair.mesh.visible !== false) {
-      this.root.updateMatrixWorld(true)
-      this.hair.step(performance.now() / 1000, this.colliders(), this.root)
-    }
+    const hasHair = this.hair && this.hair.mesh.visible !== false
+    if (!hasHair && this.cloth.targets.length === 0) return
+    this.root.updateMatrixWorld(true)
+    const now = performance.now() / 1000
+    if (hasHair) this.hair!.step(now, this.colliders(), this.root)
+    if (this.cloth.targets.length) this.cloth.step(this.joints.hips.getWorldPosition(this.clothHips), this.root.getWorldQuaternion(this.clothQuat), now)
   }
+
+  private readonly clothHips = new THREE.Vector3()
+  private readonly clothQuat = new THREE.Quaternion()
 
   /** Spheres the hair rests against: head (or helmet), neck, shoulders and upper back. */
   private colliders(): Collider[] {

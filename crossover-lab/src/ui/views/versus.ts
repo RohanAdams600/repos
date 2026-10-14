@@ -165,7 +165,7 @@ export function versusView(ctx: AppContext, code?: string): View {
       h('div', { class: 'stack', style: { gap: '6px' } }, h('span', { class: 'eyebrow' }, 'Head-to-head · any sport'), h('h1', null, built.title ?? `${MODE_LABEL[m.mode]}: ${athletes.map((a) => a.name.split(' ').slice(-1)[0]).join(' vs ')}`)),
       h('section', { class: 'section' }, h('h2', null, 'Athletes'), picker),
       h('section', { class: 'section' }, h('h2', null, 'Contest'), modes, h('div', { class: 'row' }, ...(built.extra ?? []))),
-      cross ? h('p', { class: 'note' }, h('strong', null, 'Cross-sport matchup. '), 'Each athlete is measured in his own sport; conversions between sports and size adjustments are estimates. ', qualityChip('ESTIMATED')) : null,
+      cross ? h('p', { class: 'note' }, h('strong', null, 'Cross-sport matchup. '), 'Each athlete is measured in their own sport; conversions between sports and size adjustments are estimates. ', qualityChip('ESTIMATED')) : null,
       built.live ? h('section', { class: 'section' }, h('h2', null, 'Live'), liveEl) : null,
       h('section', { class: 'section' }, h('div', { class: 'section-head' }, h('h2', null, 'Result'), h('button', { class: 'btn ghost', type: 'button', onclick: () => update({}, true) }, 'Run again with a new seed')), table),
       h('p', { class: 'note' }, h('strong', null, 'Fairness note. '), 'Results are simulated from the data on file, with the labels shown. They are not predictions of what would happen if these athletes met.'),
@@ -192,7 +192,7 @@ export function versusView(ctx: AppContext, code?: string): View {
           ),
           h('button', { class: 'btn ghost', type: 'button', onclick: () => void ctx.hud.record() }, 'Record clip'),
         ),
-        custom ? h('p', { class: 'src' }, 'This matchup includes a custom athlete, who only exists in the browser that built him. Others opening the link will see the built-in athletes instead.') : null,
+        custom ? h('p', { class: 'src' }, 'This matchup includes a custom athlete, who only exists in the browser that built it. Others opening the link will see the built-in athletes instead.') : null,
         h(
           'form',
           {
@@ -463,7 +463,7 @@ function buildMode(ctx: AppContext, m: Matchup, athletes: Athlete[]): Built {
         rows: athletes.map((a, i) => {
           const made = results[i]!.shots.filter((x) => x.made).length
           const p0 = results[i]!.shots[0]?.p ?? 0
-          return { athlete: a, display: `${totals[i]} ${label}`, quality: 'SIMULATED', sortValue: totals[i]!, basis: `${made} of ${results[i]!.shots.length} made. Make chance from ${a.league === 'NBA' ? 'his shooting percentages' : 'cross-sport defaults'} (first shot ${(p0 * 100).toFixed(0)}%).` }
+          return { athlete: a, display: `${totals[i]} ${label}`, quality: 'SIMULATED', sortValue: totals[i]!, basis: `${made} of ${results[i]!.shots.length} made. Make chance from ${a.league === 'NBA' ? 'their shooting percentages' : 'cross-sport defaults'} (first shot ${(p0 * 100).toFixed(0)}%).` }
         }),
         extra: [
           seg(

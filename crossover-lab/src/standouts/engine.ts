@@ -773,8 +773,8 @@ function risingSection(ctx: Ctx): Candidate[] {
 // Hidden gems
 
 /**
- * Why an athlete counts as little known, or undefined when he does not or nobody knows. A known
- * All-Star (or Pro Bowler) is never hidden, whatever his draft slot; Legends are never hidden.
+ * Why an athlete counts as little known, or undefined when they are not or nobody knows. A known
+ * All-Star (or Pro Bowler) is never hidden, whatever their draft slot; Legends are never hidden.
  */
 export function lowRecognition(a: Athlete): string | undefined {
   if (a.status === 'legend') return undefined
@@ -893,7 +893,7 @@ export function buildStandouts(athletes: readonly Athlete[], options: StandoutOp
 }
 
 /**
- * Every figure of one athlete at or above the 95th percentile of his position norm, strongest
+ * Every figure of one athlete at or above the 95th percentile of their position norm, strongest
  * first. Derived builds (Speed Score, wingspan minus height) are included where a norm exists.
  */
 export function outliers(a: Athlete): Outlier[] {

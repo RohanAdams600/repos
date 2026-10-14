@@ -195,7 +195,7 @@ export const jonathanTaylor: Athlete = {
       use: {
         usagePct: 100,
         quality: 'SIMULATED',
-        note: 'Worn every snap. Impact zones assume a back who lowers his pad level into contact.',
+        note: 'Worn every snap. Impact zones assume a back who lowers the pad level into contact.',
         hotspots: [
           { segment: 'head', along: 0.35, face: 'front', intensity: 0.85, label: 'Crown and front (contact with lowered pad level)' },
           { segment: 'head', along: 0.1, face: 'top', intensity: 0.55, label: 'Top of shell' },
@@ -408,7 +408,7 @@ export const jonathanTaylor: Athlete = {
       segment: 'shinR',
       side: 'R',
       title: 'Ankle injury and offseason surgery',
-      detail: 'Ankle injury during the 2022 season, followed by offseason surgery. He began 2023 on the physically-unable-to-perform list and missed the first four games. Outlets describe the injury timeline differently.',
+      detail: 'Ankle injury during the 2022 season, followed by offseason surgery. Began 2023 on the physically-unable-to-perform list and missed the first four games. Outlets describe the injury timeline differently.',
       gamesMissed: 4,
       surgery: true,
       quality: 'ESTIMATED',

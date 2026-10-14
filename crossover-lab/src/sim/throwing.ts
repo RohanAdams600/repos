@@ -42,7 +42,7 @@ export function throwVelocity(a: Athlete, ball: Ball): { mph: number; quality: Q
   return {
     mph: base * ratio * technique,
     quality: weakest(baseQuality, 'ESTIMATED'),
-    basis: `Converted from his ${BALLS[native].label.toLowerCase()} velocity: × (mass ratio)^${MASS_EXPONENT} × ${technique} for unfamiliar technique.`,
+    basis: `Converted from their ${BALLS[native].label.toLowerCase()} velocity: × (mass ratio)^${MASS_EXPONENT} × ${technique} for unfamiliar technique.`,
   }
 }
 

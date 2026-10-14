@@ -117,7 +117,7 @@ export function leadersView(ctx: AppContext): View {
         'div',
         { class: 'live' },
         champion(derivedBoards[1]!, 'Fastest'),
-        champion(derivedBoards[2]!, 'Strongest for his size'),
+        champion(derivedBoards[2]!, 'Strongest for their size'),
         champion(metricBoards.find((b) => b.id === 'm:maxVerticalIn')!, 'Highest jumper'),
       ),
       h(
