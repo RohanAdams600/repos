@@ -10,6 +10,10 @@ export const shoheiOhtani: Athlete = {
   position: 'Two-way player (DH and starting pitcher)',
   positionGroup: 'TWP',
   team: 'Los Angeles Dodgers',
+  teamId: 'mlb-lad',
+  status: 'active',
+  profile: 'full',
+  appearance: { quality: 'SIMULATED', basis: 'No reference photos supplied yet. Neutral studio finish until they are.', hair: 'unset', facialHair: 'none' },
   bats: 'L',
   throws: 'R',
   summary:

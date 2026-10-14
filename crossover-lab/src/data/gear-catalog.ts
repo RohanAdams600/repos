@@ -113,6 +113,26 @@ export const GEAR_INFO: Record<GearSlot, GearInfo> = {
     category: 'Comfort',
     why: 'Cushioning and grip inside the shoe cut blisters; crew height also protects the lower leg from turf burns.',
   },
+  chinStrap: {
+    label: 'Chin strap',
+    category: 'Protection',
+    why: 'Holds the helmet in place so the liner stays where it was fitted. A loose strap lets the shell shift on contact.',
+  },
+  kneeBrace: {
+    label: 'Knee brace',
+    category: 'Protection',
+    why: 'Hinged braces limit side-to-side knee movement; linemen wear them prophylactically, others after ligament injuries.',
+  },
+  ankleBrace: {
+    label: 'Ankle brace',
+    category: 'Protection',
+    why: 'Lace-up or hinged braces cut the risk of rolling an ankle; common in basketball, especially after a sprain.',
+  },
+  bat: {
+    label: 'Bat',
+    category: 'Grip',
+    why: 'Length and weight trade bat speed against reach and mass behind the ball. Most hitters swing 33 to 35 inch maple or birch.',
+  },
   shoes: {
     label: 'Shoes and cleats',
     category: 'Traction',

@@ -10,6 +10,17 @@ export const jonathanTaylor: Athlete = {
   position: 'Running back',
   positionGroup: 'RB',
   team: 'Indianapolis Colts',
+  teamId: 'nfl-ind',
+  status: 'active',
+  profile: 'full',
+  appearance: {
+    quality: 'ESTIMATED',
+    basis: 'Reference photos supplied with the brief (sideline portrait and headshot): shoulder-length braids, short goatee. Not a scan; the face is a generic sculpt.',
+    skinTone: '#6f4a33',
+    hair: 'braids',
+    hairColor: '#17110d',
+    facialHair: 'goatee',
+  },
   summary:
     'Colts running back since 2020. Ran a 4.39 40-yard dash at the 2020 combine and rushed for 1,811 yards in 2021. Kit and carry style come from the reference photos supplied with the brief.',
   reviewed: RETRIEVED,

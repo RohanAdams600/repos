@@ -10,6 +10,10 @@ export const donovanMitchell: Athlete = {
   position: 'Shooting guard',
   positionGroup: 'G',
   team: 'Cleveland Cavaliers',
+  teamId: 'nba-cle',
+  status: 'active',
+  profile: 'full',
+  appearance: { quality: 'SIMULATED', basis: 'No reference photos supplied yet. Neutral studio finish until they are.', hair: 'unset', facialHair: 'none' },
   summary:
     'Guard with a 40.5-inch max vertical, a 6\'10" wingspan and the fastest three-quarter-court sprint (3.01 s) at the 2017 draft combine.',
   reviewed: RETRIEVED,

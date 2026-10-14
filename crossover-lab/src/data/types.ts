@@ -114,6 +114,19 @@ export type MetricKey =
   | 'stealsPerGame'
   | 'blocksPerGame'
   | 'minutesPerGame'
+  // added for the standouts engine and full-roster profiles
+  | 'benchReps225'
+  | 'armLengthIn'
+  | 'handLengthIn'
+  | 'handWidthIn'
+  | 'shoeSizeUs'
+  | 'armStrengthMph'
+  | 'spinRateRpm'
+  | 'homeToFirstS'
+  | 'avgSpeedMph'
+  | 'brokenTackles'
+  | 'yardsAfterContact'
+  | 'draftPick'
 
 export type Metrics = Partial<Record<MetricKey, Measured>>
 
@@ -171,8 +184,14 @@ export type GearSlot =
   | 'kneeSleeves'
   | 'socks'
   | 'shoes'
+  | 'chinStrap'
+  | 'kneeBrace'
+  | 'ankleBrace'
+  | 'bat'
 
 export type GearKind =
+  | 'brace'
+  | 'equipment'
   | 'helmet'
   | 'facemask'
   | 'cap'
@@ -320,6 +339,49 @@ export interface Kit {
   number: string
 }
 
+/** Where an athlete sits on (or off) a roster. */
+export type RosterStatus = 'active' | 'practice-squad' | 'two-way' | 'ten-day' | 'injured-reserve' | 'free-agent' | 'legend' | 'prospect' | 'rookie'
+
+export type HairStyle = 'unset' | 'bald' | 'buzz' | 'short' | 'braids' | 'locs' | 'afro' | 'long'
+export type FacialHair = 'none' | 'stubble' | 'mustache' | 'goatee' | 'beard'
+
+/**
+ * A rights-cleared photogrammetry or body scan. Only scans with a licence record are shown with
+ * the "Licensed scan" badge; nothing else is ever presented as a scan.
+ */
+export interface LicensedScan {
+  url: string
+  format: 'glb' | 'gltf' | 'fbx'
+  kind: 'face' | 'full-body'
+  licensor: string
+  licenseRef: string
+  expires?: string
+}
+
+/**
+ * How the figure looks. The default is a custom figure with authentic proportions and features
+ * taken from reference photos, never a generated photoreal face. `unset` hair means no reference
+ * has been supplied, and the figure renders in a neutral studio finish.
+ */
+export interface Appearance {
+  quality: Quality
+  basis: string
+  skinTone?: string
+  hair: HairStyle
+  hairColor?: string
+  facialHair: FacialHair
+  scan?: LicensedScan
+}
+
+export interface Recognition {
+  draftRound?: number
+  draftPick?: number
+  draftYear?: number
+  undrafted?: boolean
+  /** Pro Bowl, All-Star or All-NBA selections: a rough proxy for name recognition. */
+  allStarSelections?: number
+}
+
 export interface Athlete {
   id: string
   name: string
@@ -328,6 +390,18 @@ export interface Athlete {
   /** Position group used for position-adjusted percentiles, e.g. 'RB', 'TWP', 'G'. */
   positionGroup: string
   team: string
+  /** Id from teams.ts when the athlete is on (or last played for) a club. */
+  teamId?: string
+  status: RosterStatus
+  /** Decade(s) played, for Legends. */
+  era?: string
+  /**
+   * full: a researched profile; standout: a lighter card built around sourced standout figures;
+   * roster: a row imported from a roster file or feed.
+   */
+  profile: 'full' | 'standout' | 'roster'
+  appearance: Appearance
+  recognition?: Recognition
   bats?: 'L' | 'R' | 'S'
   throws?: 'L' | 'R'
   born?: string

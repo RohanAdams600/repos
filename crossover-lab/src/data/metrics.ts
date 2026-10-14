@@ -72,6 +72,18 @@ export const METRICS: Record<MetricKey, MetricDef> = {
   stealsPerGame: { label: 'Steals per game', unit: '', decimals: 1, higherIsBetter: true, group: 'Basketball' },
   blocksPerGame: { label: 'Blocks per game', unit: '', decimals: 1, higherIsBetter: true, group: 'Basketball' },
   minutesPerGame: { label: 'Minutes per game', unit: '', decimals: 1, higherIsBetter: true, group: 'Basketball' },
+  benchReps225: { label: 'Bench reps at 225 lb', unit: 'reps', decimals: 0, higherIsBetter: true, group: 'Strength' },
+  armLengthIn: { label: 'Arm length', unit: 'in', decimals: 2, higherIsBetter: true, group: 'Body' },
+  handLengthIn: { label: 'Hand length', unit: 'in', decimals: 2, higherIsBetter: true, group: 'Body' },
+  handWidthIn: { label: 'Hand width', unit: 'in', decimals: 2, higherIsBetter: true, group: 'Body' },
+  shoeSizeUs: { label: 'Shoe size (US)', unit: '', decimals: 1, higherIsBetter: true, group: 'Body' },
+  armStrengthMph: { label: 'Fielding arm strength', unit: 'mph', decimals: 1, higherIsBetter: true, group: 'Throwing' },
+  spinRateRpm: { label: 'Spin rate', unit: 'rpm', decimals: 0, higherIsBetter: true, group: 'Baseball' },
+  homeToFirstS: { label: 'Home to first', unit: 's', decimals: 2, higherIsBetter: false, group: 'Speed' },
+  avgSpeedMph: { label: 'Average speed (tracking)', unit: 'mph', decimals: 2, higherIsBetter: true, group: 'Speed' },
+  brokenTackles: { label: 'Broken tackles', unit: '', decimals: 0, higherIsBetter: true, group: 'Football' },
+  yardsAfterContact: { label: 'Yards after contact', unit: 'yd', decimals: 0, higherIsBetter: true, group: 'Football' },
+  draftPick: { label: 'Draft pick (overall)', unit: '', decimals: 0, higherIsBetter: false, group: 'Body' },
 }
 
 export function formatMetric(key: MetricKey, value: number): string {
