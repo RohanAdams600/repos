@@ -487,7 +487,7 @@ describe('rising and most improved', () => {
     }
   })
 
-  it('skips position groups that have no overall weights', () => {
-    expect(section(page([measuredBack('receiver', 'WR')]), 'rising')).toEqual([])
+  it('ranks every position group now that each has overall weights', () => {
+    expect(section(page([measuredBack('receiver', 'WR')]), 'rising').length).toBeGreaterThan(0)
   })
 })
