@@ -97,7 +97,9 @@ export function garment(body: BodyGeometry, slot: GarmentSlot, league: League, s
         body,
         (i, p) => (torso(i) && p.y < yHip + 0.06 * H) || (leg(i) && p.y > kn - 0.035 * H),
         (i, p, n) => {
-          if (!leg(i)) return 0.006 * H
+          // The jersey is tucked in: the waistband sits clearly outside its hem, so the two
+          // surfaces never meet at the same depth.
+          if (!leg(i)) return 0.006 * H + 0.003 * H * smoothstep(yHip - 0.02 * H, yHip + 0.005 * H, p.y)
           // Thigh and knee pads sit inside football pants.
           const front = Math.max(0, n.z)
           const thigh = 0.008 * H * front * Math.exp(-(((p.y - (yHip - 0.13 * H)) / (0.05 * H)) ** 2))
@@ -107,11 +109,13 @@ export function garment(body: BodyGeometry, slot: GarmentSlot, league: League, s
       )
     }
     case 'pantsStripe': {
-      // A side stripe down the outside of each leg.
+      // A side stripe down the outside of each leg. "Outside" is the leg's own side, not the sign
+      // of x, so inner-thigh vertices that cross the midline never pick it up.
       const nor = body.geometry.getAttribute('normal')
+      const side = (i: number) => (part(i) === 'legL' ? Math.sign(J.hipL.x) : Math.sign(J.hipR.x))
       return shellFrom(
         body,
-        (i, p) => (leg(i) ? Math.min((nor.getX(i) * Math.sign(p.x) - 0.96) * 0.5, p.y - (kn - 0.03 * H), J.hipL.y + 0.03 * H - p.y) : -1),
+        (i, p) => (leg(i) ? Math.min((nor.getX(i) * side(i) - 0.96) * 0.5, p.y - (kn - 0.03 * H), J.hipL.y + 0.03 * H - p.y) : -1),
         (_i, p) => (league === 'MLB' ? 0.0102 * H + 0.006 * H * smoothstep(kn, yHip, p.y) : 0.0072 * H),
       )
     }
