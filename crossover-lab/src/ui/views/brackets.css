@@ -1,0 +1,270 @@
+/* Brackets page. Rounds stack top to bottom and match cards flow into as many columns as the
+   panel fits, so a 16-athlete bracket reads on a 360 px phone without sideways scrolling.
+   Winners are marked by text ("Won") and weight as well as the accent rule. */
+
+.br-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.br-controls select,
+.br-controls input {
+  width: 100%;
+  min-width: 0;
+}
+
+.br-inline {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+.br-inline input {
+  flex: 1 1 auto;
+}
+
+.br-inline .btn {
+  flex: none;
+}
+
+/* ---------- Entrant picker ---------- */
+
+.br-entrants {
+  margin: 0;
+  padding: 6px 12px 8px;
+  min-width: 0;
+  min-inline-size: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.br-entrants legend {
+  padding: 0 4px;
+  font-weight: 700;
+}
+
+.br-picks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 320px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.br-picks li {
+  border-bottom: 1px solid var(--line);
+}
+
+.br-picks li:last-child {
+  border-bottom: 0;
+}
+
+.br-picks label {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: flex-start;
+  padding: 8px 2px;
+  cursor: pointer;
+}
+
+.br-picks input[type='checkbox'] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+}
+
+.br-picks input[type='checkbox']:disabled + .br-pick-main {
+  color: var(--ink-2);
+}
+
+.br-pick-main {
+  flex: 1 1 140px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow-wrap: anywhere;
+}
+
+.br-pick-mark {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  align-items: center;
+  margin-left: auto;
+  font-size: var(--step--1);
+}
+
+/* ---------- Bracket ---------- */
+
+.br-champ {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.br-champ-name {
+  font-family: var(--display);
+  font-size: var(--step-2);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.br-rounds,
+.br-matches,
+.br-ladder,
+.br-history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.br-rounds {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.br-round h3 {
+  margin: 0 0 8px;
+}
+
+.br-matches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 8px;
+}
+
+.br-match {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 8px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.br-side {
+  display: grid;
+  grid-template-columns: 2.5ch minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: baseline;
+  padding: 4px 6px 4px 4px;
+  border-left: 3px solid transparent;
+  border-radius: 3px;
+}
+
+.br-side.win {
+  font-weight: 700;
+  border-left-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.br-seed {
+  color: var(--ink-2);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.br-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.br-mark {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.br-res {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.br-side.win .br-res {
+  color: var(--ink);
+}
+
+.br-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 8px;
+  padding: 4px 4px 0;
+}
+
+.br-match.bye {
+  border-style: dashed;
+  background: transparent;
+}
+
+/* ---------- Ladder ---------- */
+
+.br-rung {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.br-rung:focus-visible {
+  outline-offset: -2px;
+}
+
+.br-rung-no {
+  flex: none;
+  min-width: 2.5ch;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.br-rung .grow {
+  flex: 1 1 140px;
+  overflow-wrap: anywhere;
+}
+
+.br-challenges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.br-challenges .btn {
+  padding: 5px 9px;
+}
+
+.br-share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.br-share input {
+  flex: 1 1 200px;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: var(--step--1);
+}
