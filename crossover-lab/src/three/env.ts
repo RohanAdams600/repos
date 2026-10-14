@@ -1,12 +1,33 @@
 import * as THREE from 'three'
+import { buildVenue, dirt, hardwood, turf } from './venue'
 
-export type EnvKind = 'studio' | 'track' | 'field' | 'diamond' | 'court' | 'gym'
+export type EnvKind = 'studio' | 'track' | 'field' | 'diamond' | 'court' | 'gym' | 'stadium' | 'ballpark' | 'arena'
 
 export interface EnvOptions {
   lanes?: number
   /** Race length in metres, for lane markings. */
   length?: number
   unit?: 'yd' | 'm'
+  /** Surround fields, diamonds and courts with a venue (default true). */
+  venue?: boolean
+  night?: boolean
+}
+
+/** Which lighting suits an environment: the viewer picks it unless a page overrides it. */
+export function lightingFor(kind: EnvKind, opts: EnvOptions = {}): 'studio' | 'day' | 'night' | 'arena' {
+  if (kind === 'court' || kind === 'arena' || kind === 'gym') return opts.venue === false && kind !== 'arena' ? 'studio' : 'arena'
+  if (kind === 'studio') return 'studio'
+  return opts.night ? 'night' : 'day'
+}
+
+function textured(w: number, d: number, tex: THREE.Texture | null, fallback: number, y = 0, repeat?: [number, number]): THREE.Mesh {
+  const map = tex ? tex.clone() : null
+  if (map && repeat) map.repeat.set(repeat[0], repeat[1])
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ color: map ? 0xffffff : fallback, map, roughness: 0.92 }))
+  mesh.rotation.x = -Math.PI / 2
+  mesh.position.y = y
+  mesh.receiveShadow = true
+  return mesh
 }
 
 const LANE_WIDTH = 1.4
@@ -69,12 +90,16 @@ export function buildEnvironment(kind: EnvKind, opts: EnvOptions = {}): THREE.Gr
   g.name = `env:${kind}`
   switch (kind) {
     case 'studio': {
-      g.add(flat(60, 60, 0x4a5058, -0.002))
-      const disc = new THREE.Mesh(new THREE.CircleGeometry(3, 64), new THREE.MeshStandardMaterial({ color: 0x5d646d, roughness: 0.9 }))
-      disc.rotation.x = -Math.PI / 2
-      disc.receiveShadow = true
-      g.add(disc)
-      g.add(arc(3, 0, Math.PI * 2, 0, 0, 0.03, 0x8a929c))
+      // Large enough that a side-by-side partner (40 m away) stands on the same floor.
+      g.add(flat(240, 240, 0x4a5058, -0.002))
+      for (const x of [0, 40]) {
+        const disc = new THREE.Mesh(new THREE.CircleGeometry(3, 64), new THREE.MeshStandardMaterial({ color: 0x5d646d, roughness: 0.9 }))
+        disc.rotation.x = -Math.PI / 2
+        disc.position.x = x
+        disc.receiveShadow = true
+        g.add(disc)
+        g.add(arc(3, 0, Math.PI * 2, x, 0, 0.03, 0x8a929c))
+      }
       break
     }
     case 'track':
@@ -104,6 +129,7 @@ export function buildEnvironment(kind: EnvKind, opts: EnvOptions = {}): THREE.Gr
         label.rotation.z = Math.PI / 2
         g.add(label)
       }
+      if (kind === 'field' && opts.venue !== false) g.add(buildVenue('stadium', { night: opts.night ?? false, center: new THREE.Vector3(0, 0, length / 2) }))
       break
     }
     case 'diamond': {
@@ -140,6 +166,7 @@ export function buildEnvironment(kind: EnvKind, opts: EnvOptions = {}): THREE.Gr
       }
       g.add(line(0, 0, 70, 70, 0.08))
       g.add(line(0, 0, -70, 70, 0.08))
+      if (opts.venue !== false) g.add(buildVenue('ballpark', { night: opts.night ?? false }))
       break
     }
     case 'court': {
@@ -172,6 +199,84 @@ export function buildEnvironment(kind: EnvKind, opts: EnvOptions = {}): THREE.Gr
       rim.rotation.x = Math.PI / 2
       rim.position.set(0, 3.05, 0)
       g.add(rim)
+      if (opts.venue !== false) g.add(buildVenue('arena', { night: true, center: new THREE.Vector3(0, 0, 13) }))
+      break
+    }
+    case 'stadium': {
+      // A full football field centred on the athlete: long axis along Z, yard lines every 5.
+      const YD = 0.9144
+      g.add(textured(160, 200, turf(), 0x2f6b39, -0.004, [40, 50]))
+      g.add(textured(53.33 * YD, 100 * YD, turf(), 0x3a7d44, 0, [12, 24]))
+      for (const end of [1, -1]) {
+        const ez = flat(53.33 * YD, 10 * YD, 0x24452f, 0.001)
+        ez.position.z = end * 55 * YD
+        g.add(ez)
+      }
+      for (let yd = -50; yd <= 50; yd += 5) g.add(line(-26.67 * YD, yd * YD, 26.67 * YD, yd * YD, yd % 10 === 0 ? 0.12 : 0.08, 0xeef2ee))
+      for (const x of [-26.67, 26.67]) g.add(line(x * YD, -60 * YD, x * YD, 60 * YD, 0.15, 0xeef2ee))
+      for (let yd = -49; yd <= 49; yd++) {
+        for (const x of [-3.08, 3.08]) g.add(line(x * YD - 0.3, yd * YD, x * YD + 0.3, yd * YD, 0.05, 0xeef2ee))
+      }
+      for (let yd = 10; yd <= 50; yd += 10) {
+        for (const side of [1, -1]) {
+          if (yd === 50 && side < 0) continue
+          const label = textPlane(`${yd}`, 1.4, '#eef2ee')
+          label.position.set(-20 * YD, 0.006, side * (50 - yd) * YD)
+          label.rotation.z = Math.PI / 2
+          g.add(label)
+        }
+      }
+      if (opts.venue !== false) g.add(buildVenue('stadium', { night: opts.night ?? false }))
+      break
+    }
+    case 'ballpark': {
+      // Home plate at the origin, the field opening toward +Z.
+      g.add(textured(260, 260, turf(), 0x2f6b39, -0.004, [60, 60]))
+      const infield = new THREE.Mesh(new THREE.CircleGeometry(29, 64, Math.PI / 4, Math.PI / 2), new THREE.MeshStandardMaterial({ color: dirt() ? 0xffffff : 0x9a6b45, map: dirt(), roughness: 1 }))
+      infield.rotation.x = -Math.PI / 2
+      infield.rotation.z = 0
+      infield.position.y = 0.001
+      infield.receiveShadow = true
+      g.add(infield)
+      const grass = new THREE.Mesh(new THREE.PlaneGeometry(19.4, 19.4), new THREE.MeshStandardMaterial({ color: turf() ? 0xffffff : 0x3a7d44, map: turf()?.clone() ?? null, roughness: 0.92 }))
+      grass.rotation.x = -Math.PI / 2
+      grass.rotation.z = Math.PI / 4
+      grass.position.set(0, 0.002, 19.4 * Math.SQRT1_2)
+      grass.receiveShadow = true
+      g.add(grass)
+      const circle = new THREE.Mesh(new THREE.CircleGeometry(4, 40), new THREE.MeshStandardMaterial({ color: 0x9a6b45, map: dirt(), roughness: 1 }))
+      circle.rotation.x = -Math.PI / 2
+      circle.position.y = 0.003
+      g.add(circle)
+      const mound = new THREE.Mesh(new THREE.CylinderGeometry(2.7, 2.9, 0.25, 40), new THREE.MeshStandardMaterial({ color: 0x9a6b45, map: dirt(), roughness: 1 }))
+      mound.position.set(0, 0.12, 18.44)
+      mound.receiveShadow = true
+      g.add(mound)
+      for (const [x, z] of [[19.4, 19.4], [0, 38.8], [-19.4, 19.4]] as const) {
+        const base = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.08, 0.38), new THREE.MeshStandardMaterial({ color: 0xf4f4f4 }))
+        base.position.set(x * Math.SQRT1_2 * Math.SQRT2 / 1.414, 0.04, z)
+        base.rotation.y = Math.PI / 4
+        g.add(base)
+      }
+      g.add(line(0, 0, 76, 76, 0.08))
+      g.add(line(0, 0, -76, 76, 0.08))
+      if (opts.venue !== false) g.add(buildVenue('ballpark', { night: opts.night ?? false }))
+      break
+    }
+    case 'arena': {
+      // A full court centred on the athlete, long axis along Z.
+      g.add(flat(60, 50, 0x23262c, -0.004))
+      g.add(textured(15.24, 28.65, hardwood(), 0xc49a63, 0, [3, 6]))
+      g.add(line(-7.62, 0, 7.62, 0, 0.05))
+      g.add(arc(1.8, 0, Math.PI * 2, 0, 0, 0.05))
+      for (const end of [1, -1]) {
+        const paint = flat(4.9, 5.8, 0x8f5a3a, 0.002)
+        paint.position.set(0, 0.002, end * (14.325 - 2.9))
+        g.add(paint)
+        g.add(line(-7.62, end * 14.325, 7.62, end * 14.325, 0.05))
+      }
+      for (const z of [-14.325, 14.325]) g.add(line(z > 0 ? 7.62 : -7.62, -14.325, z > 0 ? 7.62 : -7.62, 14.325, 0.05))
+      if (opts.venue !== false) g.add(buildVenue('arena', { night: true }))
       break
     }
     case 'gym': {

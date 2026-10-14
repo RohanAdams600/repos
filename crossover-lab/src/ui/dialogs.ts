@@ -50,7 +50,7 @@ export function openHelp(): void {
     ['Space', 'Play or pause the replay'],
     [', and .', 'Back or forward one frame'],
     ['R', 'Restart'],
-    ['1, 2, 3, 4', 'Broadcast, behind, overhead, first-person camera'],
+    ['1 to 6', 'Broadcast, sideline, behind, overhead, close-up, first-person camera'],
     ['Arrow keys', 'Orbit the camera (focus the stage first)'],
     ['+ and −', 'Zoom (focus the stage first)'],
     ['C', 'Captions on or off'],

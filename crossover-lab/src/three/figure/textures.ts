@@ -199,9 +199,11 @@ export function surfaceTexture(kind: 'turf' | 'wood' | 'dirt' | 'track' | 'crowd
         g = 78 * v
         b = 56 * v
       } else {
-        // Crowd: coloured speckle at a distance, deliberately abstract.
-        const cell = n(Math.floor(x / 6) * 3.1, Math.floor(y / 8) * 7.3)
-        const shade = 0.35 + 0.65 * n(x * 0.9, y * 0.9)
+        // Crowd: muted coloured speckle in rows of seats, deliberately abstract. A darker band
+        // every eighth row reads as the aisle step between tiers.
+        const cell = n(Math.floor(x / 8) * 3.1, Math.floor(y / 16) * 7.3)
+        const row = Math.floor(y / 16) % 8 === 7 ? 0.45 : 1
+        const shade = (0.32 + 0.3 * n(x * 0.25, y * 0.25)) * row
         const palette = [
           [70, 74, 86],
           [120, 124, 132],

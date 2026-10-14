@@ -75,6 +75,14 @@ export abstract class TimelineStage implements StageController {
     return this.rigs[0]
   }
 
+  /** Everyone on stage, for camera auto-framing. */
+  bounds(out: THREE.Box3): THREE.Box3 {
+    out.makeEmpty()
+    const box = new THREE.Box3()
+    for (const r of this.rigs) out.union(r.bounds(box))
+    return out
+  }
+
   dispose(): void {
     for (const r of this.rigs) r.dispose()
     this.scene.remove(this.group)

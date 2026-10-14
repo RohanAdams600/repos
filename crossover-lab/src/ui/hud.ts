@@ -61,7 +61,7 @@ export class Hud {
   bind(stage: TimelineStage | null, opts: HudOptions = {}): void {
     this.stage = stage
     this.lastCaption = ''
-    const presets = opts.presets ?? ['broadcast', 'behind', 'overhead', 'firstPerson']
+    const presets = opts.presets ?? ['broadcast', 'sideline', 'behind', 'overhead', 'closeup', 'firstPerson']
     const presetSeg = h(
       'div',
       { class: 'seg', role: 'group', 'aria-label': 'Camera' },

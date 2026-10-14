@@ -6,8 +6,11 @@ import { h, toast } from './ui/dom'
 import { Hud } from './ui/hud'
 import { applySettings, onSettings, reducedMotion, settings, updateSettings } from './ui/settings'
 import { openHelp, openSettings } from './ui/dialogs'
-import { athleteView, TABS, type AthleteTab } from './ui/views/athlete'
+import { athleteView, tabFor } from './ui/views/athlete'
+import { LEAGUES, LEGAL, Rail } from './ui/rail'
 import { rosterView } from './ui/views/roster'
+import { standoutsView } from './ui/views/standouts'
+import type { League } from './data/types'
 import { versusView } from './ui/views/versus'
 import { tournamentView } from './ui/views/tournament'
 import { leadersView } from './ui/views/leaders'
@@ -18,20 +21,47 @@ import { aboutView } from './ui/views/about'
 applySettings()
 
 const NAV: { hash: string; label: string; match: (h: string) => boolean }[] = [
-  { hash: '#roster', label: 'Roster', match: (x) => x === '' || x === '#roster' || x.startsWith('#a.') },
-  { hash: '#versus', label: 'Versus', match: (x) => x === '#versus' || x.startsWith('#m.') },
+  { hash: '#roster', label: 'Athletes', match: (x) => x === '' || x === '#roster' || x.startsWith('#a.') },
+  { hash: '#standouts', label: 'Standouts', match: (x) => x.startsWith('#standouts') },
+  { hash: '#events', label: 'Versus', match: (x) => x.startsWith('#events') },
+  { hash: '#versus', label: 'Crossover', match: (x) => x === '#versus' || x.startsWith('#m.') },
+  { hash: '#brackets', label: 'Brackets', match: (x) => x.startsWith('#brackets') || x.startsWith('#ladder.') },
   { hash: '#decathlon', label: 'Decathlon', match: (x) => x === '#decathlon' },
   { hash: '#leaders', label: 'Leaders', match: (x) => x === '#leaders' },
   { hash: '#build', label: 'Build', match: (x) => x === '#build' },
   { hash: '#cards', label: 'Cards', match: (x) => x === '#cards' },
-  { hash: '#about', label: 'Data', match: (x) => x === '#about' },
+  { hash: '#methodology', label: 'Methodology', match: (x) => x === '#methodology' || x === '#about' || x === '#import' },
 ]
 
 const nav = h('nav', { class: 'nav', 'aria-label': 'Main' })
-const stageEl = h('div', { id: 'stage', tabindex: '0', role: 'application', 'aria-label': '3D stage. Arrow keys orbit, plus and minus zoom, 1 to 4 change camera.' })
+const stageEl = h('div', { id: 'stage', tabindex: '0', role: 'application', 'aria-label': '3D stage. Arrow keys orbit, plus and minus zoom, 1 to 6 change camera.' })
 const stageWrap = h('div', { class: 'stage-wrap' }, stageEl)
 const panel = h('main', { class: 'panel', id: 'panel', tabindex: '-1' })
 const live = h('div', { id: 'live-region', class: 'sr-only', 'aria-live': 'polite' })
+const rail = new Rail()
+const railToggle = h(
+  'button',
+  {
+    class: 'btn ghost rail-toggle',
+    type: 'button',
+    'aria-controls': 'rail',
+    'aria-expanded': 'false',
+    onclick: () => {
+      const open = !document.body.classList.contains('rail-open')
+      document.body.classList.toggle('rail-open', open)
+      railToggle.setAttribute('aria-expanded', String(open))
+      if (open) rail.el.querySelector<HTMLElement>('.rail-search')?.focus()
+    },
+  },
+  'Browse',
+)
+const closeRail = () => {
+  document.body.classList.remove('rail-open')
+  railToggle.setAttribute('aria-expanded', 'false')
+}
+rail.el.addEventListener('click', (e) => {
+  if ((e.target as Element).closest('a')) closeRail()
+})
 
 const shell = h(
   'div',
@@ -39,6 +69,7 @@ const shell = h(
   h(
     'header',
     { class: 'topbar' },
+    railToggle,
     h('a', { class: 'brand', href: '#roster' }, h('span', { class: 'pylon', 'aria-hidden': 'true' }), 'Crossover Lab'),
     nav,
     h(
@@ -48,7 +79,7 @@ const shell = h(
       h('button', { class: 'btn ghost', type: 'button', onclick: () => openSettings() }, 'Settings'),
     ),
   ),
-  h('div', { class: 'main' }, stageWrap, panel),
+  h('div', { class: 'main' }, rail.el, stageWrap, panel),
   live,
 )
 document.getElementById('app')!.appendChild(shell)
@@ -74,12 +105,14 @@ const ctx: AppContext = {
   },
 }
 
+const leagueOf = (x: string | undefined): League => (LEAGUES.includes(x as League) ? (x as League) : 'NFL')
+
 function route(hash: string): View {
   if (hash.startsWith('#a.')) {
-    const [, id, tab] = hash.split('.')
-    const t = (TABS.some((x) => x.id === tab) ? tab : 'overview') as AthleteTab
-    return athleteView(ctx, id ?? '', t)
+    const [, id, tab, arg] = hash.split('.')
+    return athleteView(ctx, id ?? '', tabFor(tab), arg || undefined)
   }
+  if (hash.startsWith('#standouts')) return standoutsView(ctx, leagueOf(hash.split('.')[1]))
   if (hash.startsWith('#m.')) return versusView(ctx, hash.slice(3))
   switch (hash) {
     case '#versus':
@@ -112,8 +145,10 @@ function render(force = false): void {
     console.error(err)
     current = { el: h('div', { class: 'section' }, h('h1', null, 'Something went wrong'), h('p', null, 'This page failed to load. Go back to the roster and try again.'), h('a', { href: '#roster' }, 'Back to the roster')) }
   }
-  panel.replaceChildren(current.el)
+  panel.replaceChildren(current.el, h('footer', { class: 'legal-foot' }, h('p', null, LEGAL), h('p', null, 'Generic or licensed branding only: no logos or wordmarks. Licensed media and data only; nothing is scraped or rehosted. ', h('a', { href: '#methodology' }, 'How the numbers work'))))
   current.mounted?.()
+  rail.render(hash.startsWith('#a.') ? hash.split('.')[1] ?? null : null)
+  closeRail()
   nav.replaceChildren(...NAV.map((n) => h('a', { href: n.hash, 'aria-current': n.match(hash) ? 'page' : null }, n.label)))
   if (!sameAthlete) {
     panel.scrollTop = 0
@@ -125,17 +160,23 @@ function render(force = false): void {
 
 window.addEventListener('hashchange', () => render())
 onRosterChange(() => {
+  rail.render()
   if (location.hash === '#build' || location.hash === '#leaders' || location.hash === '#cards') return
   render(true)
 })
 render(true)
 
-const PRESET_KEYS: Record<string, CameraPreset> = { '1': 'broadcast', '2': 'behind', '3': 'overhead', '4': 'firstPerson' }
+const PRESET_KEYS: Record<string, CameraPreset> = { '1': 'broadcast', '2': 'sideline', '3': 'behind', '4': 'overhead', '5': 'closeup', '6': 'firstPerson' }
 
 document.addEventListener('keydown', (e) => {
   const target = e.target as HTMLElement
   if (target.closest('input, select, textarea, [contenteditable="true"], dialog')) return
   if (e.metaKey || e.ctrlKey || e.altKey) return
+  if (e.key === 'Escape' && document.body.classList.contains('rail-open')) {
+    closeRail()
+    railToggle.focus()
+    return
+  }
   if (target === stageEl && viewer.handleKey(e)) {
     e.preventDefault()
     return

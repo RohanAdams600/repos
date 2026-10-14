@@ -5,8 +5,8 @@ import { fmtDate, h } from './dom'
 
 export const QUALITY_TEXT: Record<Quality, string> = {
   VERIFIED: 'Checked against the cited public source on the date shown.',
-  ESTIMATED: 'Derived from verified figures by a stated formula, or sources disagree (see note).',
-  SIMULATED: 'No public source. A demo value until a licensed data feed is connected.',
+  ESTIMATED: 'Derived by a stated formula, reported by only one source, or sources disagree (see the note).',
+  SIMULATED: 'Model output or a default: no public source. Never shown as measured.',
 }
 
 export function qualityChip(q: Quality, extra?: string): HTMLElement {
