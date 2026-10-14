@@ -80,6 +80,8 @@ export class ClothDriver {
       const c = 2 * Math.sqrt(k) * 0.55
       this.swayVel.addScaledVector(target.sub(this.sway), k * dt).multiplyScalar(Math.max(0, 1 - c * dt))
       this.sway.addScaledVector(this.swayVel, dt)
+      // The spring may overshoot; never let fabric swing past its reach (it would cut the body).
+      if (this.sway.length() > reach) this.sway.setLength(reach)
     }
     const ripple = Math.min(0.0045, this.speed * 0.0006) * (this.height / 1.85)
     for (const t of this.targets) {
