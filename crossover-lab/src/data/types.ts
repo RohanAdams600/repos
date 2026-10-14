@@ -38,6 +38,11 @@ export interface Measured {
   /** Date the value applies to (a combine date, a season end). */
   asOf?: string
   note?: string
+  /**
+   * The source's own rank wording, quoted as published (e.g. "NFL Scouting Combine record").
+   * Never written by the app: standouts show it verbatim with the source and date.
+   */
+  rank?: string
 }
 
 export type League = 'NFL' | 'MLB' | 'NBA'
