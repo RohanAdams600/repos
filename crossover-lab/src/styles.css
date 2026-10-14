@@ -2009,11 +2009,32 @@ ul.notes {
 }
 
 @media (max-width: 520px) {
+  /* Phones: the name gets the whole first line; value, label and tag share the second. */
   .standout summary {
-    grid-template-columns: 2.4ch minmax(0, 1fr) auto;
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 10px;
+    row-gap: 4px;
   }
-  .standout summary .tag.outlier {
-    display: none;
+  .standout-who {
+    flex: 1 1 70%;
+  }
+  .standout-rank {
+    flex: 0 0 1.6rem;
+  }
+  .standout-value {
+    margin-left: calc(1.6rem + 10px);
+    text-align: left;
+    max-width: none;
+  }
+  .topbar {
+    column-gap: 10px;
+  }
+  .topbar .brand {
+    font-size: 1.2rem;
+  }
+  .topbar .btn {
+    padding: 6px 9px;
   }
   .gbar {
     grid-template-columns: minmax(7ch, 10ch) minmax(40px, 1fr) 3ch;
