@@ -7,6 +7,7 @@ import { qualityChip, sourceCite } from '../components'
 import type { AppContext, View } from '../context'
 import { fmtDate, h } from '../dom'
 import { LEAGUES } from '../rail'
+import { shortName } from '../../stage/event-stages'
 import { athleteColor } from '../settings'
 
 /**
@@ -33,9 +34,9 @@ export function standoutsView(ctx: AppContext, league: League = 'NFL', today = n
     ctx.viewer.setController(stage)
     ctx.hud.bind(stage, { presets: ['broadcast', 'sideline', 'behind', 'overhead'], record: true })
     leaders.forEach((a, i) =>
-      ctx.viewer.addLabel(`lead${i}`, h('div', { style: { '--swatch': athleteColor(i) } }, a.name), (o) => {
+      ctx.viewer.addLabel(`lead${i}`, h('div', { style: { '--swatch': athleteColor(i) }, title: a.name }, shortName(a)), (o) => {
         stage!.rigs[i]!.jointWorld('head', o)
-        o.y += 0.36
+        o.y += i % 2 ? 0.62 : 0.36
         return o
       }),
     )
@@ -48,7 +49,7 @@ export function standoutsView(ctx: AppContext, league: League = 'NFL', today = n
   const leagueTabs = h(
     'div',
     { class: 'seg', role: 'group', 'aria-label': 'League' },
-    LEAGUES.map((l) => h('a', { class: 'btn', href: `#standouts.${l}`, 'aria-current': l === league ? 'page' : null, role: 'button', 'aria-pressed': String(l === league) }, l)),
+    LEAGUES.map((l) => h('a', { href: `#standouts.${l}`, 'aria-current': l === league ? 'page' : null }, l)),
   )
 
   const entryCard = (e: StandoutEntry, rank: number) => {

@@ -203,13 +203,13 @@ export function surfaceTexture(kind: 'turf' | 'wood' | 'dirt' | 'track' | 'crowd
         // every eighth row reads as the aisle step between tiers.
         const cell = n(Math.floor(x / 8) * 3.1, Math.floor(y / 16) * 7.3)
         const row = Math.floor(y / 16) % 8 === 7 ? 0.45 : 1
-        const shade = (0.32 + 0.3 * n(x * 0.25, y * 0.25)) * row
+        const shade = (0.42 + 0.18 * n(x * 0.25, y * 0.25)) * row
         const palette = [
-          [70, 74, 86],
-          [120, 124, 132],
-          [160, 52, 46],
-          [44, 82, 150],
-          [210, 206, 196],
+          [66, 70, 80],
+          [100, 104, 112],
+          [132, 66, 60],
+          [58, 82, 124],
+          [156, 152, 144],
           [40, 40, 44],
         ]
         const c = palette[Math.floor(cell * palette.length) % palette.length]!

@@ -17,6 +17,11 @@ import { leadersView } from './ui/views/leaders'
 import { buildView } from './ui/views/build'
 import { cardsView } from './ui/views/cards'
 import { aboutView } from './ui/views/about'
+import { bracketsView, LADDER_HASH_PREFIX } from './ui/views/brackets'
+import { methodologyView } from './ui/views/methodology'
+import { importView } from './ui/views/import'
+import { eventsView } from './ui/views/events'
+import { parseEventsHash } from './stage/event-stages'
 
 applySettings()
 
@@ -114,6 +119,9 @@ function route(hash: string): View {
   }
   if (hash.startsWith('#standouts')) return standoutsView(ctx, leagueOf(hash.split('.')[1]))
   if (hash.startsWith('#m.')) return versusView(ctx, hash.slice(3))
+  if (hash.startsWith(LADDER_HASH_PREFIX)) return bracketsView(ctx)
+  const ev = parseEventsHash(hash)
+  if (ev) return eventsView(ctx, ev.league, ev.eventId, ev.ids, ev.seed)
   switch (hash) {
     case '#versus':
       return versusView(ctx)
@@ -125,6 +133,12 @@ function route(hash: string): View {
       return buildView(ctx)
     case '#cards':
       return cardsView(ctx)
+    case '#brackets':
+      return bracketsView(ctx)
+    case '#methodology':
+      return methodologyView(ctx)
+    case '#import':
+      return importView(ctx)
     case '#about':
       return aboutView(ctx)
     default:

@@ -14,7 +14,10 @@ function mat<T extends THREE.Material>(m: T): T {
   return m
 }
 
-/** A seating bowl: a lathe profile of rising tiers, with a crowd texture on the seats. */
+/**
+ * A seating bowl: a lathe profile of rising tiers, with a crowd texture on the seats. Lathe angle
+ * 0 points down +Z (the long axis of every playing surface); `ellipse` narrows the bowl across X.
+ */
 function bowl(inner: number, outer: number, height: number, sweep = Math.PI * 2, start = 0, ellipse = 1): THREE.Mesh {
   const steps = 10
   const pts: THREE.Vector2[] = []
@@ -27,11 +30,16 @@ function bowl(inner: number, outer: number, height: number, sweep = Math.PI * 2,
     if (i < steps) pts.push(new THREE.Vector2(r + (outer - inner) / steps * 0.15, y + (height / steps) * 0.85))
   }
   const geo = new THREE.LatheGeometry(pts, 96, start, sweep)
-  geo.scale(1, 1, ellipse)
+  geo.scale(ellipse, 1, 1)
   // Each bowl gets its own repeat, so clone the shared crowd texture (the image is shared).
   const base = surfaceTexture('crowd', 1)
   const tex = base ? base.clone() : null
-  if (tex) tex.repeat.set(sweep * 7, 3)
+  // A tile is 64 seats by 32 rows, scaled a little under life size so the crowd reads as texture.
+  if (tex) {
+    const around = sweep * ((inner + outer) / 2) * (1 + ellipse) / 2
+    const up = Math.hypot(outer - inner, height)
+    tex.repeat.set(Math.max(1, Math.round(around / 22)), Math.max(1, up / 20))
+  }
   const m = new THREE.Mesh(geo, mat(new THREE.MeshStandardMaterial({ color: tex ? 0xffffff : 0x55606c, map: tex ?? null, roughness: 0.95, side: THREE.DoubleSide })))
   m.receiveShadow = true
   return m
@@ -57,7 +65,7 @@ function lightTower(x: number, z: number, height: number, night: boolean): THREE
 function ring(radius: number, y: number, tube: number, color: number, ellipse = 1): THREE.Mesh {
   const geo = new THREE.TorusGeometry(radius, tube, 6, 96)
   geo.rotateX(Math.PI / 2)
-  geo.scale(1, 1, ellipse)
+  geo.scale(ellipse, 1, 1)
   const m = new THREE.Mesh(geo, mat(new THREE.MeshStandardMaterial({ color, roughness: 0.7 })))
   m.position.y = y
   return m
@@ -74,16 +82,17 @@ export function buildVenue(kind: VenueKind, opts: VenueOptions = {}): THREE.Grou
   g.name = `venue:${kind}`
   const night = opts.night ?? false
   if (kind === 'stadium') {
-    // An oval bowl around a 110 m x 49 m field, with an upper deck and four light towers.
-    g.add(bowl(52, 78, 22, Math.PI * 2, 0, 0.62))
-    const upper = bowl(80, 98, 18, Math.PI * 2, 0, 0.62)
+    // An oval bowl around a 110 m x 49 m field (long axis Z), an upper deck, four light towers.
+    g.add(bowl(66, 92, 22, Math.PI * 2, 0, 0.6))
+    const upper = bowl(94, 112, 18, Math.PI * 2, 0, 0.6)
     upper.position.y = 24
     g.add(upper)
-    g.add(ring(98, 42.5, 1.2, 0x3a4048, 0.62))
-    for (const [x, z] of [[70, 50], [-70, 50], [70, -50], [-70, -50]] as const) g.add(lightTower(x, z, 55, night))
+    g.add(ring(112, 42.5, 1.2, 0x3a4048, 0.6))
+    for (const [x, z] of [[62, 80], [-62, 80], [62, -80], [-62, -80]] as const) g.add(lightTower(x, z, 55, night))
   } else if (kind === 'ballpark') {
-    // Grandstand wrapping home plate from first base to third, an outfield wall, bleachers.
-    const stand = bowl(36, 64, 24, Math.PI * 1.15, Math.PI * 0.92)
+    // Home plate at the origin, the outfield toward +Z. A grandstand wraps foul territory behind
+    // the plate from first base round to third, then an outfield wall and bleachers.
+    const stand = bowl(36, 64, 24, Math.PI * 1.15, Math.PI * 0.425)
     g.add(stand)
     const wallGeo = new THREE.CylinderGeometry(112, 112, 3.2, 96, 1, true, -Math.PI / 4, Math.PI / 2)
     const wall = new THREE.Mesh(wallGeo, mat(new THREE.MeshStandardMaterial({ color: 0x1f4d36, roughness: 0.9, side: THREE.DoubleSide })))
@@ -93,12 +102,13 @@ export function buildVenue(kind: VenueKind, opts: VenueOptions = {}): THREE.Grou
     g.add(bleachers)
     for (const [x, z] of [[60, -20], [-60, -20], [95, 70], [-95, 70]] as const) g.add(lightTower(x, z, 48, night))
   } else {
-    // Arena: a tight steep bowl, a ceiling ring and a generic centre-hung scoreboard.
-    g.add(bowl(17, 34, 15, Math.PI * 2, 0, 0.72))
-    const upper = bowl(36, 46, 10, Math.PI * 2, 0, 0.72)
+    // Arena: a tight steep bowl round a 28.65 m court (long axis Z), a ceiling ring and a generic
+    // centre-hung scoreboard.
+    g.add(bowl(20, 36, 15, Math.PI * 2, 0, 0.72))
+    const upper = bowl(38, 48, 10, Math.PI * 2, 0, 0.72)
     upper.position.y = 16
     g.add(upper)
-    g.add(ring(46, 27, 0.8, 0x2a2f36, 0.72))
+    g.add(ring(48, 27, 0.8, 0x2a2f36, 0.72))
     const board = new THREE.Mesh(
       new THREE.BoxGeometry(6, 4, 6),
       mat(new THREE.MeshStandardMaterial({ color: 0x15181d, emissive: new THREE.Color(0x2b3c55), emissiveIntensity: 0.9, roughness: 0.4 })),
