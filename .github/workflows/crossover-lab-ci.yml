@@ -1,0 +1,36 @@
+name: Crossover Lab CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['crossover-lab/**', '.github/workflows/crossover-lab-ci.yml']
+  pull_request:
+    paths: ['crossover-lab/**', '.github/workflows/crossover-lab-ci.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crossover-lab-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: crossover-lab
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: crossover-lab/package-lock.json
+      - run: npm ci
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

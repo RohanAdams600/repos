@@ -1,6 +1,7 @@
 > **Repository contents**
 > - `/` (this file): the Autonoma landing page described below.
 > - [`kineticscout/`](kineticscout/README.md): the KineticScout web app and background worker.
+> - [`crossover-lab/`](crossover-lab/README.md): Crossover Lab, a 3D athlete viewer with grades, gear and cross-sport head-to-head simulations (three-athlete demo).
 
 # Autonoma — Landing Page
 
