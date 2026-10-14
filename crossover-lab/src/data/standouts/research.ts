@@ -48,3398 +48,4064 @@ export const RESEARCH_RETRIEVED = '2026-10-14'
 
 export const RESEARCH: ResearchAthlete[] = [
   {
-    "id": "xavier-worthy",
-    "name": "Xavier Worthy",
-    "league": "NFL",
-    "position": "WR",
-    "team": "Kansas City Chiefs",
-    "status": "active",
-    "facts": [
+    id: 'xavier-worthy',
+    name: 'Xavier Worthy',
+    league: 'NFL',
+    position: 'WR',
+    team: 'Kansas City Chiefs',
+    status: 'active',
+    facts: [
       {
-        "metric": "fortyS",
-        "value": 4.21,
-        "quality": "VERIFIED",
-        "asOf": "2024-03-02",
-        "category": "fastest",
-        "context": "2024 NFL Scouting Combine",
-        "source": {
-          "title": "Texas WR Xavier Worthy sets NFL Scouting Combine record with 4.21-second 40-yard dash",
-          "publisher": "NFL.com",
-          "url": "https://www.nfl.com/news/texas-wr-xavier-worthy-sets-nfl-scouting-combine-record-with-4-21-second-40-yard-dash"
+        metric: 'fortyS',
+        value: 4.21,
+        quality: 'VERIFIED',
+        asOf: '2024-03-02',
+        category: 'fastest',
+        context: '2024 NFL Scouting Combine',
+        source: {
+          title: 'Texas WR Xavier Worthy sets NFL Scouting Combine record with 4.21-second 40-yard dash',
+          publisher: 'NFL.com',
+          url: 'https://www.nfl.com/news/texas-wr-xavier-worthy-sets-nfl-scouting-combine-record-with-4-21-second-40-yard-dash',
         },
-        "note": "2024 NFL Scouting Combine. Reported by NFL.com and confirmed by KXAN.",
-        "confirmedBy": {
-          "title": "Xavier Worthy wins 40-yard dash record by .01 seconds (KXAN digital release)",
-          "publisher": "KXAN",
-          "url": "https://digital-release.kxan.com/?p=2137312"
+        note: '2024 NFL Scouting Combine. Reported by NFL.com and confirmed by KXAN.',
+        confirmedBy: {
+          title: 'Xavier Worthy wins 40-yard dash record by .01 seconds (KXAN digital release)',
+          publisher: 'KXAN',
+          url: 'https://digital-release.kxan.com/?p=2137312',
         },
-        "rank": "NFL Scouting Combine record"
+        rank: 'NFL Scouting Combine record',
       },
       {
-        "metric": "topSpeedMph",
-        "value": 24.41,
-        "quality": "VERIFIED",
-        "asOf": "2024-03-02",
-        "category": "fastest",
-        "context": "2024 NFL Combine 40-yard dash, Next Gen Stats tracking",
-        "source": {
-          "title": "Xavier Worthy 40 time: How fast is Chiefs WR, NFL Combine record holder?",
-          "publisher": "Yahoo Sports",
-          "url": "https://ca.sports.yahoo.com/news/xavier-worthy-40-time-fast-100605893.html"
+        metric: 'topSpeedMph',
+        value: 24.41,
+        quality: 'VERIFIED',
+        asOf: '2024-03-02',
+        category: 'fastest',
+        context: '2024 NFL Combine 40-yard dash, Next Gen Stats tracking',
+        source: {
+          title: 'Xavier Worthy 40 time: How fast is Chiefs WR, NFL Combine record holder?',
+          publisher: 'Yahoo Sports',
+          url: 'https://ca.sports.yahoo.com/news/xavier-worthy-40-time-fast-100605893.html',
         },
-        "note": "2024 NFL Combine 40-yard dash, Next Gen Stats tracking. Reported by Yahoo Sports and confirmed by Heavy.",
-        "confirmedBy": {
-          "title": "Texas Football Star Xavier Worthy Smashes NFL Combine Record",
-          "publisher": "Heavy",
-          "url": "https://heavy.com/sports/college-football/texas-longhorns/xavier-worthy-nfl-combine-record/"
-        }
+        note: '2024 NFL Combine 40-yard dash, Next Gen Stats tracking. Reported by Yahoo Sports and confirmed by Heavy.',
+        confirmedBy: {
+          title: 'Texas Football Star Xavier Worthy Smashes NFL Combine Record',
+          publisher: 'Heavy',
+          url: 'https://heavy.com/sports/college-football/texas-longhorns/xavier-worthy-nfl-combine-record/',
+        },
       },
       {
-        "metric": "tenSplitS",
-        "value": 1.49,
-        "quality": "VERIFIED",
-        "asOf": "2024-03-02",
-        "category": "fastest",
-        "context": "2024 NFL Combine",
-        "source": {
-          "title": "Xavier Worthy fastest 40-yard dash NFL combine history",
-          "publisher": "Burnt Orange Nation",
-          "url": "https://www.burntorangenation.com/2024/3/2/24088950/xavier-worthy-fastest-40-yard-dash-nfl-combine-history",
-          "published": "2024-03-02"
+        metric: 'tenSplitS',
+        value: 1.49,
+        quality: 'VERIFIED',
+        asOf: '2024-03-02',
+        category: 'fastest',
+        context: '2024 NFL Combine',
+        source: {
+          title: 'Xavier Worthy fastest 40-yard dash NFL combine history',
+          publisher: 'Burnt Orange Nation',
+          url: 'https://www.burntorangenation.com/2024/3/2/24088950/xavier-worthy-fastest-40-yard-dash-nfl-combine-history',
+          published: '2024-03-02',
         },
-        "note": "2024 NFL Combine. Reported by Burnt Orange Nation and confirmed by KHOU 11.",
-        "confirmedBy": {
-          "title": "Texas Longhorns' Xavier Worthy 40-yard dash record (NFL Combine)",
-          "publisher": "KHOU 11",
-          "url": "https://khou.com/article/sports/ncaa/texas-longhorns-xavier-worthy-40-yard-dash-record-byron-murphy-tvondre-sweat-ad-mitchell-nfl-combine/269-2344194a-f4cc-461f-a55e-895bbf06b317"
-        }
+        note: '2024 NFL Combine. Reported by Burnt Orange Nation and confirmed by KHOU 11.',
+        confirmedBy: {
+          title: 'Texas Longhorns\' Xavier Worthy 40-yard dash record (NFL Combine)',
+          publisher: 'KHOU 11',
+          url: 'https://khou.com/article/sports/ncaa/texas-longhorns-xavier-worthy-40-yard-dash-record-byron-murphy-tvondre-sweat-ad-mitchell-nfl-combine/269-2344194a-f4cc-461f-a55e-895bbf06b317',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 71.25,
-        "quality": "VERIFIED",
-        "asOf": "2024-03",
-        "category": "bio",
-        "context": "2024 NFL Combine measurement",
-        "source": {
-          "title": "2024 NFL Combine results: WR measurements, 40-yard dash winners, losers as Xavier Worthy breaks combine record",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nfl/draft/news/2024-nfl-combine-results-wr-measurements-40-yard-dash-winners-losers-as-xavier-worthy-breaks-combine-record/"
+        metric: 'heightIn',
+        value: 71.25,
+        quality: 'VERIFIED',
+        asOf: '2024-03',
+        category: 'bio',
+        context: '2024 NFL Combine measurement',
+        source: {
+          title: '2024 NFL Combine results: WR measurements, 40-yard dash winners, losers as Xavier Worthy breaks combine record',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/draft/news/2024-nfl-combine-results-wr-measurements-40-yard-dash-winners-losers-as-xavier-worthy-breaks-combine-record/',
         },
-        "note": "2024 NFL Combine measurement. Reported by CBS Sports and confirmed by Wikipedia.",
-        "confirmedBy": {
-          "title": "Xavier Worthy",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Xavier_Worthy"
-        }
+        note: '2024 NFL Combine measurement. Reported by CBS Sports and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Xavier Worthy',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Xavier_Worthy',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 165.0,
-        "quality": "VERIFIED",
-        "asOf": "2024-03",
-        "category": "bio",
-        "context": "2024 NFL Combine measurement",
-        "source": {
-          "title": "2024 NFL Combine results: WR measurements, 40-yard dash winners, losers as Xavier Worthy breaks combine record",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nfl/draft/news/2024-nfl-combine-results-wr-measurements-40-yard-dash-winners-losers-as-xavier-worthy-breaks-combine-record/"
+        metric: 'weightLb',
+        value: 165,
+        quality: 'VERIFIED',
+        asOf: '2024-03',
+        category: 'bio',
+        context: '2024 NFL Combine measurement',
+        source: {
+          title: '2024 NFL Combine results: WR measurements, 40-yard dash winners, losers as Xavier Worthy breaks combine record',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/draft/news/2024-nfl-combine-results-wr-measurements-40-yard-dash-winners-losers-as-xavier-worthy-breaks-combine-record/',
         },
-        "note": "2024 NFL Combine measurement. Reported by CBS Sports and confirmed by Wikipedia.",
-        "confirmedBy": {
-          "title": "Xavier Worthy",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Xavier_Worthy"
-        }
-      }
-    ]
+        note: '2024 NFL Combine measurement. Reported by CBS Sports and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Xavier Worthy',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Xavier_Worthy',
+        },
+      },
+    ],
   },
   {
-    "id": "brenen-thompson",
-    "name": "Brenen Thompson",
-    "league": "NFL",
-    "position": "WR",
-    "team": "Los Angeles Chargers",
-    "status": "rookie",
-    "facts": [
+    id: 'brenen-thompson',
+    name: 'Brenen Thompson',
+    league: 'NFL',
+    position: 'WR',
+    team: 'Los Angeles Chargers',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "fortyS",
-        "value": 4.26,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "fastest",
-        "context": "2026 NFL Scouting Combine",
-        "source": {
-          "title": "2026 NFL Combine best and average 40-yard dash times by position",
-          "publisher": "NFL.com",
-          "url": "https://www.nfl.com/news/2026-nfl-combine-best-and-average-40-yard-dash-times-by-position"
+        metric: 'fortyS',
+        value: 4.26,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'fastest',
+        context: '2026 NFL Scouting Combine',
+        source: {
+          title: '2026 NFL Combine best and average 40-yard dash times by position',
+          publisher: 'NFL.com',
+          url: 'https://www.nfl.com/news/2026-nfl-combine-best-and-average-40-yard-dash-times-by-position',
         },
-        "note": "2026 NFL Scouting Combine. Reported by NFL.com and confirmed by SuperTalk Mississippi.",
-        "confirmedBy": {
-          "title": "Mississippi State's Brenen Thompson runs historic 40-yard dash time",
-          "publisher": "SuperTalk Mississippi",
-          "url": "https://www.supertalk.fm/mississippi-states-brenen-thompson-runs-historic-40-yard-dash-time/"
-        }
+        note: '2026 NFL Scouting Combine. Reported by NFL.com and confirmed by SuperTalk Mississippi.',
+        confirmedBy: {
+          title: 'Mississippi State\'s Brenen Thompson runs historic 40-yard dash time',
+          publisher: 'SuperTalk Mississippi',
+          url: 'https://www.supertalk.fm/mississippi-states-brenen-thompson-runs-historic-40-yard-dash-time/',
+        },
       },
       {
-        "metric": "tenSplitS",
-        "value": 1.54,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "fastest",
-        "context": "2026 NFL Combine (Mockdraftable figures)",
-        "source": {
-          "title": "2026 Dynasty Rookie Post-Draft Update: Brenen Thompson",
-          "publisher": "Dynasty League Football",
-          "url": "https://dynastyleaguefootball.com/2026/07/02/2026-dynasty-rookie-post-draft-update-brenen-thompson/",
-          "published": "2026-07-02"
+        metric: 'tenSplitS',
+        value: 1.54,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'fastest',
+        context: '2026 NFL Combine (Mockdraftable figures)',
+        source: {
+          title: '2026 Dynasty Rookie Post-Draft Update: Brenen Thompson',
+          publisher: 'Dynasty League Football',
+          url: 'https://dynastyleaguefootball.com/2026/07/02/2026-dynasty-rookie-post-draft-update-brenen-thompson/',
+          published: '2026-07-02',
         },
-        "note": "2026 NFL Combine (Mockdraftable figures). Reported by Dynasty League Football and confirmed by The Ringer.",
-        "confirmedBy": {
-          "title": "Brenen Thompson (Todd McShay player page)",
-          "publisher": "The Ringer",
-          "url": "https://theringer.com/todd-mcshay/players/brenen-thompson"
-        }
+        note: '2026 NFL Combine (Mockdraftable figures). Reported by Dynasty League Football and confirmed by The Ringer.',
+        confirmedBy: {
+          title: 'Brenen Thompson (Todd McShay player page)',
+          publisher: 'The Ringer',
+          url: 'https://theringer.com/todd-mcshay/players/brenen-thompson',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 69.375,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "2026 NFL Combine measurement (credited to Mockdraftable)",
-        "source": {
-          "title": "2026 Dynasty Rookie Post-Draft Update: Brenen Thompson",
-          "publisher": "Dynasty League Football",
-          "url": "https://dynastyleaguefootball.com/2026/07/02/2026-dynasty-rookie-post-draft-update-brenen-thompson/",
-          "published": "2026-07-02"
+        metric: 'heightIn',
+        value: 69.375,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: '2026 NFL Combine measurement (credited to Mockdraftable)',
+        source: {
+          title: '2026 Dynasty Rookie Post-Draft Update: Brenen Thompson',
+          publisher: 'Dynasty League Football',
+          url: 'https://dynastyleaguefootball.com/2026/07/02/2026-dynasty-rookie-post-draft-update-brenen-thompson/',
+          published: '2026-07-02',
         },
-        "note": "2026 NFL Combine measurement (credited to Mockdraftable). Reported by Dynasty League Football and confirmed by Wikipedia.",
-        "confirmedBy": {
-          "title": "Brenen Thompson",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Brenen_Thompson"
-        }
+        note: '2026 NFL Combine measurement (credited to Mockdraftable). Reported by Dynasty League Football and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Brenen Thompson',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Brenen_Thompson',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 164.0,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "2026 NFL Combine measurement (credited to Mockdraftable)",
-        "source": {
-          "title": "2026 Dynasty Rookie Post-Draft Update: Brenen Thompson",
-          "publisher": "Dynasty League Football",
-          "url": "https://dynastyleaguefootball.com/2026/07/02/2026-dynasty-rookie-post-draft-update-brenen-thompson/",
-          "published": "2026-07-02"
+        metric: 'weightLb',
+        value: 164,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: '2026 NFL Combine measurement (credited to Mockdraftable)',
+        source: {
+          title: '2026 Dynasty Rookie Post-Draft Update: Brenen Thompson',
+          publisher: 'Dynasty League Football',
+          url: 'https://dynastyleaguefootball.com/2026/07/02/2026-dynasty-rookie-post-draft-update-brenen-thompson/',
+          published: '2026-07-02',
         },
-        "note": "2026 NFL Combine measurement (credited to Mockdraftable). Reported by Dynasty League Football and confirmed by The Ringer.",
-        "confirmedBy": {
-          "title": "Brenen Thompson (Todd McShay player page)",
-          "publisher": "The Ringer",
-          "url": "https://theringer.com/todd-mcshay/players/brenen-thompson"
-        }
+        note: '2026 NFL Combine measurement (credited to Mockdraftable). Reported by Dynasty League Football and confirmed by The Ringer.',
+        confirmedBy: {
+          title: 'Brenen Thompson (Todd McShay player page)',
+          publisher: 'The Ringer',
+          url: 'https://theringer.com/todd-mcshay/players/brenen-thompson',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 105.0,
-        "quality": "VERIFIED",
-        "asOf": "2026-04",
-        "category": "rising",
-        "context": "2026 NFL Draft, Round 4",
-        "source": {
-          "title": "Brenen Thompson Round 4 2026 NFL Draft",
-          "publisher": "Chargers.com",
-          "url": "https://www.chargers.com/news/brenen-thompson-round-4-2026-nfl-draft"
+        metric: 'draftPick',
+        value: 105,
+        quality: 'VERIFIED',
+        asOf: '2026-04',
+        category: 'rising',
+        context: '2026 NFL Draft, Round 4',
+        source: {
+          title: 'Brenen Thompson Round 4 2026 NFL Draft',
+          publisher: 'Chargers.com',
+          url: 'https://www.chargers.com/news/brenen-thompson-round-4-2026-nfl-draft',
         },
-        "note": "2026 NFL Draft, Round 4. Reported by Chargers.com and confirmed by RotoWire.",
-        "confirmedBy": {
-          "title": "Brenen Thompson",
-          "publisher": "RotoWire",
-          "url": "https://www.rotowire.com/football/player/brenen-thompson-19318"
-        }
-      }
-    ]
+        note: '2026 NFL Draft, Round 4. Reported by Chargers.com and confirmed by RotoWire.',
+        confirmedBy: {
+          title: 'Brenen Thompson',
+          publisher: 'RotoWire',
+          url: 'https://www.rotowire.com/football/player/brenen-thompson-19318',
+        },
+      },
+    ],
   },
   {
-    "id": "kenyon-sadiq",
-    "name": "Kenyon Sadiq",
-    "league": "NFL",
-    "position": "TE",
-    "team": "New York Jets",
-    "status": "rookie",
-    "facts": [
+    id: 'kenyon-sadiq',
+    name: 'Kenyon Sadiq',
+    league: 'NFL',
+    position: 'TE',
+    team: 'New York Jets',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "fortyS",
-        "value": 4.39,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "build",
-        "context": "2026 NFL Scouting Combine",
-        "source": {
-          "title": "2026 NFL Combine: Oregon's Kenyon Sadiq runs fastest 40 by tight end since at least 2003",
-          "publisher": "NFL.com",
-          "url": "https://amp.nfl.com/news/2026-nfl-combine-oregon-s-kenyon-sadiq-runs-fastest-40-by-tight-end-since-at-least-2003"
+        metric: 'fortyS',
+        value: 4.39,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'build',
+        context: '2026 NFL Scouting Combine',
+        source: {
+          title: '2026 NFL Combine: Oregon\'s Kenyon Sadiq runs fastest 40 by tight end since at least 2003',
+          publisher: 'NFL.com',
+          url: 'https://amp.nfl.com/news/2026-nfl-combine-oregon-s-kenyon-sadiq-runs-fastest-40-by-tight-end-since-at-least-2003',
         },
-        "note": "2026 NFL Scouting Combine. Reported by NFL.com and confirmed by CBS Sports.",
-        "confirmedBy": {
-          "title": "NFL combine 2026: Grading top TE prospects as Kenyon Sadiq, Eli Stowers deliver all-time performances",
-          "publisher": "CBS Sports",
-          "url": "https://cbssports.com/nfl/draft/news/nfl-combine-2026-te-grades-kenyon-sadiq-40-record/"
+        note: '2026 NFL Scouting Combine. Reported by NFL.com and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: 'NFL combine 2026: Grading top TE prospects as Kenyon Sadiq, Eli Stowers deliver all-time performances',
+          publisher: 'CBS Sports',
+          url: 'https://cbssports.com/nfl/draft/news/nfl-combine-2026-te-grades-kenyon-sadiq-40-record/',
         },
-        "rank": "fastest 40-yard dash of any tight end at the NFL Scouting Combine since at least 2003"
+        rank: 'fastest 40-yard dash of any tight end at the NFL Scouting Combine since at least 2003',
       },
       {
-        "metric": "weightLb",
-        "value": 241.0,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "2026 NFL Combine results listing",
-        "source": {
-          "title": "Kenyon Sadiq",
-          "publisher": "The Ringer",
-          "url": "https://theringer.com/todd-mcshay/2026/players/kenyon-sadiq"
+        metric: 'weightLb',
+        value: 241,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: '2026 NFL Combine results listing',
+        source: {
+          title: 'Kenyon Sadiq',
+          publisher: 'The Ringer',
+          url: 'https://theringer.com/todd-mcshay/2026/players/kenyon-sadiq',
         },
-        "note": "2026 NFL Combine results listing. Reported by The Ringer and confirmed by Wikipedia.",
-        "confirmedBy": {
-          "title": "Kenyon Sadiq",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Kenyon_Sadiq"
-        }
+        note: '2026 NFL Combine results listing. Reported by The Ringer and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Kenyon Sadiq',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Kenyon_Sadiq',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 16.0,
-        "quality": "VERIFIED",
-        "asOf": "2026-04",
-        "category": "bio",
-        "context": "2026 NFL Draft, Round 1",
-        "source": {
-          "title": "Kenyon Sadiq signs rookie contract",
-          "publisher": "NewYorkJets.com",
-          "url": "https://www.newyorkjets.com/news/kenyon-sadiq-signs-rookie-contract-05-07-2026",
-          "published": "2026-05-07"
+        metric: 'draftPick',
+        value: 16,
+        quality: 'VERIFIED',
+        asOf: '2026-04',
+        category: 'bio',
+        context: '2026 NFL Draft, Round 1',
+        source: {
+          title: 'Kenyon Sadiq signs rookie contract',
+          publisher: 'NewYorkJets.com',
+          url: 'https://www.newyorkjets.com/news/kenyon-sadiq-signs-rookie-contract-05-07-2026',
+          published: '2026-05-07',
         },
-        "note": "2026 NFL Draft, Round 1. Reported by NewYorkJets.com and confirmed by Wikipedia.",
-        "confirmedBy": {
-          "title": "Kenyon Sadiq",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Kenyon_Sadiq"
-        }
-      }
-    ]
+        note: '2026 NFL Draft, Round 1. Reported by NewYorkJets.com and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Kenyon Sadiq',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Kenyon_Sadiq',
+        },
+      },
+    ],
   },
   {
-    "id": "sonny-styles",
-    "name": "Sonny Styles",
-    "league": "NFL",
-    "position": "LB",
-    "team": "Washington Commanders",
-    "status": "rookie",
-    "facts": [
+    id: 'sonny-styles',
+    name: 'Sonny Styles',
+    league: 'NFL',
+    position: 'LB',
+    team: 'Washington Commanders',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 43.5,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "explosive",
-        "context": "2026 NFL Scouting Combine",
-        "source": {
-          "title": "2026 NFL Draft: Commanders select Ohio State LB Sonny Styles with No. 7 overall pick",
-          "publisher": "NFL.com",
-          "url": "https://www.nfl.com/news/sonny-styles-commanders-no-7-overall-pick-2026-nfl-draft"
+        metric: 'maxVerticalIn',
+        value: 43.5,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'explosive',
+        context: '2026 NFL Scouting Combine',
+        source: {
+          title: '2026 NFL Draft: Commanders select Ohio State LB Sonny Styles with No. 7 overall pick',
+          publisher: 'NFL.com',
+          url: 'https://www.nfl.com/news/sonny-styles-commanders-no-7-overall-pick-2026-nfl-draft',
         },
-        "note": "2026 NFL Scouting Combine. Reported by NFL.com and confirmed by NBC Washington.",
-        "confirmedBy": {
-          "title": "Commanders select Ohio State LB Sonny Styles with 7th pick",
-          "publisher": "NBC Washington",
-          "url": "https://www.nbcwashington.com/news/sports/washington-commanders/commanders-select-ohio-state-lb-sonny-styles-with-7th-pick/4095296/"
-        }
+        note: '2026 NFL Scouting Combine. Reported by NFL.com and confirmed by NBC Washington.',
+        confirmedBy: {
+          title: 'Commanders select Ohio State LB Sonny Styles with 7th pick',
+          publisher: 'NBC Washington',
+          url: 'https://www.nbcwashington.com/news/sports/washington-commanders/commanders-select-ohio-state-lb-sonny-styles-with-7th-pick/4095296/',
+        },
       },
       {
-        "metric": "fortyS",
-        "value": 4.46,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "build",
-        "context": "2026 NFL Scouting Combine",
-        "source": {
-          "title": "2026 NFL Draft: Commanders select Ohio State LB Sonny Styles with No. 7 overall pick",
-          "publisher": "NFL.com",
-          "url": "https://www.nfl.com/news/sonny-styles-commanders-no-7-overall-pick-2026-nfl-draft"
+        metric: 'fortyS',
+        value: 4.46,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'build',
+        context: '2026 NFL Scouting Combine',
+        source: {
+          title: '2026 NFL Draft: Commanders select Ohio State LB Sonny Styles with No. 7 overall pick',
+          publisher: 'NFL.com',
+          url: 'https://www.nfl.com/news/sonny-styles-commanders-no-7-overall-pick-2026-nfl-draft',
         },
-        "note": "2026 NFL Scouting Combine. Reported by NFL.com and confirmed by Washington Informer.",
-        "confirmedBy": {
-          "title": "Washington Informer report on Commanders' pick of Sonny Styles",
-          "publisher": "Washington Informer",
-          "url": "https://www.washingtoninformer.com/?p=1248450"
-        }
+        note: '2026 NFL Scouting Combine. Reported by NFL.com and confirmed by Washington Informer.',
+        confirmedBy: {
+          title: 'Washington Informer report on Commanders\' pick of Sonny Styles',
+          publisher: 'Washington Informer',
+          url: 'https://www.washingtoninformer.com/?p=1248450',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 77.0,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "2026 NFL Combine",
-        "source": {
-          "title": "2026 NFL Draft: Commanders select Ohio State LB Sonny Styles with No. 7 overall pick",
-          "publisher": "NFL.com",
-          "url": "https://www.nfl.com/news/sonny-styles-commanders-no-7-overall-pick-2026-nfl-draft"
+        metric: 'heightIn',
+        value: 77,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: '2026 NFL Combine',
+        source: {
+          title: '2026 NFL Draft: Commanders select Ohio State LB Sonny Styles with No. 7 overall pick',
+          publisher: 'NFL.com',
+          url: 'https://www.nfl.com/news/sonny-styles-commanders-no-7-overall-pick-2026-nfl-draft',
         },
-        "note": "2026 NFL Combine. Reported by NFL.com and confirmed by Washington Informer.",
-        "confirmedBy": {
-          "title": "Washington Informer report on Commanders' pick of Sonny Styles",
-          "publisher": "Washington Informer",
-          "url": "https://www.washingtoninformer.com/?p=1248450"
-        }
+        note: '2026 NFL Combine. Reported by NFL.com and confirmed by Washington Informer.',
+        confirmedBy: {
+          title: 'Washington Informer report on Commanders\' pick of Sonny Styles',
+          publisher: 'Washington Informer',
+          url: 'https://www.washingtoninformer.com/?p=1248450',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 244.0,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "2026 NFL Combine",
-        "source": {
-          "title": "2026 NFL Draft: Commanders select Ohio State LB Sonny Styles with No. 7 overall pick",
-          "publisher": "NFL.com",
-          "url": "https://www.nfl.com/news/sonny-styles-commanders-no-7-overall-pick-2026-nfl-draft"
+        metric: 'weightLb',
+        value: 244,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: '2026 NFL Combine',
+        source: {
+          title: '2026 NFL Draft: Commanders select Ohio State LB Sonny Styles with No. 7 overall pick',
+          publisher: 'NFL.com',
+          url: 'https://www.nfl.com/news/sonny-styles-commanders-no-7-overall-pick-2026-nfl-draft',
         },
-        "note": "2026 NFL Combine. Reported by NFL.com and confirmed by Washington Informer.",
-        "confirmedBy": {
-          "title": "Washington Informer report on Commanders' pick of Sonny Styles",
-          "publisher": "Washington Informer",
-          "url": "https://www.washingtoninformer.com/?p=1248450"
-        }
+        note: '2026 NFL Combine. Reported by NFL.com and confirmed by Washington Informer.',
+        confirmedBy: {
+          title: 'Washington Informer report on Commanders\' pick of Sonny Styles',
+          publisher: 'Washington Informer',
+          url: 'https://www.washingtoninformer.com/?p=1248450',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 7.0,
-        "quality": "VERIFIED",
-        "asOf": "2026-04",
-        "category": "bio",
-        "context": "2026 NFL Draft, Round 1",
-        "source": {
-          "title": "2026 NFL Draft: Commanders select Ohio State LB Sonny Styles with No. 7 overall pick",
-          "publisher": "NFL.com",
-          "url": "https://www.nfl.com/news/sonny-styles-commanders-no-7-overall-pick-2026-nfl-draft"
+        metric: 'draftPick',
+        value: 7,
+        quality: 'VERIFIED',
+        asOf: '2026-04',
+        category: 'bio',
+        context: '2026 NFL Draft, Round 1',
+        source: {
+          title: '2026 NFL Draft: Commanders select Ohio State LB Sonny Styles with No. 7 overall pick',
+          publisher: 'NFL.com',
+          url: 'https://www.nfl.com/news/sonny-styles-commanders-no-7-overall-pick-2026-nfl-draft',
         },
-        "note": "2026 NFL Draft, Round 1. Reported by NFL.com and confirmed by Fox Sports (Associated Press).",
-        "confirmedBy": {
-          "title": "Commanders select Ohio State LB Sonny Styles with the 7th pick in the NFL draft",
-          "publisher": "Fox Sports (Associated Press)",
-          "url": "https://www.foxsports.com/articles/nfl/commanders-select-ohio-state-lb-sonny-styles-with-the-7th-pick-in-the-nfl-draft"
-        }
-      }
-    ]
+        note: '2026 NFL Draft, Round 1. Reported by NFL.com and confirmed by Fox Sports (Associated Press).',
+        confirmedBy: {
+          title: 'Commanders select Ohio State LB Sonny Styles with the 7th pick in the NFL draft',
+          publisher: 'Fox Sports (Associated Press)',
+          url: 'https://www.foxsports.com/articles/nfl/commanders-select-ohio-state-lb-sonny-styles-with-the-7th-pick-in-the-nfl-draft',
+        },
+      },
+    ],
   },
   {
-    "id": "lorenzo-styles-jr",
-    "name": "Lorenzo Styles Jr.",
-    "league": "NFL",
-    "position": "S",
-    "team": "New Orleans Saints (placed on short-term IR 2026-09-01)",
-    "status": "rookie",
-    "facts": [
+    id: 'lorenzo-styles-jr',
+    name: 'Lorenzo Styles Jr.',
+    league: 'NFL',
+    position: 'S',
+    team: 'New Orleans Saints (placed on short-term IR 2026-09-01)',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "fortyS",
-        "value": 4.27,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "fastest",
-        "context": "2026 NFL Scouting Combine",
-        "source": {
-          "title": "Combine Recap",
-          "publisher": "College Football Playoff",
-          "url": "https://collegefootballplayoff.com/news/2026/3/4/combine-recap",
-          "published": "2026-03-04"
+        metric: 'fortyS',
+        value: 4.27,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'fastest',
+        context: '2026 NFL Scouting Combine',
+        source: {
+          title: 'Combine Recap',
+          publisher: 'College Football Playoff',
+          url: 'https://collegefootballplayoff.com/news/2026/3/4/combine-recap',
+          published: '2026-03-04',
         },
-        "note": "2026 NFL Scouting Combine. Reported by College Football Playoff and confirmed by NFL.com.",
-        "confirmedBy": {
-          "title": "2026 NFL Combine: Ohio State's Lorenzo Styles Jr. runs fastest 40 by a safety since at least 2003",
-          "publisher": "NFL.com",
-          "url": "https://amp.nfl.com/news/2026-nfl-combine-ohio-state-s-lorenzo-styles-jr-runs-fastest-40-by-a-safety-since-at-least-2003"
-        }
+        note: '2026 NFL Scouting Combine. Reported by College Football Playoff and confirmed by NFL.com.',
+        confirmedBy: {
+          title: '2026 NFL Combine: Ohio State\'s Lorenzo Styles Jr. runs fastest 40 by a safety since at least 2003',
+          publisher: 'NFL.com',
+          url: 'https://amp.nfl.com/news/2026-nfl-combine-ohio-state-s-lorenzo-styles-jr-runs-fastest-40-by-a-safety-since-at-least-2003',
+        },
       },
       {
-        "metric": "tenSplitS",
-        "value": 1.49,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "fastest",
-        "context": "2026 NFL Scouting Combine",
-        "source": {
-          "title": "Combine Recap",
-          "publisher": "College Football Playoff",
-          "url": "https://collegefootballplayoff.com/news/2026/3/4/combine-recap",
-          "published": "2026-03-04"
+        metric: 'tenSplitS',
+        value: 1.49,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'fastest',
+        context: '2026 NFL Scouting Combine',
+        source: {
+          title: 'Combine Recap',
+          publisher: 'College Football Playoff',
+          url: 'https://collegefootballplayoff.com/news/2026/3/4/combine-recap',
+          published: '2026-03-04',
         },
-        "note": "2026 NFL Scouting Combine. Reported by College Football Playoff and confirmed by New Orleans Saints (neworleanssaints.com).",
-        "confirmedBy": {
-          "title": "Lorenzo Styles Jr. – Saints draft pick 2026",
-          "publisher": "New Orleans Saints (neworleanssaints.com)",
-          "url": "https://www.neworleanssaints.com/news/lorenzo-styles-jr-saints-draft-pick-2026"
+        note: '2026 NFL Scouting Combine. Reported by College Football Playoff and confirmed by New Orleans Saints (neworleanssaints.com).',
+        confirmedBy: {
+          title: 'Lorenzo Styles Jr. – Saints draft pick 2026',
+          publisher: 'New Orleans Saints (neworleanssaints.com)',
+          url: 'https://www.neworleanssaints.com/news/lorenzo-styles-jr-saints-draft-pick-2026',
         },
-        "rank": "fastest 10-yard split among safeties"
+        rank: 'fastest 10-yard split among safeties',
       },
       {
-        "metric": "draftPick",
-        "value": 172.0,
-        "quality": "VERIFIED",
-        "asOf": "2026-04-25",
-        "category": "hidden",
-        "context": "2026 NFL Draft, Round 5",
-        "source": {
-          "title": "2026 NFL Draft: Lorenzo Styles Jr. Selected No. 172 Overall By New Orleans Saints",
-          "publisher": "Buckeye Sports Bulletin",
-          "url": "https://www.buckeyesports.com/2026-nfl-draft-lorenzo-styles-jr-selected-no-172-overall-by-new-orleans-saints/"
+        metric: 'draftPick',
+        value: 172,
+        quality: 'VERIFIED',
+        asOf: '2026-04-25',
+        category: 'hidden',
+        context: '2026 NFL Draft, Round 5',
+        source: {
+          title: '2026 NFL Draft: Lorenzo Styles Jr. Selected No. 172 Overall By New Orleans Saints',
+          publisher: 'Buckeye Sports Bulletin',
+          url: 'https://www.buckeyesports.com/2026-nfl-draft-lorenzo-styles-jr-selected-no-172-overall-by-new-orleans-saints/',
         },
-        "note": "2026 NFL Draft, Round 5. Reported by Buckeye Sports Bulletin and confirmed by New Orleans Saints (neworleanssaints.com).",
-        "confirmedBy": {
-          "title": "Lorenzo Styles Jr. – Saints draft pick 2026",
-          "publisher": "New Orleans Saints (neworleanssaints.com)",
-          "url": "https://www.neworleanssaints.com/news/lorenzo-styles-jr-saints-draft-pick-2026"
-        }
-      }
-    ]
+        note: '2026 NFL Draft, Round 5. Reported by Buckeye Sports Bulletin and confirmed by New Orleans Saints (neworleanssaints.com).',
+        confirmedBy: {
+          title: 'Lorenzo Styles Jr. – Saints draft pick 2026',
+          publisher: 'New Orleans Saints (neworleanssaints.com)',
+          url: 'https://www.neworleanssaints.com/news/lorenzo-styles-jr-saints-draft-pick-2026',
+        },
+      },
+    ],
   },
   {
-    "id": "eli-stowers",
-    "name": "Eli Stowers",
-    "league": "NFL",
-    "position": "TE",
-    "team": "Philadelphia Eagles",
-    "status": "rookie",
-    "facts": [
+    id: 'eli-stowers',
+    name: 'Eli Stowers',
+    league: 'NFL',
+    position: 'TE',
+    team: 'Philadelphia Eagles',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 45.5,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "explosive",
-        "context": "2026 NFL Scouting Combine",
-        "source": {
-          "title": "Eagles select Eli Stowers, Vanderbilt, 2026 NFL Draft",
-          "publisher": "PhiladelphiaEagles.com",
-          "url": "https://www.philadelphiaeagles.com/news/eagles-eli-stowers-vanderbilt-nfl-draft-2026"
+        metric: 'maxVerticalIn',
+        value: 45.5,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'explosive',
+        context: '2026 NFL Scouting Combine',
+        source: {
+          title: 'Eagles select Eli Stowers, Vanderbilt, 2026 NFL Draft',
+          publisher: 'PhiladelphiaEagles.com',
+          url: 'https://www.philadelphiaeagles.com/news/eagles-eli-stowers-vanderbilt-nfl-draft-2026',
         },
-        "note": "2026 NFL Scouting Combine. Reported by PhiladelphiaEagles.com and confirmed by CBS Sports.",
-        "confirmedBy": {
-          "title": "NFL combine 2026: Grading top TE prospects as Kenyon Sadiq, Eli Stowers deliver all-time performances",
-          "publisher": "CBS Sports",
-          "url": "https://cbssports.com/nfl/draft/news/nfl-combine-2026-te-grades-kenyon-sadiq-40-record/"
+        note: '2026 NFL Scouting Combine. Reported by PhiladelphiaEagles.com and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: 'NFL combine 2026: Grading top TE prospects as Kenyon Sadiq, Eli Stowers deliver all-time performances',
+          publisher: 'CBS Sports',
+          url: 'https://cbssports.com/nfl/draft/news/nfl-combine-2026-te-grades-kenyon-sadiq-40-record/',
         },
-        "rank": "tight end Combine record"
+        rank: 'tight end Combine record',
       },
       {
-        "metric": "broadJumpIn",
-        "value": 135.0,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "explosive",
-        "context": "2026 NFL Scouting Combine (11 feet, 3 inches)",
-        "source": {
-          "title": "Eagles select Eli Stowers, Vanderbilt, 2026 NFL Draft",
-          "publisher": "PhiladelphiaEagles.com",
-          "url": "https://www.philadelphiaeagles.com/news/eagles-eli-stowers-vanderbilt-nfl-draft-2026"
+        metric: 'broadJumpIn',
+        value: 135,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'explosive',
+        context: '2026 NFL Scouting Combine (11 feet, 3 inches)',
+        source: {
+          title: 'Eagles select Eli Stowers, Vanderbilt, 2026 NFL Draft',
+          publisher: 'PhiladelphiaEagles.com',
+          url: 'https://www.philadelphiaeagles.com/news/eagles-eli-stowers-vanderbilt-nfl-draft-2026',
         },
-        "note": "2026 NFL Scouting Combine (11 feet, 3 inches). Reported by PhiladelphiaEagles.com and confirmed by RotoWire.",
-        "confirmedBy": {
-          "title": "Eli Stowers",
-          "publisher": "RotoWire",
-          "url": "https://www.rotowire.com/football/player.php?id=18539"
+        note: '2026 NFL Scouting Combine (11 feet, 3 inches). Reported by PhiladelphiaEagles.com and confirmed by RotoWire.',
+        confirmedBy: {
+          title: 'Eli Stowers',
+          publisher: 'RotoWire',
+          url: 'https://www.rotowire.com/football/player.php?id=18539',
         },
-        "rank": "tight end Combine record"
+        rank: 'tight end Combine record',
       },
       {
-        "metric": "fortyS",
-        "value": 4.51,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "build",
-        "context": "2026 NFL Scouting Combine",
-        "source": {
-          "title": "Eagles select Eli Stowers, Vanderbilt, 2026 NFL Draft",
-          "publisher": "PhiladelphiaEagles.com",
-          "url": "https://www.philadelphiaeagles.com/news/eagles-eli-stowers-vanderbilt-nfl-draft-2026"
+        metric: 'fortyS',
+        value: 4.51,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'build',
+        context: '2026 NFL Scouting Combine',
+        source: {
+          title: 'Eagles select Eli Stowers, Vanderbilt, 2026 NFL Draft',
+          publisher: 'PhiladelphiaEagles.com',
+          url: 'https://www.philadelphiaeagles.com/news/eagles-eli-stowers-vanderbilt-nfl-draft-2026',
         },
-        "note": "2026 NFL Scouting Combine. Reported by PhiladelphiaEagles.com and confirmed by NFL.com.",
-        "confirmedBy": {
-          "title": "2026 NFL Combine: Oregon's Kenyon Sadiq runs fastest 40 by tight end since at least 2003",
-          "publisher": "NFL.com",
-          "url": "https://amp.nfl.com/news/2026-nfl-combine-oregon-s-kenyon-sadiq-runs-fastest-40-by-tight-end-since-at-least-2003"
-        }
+        note: '2026 NFL Scouting Combine. Reported by PhiladelphiaEagles.com and confirmed by NFL.com.',
+        confirmedBy: {
+          title: '2026 NFL Combine: Oregon\'s Kenyon Sadiq runs fastest 40 by tight end since at least 2003',
+          publisher: 'NFL.com',
+          url: 'https://amp.nfl.com/news/2026-nfl-combine-oregon-s-kenyon-sadiq-runs-fastest-40-by-tight-end-since-at-least-2003',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 54.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-04",
-        "category": "bio",
-        "context": "2026 NFL Draft, Round 2",
-        "source": {
-          "title": "Eagles select Eli Stowers, Vanderbilt, 2026 NFL Draft",
-          "publisher": "PhiladelphiaEagles.com",
-          "url": "https://www.philadelphiaeagles.com/news/eagles-eli-stowers-vanderbilt-nfl-draft-2026"
+        metric: 'draftPick',
+        value: 54,
+        quality: 'ESTIMATED',
+        asOf: '2026-04',
+        category: 'bio',
+        context: '2026 NFL Draft, Round 2',
+        source: {
+          title: 'Eagles select Eli Stowers, Vanderbilt, 2026 NFL Draft',
+          publisher: 'PhiladelphiaEagles.com',
+          url: 'https://www.philadelphiaeagles.com/news/eagles-eli-stowers-vanderbilt-nfl-draft-2026',
         },
-        "note": "2026 NFL Draft, Round 2. Reported by PhiladelphiaEagles.com; no independent second source turned up, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2026 NFL Draft, Round 2. Reported by PhiladelphiaEagles.com; no independent second source turned up, so it is not marked VERIFIED.',
+      },
+    ],
   },
   {
-    "id": "david-gusta",
-    "name": "David Gusta",
-    "league": "NFL",
-    "position": "DT",
-    "team": "BC Lions (CFL), on reserve roster since 2026-10-02",
-    "status": "free-agent",
-    "facts": [
+    id: 'david-gusta',
+    name: 'David Gusta',
+    league: 'NFL',
+    position: 'DT',
+    team: 'BC Lions (CFL), on reserve roster since 2026-10-02',
+    status: 'free-agent',
+    facts: [
       {
-        "metric": "benchReps225",
-        "value": 37.0,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "strongest",
-        "context": "2026 NFL Scouting Combine",
-        "source": {
-          "title": "Lions sign American trio, release five as part of Monday moves",
-          "publisher": "BC Lions (bclions.com)",
-          "url": "https://www.bclions.com/2026/04/27/lions-sign-american-trio-release-five-as-part-of-monday-moves/",
-          "published": "2026-04-27"
+        metric: 'benchReps225',
+        value: 37,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'strongest',
+        context: '2026 NFL Scouting Combine',
+        source: {
+          title: 'Lions sign American trio, release five as part of Monday moves',
+          publisher: 'BC Lions (bclions.com)',
+          url: 'https://www.bclions.com/2026/04/27/lions-sign-american-trio-release-five-as-part-of-monday-moves/',
+          published: '2026-04-27',
         },
-        "note": "2026 NFL Scouting Combine. Reported by BC Lions (bclions.com) and confirmed by Sharp Football Analysis.",
-        "confirmedBy": {
-          "title": "2026 NFL Combine Results: Top Results Tracker",
-          "publisher": "Sharp Football Analysis",
-          "url": "https://www.sharpfootballanalysis.com/analysis/nfl-combine-results-2026-best-40-time-vertical-jump-broad-jump-bench-press/"
+        note: '2026 NFL Scouting Combine. Reported by BC Lions (bclions.com) and confirmed by Sharp Football Analysis.',
+        confirmedBy: {
+          title: '2026 NFL Combine Results: Top Results Tracker',
+          publisher: 'Sharp Football Analysis',
+          url: 'https://www.sharpfootballanalysis.com/analysis/nfl-combine-results-2026-best-40-time-vertical-jump-broad-jump-bench-press/',
         },
-        "rank": "placing first among all prospects in attendance"
+        rank: 'placing first among all prospects in attendance',
       },
       {
-        "metric": "fortyS",
-        "value": 4.88,
-        "quality": "VERIFIED",
-        "asOf": "2026",
-        "category": "build",
-        "context": "2026 NFL Scouting Combine",
-        "source": {
-          "title": "Lions sign American trio, release five as part of Monday moves",
-          "publisher": "BC Lions (bclions.com)",
-          "url": "https://www.bclions.com/2026/04/27/lions-sign-american-trio-release-five-as-part-of-monday-moves/",
-          "published": "2026-04-27"
+        metric: 'fortyS',
+        value: 4.88,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'build',
+        context: '2026 NFL Scouting Combine',
+        source: {
+          title: 'Lions sign American trio, release five as part of Monday moves',
+          publisher: 'BC Lions (bclions.com)',
+          url: 'https://www.bclions.com/2026/04/27/lions-sign-american-trio-release-five-as-part-of-monday-moves/',
+          published: '2026-04-27',
         },
-        "note": "2026 NFL Scouting Combine. Reported by BC Lions (bclions.com) and confirmed by Wikipedia.",
-        "confirmedBy": {
-          "title": "David Gusta",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/David_Gusta"
-        }
+        note: '2026 NFL Scouting Combine. Reported by BC Lions (bclions.com) and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'David Gusta',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/David_Gusta',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 75.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-04",
-        "category": "bio",
-        "context": "BC Lions listed size",
-        "source": {
-          "title": "Lions sign American trio, release five as part of Monday moves",
-          "publisher": "BC Lions (bclions.com)",
-          "url": "https://www.bclions.com/2026/04/27/lions-sign-american-trio-release-five-as-part-of-monday-moves/",
-          "published": "2026-04-27"
+        metric: 'heightIn',
+        value: 75,
+        quality: 'ESTIMATED',
+        asOf: '2026-04',
+        category: 'bio',
+        context: 'BC Lions listed size',
+        source: {
+          title: 'Lions sign American trio, release five as part of Monday moves',
+          publisher: 'BC Lions (bclions.com)',
+          url: 'https://www.bclions.com/2026/04/27/lions-sign-american-trio-release-five-as-part-of-monday-moves/',
+          published: '2026-04-27',
         },
-        "note": "BC Lions listed size. Sources disagree: BC Lions list 6'3\" (75 in); Wikipedia and most draft and combine sources list 6'2\" (74 in). Shown as ESTIMATED until they agree.",
-        "confirmedBy": {
-          "title": "David Gusta",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/David_Gusta"
-        }
+        note: 'BC Lions listed size. Sources disagree: BC Lions list 6\'3" (75 in); Wikipedia and most draft and combine sources list 6\'2" (74 in). Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'David Gusta',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/David_Gusta',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 316.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-04",
-        "category": "bio",
-        "context": "BC Lions listed size",
-        "source": {
-          "title": "Lions sign American trio, release five as part of Monday moves",
-          "publisher": "BC Lions (bclions.com)",
-          "url": "https://www.bclions.com/2026/04/27/lions-sign-american-trio-release-five-as-part-of-monday-moves/",
-          "published": "2026-04-27"
+        metric: 'weightLb',
+        value: 316,
+        quality: 'ESTIMATED',
+        asOf: '2026-04',
+        category: 'bio',
+        context: 'BC Lions listed size',
+        source: {
+          title: 'Lions sign American trio, release five as part of Monday moves',
+          publisher: 'BC Lions (bclions.com)',
+          url: 'https://www.bclions.com/2026/04/27/lions-sign-american-trio-release-five-as-part-of-monday-moves/',
+          published: '2026-04-27',
         },
-        "note": "BC Lions listed size. Sources disagree: BC Lions list 316 lb; Wikipedia and most draft and combine sources list 308 lb. Shown as ESTIMATED until they agree.",
-        "confirmedBy": {
-          "title": "David Gusta",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/David_Gusta"
-        }
-      }
-    ]
+        note: 'BC Lions listed size. Sources disagree: BC Lions list 316 lb; Wikipedia and most draft and combine sources list 308 lb. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'David Gusta',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/David_Gusta',
+        },
+      },
+    ],
   },
   {
-    "id": "riq-woolen",
-    "name": "Riq Woolen",
-    "league": "NFL",
-    "position": "CB",
-    "team": "Philadelphia Eagles",
-    "status": "active",
-    "facts": [
+    id: 'riq-woolen',
+    name: 'Riq Woolen',
+    league: 'NFL',
+    position: 'CB',
+    team: 'Philadelphia Eagles',
+    status: 'active',
+    facts: [
       {
-        "metric": "fortyS",
-        "value": 4.26,
-        "quality": "VERIFIED",
-        "asOf": "2022",
-        "category": "hidden",
-        "context": "2022 NFL Scouting Combine",
-        "source": {
-          "title": "Kalon Barnes runs second-fastest 40-yard dash in NFL Scouting Combine history, Tariq Woolen ties fourth-fastest ever",
-          "publisher": "ESPN",
-          "url": "https://www.espn.com/nfl/story/_/id/33440208/kalon-barnes-runs-second-fastest-40-yard-dash-nfl-scouting-combine-history-tariq-woolen-ties-fourth-fastest-ever"
+        metric: 'fortyS',
+        value: 4.26,
+        quality: 'VERIFIED',
+        asOf: '2022',
+        category: 'hidden',
+        context: '2022 NFL Scouting Combine',
+        source: {
+          title: 'Kalon Barnes runs second-fastest 40-yard dash in NFL Scouting Combine history, Tariq Woolen ties fourth-fastest ever',
+          publisher: 'ESPN',
+          url: 'https://www.espn.com/nfl/story/_/id/33440208/kalon-barnes-runs-second-fastest-40-yard-dash-nfl-scouting-combine-history-tariq-woolen-ties-fourth-fastest-ever',
         },
-        "note": "2022 NFL Scouting Combine. Reported by ESPN and confirmed by CBS Sports.",
-        "confirmedBy": {
-          "title": "2022 NFL Scouting Combine: Kalon Barnes runs second-fastest 40-yard dash time in history of event",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nfl/news/2022-nfl-scouting-combine-kalon-barnes-runs-second-fastest-40-yard-dash-time-in-history-of-event"
-        }
+        note: '2022 NFL Scouting Combine. Reported by ESPN and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2022 NFL Scouting Combine: Kalon Barnes runs second-fastest 40-yard dash time in history of event',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/news/2022-nfl-scouting-combine-kalon-barnes-runs-second-fastest-40-yard-dash-time-in-history-of-event',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 76.125,
-        "quality": "VERIFIED",
-        "asOf": "2022",
-        "category": "bio",
-        "context": "Pre-draft measurables (NFL Combine)",
-        "source": {
-          "title": "Riq Woolen",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Riq_Woolen"
+        metric: 'heightIn',
+        value: 76.125,
+        quality: 'VERIFIED',
+        asOf: '2022',
+        category: 'bio',
+        context: 'Pre-draft measurables (NFL Combine)',
+        source: {
+          title: 'Riq Woolen',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Riq_Woolen',
         },
-        "note": "Pre-draft measurables (NFL Combine). Reported by Wikipedia and confirmed by PlayerProfiler.",
-        "confirmedBy": {
-          "title": "Riq Woolen (PlayerProfiler)",
-          "publisher": "PlayerProfiler",
-          "url": "https://www.playerprofiler.com/?p=125210"
-        }
+        note: 'Pre-draft measurables (NFL Combine). Reported by Wikipedia and confirmed by PlayerProfiler.',
+        confirmedBy: {
+          title: 'Riq Woolen (PlayerProfiler)',
+          publisher: 'PlayerProfiler',
+          url: 'https://www.playerprofiler.com/?p=125210',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 205.0,
-        "quality": "VERIFIED",
-        "asOf": "2022",
-        "category": "bio",
-        "context": "Pre-draft measurables (NFL Combine)",
-        "source": {
-          "title": "Riq Woolen",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Riq_Woolen"
+        metric: 'weightLb',
+        value: 205,
+        quality: 'VERIFIED',
+        asOf: '2022',
+        category: 'bio',
+        context: 'Pre-draft measurables (NFL Combine)',
+        source: {
+          title: 'Riq Woolen',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Riq_Woolen',
         },
-        "note": "Pre-draft measurables (NFL Combine). Reported by Wikipedia and confirmed by PlayerProfiler.",
-        "confirmedBy": {
-          "title": "Riq Woolen (PlayerProfiler)",
-          "publisher": "PlayerProfiler",
-          "url": "https://www.playerprofiler.com/?p=125210"
-        }
+        note: 'Pre-draft measurables (NFL Combine). Reported by Wikipedia and confirmed by PlayerProfiler.',
+        confirmedBy: {
+          title: 'Riq Woolen (PlayerProfiler)',
+          publisher: 'PlayerProfiler',
+          url: 'https://www.playerprofiler.com/?p=125210',
+        },
       },
       {
-        "metric": "armLengthIn",
-        "value": 33.625,
-        "quality": "VERIFIED",
-        "asOf": "2022",
-        "category": "build",
-        "context": "Pre-draft measurement",
-        "source": {
-          "title": "Tariq Woolen NFL Draft cornerback Texas-San Antonio",
-          "publisher": "Seahawks.com",
-          "url": "https://seahawks.com/news/tariq-woolen-nfl-draft-cornerback-texas-san-antonio"
+        metric: 'armLengthIn',
+        value: 33.625,
+        quality: 'VERIFIED',
+        asOf: '2022',
+        category: 'build',
+        context: 'Pre-draft measurement',
+        source: {
+          title: 'Tariq Woolen NFL Draft cornerback Texas-San Antonio',
+          publisher: 'Seahawks.com',
+          url: 'https://seahawks.com/news/tariq-woolen-nfl-draft-cornerback-texas-san-antonio',
         },
-        "note": "Pre-draft measurement. Reported by Seahawks.com and confirmed by Wikipedia.",
-        "confirmedBy": {
-          "title": "Riq Woolen",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Riq_Woolen"
-        }
+        note: 'Pre-draft measurement. Reported by Seahawks.com and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Riq Woolen',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Riq_Woolen',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 153.0,
-        "quality": "VERIFIED",
-        "asOf": "2022-04-30",
-        "category": "hidden",
-        "context": "2022 NFL Draft, Round 5",
-        "source": {
-          "title": "Seahawks select Tariq Woolen with No. 153 pick in 2022 draft",
-          "publisher": "NFL.com",
-          "url": "https://nfl.com/videos/seahawks-select-tariq-woolen-with-no-153-pick-in-2022-draft"
+        metric: 'draftPick',
+        value: 153,
+        quality: 'VERIFIED',
+        asOf: '2022-04-30',
+        category: 'hidden',
+        context: '2022 NFL Draft, Round 5',
+        source: {
+          title: 'Seahawks select Tariq Woolen with No. 153 pick in 2022 draft',
+          publisher: 'NFL.com',
+          url: 'https://nfl.com/videos/seahawks-select-tariq-woolen-with-no-153-pick-in-2022-draft',
         },
-        "note": "2022 NFL Draft, Round 5. Reported by NFL.com and confirmed by MyNorthwest (KIRO).",
-        "confirmedBy": {
-          "title": "Seahawks draft long, speedy UTSA CB Tariq Woolen in 5th round",
-          "publisher": "MyNorthwest (KIRO)",
-          "url": "https://sports.mynorthwest.com/nfl/seattle-seahawks/seahawks-draft-long-speedy-utsa-cb-tariq-woolen-in-5th-round"
-        }
-      }
-    ]
+        note: '2022 NFL Draft, Round 5. Reported by NFL.com and confirmed by MyNorthwest (KIRO).',
+        confirmedBy: {
+          title: 'Seahawks draft long, speedy UTSA CB Tariq Woolen in 5th round',
+          publisher: 'MyNorthwest (KIRO)',
+          url: 'https://sports.mynorthwest.com/nfl/seattle-seahawks/seahawks-draft-long-speedy-utsa-cb-tariq-woolen-in-5th-round',
+        },
+      },
+    ],
   },
   {
-    "id": "dk-metcalf",
-    "name": "DK Metcalf",
-    "league": "NFL",
-    "position": "WR",
-    "team": "Pittsburgh Steelers",
-    "status": "active",
-    "facts": [
+    id: 'dk-metcalf',
+    name: 'DK Metcalf',
+    league: 'NFL',
+    position: 'WR',
+    team: 'Pittsburgh Steelers',
+    status: 'active',
+    facts: [
       {
-        "metric": "fortyS",
-        "value": 4.33,
-        "quality": "VERIFIED",
-        "asOf": "2019",
-        "category": "build",
-        "context": "2019 NFL Scouting Combine",
-        "source": {
-          "title": "2019 NFL combine: D.K. Metcalf runs 40-yard dash in 4.33 seconds as Twitter reacts in awe",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nfl/draft/news/2019-nfl-combine-d-k-metcalf-runs-40-yard-dash-in-4-33-seconds-as-twitter-reacts-in-awe"
+        metric: 'fortyS',
+        value: 4.33,
+        quality: 'VERIFIED',
+        asOf: '2019',
+        category: 'build',
+        context: '2019 NFL Scouting Combine',
+        source: {
+          title: '2019 NFL combine: D.K. Metcalf runs 40-yard dash in 4.33 seconds as Twitter reacts in awe',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/draft/news/2019-nfl-combine-d-k-metcalf-runs-40-yard-dash-in-4-33-seconds-as-twitter-reacts-in-awe',
         },
-        "note": "2019 NFL Scouting Combine. Reported by CBS Sports and confirmed by Rivals (Ole Miss).",
-        "confirmedBy": {
-          "title": "Twitter talk: D.K. Metcalf continues NFL Combine tear with 4.33 40 time",
-          "publisher": "Rivals (Ole Miss)",
-          "url": "https://olemiss.rivals.com/news/twitter-talk-d-k-metcalf-continues-nfl-combine-tear-with-4-33-40-time"
-        }
+        note: '2019 NFL Scouting Combine. Reported by CBS Sports and confirmed by Rivals (Ole Miss).',
+        confirmedBy: {
+          title: 'Twitter talk: D.K. Metcalf continues NFL Combine tear with 4.33 40 time',
+          publisher: 'Rivals (Ole Miss)',
+          url: 'https://olemiss.rivals.com/news/twitter-talk-d-k-metcalf-continues-nfl-combine-tear-with-4-33-40-time',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 75.375,
-        "quality": "ESTIMATED",
-        "asOf": "2019",
-        "category": "bio",
-        "context": "2019 NFL Combine measurement",
-        "source": {
-          "title": "D.K. Metcalf Measures Off the Charts, But Will He Fit into the NFL?",
-          "publisher": "Sports Illustrated",
-          "url": "https://www.si.com/nfl/2019/04/17/nfl-draft-2019-dk-metcalf-wide-receiver-mississippi",
-          "published": "2019-04-17"
+        metric: 'heightIn',
+        value: 75.375,
+        quality: 'VERIFIED',
+        asOf: '2019',
+        category: 'bio',
+        context: '2019 NFL Combine measurement',
+        source: {
+          title: 'D.K. Metcalf Measures Off the Charts, But Will He Fit into the NFL?',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/nfl/2019/04/17/nfl-draft-2019-dk-metcalf-wide-receiver-mississippi',
+          published: '2019-04-17',
         },
-        "note": "2019 NFL Combine measurement. Reported by Sports Illustrated; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2019 NFL Combine measurement. Reported by Sports Illustrated and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'DK Metcalf (pre-draft measurables table)',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/DK_Metcalf',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 228.0,
-        "quality": "VERIFIED",
-        "asOf": "2019",
-        "category": "bio",
-        "context": "2019 NFL Combine measurement",
-        "source": {
-          "title": "D.K. Metcalf Measures Off the Charts, But Will He Fit into the NFL?",
-          "publisher": "Sports Illustrated",
-          "url": "https://www.si.com/nfl/2019/04/17/nfl-draft-2019-dk-metcalf-wide-receiver-mississippi",
-          "published": "2019-04-17"
+        metric: 'weightLb',
+        value: 228,
+        quality: 'VERIFIED',
+        asOf: '2019',
+        category: 'bio',
+        context: '2019 NFL Combine measurement',
+        source: {
+          title: 'D.K. Metcalf Measures Off the Charts, But Will He Fit into the NFL?',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/nfl/2019/04/17/nfl-draft-2019-dk-metcalf-wide-receiver-mississippi',
+          published: '2019-04-17',
         },
-        "note": "2019 NFL Combine measurement. Reported by Sports Illustrated and confirmed by CBS Sports.",
-        "confirmedBy": {
-          "title": "2019 NFL combine results: D.K. Metcalf steals the show, Drew Lock and Noah Fant shine at workouts",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nfl/draft/news/2019-nfl-combine-results-d-k-metcalf-steals-the-show-drew-lock-and-noah-fant-shine-at-workouts"
-        }
+        note: '2019 NFL Combine measurement. Reported by Sports Illustrated and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2019 NFL combine results: D.K. Metcalf steals the show, Drew Lock and Noah Fant shine at workouts',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/draft/news/2019-nfl-combine-results-d-k-metcalf-steals-the-show-drew-lock-and-noah-fant-shine-at-workouts',
+        },
       },
       {
-        "metric": "benchReps225",
-        "value": 27.0,
-        "quality": "VERIFIED",
-        "asOf": "2019",
-        "category": "strongest",
-        "context": "2019 NFL Scouting Combine",
-        "source": {
-          "title": "ASU's Jordyn Tyson nearly breaks NFL Draft Combine record, Max Iheanachor shows off speed",
-          "publisher": "Arizona Sports",
-          "url": "https://arizonasports.com/?p=3613199"
+        metric: 'benchReps225',
+        value: 27,
+        quality: 'VERIFIED',
+        asOf: '2019',
+        category: 'strongest',
+        context: '2019 NFL Scouting Combine',
+        source: {
+          title: 'ASU\'s Jordyn Tyson nearly breaks NFL Draft Combine record, Max Iheanachor shows off speed',
+          publisher: 'Arizona Sports',
+          url: 'https://arizonasports.com/?p=3613199',
         },
-        "note": "2019 NFL Scouting Combine. Reported by Arizona Sports and confirmed by CBS Sports.",
-        "confirmedBy": {
-          "title": "2019 NFL combine results: D.K. Metcalf steals the show, Drew Lock and Noah Fant shine at workouts",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nfl/draft/news/2019-nfl-combine-results-d-k-metcalf-steals-the-show-drew-lock-and-noah-fant-shine-at-workouts"
-        }
-      }
-    ]
+        note: '2019 NFL Scouting Combine. Reported by Arizona Sports and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2019 NFL combine results: D.K. Metcalf steals the show, Drew Lock and Noah Fant shine at workouts',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/draft/news/2019-nfl-combine-results-d-k-metcalf-steals-the-show-drew-lock-and-noah-fant-shine-at-workouts',
+        },
+      },
+    ],
   },
   {
-    "id": "tyreek-hill",
-    "name": "Tyreek Hill",
-    "league": "NFL",
-    "position": "WR",
-    "team": "Free agent",
-    "status": "free-agent",
-    "facts": [
+    id: 'tyreek-hill',
+    name: 'Tyreek Hill',
+    league: 'NFL',
+    position: 'WR',
+    team: 'Free agent',
+    status: 'free-agent',
+    facts: [
       {
-        "metric": "topSpeedMph",
-        "value": 23.24,
-        "quality": "ESTIMATED",
-        "asOf": "2016",
-        "category": "fastest",
-        "context": "2016 regular season kickoff return vs. Houston Texans, NFL Next Gen Stats",
-        "source": {
-          "title": "Fastest NFL Players in the Next Gen Stats Era",
-          "publisher": "NBC Washington (NBC Sports)",
-          "url": "https://www.nbcwashington.com/news/sports/fastest-nfl-players-in-2021-2020-and-the-next-gen-stats-era/"
+        metric: 'topSpeedMph',
+        value: 23.24,
+        quality: 'VERIFIED',
+        asOf: '2016',
+        category: 'fastest',
+        context: '2016 regular season kickoff return vs. Houston Texans, NFL Next Gen Stats',
+        source: {
+          title: 'Fastest NFL Players in the Next Gen Stats Era',
+          publisher: 'NBC Washington (NBC Sports)',
+          url: 'https://www.nbcwashington.com/news/sports/fastest-nfl-players-in-2021-2020-and-the-next-gen-stats-era/',
         },
-        "note": "2016 regular season kickoff return vs. Houston Texans, NFL Next Gen Stats. Reported by NBC Washington (NBC Sports); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NBC Washington (NBC Sports)'s own and was not independently checked.",
-        "rank": "Hill and Mostert are the only players to exceed 23 mph with the football in their hands since Next Gen Stats started tracking speed"
-      }
-    ]
+        note: '2016 regular season kickoff return vs. Houston Texans, NFL Next Gen Stats. Reported by NBC Washington (NBC Sports) and confirmed by Fox News / Fox Sports.',
+        confirmedBy: {
+          title: 'Who are the 10 fastest players in the NFL Next Gen Stats era?',
+          publisher: 'Fox News / Fox Sports',
+          url: 'https://www.foxnews.com/sports/who-10-fastest-players-nfl-next-gen-stats-era.amp',
+        },
+        rank: 'Hill and Mostert are the only players to exceed 23 mph with the football in their hands since Next Gen Stats started tracking speed',
+      },
+    ],
   },
   {
-    "id": "kavontae-turpin",
-    "name": "KaVontae Turpin",
-    "league": "NFL",
-    "position": "WR/KR",
-    "team": "Dallas Cowboys",
-    "status": "active",
-    "facts": [
+    id: 'kavontae-turpin',
+    name: 'KaVontae Turpin',
+    league: 'NFL',
+    position: 'WR/KR',
+    team: 'Dallas Cowboys',
+    status: 'active',
+    facts: [
       {
-        "metric": "topSpeedMph",
-        "value": 22.36,
-        "quality": "ESTIMATED",
-        "asOf": "2024",
-        "category": "fastest",
-        "context": "2024 regular season Week 11, 64-yard TD vs. Houston Texans, NFL Next Gen Stats",
-        "source": {
-          "title": "Cowboys' KaVontae Turpin Becomes 2024's Fastest Ball Carrier on TD vs. Texans",
-          "publisher": "Sports Illustrated",
-          "url": "https://www.si.com/nfl/cowboys-kavontae-turpin-becomes-fastest-ball-carrier-of-the-season-on-td-vs-texans"
+        metric: 'topSpeedMph',
+        value: 22.36,
+        quality: 'VERIFIED',
+        asOf: '2024',
+        category: 'fastest',
+        context: '2024 regular season Week 11, 64-yard TD vs. Houston Texans, NFL Next Gen Stats',
+        source: {
+          title: 'Cowboys\' KaVontae Turpin Becomes 2024\'s Fastest Ball Carrier on TD vs. Texans',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/nfl/cowboys-kavontae-turpin-becomes-fastest-ball-carrier-of-the-season-on-td-vs-texans',
         },
-        "note": "2024 regular season Week 11, 64-yard TD vs. Houston Texans, NFL Next Gen Stats. Reported by Sports Illustrated; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Sports Illustrated's own and was not independently checked.",
-        "rank": "both the fastest this season and the fastest by a ball-carrier since 2020"
-      }
-    ]
+        note: '2024 regular season Week 11, 64-yard TD vs. Houston Texans, NFL Next Gen Stats. Reported by Sports Illustrated and confirmed by NFL.com.',
+        confirmedBy: {
+          title: 'Can\'t-Miss Play: 64-yard TD! Turpin reaches 22.36 mph on score vs. Texans',
+          publisher: 'NFL.com',
+          url: 'https://amp.nfl.com/videos/can-t-miss-play-64-yard-td-turpin-reaches-22-36-mph-on-score-vs-texans',
+        },
+        rank: 'both the fastest this season and the fastest by a ball-carrier since 2020',
+      },
+    ],
   },
   {
-    "id": "jonathan-taylor",
-    "name": "Jonathan Taylor",
-    "league": "NFL",
-    "position": "RB",
-    "team": "Indianapolis Colts",
-    "status": "active",
-    "facts": [
+    id: 'jonathan-taylor',
+    name: 'Jonathan Taylor',
+    league: 'NFL',
+    position: 'RB',
+    team: 'Indianapolis Colts',
+    status: 'active',
+    facts: [
       {
-        "metric": "topSpeedMph",
-        "value": 22.38,
-        "quality": "ESTIMATED",
-        "asOf": "2025",
-        "category": "fastest",
-        "context": "2025 regular season Week 2, NFL Next Gen Stats (reported after Week 10)",
-        "source": {
-          "title": "NFL Week 10 Next Gen Stars: Colts' Jonathan Taylor, Patriots rookies",
-          "publisher": "ESPN",
-          "url": "https://africa.espn.com/nfl/story/_/id/46919345/nfl-week-10-next-gen-stars-colts-jonathan-taylor-patriots-rookies"
+        metric: 'topSpeedMph',
+        value: 22.38,
+        quality: 'VERIFIED',
+        asOf: '2025',
+        category: 'fastest',
+        context: '2025 regular season Week 2, NFL Next Gen Stats (reported after Week 10)',
+        source: {
+          title: 'NFL Week 10 Next Gen Stars: Colts\' Jonathan Taylor, Patriots rookies',
+          publisher: 'ESPN',
+          url: 'https://africa.espn.com/nfl/story/_/id/46919345/nfl-week-10-next-gen-stars-colts-jonathan-taylor-patriots-rookies',
         },
-        "note": "2025 regular season Week 2, NFL Next Gen Stats (reported after Week 10). Reported by ESPN; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is ESPN's own and was not independently checked.",
-        "rank": "the fastest time of the season (as of Week 10, 2025)"
-      }
-    ]
+        note: '2025 regular season Week 2, NFL Next Gen Stats (reported after Week 10). Reported by ESPN and confirmed by Sports Illustrated.',
+        confirmedBy: {
+          title: 'WATCH: Jonathan Taylor\'s dominant Week 2 for Colts looked just like vintage Wisconsin Badgers running back',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/college/wisconsin/badgers-in-the-nfl/watch-jonathan-taylor-dominant-week-2-colts-vintage-running-back-highlights',
+        },
+        rank: 'the fastest time of the season (as of Week 10, 2025)',
+      },
+    ],
   },
   {
-    "id": "ashton-jeanty",
-    "name": "Ashton Jeanty",
-    "league": "NFL",
-    "position": "RB",
-    "team": "Las Vegas Raiders",
-    "status": "active",
-    "facts": [
+    id: 'ashton-jeanty',
+    name: 'Ashton Jeanty',
+    league: 'NFL',
+    position: 'RB',
+    team: 'Las Vegas Raiders',
+    status: 'active',
+    facts: [
       {
-        "metric": "yardsAfterContact",
-        "value": 863.0,
-        "quality": "ESTIMATED",
-        "asOf": "2025",
-        "category": "rising",
-        "context": "2025 regular season, NFL Next Gen Stats",
-        "source": {
-          "title": "By the Numbers: A look at Raiders' top performers from 2025 season",
-          "publisher": "Raiders.com",
-          "url": "https://www.raiders.com/news/by-the-numbers-a-look-at-raiders-top-performers-from-2025-season"
+        metric: 'yardsAfterContact',
+        value: 863,
+        quality: 'VERIFIED',
+        asOf: '2025',
+        category: 'rising',
+        context: '2025 regular season, NFL Next Gen Stats',
+        source: {
+          title: 'By the Numbers: A look at Raiders\' top performers from 2025 season',
+          publisher: 'Raiders.com',
+          url: 'https://www.raiders.com/news/by-the-numbers-a-look-at-raiders-top-performers-from-2025-season',
         },
-        "note": "2025 regular season, NFL Next Gen Stats. Reported by Raiders.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Raiders.com's own and was not independently checked.",
-        "rank": "ranked top 10 across the league among rushers in missed tackles forced (71) and yards after contact (863)"
+        note: '2025 regular season, NFL Next Gen Stats. Reported by Raiders.com and confirmed by NFL.com.',
+        confirmedBy: {
+          title: 'Raiders GM: Ashton Jeanty rookie season, \'10 other people out there with him\'',
+          publisher: 'NFL.com',
+          url: 'https://amp.nfl.com/news/raiders-gm-ashton-jeanty-rookie-season-10-other-people-out-there-with-him',
+        },
       },
       {
-        "metric": "rushYards",
-        "value": 975.0,
-        "quality": "ESTIMATED",
-        "asOf": "2025",
-        "category": "rising",
-        "context": "2025 regular season (rookie)",
-        "source": {
-          "title": "Raiders' 2025 season stat leaders",
-          "publisher": "Raiders.com",
-          "url": "https://www.raiders.com/news/raiders-2025-season-stat-leaders-maxx-crosby-ashton-jeanty-brock-bowers"
+        metric: 'rushYards',
+        value: 975,
+        quality: 'VERIFIED',
+        asOf: '2025',
+        category: 'rising',
+        context: '2025 regular season (rookie)',
+        source: {
+          title: 'Raiders\' 2025 season stat leaders',
+          publisher: 'Raiders.com',
+          url: 'https://www.raiders.com/news/raiders-2025-season-stat-leaders-maxx-crosby-ashton-jeanty-brock-bowers',
         },
-        "note": "2025 regular season (rookie). Reported by Raiders.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2025 regular season (rookie). Reported by Raiders.com and confirmed by NFL.com.',
+        confirmedBy: {
+          title: 'Raiders GM: Ashton Jeanty rookie season, \'10 other people out there with him\'',
+          publisher: 'NFL.com',
+          url: 'https://amp.nfl.com/news/raiders-gm-ashton-jeanty-rookie-season-10-other-people-out-there-with-him',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 6.0,
-        "quality": "ESTIMATED",
-        "asOf": "2025-04",
-        "category": "bio",
-        "context": "2025 NFL Draft, Round 1",
-        "source": {
-          "title": "2025 NFL Draft: Raiders select Boise State RB Ashton Jeanty with No. 6 overall pick",
-          "publisher": "NFL.com",
-          "url": "https://amp.nfl.com/news/2025-nfl-draft-raiders-select-boise-state-rb-ashton-jeanty-with-no-6-overall-pick"
+        metric: 'draftPick',
+        value: 6,
+        quality: 'VERIFIED',
+        asOf: '2025-04',
+        category: 'bio',
+        context: '2025 NFL Draft, Round 1',
+        source: {
+          title: '2025 NFL Draft: Raiders select Boise State RB Ashton Jeanty with No. 6 overall pick',
+          publisher: 'NFL.com',
+          url: 'https://amp.nfl.com/news/2025-nfl-draft-raiders-select-boise-state-rb-ashton-jeanty-with-no-6-overall-pick',
         },
-        "note": "2025 NFL Draft, Round 1. Reported by NFL.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NFL.com's own and was not independently checked.",
-        "rank": "the highest a running back had been drafted since Saquon Barkley went No. 2 in 2018"
-      }
-    ]
+        note: '2025 NFL Draft, Round 1. Reported by NFL.com and confirmed by Associated Press via WIS-TV.',
+        confirmedBy: {
+          title: 'Las Vegas Raiders pick Boise State running back Ashton Jeanty at No. 6 overall (AP)',
+          publisher: 'Associated Press via WIS-TV',
+          url: 'https://www.wistv.com/2025/04/25/las-vegas-raiders-pick-boise-state-running-back-ashton-jeanty-no-6-overall/',
+        },
+        rank: 'the highest a running back had been drafted since Saquon Barkley went No. 2 in 2018',
+      },
+    ],
   },
   {
-    "id": "byron-jones",
-    "name": "Byron Jones",
-    "league": "NFL",
-    "position": "CB",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2010s-2020s",
-    "facts": [
+    id: 'byron-jones',
+    name: 'Byron Jones',
+    league: 'NFL',
+    position: 'CB',
+    team: 'Retired',
+    status: 'legend',
+    era: '2010s-2020s',
+    facts: [
       {
-        "metric": "broadJumpIn",
-        "value": 147.0,
-        "quality": "ESTIMATED",
-        "asOf": "2015",
-        "category": "explosive",
-        "context": "2015 NFL Scouting Combine (12 feet 3 inches)",
-        "source": {
-          "title": "12 Feet: A Soaring New Broad Jump Record Is Set At NFL Combine",
-          "publisher": "NPR",
-          "url": "https://www.npr.org/sections/thetwo-way/2015/02/23/388461378/a-soaring-new-broad-jump-record-is-set-at-nfl-combine",
-          "published": "2015-02-23"
+        metric: 'broadJumpIn',
+        value: 147,
+        quality: 'VERIFIED',
+        asOf: '2015',
+        category: 'explosive',
+        context: '2015 NFL Scouting Combine (12 feet 3 inches)',
+        source: {
+          title: '12 Feet: A Soaring New Broad Jump Record Is Set At NFL Combine',
+          publisher: 'NPR',
+          url: 'https://www.npr.org/sections/thetwo-way/2015/02/23/388461378/a-soaring-new-broad-jump-record-is-set-at-nfl-combine',
+          published: '2015-02-23',
         },
-        "note": "2015 NFL Scouting Combine (12 feet 3 inches). Reported by NPR; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NPR's own and was not independently checked.",
-        "rank": "NFL record"
+        note: '2015 NFL Scouting Combine (12 feet 3 inches). Reported by NPR and confirmed by NFL.com.',
+        confirmedBy: {
+          title: 'UConn\'s Byron Jones breaks combine, world broad jump marks',
+          publisher: 'NFL.com',
+          url: 'https://nfl.com/news/uconn-s-byron-jones-breaks-combine-world-broad-jump-marks-0ap3000000473522',
+        },
+        rank: 'NFL record',
       },
       {
-        "metric": "maxVerticalIn",
-        "value": 44.5,
-        "quality": "ESTIMATED",
-        "asOf": "2015",
-        "category": "explosive",
-        "context": "2015 NFL Scouting Combine",
-        "source": {
-          "title": "12 Feet: A Soaring New Broad Jump Record Is Set At NFL Combine",
-          "publisher": "NPR",
-          "url": "https://www.npr.org/sections/thetwo-way/2015/02/23/388461378/a-soaring-new-broad-jump-record-is-set-at-nfl-combine",
-          "published": "2015-02-23"
+        metric: 'maxVerticalIn',
+        value: 44.5,
+        quality: 'VERIFIED',
+        asOf: '2015',
+        category: 'explosive',
+        context: '2015 NFL Scouting Combine',
+        source: {
+          title: '12 Feet: A Soaring New Broad Jump Record Is Set At NFL Combine',
+          publisher: 'NPR',
+          url: 'https://www.npr.org/sections/thetwo-way/2015/02/23/388461378/a-soaring-new-broad-jump-record-is-set-at-nfl-combine',
+          published: '2015-02-23',
         },
-        "note": "2015 NFL Scouting Combine. Reported by NPR; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NPR's own and was not independently checked.",
-        "rank": "nearly set a vertical jump record"
+        note: '2015 NFL Scouting Combine. Reported by NPR and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: 'How Byron Jones set a broad jump world record at the NFL Combine',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/news/how-byron-jones-set-a-broad-jump-world-record-at-the-nfl-combine',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 27.0,
-        "quality": "ESTIMATED",
-        "asOf": "2015-04-30",
-        "category": "bio",
-        "context": "2015 NFL Draft, Round 1",
-        "source": {
-          "title": "Byron Jones Selected In First Round of NFL Draft",
-          "publisher": "UConn Athletics",
-          "url": "https://uconnhuskies.com/news/2015/4/30/Byron_Jones_Selected_In_First_Round_of_NFL_Draft",
-          "published": "2015-04-30"
+        metric: 'draftPick',
+        value: 27,
+        quality: 'VERIFIED',
+        asOf: '2015-04-30',
+        category: 'bio',
+        context: '2015 NFL Draft, Round 1',
+        source: {
+          title: 'Byron Jones Selected In First Round of NFL Draft',
+          publisher: 'UConn Athletics',
+          url: 'https://uconnhuskies.com/news/2015/4/30/Byron_Jones_Selected_In_First_Round_of_NFL_Draft',
+          published: '2015-04-30',
         },
-        "note": "2015 NFL Draft, Round 1. Reported by UConn Athletics; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2015 NFL Draft, Round 1. Reported by UConn Athletics and confirmed by NFL.com.',
+        confirmedBy: {
+          title: 'Dallas Cowboys draft combine wonder Byron Jones',
+          publisher: 'NFL.com',
+          url: 'https://nfl.com/news/dallas-cowboys-draft-combine-wonder-byron-jones-0ap3000000489471',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 73.0,
-        "quality": "ESTIMATED",
-        "asOf": "2022",
-        "category": "bio",
-        "context": "Listed playing size (not combine-measured)",
-        "source": {
-          "title": "Byron Jones (American football)",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Byron_Jones_(American_football)"
+        metric: 'heightIn',
+        value: 73,
+        quality: 'VERIFIED',
+        asOf: '2022',
+        category: 'bio',
+        context: 'Listed playing size (not combine-measured)',
+        source: {
+          title: 'Byron Jones (American football)',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Byron_Jones_(American_football)',
         },
-        "note": "Listed playing size (not combine-measured). Reported by Wikipedia; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: 'Listed playing size (not combine-measured). Reported by Wikipedia and confirmed by NFL.com.',
+        confirmedBy: {
+          title: 'Dallas Cowboys draft combine wonder Byron Jones',
+          publisher: 'NFL.com',
+          url: 'https://nfl.com/news/dallas-cowboys-draft-combine-wonder-byron-jones-0ap3000000489471',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 194.0,
-        "quality": "ESTIMATED",
-        "asOf": "2022",
-        "category": "bio",
-        "context": "Listed playing size (not combine-measured)",
-        "source": {
-          "title": "Byron Jones (American football)",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Byron_Jones_(American_football)"
+        metric: 'weightLb',
+        value: 194,
+        quality: 'ESTIMATED',
+        asOf: '2022',
+        category: 'bio',
+        context: 'Listed playing size (not combine-measured)',
+        source: {
+          title: 'Byron Jones (American football)',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Byron_Jones_(American_football)',
         },
-        "note": "Listed playing size (not combine-measured). Reported by Wikipedia; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: 'Listed playing size (not combine-measured). Sources disagree: 199 lb (NFL.com and NBC DFW, 2015 draft measurement); 196 lb (another sports site). Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Dallas Cowboys draft combine wonder Byron Jones',
+          publisher: 'NFL.com',
+          url: 'https://nfl.com/news/dallas-cowboys-draft-combine-wonder-byron-jones-0ap3000000489471',
+        },
+      },
+    ],
   },
   {
-    "id": "gerald-sensabaugh",
-    "name": "Gerald Sensabaugh",
-    "league": "NFL",
-    "position": "S",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2000s-2010s",
-    "facts": [
+    id: 'gerald-sensabaugh',
+    name: 'Gerald Sensabaugh',
+    league: 'NFL',
+    position: 'S',
+    team: 'Retired',
+    status: 'legend',
+    era: '2000s-2010s',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 46.0,
-        "quality": "ESTIMATED",
-        "asOf": "2005",
-        "category": "explosive",
-        "context": "2005 NFL Scouting Combine",
-        "source": {
-          "title": "Top 5 players with highest vertical jump recorded at NFL Combine ft. Gerald Sensabaugh",
-          "publisher": "Sportskeeda",
-          "url": "https://www.sportskeeda.com/nfl/top-5-players-highest-vertical-jump-recorded-nfl-combine-ft-gerald-sensabaugh"
+        metric: 'maxVerticalIn',
+        value: 46,
+        quality: 'VERIFIED',
+        asOf: '2005',
+        category: 'explosive',
+        context: '2005 NFL Scouting Combine',
+        source: {
+          title: 'Top 5 players with highest vertical jump recorded at NFL Combine ft. Gerald Sensabaugh',
+          publisher: 'Sportskeeda',
+          url: 'https://www.sportskeeda.com/nfl/top-5-players-highest-vertical-jump-recorded-nfl-combine-ft-gerald-sensabaugh',
         },
-        "note": "2005 NFL Scouting Combine. Reported by Sportskeeda; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Sportskeeda's own and was not independently checked.",
-        "rank": "the highest vertical jump test in the history of the event"
+        note: '2005 NFL Scouting Combine. Reported by Sportskeeda and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: 'NFL Combine: Best bench press and vertical jumps in Combine history, where top performing players landed',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/news/nfl-combine-best-bench-press-and-vertical-jumps-in-combine-history-where-top-performing-players-landed',
+        },
+        rank: 'the highest vertical jump test in the history of the event',
       },
       {
-        "metric": "heightIn",
-        "value": 73.0,
-        "quality": "ESTIMATED",
-        "asOf": "2005",
-        "category": "bio",
-        "context": "2005 NFL Combine",
-        "source": {
-          "title": "Top 5 players with highest vertical jump recorded at NFL Combine ft. Gerald Sensabaugh",
-          "publisher": "Sportskeeda",
-          "url": "https://www.sportskeeda.com/nfl/top-5-players-highest-vertical-jump-recorded-nfl-combine-ft-gerald-sensabaugh"
+        metric: 'heightIn',
+        value: 73,
+        quality: 'ESTIMATED',
+        asOf: '2005',
+        category: 'bio',
+        context: '2005 NFL Combine',
+        source: {
+          title: 'Top 5 players with highest vertical jump recorded at NFL Combine ft. Gerald Sensabaugh',
+          publisher: 'Sportskeeda',
+          url: 'https://www.sportskeeda.com/nfl/top-5-players-highest-vertical-jump-recorded-nfl-combine-ft-gerald-sensabaugh',
         },
-        "note": "2005 NFL Combine. Reported by Sportskeeda; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2005 NFL Combine. Sources disagree: 72.5 in (6-0 1/2) in American Football Database\'s combine table; Wikipedia gives 6-1 (73) but as listed height, not the combine measurement. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Gerald Sensabaugh',
+          publisher: 'American Football Database',
+          url: 'https://americanfootballdatabase.fandom.com/wiki/Gerald_Sensabaugh',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 212.0,
-        "quality": "ESTIMATED",
-        "asOf": "2005",
-        "category": "bio",
-        "context": "2005 NFL Combine",
-        "source": {
-          "title": "Top 5 players with highest vertical jump recorded at NFL Combine ft. Gerald Sensabaugh",
-          "publisher": "Sportskeeda",
-          "url": "https://www.sportskeeda.com/nfl/top-5-players-highest-vertical-jump-recorded-nfl-combine-ft-gerald-sensabaugh"
+        metric: 'weightLb',
+        value: 212,
+        quality: 'ESTIMATED',
+        asOf: '2005',
+        category: 'bio',
+        context: '2005 NFL Combine',
+        source: {
+          title: 'Top 5 players with highest vertical jump recorded at NFL Combine ft. Gerald Sensabaugh',
+          publisher: 'Sportskeeda',
+          url: 'https://www.sportskeeda.com/nfl/top-5-players-highest-vertical-jump-recorded-nfl-combine-ft-gerald-sensabaugh',
         },
-        "note": "2005 NFL Combine. Reported by Sportskeeda; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2005 NFL Combine. Sources disagree: 214 lb in American Football Database\'s combine table; Wikipedia gives 212 but as listed weight. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Gerald Sensabaugh',
+          publisher: 'American Football Database',
+          url: 'https://americanfootballdatabase.fandom.com/wiki/Gerald_Sensabaugh',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 157.0,
-        "quality": "ESTIMATED",
-        "asOf": "2005-04",
-        "category": "hidden",
-        "context": "2005 NFL Draft, Round 5",
-        "source": {
-          "title": "Gerald Sensabaugh",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Gerald_Sensabaugh"
+        metric: 'draftPick',
+        value: 157,
+        quality: 'VERIFIED',
+        asOf: '2005-04',
+        category: 'hidden',
+        context: '2005 NFL Draft, Round 5',
+        source: {
+          title: 'Gerald Sensabaugh',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Gerald_Sensabaugh',
         },
-        "note": "2005 NFL Draft, Round 5. Reported by Wikipedia; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2005 NFL Draft, Round 5. Reported by Wikipedia and confirmed by Pro Football Hall of Fame.',
+        confirmedBy: {
+          title: '2005 National Football League Draft',
+          publisher: 'Pro Football Hall of Fame',
+          url: 'https://profootballhof.com/news/2005-national-football-league-draft',
+        },
+      },
+    ],
   },
   {
-    "id": "cameron-wake",
-    "name": "Cameron Wake",
-    "league": "NFL",
-    "position": "DE/OLB",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2000s-2010s",
-    "undrafted": true,
-    "facts": [
+    id: 'cameron-wake',
+    name: 'Cameron Wake',
+    league: 'NFL',
+    position: 'DE/OLB',
+    team: 'Retired',
+    status: 'legend',
+    era: '2000s-2010s',
+    undrafted: true,
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 45.5,
-        "quality": "VERIFIED",
-        "asOf": "2005",
-        "category": "hidden",
-        "context": "2005 NFL Scouting Combine (as Derek Wake, Penn State LB); went undrafted",
-        "source": {
-          "title": "NFL Combine: Best bench press and vertical jumps in Combine history, where top performing players landed",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nfl/news/nfl-combine-best-bench-press-and-vertical-jumps-in-combine-history-where-top-performing-players-landed"
+        metric: 'maxVerticalIn',
+        value: 45.5,
+        quality: 'VERIFIED',
+        asOf: '2005',
+        category: 'hidden',
+        context: '2005 NFL Scouting Combine (as Derek Wake, Penn State LB); went undrafted',
+        source: {
+          title: 'NFL Combine: Best bench press and vertical jumps in Combine history, where top performing players landed',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/news/nfl-combine-best-bench-press-and-vertical-jumps-in-combine-history-where-top-performing-players-landed',
         },
-        "note": "2005 NFL Scouting Combine (as Derek Wake, Penn State LB); went undrafted. Reported by CBS Sports and confirmed by Buckeye Sports Bulletin.",
-        "confirmedBy": {
-          "title": "Former Ohio State linebacker Sonny Styles shines at NFL Combine",
-          "publisher": "Buckeye Sports Bulletin",
-          "url": "https://www.buckeyesports.com/former-ohio-state-linebacker-sonny-styles-shines-at-nfl-combine"
-        }
-      }
-    ]
+        note: '2005 NFL Scouting Combine (as Derek Wake, Penn State LB); went undrafted. Reported by CBS Sports and confirmed by Buckeye Sports Bulletin.',
+        confirmedBy: {
+          title: 'Former Ohio State linebacker Sonny Styles shines at NFL Combine',
+          publisher: 'Buckeye Sports Bulletin',
+          url: 'https://www.buckeyesports.com/former-ohio-state-linebacker-sonny-styles-shines-at-nfl-combine',
+        },
+      },
+    ],
   },
   {
-    "id": "stephen-paea",
-    "name": "Stephen Paea",
-    "league": "NFL",
-    "position": "DT",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2010s",
-    "facts": [
+    id: 'stephen-paea',
+    name: 'Stephen Paea',
+    league: 'NFL',
+    position: 'DT',
+    team: 'Retired',
+    status: 'legend',
+    era: '2010s',
+    facts: [
       {
-        "metric": "benchReps225",
-        "value": 49.0,
-        "quality": "VERIFIED",
-        "asOf": "2011",
-        "category": "strongest",
-        "context": "2011 NFL Scouting Combine",
-        "source": {
-          "title": "NFL Combine: Best bench press and vertical jumps in Combine history, where top performing players landed",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nfl/news/nfl-combine-best-bench-press-and-vertical-jumps-in-combine-history-where-top-performing-players-landed"
+        metric: 'benchReps225',
+        value: 49,
+        quality: 'VERIFIED',
+        asOf: '2011',
+        category: 'strongest',
+        context: '2011 NFL Scouting Combine',
+        source: {
+          title: 'NFL Combine: Best bench press and vertical jumps in Combine history, where top performing players landed',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/news/nfl-combine-best-bench-press-and-vertical-jumps-in-combine-history-where-top-performing-players-landed',
         },
-        "note": "2011 NFL Scouting Combine. Reported by CBS Sports and confirmed by Men's Fitness (via AOL).",
-        "confirmedBy": {
-          "title": "WATCH: David Gusta Benches 225lbs 37 Times at NFL Combine",
-          "publisher": "Men's Fitness (via AOL)",
-          "url": "https://www.aol.com/lifestyle/watch-david-gusta-benches-225lbs-200544381.html"
+        note: '2011 NFL Scouting Combine. Reported by CBS Sports and confirmed by Men\'s Fitness (via AOL).',
+        confirmedBy: {
+          title: 'WATCH: David Gusta Benches 225lbs 37 Times at NFL Combine',
+          publisher: 'Men\'s Fitness (via AOL)',
+          url: 'https://www.aol.com/lifestyle/watch-david-gusta-benches-225lbs-200544381.html',
         },
-        "rank": "breaking the Combine record"
+        rank: 'breaking the Combine record',
       },
       {
-        "metric": "draftPick",
-        "value": 53.0,
-        "quality": "ESTIMATED",
-        "asOf": "2011-04",
-        "category": "bio",
-        "context": "2011 NFL Draft, Round 2",
-        "source": {
-          "title": "NFL Combine: Best bench press and vertical jumps in Combine history, where top performing players landed",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nfl/news/nfl-combine-best-bench-press-and-vertical-jumps-in-combine-history-where-top-performing-players-landed"
+        metric: 'draftPick',
+        value: 53,
+        quality: 'VERIFIED',
+        asOf: '2011-04',
+        category: 'bio',
+        context: '2011 NFL Draft, Round 2',
+        source: {
+          title: 'NFL Combine: Best bench press and vertical jumps in Combine history, where top performing players landed',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nfl/news/nfl-combine-best-bench-press-and-vertical-jumps-in-combine-history-where-top-performing-players-landed',
         },
-        "note": "2011 NFL Draft, Round 2. Reported by CBS Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2011 NFL Draft, Round 2. Reported by CBS Sports and confirmed by San Francisco 49ers (49ers.com).',
+        confirmedBy: {
+          title: 'Draft Spotlight: Stephen Paea',
+          publisher: 'San Francisco 49ers (49ers.com)',
+          url: 'https://www.49ers.com/news/draft-spotlight-stephen-paea-4798689',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 73.0,
-        "quality": "ESTIMATED",
-        "asOf": "2011",
-        "category": "bio",
-        "context": "Draft-workout measurements",
-        "source": {
-          "title": "Stephen Paea",
-          "publisher": "RotoWire",
-          "url": "https://www.rotowire.com/football/player/stephen-paea-7331"
+        metric: 'heightIn',
+        value: 73,
+        quality: 'VERIFIED',
+        asOf: '2011',
+        category: 'bio',
+        context: 'Draft-workout measurements',
+        source: {
+          title: 'Stephen Paea',
+          publisher: 'RotoWire',
+          url: 'https://www.rotowire.com/football/player/stephen-paea-7331',
         },
-        "note": "Draft-workout measurements. Reported by RotoWire; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: 'Draft-workout measurements. Reported by RotoWire and confirmed by San Francisco 49ers (49ers.com).',
+        confirmedBy: {
+          title: 'Draft Spotlight: Stephen Paea',
+          publisher: 'San Francisco 49ers (49ers.com)',
+          url: 'https://www.49ers.com/news/draft-spotlight-stephen-paea-4798689',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 300.0,
-        "quality": "ESTIMATED",
-        "asOf": "2011",
-        "category": "bio",
-        "context": "Draft-workout measurements",
-        "source": {
-          "title": "Stephen Paea",
-          "publisher": "RotoWire",
-          "url": "https://www.rotowire.com/football/player/stephen-paea-7331"
+        metric: 'weightLb',
+        value: 300,
+        quality: 'ESTIMATED',
+        asOf: '2011',
+        category: 'bio',
+        context: 'Draft-workout measurements',
+        source: {
+          title: 'Stephen Paea',
+          publisher: 'RotoWire',
+          url: 'https://www.rotowire.com/football/player/stephen-paea-7331',
         },
-        "note": "Draft-workout measurements. Reported by RotoWire; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: 'Draft-workout measurements. Sources disagree: 303 lb (49ers.com draft spotlight; ESPN NFC North blog, 2011 draft coverage); 295 lb (Wikipedia listed weight). Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Draft Spotlight: Stephen Paea',
+          publisher: 'San Francisco 49ers (49ers.com)',
+          url: 'https://www.49ers.com/news/draft-spotlight-stephen-paea-4798689',
+        },
+      },
+    ],
   },
   {
-    "id": "calvin-johnson",
-    "name": "Calvin Johnson",
-    "league": "NFL",
-    "position": "WR",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2000s-2010s",
-    "facts": [
+    id: 'calvin-johnson',
+    name: 'Calvin Johnson',
+    league: 'NFL',
+    position: 'WR',
+    team: 'Retired',
+    status: 'legend',
+    era: '2000s-2010s',
+    facts: [
       {
-        "metric": "fortyS",
-        "value": 4.35,
-        "quality": "ESTIMATED",
-        "asOf": "2007",
-        "category": "build",
-        "context": "2007 NFL Scouting Combine",
-        "source": {
-          "title": "Road to the Draft: Calvin Johnson",
-          "publisher": "Buccaneers.com",
-          "url": "https://www.buccaneers.com/news/road-to-the-draft-calvin-johnson-2152857"
+        metric: 'fortyS',
+        value: 4.35,
+        quality: 'VERIFIED',
+        asOf: '2007',
+        category: 'build',
+        context: '2007 NFL Scouting Combine',
+        source: {
+          title: 'Road to the Draft: Calvin Johnson',
+          publisher: 'Buccaneers.com',
+          url: 'https://www.buccaneers.com/news/road-to-the-draft-calvin-johnson-2152857',
         },
-        "note": "2007 NFL Scouting Combine. Reported by Buccaneers.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2007 NFL Scouting Combine. Reported by Buccaneers.com and confirmed by ESPN Stats & Info.',
+        confirmedBy: {
+          title: 'Calvin Johnson\'s place in NFL history',
+          publisher: 'ESPN Stats & Info',
+          url: 'https://www.espn.com/blog/statsinfo/post/_/id/115152/calvin-johnsons-place-in-nfl-history',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 76.0,
-        "quality": "ESTIMATED",
-        "asOf": "2007",
-        "category": "bio",
-        "context": "2007 NFL Combine measurement",
-        "source": {
-          "title": "Road to the Draft: Calvin Johnson",
-          "publisher": "Buccaneers.com",
-          "url": "https://www.buccaneers.com/news/road-to-the-draft-calvin-johnson-2152857"
+        metric: 'heightIn',
+        value: 76,
+        quality: 'ESTIMATED',
+        asOf: '2007',
+        category: 'bio',
+        context: '2007 NFL Combine measurement',
+        source: {
+          title: 'Road to the Draft: Calvin Johnson',
+          publisher: 'Buccaneers.com',
+          url: 'https://www.buccaneers.com/news/road-to-the-draft-calvin-johnson-2152857',
         },
-        "note": "2007 NFL Combine measurement. Reported by Buccaneers.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2007 NFL Combine measurement. Sources disagree: 77 in (6-5) per DetroitLions.com, Wikipedia, ESPN Stats & Info and Sportskeeda; only the Buccaneers.com source says he measured 6-4 at the combine. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'How Lions have fared with the No. 2 overall pick: Johnson, Suh',
+          publisher: 'Detroit Lions (DetroitLions.com)',
+          url: 'https://www.detroitlions.com/news/how-lions-have-fared-with-the-no-2-overall-pick-johnson-suh',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 239.0,
-        "quality": "ESTIMATED",
-        "asOf": "2007",
-        "category": "build",
-        "context": "2007 NFL Combine measurement",
-        "source": {
-          "title": "Road to the Draft: Calvin Johnson",
-          "publisher": "Buccaneers.com",
-          "url": "https://www.buccaneers.com/news/road-to-the-draft-calvin-johnson-2152857"
+        metric: 'weightLb',
+        value: 239,
+        quality: 'VERIFIED',
+        asOf: '2007',
+        category: 'build',
+        context: '2007 NFL Combine measurement',
+        source: {
+          title: 'Road to the Draft: Calvin Johnson',
+          publisher: 'Buccaneers.com',
+          url: 'https://www.buccaneers.com/news/road-to-the-draft-calvin-johnson-2152857',
         },
-        "note": "2007 NFL Combine measurement. Reported by Buccaneers.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2007 NFL Combine measurement. Reported by Buccaneers.com and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Calvin Johnson',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Calvin_Johnson',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 2.0,
-        "quality": "ESTIMATED",
-        "asOf": "2007-04",
-        "category": "bio",
-        "context": "2007 NFL Draft, Round 1",
-        "source": {
-          "title": "Greatest Yellow Jackets in the NFL: Calvin Johnson",
-          "publisher": "Sports Illustrated",
-          "url": "https://www.si.com/college/georgiatech/football/greatest-yellow-jackets-in-the-nfl-calvin-johnson"
+        metric: 'draftPick',
+        value: 2,
+        quality: 'VERIFIED',
+        asOf: '2007-04',
+        category: 'bio',
+        context: '2007 NFL Draft, Round 1',
+        source: {
+          title: 'Greatest Yellow Jackets in the NFL: Calvin Johnson',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/college/georgiatech/football/greatest-yellow-jackets-in-the-nfl-calvin-johnson',
         },
-        "note": "2007 NFL Draft, Round 1. Reported by Sports Illustrated; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2007 NFL Draft, Round 1. Reported by Sports Illustrated and confirmed by Detroit Lions (DetroitLions.com).',
+        confirmedBy: {
+          title: 'How Lions have fared with the No. 2 overall pick: Johnson, Suh',
+          publisher: 'Detroit Lions (DetroitLions.com)',
+          url: 'https://www.detroitlions.com/news/how-lions-have-fared-with-the-no-2-overall-pick-johnson-suh',
+        },
+      },
+    ],
   },
   {
-    "id": "vernon-davis",
-    "name": "Vernon Davis",
-    "league": "NFL",
-    "position": "TE",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2000s-2010s",
-    "facts": [
+    id: 'vernon-davis',
+    name: 'Vernon Davis',
+    league: 'NFL',
+    position: 'TE',
+    team: 'Retired',
+    status: 'legend',
+    era: '2000s-2010s',
+    facts: [
       {
-        "metric": "fortyS",
-        "value": 4.4,
-        "quality": "ESTIMATED",
-        "asOf": "2006",
-        "category": "build",
-        "context": "2006 NFL Scouting Combine (official mark per NFL.com)",
-        "source": {
-          "title": "2026 NFL Combine: Oregon's Kenyon Sadiq runs fastest 40 by tight end since at least 2003",
-          "publisher": "NFL.com",
-          "url": "https://amp.nfl.com/news/2026-nfl-combine-oregon-s-kenyon-sadiq-runs-fastest-40-by-tight-end-since-at-least-2003"
+        metric: 'fortyS',
+        value: 4.4,
+        quality: 'ESTIMATED',
+        asOf: '2006',
+        category: 'build',
+        context: '2006 NFL Scouting Combine (official mark per NFL.com)',
+        source: {
+          title: '2026 NFL Combine: Oregon\'s Kenyon Sadiq runs fastest 40 by tight end since at least 2003',
+          publisher: 'NFL.com',
+          url: 'https://amp.nfl.com/news/2026-nfl-combine-oregon-s-kenyon-sadiq-runs-fastest-40-by-tight-end-since-at-least-2003',
         },
-        "note": "2006 NFL Scouting Combine (official mark per NFL.com). Sources disagree: 4.38 s, per PlayerProfiler and the widely circulated 2006 figure (the researcher's own 49ers Webzone height source also says 4.38). Shown as ESTIMATED until they agree.",
-        "confirmedBy": {
-          "title": "Kenyon Sadiq excels at 40-yard dash",
-          "publisher": "PlayerProfiler",
-          "url": "https://www.playerprofiler.com/news/tight-end-kenyon-sadiq-excels-at-40-yard-dash/"
+        note: '2006 NFL Scouting Combine (official mark per NFL.com). Sources disagree: 4.38 s, per PlayerProfiler and the widely circulated 2006 figure (the researcher\'s own 49ers Webzone height source also says 4.38). Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Kenyon Sadiq excels at 40-yard dash',
+          publisher: 'PlayerProfiler',
+          url: 'https://www.playerprofiler.com/news/tight-end-kenyon-sadiq-excels-at-40-yard-dash/',
         },
-        "rank": "previous tight end mark, tied by Dorin Dickerson in 2010"
+        rank: 'previous tight end mark, tied by Dorin Dickerson in 2010',
       },
       {
-        "metric": "weightLb",
-        "value": 254.0,
-        "quality": "ESTIMATED",
-        "asOf": "2006",
-        "category": "build",
-        "context": "2006 NFL Combine weigh-in",
-        "source": {
-          "title": "Greatest moments in NFL Combine history",
-          "publisher": "FantasyPros",
-          "url": "https://fantasypros.com/2020/02/greatest-moments-in-nfl-combine-history"
+        metric: 'weightLb',
+        value: 254,
+        quality: 'VERIFIED',
+        asOf: '2006',
+        category: 'build',
+        context: '2006 NFL Combine weigh-in',
+        source: {
+          title: 'Greatest moments in NFL Combine history',
+          publisher: 'FantasyPros',
+          url: 'https://fantasypros.com/2020/02/greatest-moments-in-nfl-combine-history',
         },
-        "note": "2006 NFL Combine weigh-in. Reported by FantasyPros; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2006 NFL Combine weigh-in. Reported by FantasyPros and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Vernon Davis (pre-draft measurables table)',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Vernon_Davis',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 75.0,
-        "quality": "ESTIMATED",
-        "asOf": "2006",
-        "category": "bio",
-        "context": "2006 NFL Combine",
-        "source": {
-          "title": "2006 49ers Draft Review & Analysis",
-          "publisher": "49ers Webzone",
-          "url": "https://www.49erswebzone.com/articles/467-2006-49ers-draft-review-analysis/"
+        metric: 'heightIn',
+        value: 75,
+        quality: 'VERIFIED',
+        asOf: '2006',
+        category: 'bio',
+        context: '2006 NFL Combine',
+        source: {
+          title: '2006 49ers Draft Review & Analysis',
+          publisher: '49ers Webzone',
+          url: 'https://www.49erswebzone.com/articles/467-2006-49ers-draft-review-analysis/',
         },
-        "note": "2006 NFL Combine. Reported by 49ers Webzone; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2006 NFL Combine. Reported by 49ers Webzone and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Vernon Davis (pre-draft measurables table)',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Vernon_Davis',
+        },
+      },
+    ],
   },
   {
-    "id": "chris-johnson",
-    "name": "Chris Johnson",
-    "league": "NFL",
-    "position": "RB",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2000s-2010s",
-    "facts": [
+    id: 'chris-johnson',
+    name: 'Chris Johnson',
+    league: 'NFL',
+    position: 'RB',
+    team: 'Retired',
+    status: 'legend',
+    era: '2000s-2010s',
+    facts: [
       {
-        "metric": "fortyS",
-        "value": 4.24,
-        "quality": "ESTIMATED",
-        "asOf": "2008-02-24",
-        "category": "fastest",
-        "context": "2008 NFL Scouting Combine",
-        "source": {
-          "title": "Top running back 40 times",
-          "publisher": "Boston.com (Associated Press)",
-          "url": "https://www.boston.com/sports/new-england-patriots/2008/02/24/top_running_bac",
-          "published": "2008-02-24"
+        metric: 'fortyS',
+        value: 4.24,
+        quality: 'VERIFIED',
+        asOf: '2008-02-24',
+        category: 'fastest',
+        context: '2008 NFL Scouting Combine',
+        source: {
+          title: 'Top running back 40 times',
+          publisher: 'Boston.com (Associated Press)',
+          url: 'https://www.boston.com/sports/new-england-patriots/2008/02/24/top_running_bac',
+          published: '2008-02-24',
         },
-        "note": "2008 NFL Scouting Combine. Reported by Boston.com (Associated Press); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Boston.com (Associated Press)'s own and was not independently checked.",
-        "rank": "the fastest 40 time of the combine so far"
+        note: '2008 NFL Scouting Combine. Reported by Boston.com (Associated Press) and confirmed by NFL.com.',
+        confirmedBy: {
+          title: 'Break CJ2K\'s 40-yard dash record, make a million',
+          publisher: 'NFL.com',
+          url: 'https://www.nfl.com/news/break-cj2k-s-40-yard-dash-record-make-a-million-0ap3000000636111',
+        },
+        rank: 'the fastest 40 time of the combine so far',
       },
       {
-        "metric": "draftPick",
-        "value": 24.0,
-        "quality": "ESTIMATED",
-        "asOf": "2008-04",
-        "category": "bio",
-        "context": "2008 NFL Draft, Round 1",
-        "source": {
-          "title": "Titans Draft Countdown: RB Chris Johnson Sets Pace in 2008",
-          "publisher": "TennesseeTitans.com",
-          "url": "https://tennesseetitans.com/news/titans-draft-countdown-rb-chris-johnson-sets-pace-in-2008-9921313"
+        metric: 'draftPick',
+        value: 24,
+        quality: 'VERIFIED',
+        asOf: '2008-04',
+        category: 'bio',
+        context: '2008 NFL Draft, Round 1',
+        source: {
+          title: 'Titans Draft Countdown: RB Chris Johnson Sets Pace in 2008',
+          publisher: 'TennesseeTitans.com',
+          url: 'https://tennesseetitans.com/news/titans-draft-countdown-rb-chris-johnson-sets-pace-in-2008-9921313',
         },
-        "note": "2008 NFL Draft, Round 1. Reported by TennesseeTitans.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2008 NFL Draft, Round 1. Reported by TennesseeTitans.com and confirmed by On3.',
+        confirmedBy: {
+          title: 'Fastest 40-yard Dash Times in NFL Combine History: Top 10 running backs',
+          publisher: 'On3',
+          url: 'https://www.on3.com/pro/news/fastest-40-yard-dash-times-nfl-combine-history-top-10-running-backs/',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 71.0,
-        "quality": "ESTIMATED",
-        "asOf": "2008",
-        "category": "bio",
-        "context": "Listed playing size (not combine-measured)",
-        "source": {
-          "title": "Chris Johnson (running back)",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Chris_Johnson_(running_back)"
+        metric: 'heightIn',
+        value: 71,
+        quality: 'VERIFIED',
+        asOf: '2008',
+        category: 'bio',
+        context: 'Listed playing size (not combine-measured)',
+        source: {
+          title: 'Chris Johnson (running back)',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Chris_Johnson_(running_back)',
         },
-        "note": "Listed playing size (not combine-measured). Reported by Wikipedia; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: 'Listed playing size (not combine-measured). Reported by Wikipedia and confirmed by FantasyData.',
+        confirmedBy: {
+          title: 'Chris Johnson Fantasy',
+          publisher: 'FantasyData',
+          url: 'https://fantasydata.com/nfl/chris-johnson-fantasy/21002',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 203.0,
-        "quality": "ESTIMATED",
-        "asOf": "2008",
-        "category": "bio",
-        "context": "Listed playing size (not combine-measured)",
-        "source": {
-          "title": "Chris Johnson (running back)",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Chris_Johnson_(running_back)"
+        metric: 'weightLb',
+        value: 203,
+        quality: 'ESTIMATED',
+        asOf: '2008',
+        category: 'bio',
+        context: 'Listed playing size (not combine-measured)',
+        source: {
+          title: 'Chris Johnson (running back)',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Chris_Johnson_(running_back)',
         },
-        "note": "Listed playing size (not combine-measured). Reported by Wikipedia; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: 'Listed playing size (not combine-measured). Sources disagree: 191 lb (Titans\' listing for 2011, per TennesseeTitans.com 2012); ~199 lb (AP, 2012); 203 lb is the later career listing on Wikipedia, FantasyData and TheSportsDB. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'CJ2K adds weight title in 2012',
+          publisher: 'Tennessee Titans (TennesseeTitans.com)',
+          url: 'https://tennesseetitans.com/news/cj2k-adds-weight-title-in-2012-7422962',
+        },
+      },
+    ],
   },
   {
-    "id": "bobby-witt-jr",
-    "name": "Bobby Witt Jr.",
-    "league": "MLB",
-    "position": "SS",
-    "team": "Kansas City Royals",
-    "status": "active",
-    "facts": [
+    id: 'bobby-witt-jr',
+    name: 'Bobby Witt Jr.',
+    league: 'MLB',
+    position: 'SS',
+    team: 'Kansas City Royals',
+    status: 'active',
+    facts: [
       {
-        "metric": "sprintSpeedFtS",
-        "value": 30.5,
-        "quality": "ESTIMATED",
-        "asOf": "2024",
-        "category": "fastest",
-        "context": "2024 regular season, Statcast sprint speed",
-        "source": {
-          "title": "Sprint Speed (glossary)",
-          "publisher": "Baseball-Reference",
-          "url": "https://www.baseball-reference.com/glossary/?p=275"
+        metric: 'sprintSpeedFtS',
+        value: 30.5,
+        quality: 'VERIFIED',
+        asOf: '2024',
+        category: 'fastest',
+        context: '2024 regular season, Statcast sprint speed',
+        source: {
+          title: 'Sprint Speed (glossary)',
+          publisher: 'Baseball-Reference',
+          url: 'https://www.baseball-reference.com/glossary/?p=275',
         },
-        "note": "2024 regular season, Statcast sprint speed. Reported by Baseball-Reference; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Baseball-Reference's own and was not independently checked.",
-        "rank": "had the top sprint speed (2024)"
+        note: '2024 regular season, Statcast sprint speed. Reported by Baseball-Reference and confirmed by RotoWire.',
+        confirmedBy: {
+          title: 'Bobby Witt Jr. player page (2025 outlook)',
+          publisher: 'RotoWire',
+          url: 'https://www.rotowire.com/baseball/player/bobby-witt-jr-16040',
+        },
+        rank: 'had the top sprint speed (2024)',
       },
       {
-        "metric": "heightIn",
-        "value": 73.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "Current ESPN player listing",
-        "source": {
-          "title": "Bobby Witt Jr. Stats",
-          "publisher": "ESPN",
-          "url": "https://www.espn.com/mlb/player/stats/_/id/42403/bobby-witt-jr."
+        metric: 'heightIn',
+        value: 73,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: 'Current ESPN player listing',
+        source: {
+          title: 'Bobby Witt Jr. Stats',
+          publisher: 'ESPN',
+          url: 'https://www.espn.com/mlb/player/stats/_/id/42403/bobby-witt-jr.',
         },
-        "note": "Current ESPN player listing. Reported by ESPN; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: 'Current ESPN player listing. Reported by ESPN and confirmed by Topps (Ripped).',
+        confirmedBy: {
+          title: 'MLB Player Profile: Bobby Witt Jr.',
+          publisher: 'Topps (Ripped)',
+          url: 'https://ripped.topps.com/profile/baseball/bobby-witt-jr/',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 200.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "Current ESPN player listing",
-        "source": {
-          "title": "Bobby Witt Jr. Stats",
-          "publisher": "ESPN",
-          "url": "https://www.espn.com/mlb/player/stats/_/id/42403/bobby-witt-jr."
+        metric: 'weightLb',
+        value: 200,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: 'Current ESPN player listing',
+        source: {
+          title: 'Bobby Witt Jr. Stats',
+          publisher: 'ESPN',
+          url: 'https://www.espn.com/mlb/player/stats/_/id/42403/bobby-witt-jr.',
         },
-        "note": "Current ESPN player listing. Reported by ESPN; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: 'Current ESPN player listing. Reported by ESPN and confirmed by Topps (Ripped).',
+        confirmedBy: {
+          title: 'MLB Player Profile: Bobby Witt Jr.',
+          publisher: 'Topps (Ripped)',
+          url: 'https://ripped.topps.com/profile/baseball/bobby-witt-jr/',
+        },
+      },
+    ],
   },
   {
-    "id": "trea-turner",
-    "name": "Trea Turner",
-    "league": "MLB",
-    "position": "SS",
-    "team": "Philadelphia Phillies",
-    "status": "active",
-    "facts": [
+    id: 'trea-turner',
+    name: 'Trea Turner',
+    league: 'MLB',
+    position: 'SS',
+    team: 'Philadelphia Phillies',
+    status: 'active',
+    facts: [
       {
-        "metric": "sprintSpeedFtS",
-        "value": 30.3,
-        "quality": "ESTIMATED",
-        "asOf": "2025",
-        "category": "fastest",
-        "context": "2025 regular season, Statcast sprint speed (per Baseball Savant)",
-        "source": {
-          "title": "2025 Player Review: Trea Turner",
-          "publisher": "Yahoo Sports",
-          "url": "https://sports.yahoo.com/article/2025-player-review-trea-turner-160000753.html"
+        metric: 'sprintSpeedFtS',
+        value: 30.3,
+        quality: 'VERIFIED',
+        asOf: '2025',
+        category: 'fastest',
+        context: '2025 regular season, Statcast sprint speed (per Baseball Savant)',
+        source: {
+          title: '2025 Player Review: Trea Turner',
+          publisher: 'Yahoo Sports',
+          url: 'https://sports.yahoo.com/article/2025-player-review-trea-turner-160000753.html',
         },
-        "note": "2025 regular season, Statcast sprint speed (per Baseball Savant). Reported by Yahoo Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Yahoo Sports's own and was not independently checked.",
-        "rank": "the fastest baserunner in 2025, measured by sprint speed"
-      }
-    ]
+        note: '2025 regular season, Statcast sprint speed (per Baseball Savant). Reported by Yahoo Sports and confirmed by MLB.com.',
+        confirmedBy: {
+          title: 'Who is the fastest player in baseball? It\'s complicated',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/amp/news/fastest-player-in-baseball-statcast-analysis.html',
+        },
+      },
+    ],
   },
   {
-    "id": "chandler-simpson",
-    "name": "Chandler Simpson",
-    "league": "MLB",
-    "position": "OF",
-    "team": "Tampa Bay Rays",
-    "status": "active",
-    "facts": [
+    id: 'chandler-simpson',
+    name: 'Chandler Simpson',
+    league: 'MLB',
+    position: 'OF',
+    team: 'Tampa Bay Rays',
+    status: 'active',
+    facts: [
       {
-        "metric": "stolenBases",
-        "value": 44.0,
-        "quality": "ESTIMATED",
-        "asOf": "2025",
-        "category": "fastest",
-        "context": "2025 regular season (rookie year, 109 games)",
-        "source": {
-          "title": "Rays Stolen Base Leaders In 2025",
-          "publisher": "Screwball",
-          "url": "https://www.screwball.com/mlb/tampa-bay-rays/stolen-base-leaders-in-2025"
+        metric: 'stolenBases',
+        value: 44,
+        quality: 'VERIFIED',
+        asOf: '2025',
+        category: 'fastest',
+        context: '2025 regular season (rookie year, 109 games)',
+        source: {
+          title: 'Rays Stolen Base Leaders In 2025',
+          publisher: 'Screwball',
+          url: 'https://www.screwball.com/mlb/tampa-bay-rays/stolen-base-leaders-in-2025',
         },
-        "note": "2025 regular season (rookie year, 109 games). Reported by Screwball; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Screwball's own and was not independently checked.",
-        "rank": "the most on the Rays"
+        note: '2025 regular season (rookie year, 109 games). Reported by Screwball and confirmed by Sports Illustrated (Inside The Rays).',
+        confirmedBy: {
+          title: 'Rays rookie Chandler Simpson leads team, matching impressive franchise history',
+          publisher: 'Sports Illustrated (Inside The Rays)',
+          url: 'https://www.si.com/mlb/rays/news/rays-rookie-chandler-simpson-leads-team-matching-impressive-franchise-history',
+        },
+        rank: 'the most on the Rays',
       },
       {
-        "metric": "homeToFirstS",
-        "value": 3.68,
-        "quality": "ESTIMATED",
-        "asOf": "2025-05-30",
-        "category": "fastest",
-        "context": "2025 season through May 30, average home-to-first time, Statcast",
-        "source": {
-          "title": "Chandler Simpson demotion: Three reasons why Rays sent down exciting rookie speedster",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/mlb/news/chandler-simpson-demotion-three-reasons-why-rays-sent-down-exciting-rookie-speedster"
+        metric: 'homeToFirstS',
+        value: 3.68,
+        quality: 'ESTIMATED',
+        asOf: '2025-05-30',
+        category: 'fastest',
+        context: '2025 season through May 30, average home-to-first time, Statcast',
+        source: {
+          title: 'Chandler Simpson demotion: Three reasons why Rays sent down exciting rookie speedster',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/mlb/news/chandler-simpson-demotion-three-reasons-why-rays-sent-down-exciting-rookie-speedster',
         },
-        "note": "2025 season through May 30, average home-to-first time, Statcast. Reported by CBS Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is CBS Sports's own and was not independently checked.",
-        "rank": "making him the fastest player in the majors"
-      }
-    ]
+        note: '2025 season through May 30, average home-to-first time, Statcast. Sources disagree: MLB.com lists Simpson as the 2025 home-to-first leader at 3.95 s (mid-season); another article cites Statcast at 3.97 s, with scouts closer to 3.85 s. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Who is the fastest player in baseball? It\'s complicated',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/amp/news/fastest-player-in-baseball-statcast-analysis.html',
+        },
+        rank: 'making him the fastest player in the majors',
+      },
+    ],
   },
   {
-    "id": "tim-locastro",
-    "name": "Tim Locastro",
-    "league": "MLB",
-    "position": "OF",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2010s-2020s",
-    "facts": [
+    id: 'tim-locastro',
+    name: 'Tim Locastro',
+    league: 'MLB',
+    position: 'OF',
+    team: 'Retired',
+    status: 'legend',
+    era: '2010s-2020s',
+    facts: [
       {
-        "metric": "sprintSpeedFtS",
-        "value": 30.8,
-        "quality": "ESTIMATED",
-        "asOf": "2019",
-        "category": "fastest",
-        "context": "2019 regular season, Statcast sprint speed",
-        "source": {
-          "title": "Red Sox Claim Speedster Tim Locastro Off Waivers From Yankees",
-          "publisher": "CBS News Boston",
-          "url": "https://www.cbsnews.com/boston/news/tim-locastro-red-sox-claim-yankees-waivers-mlb-offseason/"
+        metric: 'sprintSpeedFtS',
+        value: 30.8,
+        quality: 'VERIFIED',
+        asOf: '2019',
+        category: 'fastest',
+        context: '2019 regular season, Statcast sprint speed',
+        source: {
+          title: 'Red Sox Claim Speedster Tim Locastro Off Waivers From Yankees',
+          publisher: 'CBS News Boston',
+          url: 'https://www.cbsnews.com/boston/news/tim-locastro-red-sox-claim-yankees-waivers-mlb-offseason/',
         },
-        "note": "2019 regular season, Statcast sprint speed. Reported by CBS News Boston; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is CBS News Boston's own and was not independently checked.",
-        "rank": "led the majors in sprint speed in 2019"
+        note: '2019 regular season, Statcast sprint speed. Reported by CBS News Boston and confirmed by Richmond Free Press.',
+        confirmedBy: {
+          title: 'Arizona Diamondbacks\' Tim Locastro fastest man in MLB',
+          publisher: 'Richmond Free Press',
+          url: 'https://m.richmondfreepress.com/news/2020/aug/06/arizona-diamondbacks-tim-locastro-fastest-man-mlb',
+        },
+        rank: 'led the majors in sprint speed in 2019',
       },
       {
-        "metric": "sprintSpeedFtS",
-        "value": 30.7,
-        "quality": "ESTIMATED",
-        "asOf": "2020",
-        "category": "fastest",
-        "context": "2020 regular season, Statcast sprint speed",
-        "source": {
-          "title": "Red Sox Claim Speedster Tim Locastro Off Waivers From Yankees",
-          "publisher": "CBS News Boston",
-          "url": "https://www.cbsnews.com/boston/news/tim-locastro-red-sox-claim-yankees-waivers-mlb-offseason/"
+        metric: 'sprintSpeedFtS',
+        value: 30.7,
+        quality: 'VERIFIED',
+        asOf: '2020',
+        category: 'fastest',
+        context: '2020 regular season, Statcast sprint speed',
+        source: {
+          title: 'Red Sox Claim Speedster Tim Locastro Off Waivers From Yankees',
+          publisher: 'CBS News Boston',
+          url: 'https://www.cbsnews.com/boston/news/tim-locastro-red-sox-claim-yankees-waivers-mlb-offseason/',
         },
-        "note": "2020 regular season, Statcast sprint speed. Reported by CBS News Boston; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is CBS News Boston's own and was not independently checked.",
-        "rank": "led the majors in sprint speed in 2020"
-      }
-    ]
+        note: '2020 regular season, Statcast sprint speed. Reported by CBS News Boston and confirmed by Blogging the Red Sox.',
+        confirmedBy: {
+          title: 'With acquisition of Tim Locastro, Red Sox gain speed and athleticism',
+          publisher: 'Blogging the Red Sox',
+          url: 'https://bloggingtheredsox.com/2021/11/09/with-acquisition-of-tim-locastro-red-sox-gain-speed-and-athleticism-chaim-bloom-says/',
+        },
+        rank: 'led the majors in sprint speed in 2020',
+      },
+    ],
   },
   {
-    "id": "aroldis-chapman",
-    "name": "Aroldis Chapman",
-    "league": "MLB",
-    "position": "RP",
-    "team": "Boston Red Sox",
-    "status": "active",
-    "facts": [
+    id: 'aroldis-chapman',
+    name: 'Aroldis Chapman',
+    league: 'MLB',
+    position: 'RP',
+    team: 'Boston Red Sox',
+    status: 'active',
+    facts: [
       {
-        "metric": "fastballMaxMph",
-        "value": 105.8,
-        "quality": "ESTIMATED",
-        "asOf": "2010-09-24",
-        "category": "arm",
-        "context": "2010 regular season, Reds at Padres (Petco Park); Statcast-standardized pitch tracking",
-        "source": {
-          "title": "Fastest baseball pitch (male)",
-          "publisher": "Guinness World Records",
-          "url": "https://guinnessworldrecords.com/world-records/fastest-baseball-pitch-male"
+        metric: 'fastballMaxMph',
+        value: 105.8,
+        quality: 'VERIFIED',
+        asOf: '2010-09-24',
+        category: 'arm',
+        context: '2010 regular season, Reds at Padres (Petco Park); Statcast-standardized pitch tracking',
+        source: {
+          title: 'Fastest baseball pitch (male)',
+          publisher: 'Guinness World Records',
+          url: 'https://guinnessworldrecords.com/world-records/fastest-baseball-pitch-male',
         },
-        "note": "2010 regular season, Reds at Padres (Petco Park); Statcast-standardized pitch tracking. Reported by Guinness World Records; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Guinness World Records's own and was not independently checked.",
-        "rank": "The fastest baseball pitch (Guinness World Records)"
+        note: '2010 regular season, Reds at Padres (Petco Park); Statcast-standardized pitch tracking. Reported by Guinness World Records and confirmed by WTOP (Associated Press).',
+        confirmedBy: {
+          title: 'Jacob Misiorowski throws 103.7 mph pitch, fastest by a starter since tracking began in 2008 (AP)',
+          publisher: 'WTOP (Associated Press)',
+          url: 'https://wtop.com/sports/2026/06/jacob-misiorowski-throws-103-7-mph-pitch-fastest-by-a-starter-since-tracking-began-in-2008/',
+        },
+        rank: 'The fastest baseball pitch (Guinness World Records)',
       },
       {
-        "metric": "fastballMaxMph",
-        "value": 103.8,
-        "quality": "ESTIMATED",
-        "asOf": "2025-05-07",
-        "category": "arm",
-        "context": "2025 regular season, Red Sox vs. Rangers at Fenway Park, Statcast",
-        "source": {
-          "title": "¡103.8 mph! Chapman realizó el pitcheo más rápido del 2025",
-          "publisher": "MLB.com (Spanish)",
-          "url": "https://www.mlb.com/es/amp/news/aroldis-chapman-lanzo-pitcheo-a-103-8-mph-en-triunfo-de-medias-rojas.html"
+        metric: 'fastballMaxMph',
+        value: 103.8,
+        quality: 'VERIFIED',
+        asOf: '2025-05-07',
+        category: 'arm',
+        context: '2025 regular season, Red Sox vs. Rangers at Fenway Park, Statcast',
+        source: {
+          title: '¡103.8 mph! Chapman realizó el pitcheo más rápido del 2025',
+          publisher: 'MLB.com (Spanish)',
+          url: 'https://www.mlb.com/es/amp/news/aroldis-chapman-lanzo-pitcheo-a-103-8-mph-en-triunfo-de-medias-rojas.html',
         },
-        "note": "2025 regular season, Red Sox vs. Rangers at Fenway Park, Statcast. Reported by MLB.com (Spanish); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com (Spanish)'s own and was not independently checked.",
-        "rank": "el pitcheo más rápido del 2025"
+        note: '2025 regular season, Red Sox vs. Rangers at Fenway Park, Statcast. Reported by MLB.com (Spanish) and confirmed by De Último Minuto.',
+        confirmedBy: {
+          title: 'Chapman lanza el pitcheo más rápido del 2025 con 103.8 mph',
+          publisher: 'De Último Minuto',
+          url: 'https://deultimominuto.net/deportes/beisbol/chapman-lanza-el-pitcheo-mas-rapido-del-2025-con-103-8-mph/',
+        },
       },
       {
-        "metric": "fastballVelocityMph",
-        "value": 100.9,
-        "quality": "ESTIMATED",
-        "asOf": "2025-08-31",
-        "category": "arm",
-        "context": "2025 regular season through Aug. 31, average fastball velocity",
-        "source": {
-          "title": "Red Sox and closer Aroldis Chapman agree to $13.3 million contract for 2026 with a 2027 option",
-          "publisher": "Boston.com (Associated Press)",
-          "url": "https://www.boston.com/sports/boston-red-sox/2025/09/01/red-sox-and-closer-aroldis-chapman-agree-to-13-3-million-contract-for-2026-with-a-2027-option/",
-          "published": "2025-09-01"
+        metric: 'fastballVelocityMph',
+        value: 100.9,
+        quality: 'ESTIMATED',
+        asOf: '2025-08-31',
+        category: 'arm',
+        context: '2025 regular season through Aug. 31, average fastball velocity',
+        source: {
+          title: 'Red Sox and closer Aroldis Chapman agree to $13.3 million contract for 2026 with a 2027 option',
+          publisher: 'Boston.com (Associated Press)',
+          url: 'https://www.boston.com/sports/boston-red-sox/2025/09/01/red-sox-and-closer-aroldis-chapman-agree-to-13-3-million-contract-for-2026-with-a-2027-option/',
+          published: '2025-09-01',
         },
-        "note": "2025 regular season through Aug. 31, average fastball velocity. Reported by Boston.com (Associated Press); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2025 regular season through Aug. 31, average fastball velocity. Sources disagree: Just Baseball: 99.1 mph through Aug. 6, 2025; Talk Sox: 98.4 mph for the 2025 season; BoSox Injection: 98.5 mph around May-June. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Aroldis Chapman Is Beating the Odds and Pitching at His Best',
+          publisher: 'Just Baseball',
+          url: 'https://www.justbaseball.com/?p=134802',
+        },
+      },
+    ],
   },
   {
-    "id": "mason-miller",
-    "name": "Mason Miller",
-    "league": "MLB",
-    "position": "RP",
-    "team": "San Diego Padres",
-    "status": "active",
-    "facts": [
+    id: 'mason-miller',
+    name: 'Mason Miller',
+    league: 'MLB',
+    position: 'RP',
+    team: 'San Diego Padres',
+    status: 'active',
+    facts: [
       {
-        "metric": "fastballMaxMph",
-        "value": 104.5,
-        "quality": "ESTIMATED",
-        "asOf": "2025-10-01",
-        "category": "arm",
-        "context": "2025 NL Wild Card Series Game 2 vs. Cubs, strikeout of Carson Kelly, Statcast",
-        "source": {
-          "title": "Miller makes playoff history with 104.5 mph pitch (and he painted it!)",
-          "publisher": "MLB.com",
-          "url": "https://www.mlb.com/padres/news/mason-miller-throws-fastest-tracked-pitch-in-playoff-history"
+        metric: 'fastballMaxMph',
+        value: 104.5,
+        quality: 'VERIFIED',
+        asOf: '2025-10-01',
+        category: 'arm',
+        context: '2025 NL Wild Card Series Game 2 vs. Cubs, strikeout of Carson Kelly, Statcast',
+        source: {
+          title: 'Miller makes playoff history with 104.5 mph pitch (and he painted it!)',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/padres/news/mason-miller-throws-fastest-tracked-pitch-in-playoff-history',
         },
-        "note": "2025 NL Wild Card Series Game 2 vs. Cubs, strikeout of Carson Kelly, Statcast. Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com's own and was not independently checked.",
-        "rank": "makes playoff history"
+        note: '2025 NL Wild Card Series Game 2 vs. Cubs, strikeout of Carson Kelly, Statcast. Reported by MLB.com and confirmed by News4Jax (Associated Press).',
+        confirmedBy: {
+          title: 'Mason Miller reaches 104.5 mph as San Diego\'s bullpen shuts down the Cubs in Game 2 victory',
+          publisher: 'News4Jax (Associated Press)',
+          url: 'https://www.news4jax.com/sports/2025/10/02/mason-miller-reaches-1045-mph-as-san-diegos-bullpen-shuts-down-the-cubs-in-game-2-victory/',
+        },
+        rank: 'makes playoff history',
       },
       {
-        "metric": "heightIn",
-        "value": 77.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "Current ESPN player listing",
-        "source": {
-          "title": "Mason Miller Stats",
-          "publisher": "ESPN",
-          "url": "https://www.espn.com/mlb/player/stats?id=4730225"
+        metric: 'heightIn',
+        value: 77,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: 'Current ESPN player listing',
+        source: {
+          title: 'Mason Miller Stats',
+          publisher: 'ESPN',
+          url: 'https://www.espn.com/mlb/player/stats?id=4730225',
         },
-        "note": "Current ESPN player listing. Reported by ESPN; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: 'Current ESPN player listing. Reported by ESPN and confirmed by Baseball-Reference.',
+        confirmedBy: {
+          title: 'Mason Miller (BR Bullpen)',
+          publisher: 'Baseball-Reference',
+          url: 'https://www.baseball-reference.com/bullpen/Mason_Miller',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 200.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "Current ESPN player listing",
-        "source": {
-          "title": "Mason Miller Stats",
-          "publisher": "ESPN",
-          "url": "https://www.espn.com/mlb/player/stats?id=4730225"
+        metric: 'weightLb',
+        value: 200,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: 'Current ESPN player listing',
+        source: {
+          title: 'Mason Miller Stats',
+          publisher: 'ESPN',
+          url: 'https://www.espn.com/mlb/player/stats?id=4730225',
         },
-        "note": "Current ESPN player listing. Reported by ESPN; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: 'Current ESPN player listing. Reported by ESPN and confirmed by Baseball-Reference.',
+        confirmedBy: {
+          title: 'Mason Miller (BR Bullpen)',
+          publisher: 'Baseball-Reference',
+          url: 'https://www.baseball-reference.com/bullpen/Mason_Miller',
+        },
+      },
+    ],
   },
   {
-    "id": "ben-joyce",
-    "name": "Ben Joyce",
-    "league": "MLB",
-    "position": "RP",
-    "team": "Los Angeles Angels",
-    "status": "active",
-    "facts": [
+    id: 'ben-joyce',
+    name: 'Ben Joyce',
+    league: 'MLB',
+    position: 'RP',
+    team: 'Los Angeles Angels',
+    status: 'active',
+    facts: [
       {
-        "metric": "fastballMaxMph",
-        "value": 105.5,
-        "quality": "ESTIMATED",
-        "asOf": "2024-09-03",
-        "category": "arm",
-        "context": "2024 regular season, Angels vs. Dodgers, Statcast",
-        "source": {
-          "title": "Angels' Ben Joyce fires 105.5 mph pitch, fastest in MLB in 2024",
-          "publisher": "ABC7 (Associated Press)",
-          "url": "https://abc7.com/post/angels-ben-joyce-fires-1055-mph-pitch-fastest-mlb-2024/15265875/"
+        metric: 'fastballMaxMph',
+        value: 105.5,
+        quality: 'VERIFIED',
+        asOf: '2024-09-03',
+        category: 'arm',
+        context: '2024 regular season, Angels vs. Dodgers, Statcast',
+        source: {
+          title: 'Angels\' Ben Joyce fires 105.5 mph pitch, fastest in MLB in 2024',
+          publisher: 'ABC7 (Associated Press)',
+          url: 'https://abc7.com/post/angels-ben-joyce-fires-1055-mph-pitch-fastest-mlb-2024/15265875/',
         },
-        "note": "2024 regular season, Angels vs. Dodgers, Statcast. Reported by ABC7 (Associated Press); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is ABC7 (Associated Press)'s own and was not independently checked.",
-        "rank": "fastest in MLB in 2024"
-      }
-    ]
+        note: '2024 regular season, Angels vs. Dodgers, Statcast. Reported by ABC7 (Associated Press) and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: 'Angels\' Ben Joyce sets record for fastest strikeout with 105.5 mph pitch, joins Aroldis Chapman on leaderboard',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/mlb/news/angels-ben-joyce-sets-record-for-fastest-strikeout-with-105-5-mph-pitch-joins-aroldis-chapman-on-leaderboard',
+        },
+        rank: 'fastest in MLB in 2024',
+      },
+    ],
   },
   {
-    "id": "jacob-misiorowski",
-    "name": "Jacob Misiorowski",
-    "league": "MLB",
-    "position": "SP",
-    "team": "Milwaukee Brewers",
-    "status": "active",
-    "facts": [
+    id: 'jacob-misiorowski',
+    name: 'Jacob Misiorowski',
+    league: 'MLB',
+    position: 'SP',
+    team: 'Milwaukee Brewers',
+    status: 'active',
+    facts: [
       {
-        "metric": "fastballMaxMph",
-        "value": 103.7,
-        "quality": "ESTIMATED",
-        "asOf": "2026-06-06",
-        "category": "arm",
-        "context": "2026 regular season, Brewers at Rockies (Coors Field), pitch tracking",
-        "source": {
-          "title": "Miz sets record with 45(!) pitches 101+ mph as he lowers ERA to 1.50",
-          "publisher": "MLB.com",
-          "url": "https://mlb.com/news/jacob-misiorowski-first-start-at-coors-field"
+        metric: 'fastballMaxMph',
+        value: 103.7,
+        quality: 'VERIFIED',
+        asOf: '2026-06-06',
+        category: 'arm',
+        context: '2026 regular season, Brewers at Rockies (Coors Field), pitch tracking',
+        source: {
+          title: 'Miz sets record with 45(!) pitches 101+ mph as he lowers ERA to 1.50',
+          publisher: 'MLB.com',
+          url: 'https://mlb.com/news/jacob-misiorowski-first-start-at-coors-field',
         },
-        "note": "2026 regular season, Brewers at Rockies (Coors Field), pitch tracking. Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com's own and was not independently checked.",
-        "rank": "the fastest pitch recorded by a starter since pitch tracking began in 2008"
+        note: '2026 regular season, Brewers at Rockies (Coors Field), pitch tracking. Reported by MLB.com and confirmed by WTOP (Associated Press).',
+        confirmedBy: {
+          title: 'Jacob Misiorowski throws 103.7 mph pitch, fastest by a starter since tracking began in 2008',
+          publisher: 'WTOP (Associated Press)',
+          url: 'https://wtop.com/sports/2026/06/jacob-misiorowski-throws-103-7-mph-pitch-fastest-by-a-starter-since-tracking-began-in-2008/',
+        },
+        rank: 'the fastest pitch recorded by a starter since pitch tracking began in 2008',
       },
       {
-        "metric": "heightIn",
-        "value": 79.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "Player listing",
-        "source": {
-          "title": "Jacob Misiorowski (StatMuse)",
-          "publisher": "StatMuse",
-          "url": "https://www.statmuse.com/mlb/ask/misiobowski"
+        metric: 'heightIn',
+        value: 79,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: 'Player listing',
+        source: {
+          title: 'Jacob Misiorowski (StatMuse)',
+          publisher: 'StatMuse',
+          url: 'https://www.statmuse.com/mlb/ask/misiobowski',
         },
-        "note": "Player listing. Reported by StatMuse; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: 'Player listing. Reported by StatMuse and confirmed by Baseball-Reference.',
+        confirmedBy: {
+          title: 'Jacob Misiorowski (BR Bullpen)',
+          publisher: 'Baseball-Reference',
+          url: 'https://www.baseball-reference.com/bullpen/Jacob_Misiorowski',
+        },
+      },
+    ],
   },
   {
-    "id": "carson-benge",
-    "name": "Carson Benge",
-    "league": "MLB",
-    "position": "OF",
-    "team": "New York Mets",
-    "status": "rookie",
-    "facts": [
+    id: 'carson-benge',
+    name: 'Carson Benge',
+    league: 'MLB',
+    position: 'OF',
+    team: 'New York Mets',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "armStrengthMph",
-        "value": 95.5,
-        "quality": "ESTIMATED",
-        "asOf": "2026-08-16",
-        "category": "arm",
-        "context": "2026 regular season through Aug. 16, Statcast outfielder arm strength (average of top 10% of throws, min. 50)",
-        "source": {
-          "title": "Carson Benge throws out two Padres runners in the same inning",
-          "publisher": "MLB.com",
-          "url": "https://www.mlb.com/news/carson-benge-throws-out-two-padres-runners-in-the-same-inning"
+        metric: 'armStrengthMph',
+        value: 95.5,
+        quality: 'VERIFIED',
+        asOf: '2026-08-16',
+        category: 'arm',
+        context: '2026 regular season through Aug. 16, Statcast outfielder arm strength (average of top 10% of throws, min. 50)',
+        source: {
+          title: 'Carson Benge throws out two Padres runners in the same inning',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/news/carson-benge-throws-out-two-padres-runners-in-the-same-inning',
         },
-        "note": "2026 regular season through Aug. 16, Statcast outfielder arm strength (average of top 10% of throws, min. 50). Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com's own and was not independently checked.",
-        "rank": "ranked seventh in arm strength among outfielders"
+        note: '2026 regular season through Aug. 16, Statcast outfielder arm strength (average of top 10% of throws, min. 50). Reported by MLB.com and confirmed by SportsGrid. The rank wording is MLB.com\'s own and was not independently checked.',
+        confirmedBy: {
+          title: 'Carson Benge\'s arm the difference-maker in Mets\' 2-1 win over Padres',
+          publisher: 'SportsGrid',
+          url: 'https://www.sportsgrid.com/mlb/article/carson-benge39s-arm-the-difference-maker-in-mets39-2-1-win-over-padres',
+        },
+        rank: 'ranked seventh in arm strength among outfielders',
       },
       {
-        "metric": "heightIn",
-        "value": 73.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "Player listing",
-        "source": {
-          "title": "Carson Benge profile",
-          "publisher": "Baseball America",
-          "url": "https://baseballamerica.com/?p=20622"
+        metric: 'heightIn',
+        value: 73,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: 'Player listing',
+        source: {
+          title: 'Carson Benge profile',
+          publisher: 'Baseball America',
+          url: 'https://baseballamerica.com/?p=20622',
         },
-        "note": "Player listing. Reported by Baseball America; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: 'Player listing. Reported by Baseball America and confirmed by ESPN.',
+        confirmedBy: {
+          title: 'Carson Benge bio',
+          publisher: 'ESPN',
+          url: 'https://www.espn.com/mlb/player/bio/_/id/4925604/carson-benge',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 184.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026",
-        "category": "bio",
-        "context": "Player listing",
-        "source": {
-          "title": "Carson Benge profile",
-          "publisher": "Baseball America",
-          "url": "https://baseballamerica.com/?p=20622"
+        metric: 'weightLb',
+        value: 184,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'bio',
+        context: 'Player listing',
+        source: {
+          title: 'Carson Benge profile',
+          publisher: 'Baseball America',
+          url: 'https://baseballamerica.com/?p=20622',
         },
-        "note": "Player listing. Reported by Baseball America; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: 'Player listing. Reported by Baseball America and confirmed by ESPN.',
+        confirmedBy: {
+          title: 'Carson Benge bio',
+          publisher: 'ESPN',
+          url: 'https://www.espn.com/mlb/player/bio/_/id/4925604/carson-benge',
+        },
+      },
+    ],
   },
   {
-    "id": "oneil-cruz",
-    "name": "Oneil Cruz",
-    "league": "MLB",
-    "position": "CF",
-    "team": "Pittsburgh Pirates",
-    "status": "active",
-    "facts": [
+    id: 'oneil-cruz',
+    name: 'Oneil Cruz',
+    league: 'MLB',
+    position: 'CF',
+    team: 'Pittsburgh Pirates',
+    status: 'active',
+    facts: [
       {
-        "metric": "maxExitVelocityMph",
-        "value": 122.9,
-        "quality": "ESTIMATED",
-        "asOf": "2025-05-25",
-        "category": "explosive",
-        "context": "2025 regular season, home run vs. Brewers at PNC Park, Statcast",
-        "source": {
-          "title": "Cruz annihilates 122.9 mph HR, hardest-hit ball tracked by Statcast",
-          "publisher": "MLB.com",
-          "url": "https://www.mlb.com/pirates/news/oneil-cruz-hits-122-9-mph-home-run"
+        metric: 'maxExitVelocityMph',
+        value: 122.9,
+        quality: 'VERIFIED',
+        asOf: '2025-05-25',
+        category: 'explosive',
+        context: '2025 regular season, home run vs. Brewers at PNC Park, Statcast',
+        source: {
+          title: 'Cruz annihilates 122.9 mph HR, hardest-hit ball tracked by Statcast',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/pirates/news/oneil-cruz-hits-122-9-mph-home-run',
         },
-        "note": "2025 regular season, home run vs. Brewers at PNC Park, Statcast. Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com's own and was not independently checked.",
-        "rank": "hardest-hit ball tracked by Statcast"
+        note: '2025 regular season, home run vs. Brewers at PNC Park, Statcast. Reported by MLB.com and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: 'WATCH: Pirates\' Oneil Cruz records hardest hit ball in Statcast era on home run vs. Brewers',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/mlb/news/watch-pirates-oneil-cruz-records-hardest-hit-ball-in-statcast-era-on-home-run-vs-brewers',
+        },
+        rank: 'hardest-hit ball tracked by Statcast',
       },
       {
-        "metric": "maxExitVelocityMph",
-        "value": 121.5,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05-21",
-        "category": "explosive",
-        "context": "2024 regular season, double vs. Giants (off Camilo Doval), Statcast",
-        "source": {
-          "title": "Hardest Hit Balls In 2024",
-          "publisher": "Screwball",
-          "url": "https://screwball.com/mlb/hardest-hit-balls-in-2024"
+        metric: 'maxExitVelocityMph',
+        value: 121.5,
+        quality: 'VERIFIED',
+        asOf: '2024-05-21',
+        category: 'explosive',
+        context: '2024 regular season, double vs. Giants (off Camilo Doval), Statcast',
+        source: {
+          title: 'Hardest Hit Balls In 2024',
+          publisher: 'Screwball',
+          url: 'https://screwball.com/mlb/hardest-hit-balls-in-2024',
         },
-        "note": "2024 regular season, double vs. Giants (off Camilo Doval), Statcast. Reported by Screwball; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Screwball's own and was not independently checked.",
-        "rank": "The hardest hit ball in 2024"
+        note: '2024 regular season, double vs. Giants (off Camilo Doval), Statcast. Reported by Screwball and confirmed by Sports Illustrated.',
+        confirmedBy: {
+          title: 'Oneil Cruz Mashes Two Hardest-Hit Balls of the MLB Season in One Game',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/mlb/oneil-cruz-mashes-two-hardest-hit-balls-2024-season-one-game',
+        },
+        rank: 'The hardest hit ball in 2024',
       },
       {
-        "metric": "maxExitVelocityMph",
-        "value": 119.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026",
-        "category": "explosive",
-        "context": "2026 season to date at time of article, Statcast (all levels)",
-        "source": {
-          "title": "119 mph! Prospect sizzles hardest-hit ball of 2026 for homer at Triple-A",
-          "publisher": "MLB.com",
-          "url": "https://www.mlb.com/amp/news/nationals-prospect-andrew-pinckney-119-mph-home-run.html"
+        metric: 'maxExitVelocityMph',
+        value: 119,
+        quality: 'VERIFIED',
+        asOf: '2026',
+        category: 'explosive',
+        context: '2026 season to date at time of article, Statcast (all levels)',
+        source: {
+          title: '119 mph! Prospect sizzles hardest-hit ball of 2026 for homer at Triple-A',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/amp/news/nationals-prospect-andrew-pinckney-119-mph-home-run.html',
         },
-        "note": "2026 season to date at time of article, Statcast (all levels). Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com's own and was not independently checked.",
-        "rank": "hardest-hit baseball measured by Statcast at any level this year (shared with Andrew Pinckney)"
+        note: '2026 season to date at time of article, Statcast (all levels). Reported by MLB.com and confirmed by Screwball.',
+        confirmedBy: {
+          title: 'Hardest Hit Balls In 2026',
+          publisher: 'Screwball',
+          url: 'https://www.screwball.com/mlb/hardest-hit-balls-in-2026',
+        },
+        rank: 'hardest-hit baseball measured by Statcast at any level this year (shared with Andrew Pinckney)',
       },
       {
-        "metric": "batSpeedMph",
-        "value": 78.6,
-        "quality": "ESTIMATED",
-        "asOf": "2024",
-        "category": "explosive",
-        "context": "2024 regular season average bat speed, Statcast",
-        "source": {
-          "title": "Dark horse MLB stat leader predictions 2025",
-          "publisher": "MLB.com",
-          "url": "https://www.mlb.com/news/dark-horse-mlb-stat-leader-predictions-2025"
+        metric: 'batSpeedMph',
+        value: 78.6,
+        quality: 'VERIFIED',
+        asOf: '2024',
+        category: 'explosive',
+        context: '2024 regular season average bat speed, Statcast',
+        source: {
+          title: 'Dark horse MLB stat leader predictions 2025',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/news/dark-horse-mlb-stat-leader-predictions-2025',
         },
-        "note": "2024 regular season average bat speed, Statcast. Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com's own and was not independently checked.",
-        "rank": "second fastest in the league behind Giancarlo Stanton"
+        note: '2024 regular season average bat speed, Statcast. Reported by MLB.com and confirmed by Sports Illustrated.',
+        confirmedBy: {
+          title: 'Pirates\' Oneil Cruz Poised For Huge Season?',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/mlb/pirates/news/pittsburgh-pirates-oneil-cruz-poised-huge-season',
+        },
+        rank: 'second fastest in the league behind Giancarlo Stanton',
       },
       {
-        "metric": "heightIn",
-        "value": 79.0,
-        "quality": "ESTIMATED",
-        "asOf": "2021",
-        "category": "bio",
-        "context": "MLB debut story",
-        "source": {
-          "title": "Bucs prospect Cruz called up for MLB debut",
-          "publisher": "MLB.com",
-          "url": "https://www.mlb.com/news/pirates-call-up-prospect-oneil-cruz"
+        metric: 'heightIn',
+        value: 79,
+        quality: 'VERIFIED',
+        asOf: '2021',
+        category: 'bio',
+        context: 'MLB debut story',
+        source: {
+          title: 'Bucs prospect Cruz called up for MLB debut',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/news/pirates-call-up-prospect-oneil-cruz',
         },
-        "note": "MLB debut story. Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com's own and was not independently checked.",
-        "rank": "tallest player to start at shortstop in AL/NL history"
-      }
-    ]
+        note: 'MLB debut story. Reported by MLB.com and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Oneil Cruz',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Oneil_Cruz',
+        },
+        rank: 'tallest player to start at shortstop in AL/NL history',
+      },
+    ],
   },
   {
-    "id": "giancarlo-stanton",
-    "name": "Giancarlo Stanton",
-    "league": "MLB",
-    "position": "DH",
-    "team": "New York Yankees",
-    "status": "active",
-    "facts": [
+    id: 'giancarlo-stanton',
+    name: 'Giancarlo Stanton',
+    league: 'MLB',
+    position: 'DH',
+    team: 'New York Yankees',
+    status: 'active',
+    facts: [
       {
-        "metric": "batSpeedMph",
-        "value": 80.6,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "explosive",
-        "context": "2024 regular season through mid-May (first public bat-tracking release), Statcast; snapshot, not full season",
-        "source": {
-          "title": "Takeaways from new Statcast MLB bat-tracking data",
-          "publisher": "NBC Los Angeles (Associated Press)",
-          "url": "https://www.nbclosangeles.com/mlb/mlb-tracking-data-statcast-bat-speed-swing-length-blasts/3410765/"
+        metric: 'batSpeedMph',
+        value: 80.6,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'explosive',
+        context: '2024 regular season through mid-May (first public bat-tracking release), Statcast; snapshot, not full season',
+        source: {
+          title: 'Takeaways from new Statcast MLB bat-tracking data',
+          publisher: 'NBC Los Angeles (Associated Press)',
+          url: 'https://www.nbclosangeles.com/mlb/mlb-tracking-data-statcast-bat-speed-swing-length-blasts/3410765/',
         },
-        "note": "2024 regular season through mid-May (first public bat-tracking release), Statcast; snapshot, not full season. Reported by NBC Los Angeles (Associated Press); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NBC Los Angeles (Associated Press)'s own and was not independently checked.",
-        "rank": "has the fastest bat in baseball"
+        note: '2024 regular season through mid-May (first public bat-tracking release), Statcast; snapshot, not full season. Reported by NBC Los Angeles (Associated Press) and confirmed by MLB.com.',
+        confirmedBy: {
+          title: 'MLB bat speed leaders for 2024',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/news/mlb-bat-speed-leaders-for-2024',
+        },
+        rank: 'has the fastest bat in baseball',
       },
       {
-        "metric": "heightIn",
-        "value": 78.0,
-        "quality": "ESTIMATED",
-        "asOf": "2024",
-        "category": "bio",
-        "context": "MLB.com bat speed leaders article",
-        "source": {
-          "title": "MLB bat speed leaders for 2024",
-          "publisher": "MLB.com",
-          "url": "https://www.mlb.com/news/mlb-bat-speed-leaders-for-2024"
+        metric: 'heightIn',
+        value: 78,
+        quality: 'VERIFIED',
+        asOf: '2024',
+        category: 'bio',
+        context: 'MLB.com bat speed leaders article',
+        source: {
+          title: 'MLB bat speed leaders for 2024',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/news/mlb-bat-speed-leaders-for-2024',
         },
-        "note": "MLB.com bat speed leaders article. Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: 'MLB.com bat speed leaders article. Reported by MLB.com and confirmed by Topps (Ripped).',
+        confirmedBy: {
+          title: 'MLB Player Profile: Giancarlo Stanton',
+          publisher: 'Topps (Ripped)',
+          url: 'https://ripped.topps.com/profile/mlb/giancarlo-stanton',
+        },
+      },
+    ],
   },
   {
-    "id": "junior-caminero",
-    "name": "Junior Caminero",
-    "league": "MLB",
-    "position": "3B",
-    "team": "Tampa Bay Rays",
-    "status": "active",
-    "facts": [
+    id: 'junior-caminero',
+    name: 'Junior Caminero',
+    league: 'MLB',
+    position: '3B',
+    team: 'Tampa Bay Rays',
+    status: 'active',
+    facts: [
       {
-        "metric": "batSpeedMph",
-        "value": 79.9,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05-07",
-        "category": "explosive",
-        "context": "2026 regular season through early May, Statcast qualified hitters",
-        "source": {
-          "title": "This slugger has not just the fastest swing in baseball, but the flattest",
-          "publisher": "MLB.com",
-          "url": "https://www.mlb.com/rays/news/junior-caminero-fastest-and-flattest-swing",
-          "published": "2026-05-07"
+        metric: 'batSpeedMph',
+        value: 79.9,
+        quality: 'VERIFIED',
+        asOf: '2026-05-07',
+        category: 'explosive',
+        context: '2026 regular season through early May, Statcast qualified hitters',
+        source: {
+          title: 'This slugger has not just the fastest swing in baseball, but the flattest',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/rays/news/junior-caminero-fastest-and-flattest-swing',
+          published: '2026-05-07',
         },
-        "note": "2026 regular season through early May, Statcast qualified hitters. Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com's own and was not independently checked.",
-        "rank": "ranks No. 1 out of all the Major League hitters who qualify for Statcast's bat speed leaderboard"
+        note: '2026 regular season through early May, Statcast qualified hitters. Reported by MLB.com and confirmed by Just Baseball.',
+        confirmedBy: {
+          title: 'Junior Caminero survives All-Star Game scare, goes into second half with high hopes',
+          publisher: 'Just Baseball',
+          url: 'https://www.justbaseball.com/mlb/junior-caminero-injury-update-all-star-game-scare/',
+        },
+        rank: 'ranks No. 1 out of all the Major League hitters who qualify for Statcast\'s bat speed leaderboard',
       },
       {
-        "metric": "batSpeedMph",
-        "value": 78.5,
-        "quality": "ESTIMATED",
-        "asOf": "2025",
-        "category": "explosive",
-        "context": "2025 regular season average bat speed, Statcast",
-        "source": {
-          "title": "This slugger has not just the fastest swing in baseball, but the flattest",
-          "publisher": "MLB.com",
-          "url": "https://www.mlb.com/rays/news/junior-caminero-fastest-and-flattest-swing",
-          "published": "2026-05-07"
+        metric: 'batSpeedMph',
+        value: 78.5,
+        quality: 'ESTIMATED',
+        asOf: '2025',
+        category: 'explosive',
+        context: '2025 regular season average bat speed, Statcast',
+        source: {
+          title: 'This slugger has not just the fastest swing in baseball, but the flattest',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/rays/news/junior-caminero-fastest-and-flattest-swing',
+          published: '2026-05-07',
         },
-        "note": "2025 regular season average bat speed, Statcast. Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com's own and was not independently checked.",
-        "rank": "second-fastest"
-      }
-    ]
+        note: '2025 regular season average bat speed, Statcast. Sources disagree: SI (Inside The Rays): 78.6 mph, second only to Oneil Cruz (78.8); Just Baseball and Pitcher List: 78.3 mph, which Just Baseball ranks third-fastest in MLB. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Let\'s Appreciate What Junior Caminero Just Did',
+          publisher: 'Just Baseball',
+          url: 'https://www.justbaseball.com/mlb/junior-caminero-breakout-season-rays-2025/',
+        },
+      },
+    ],
   },
   {
-    "id": "konnor-griffin",
-    "name": "Konnor Griffin",
-    "league": "MLB",
-    "position": "SS",
-    "team": "Pittsburgh Pirates",
-    "status": "rookie",
-    "facts": [
+    id: 'konnor-griffin',
+    name: 'Konnor Griffin',
+    league: 'MLB',
+    position: 'SS',
+    team: 'Pittsburgh Pirates',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "maxExitVelocityMph",
-        "value": 113.2,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "rising",
-        "context": "2026 MLB season snapshot (around late May 2026), Statcast",
-        "source": {
-          "title": "Konnor Griffin player page",
-          "publisher": "Pirates Prospects",
-          "url": "https://piratesprospects.com/players/804606-konnor-griffin/"
+        metric: 'maxExitVelocityMph',
+        value: 113.2,
+        quality: 'ESTIMATED',
+        asOf: '2026-05',
+        category: 'rising',
+        context: '2026 MLB season snapshot (around late May 2026), Statcast',
+        source: {
+          title: 'Konnor Griffin player page',
+          publisher: 'Pirates Prospects',
+          url: 'https://piratesprospects.com/players/804606-konnor-griffin/',
         },
-        "note": "2026 MLB season snapshot (around late May 2026), Statcast. Reported by Pirates Prospects; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 MLB season snapshot (around late May 2026), Statcast. Reported by Pirates Prospects; no independent second source turned up, so it is not marked VERIFIED.',
       },
       {
-        "metric": "heightIn",
-        "value": 75.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-04",
-        "category": "bio",
-        "context": "AP coverage of MLB debut",
-        "source": {
-          "title": "Konnor Griffin, a big leaguer at 19, is eager to shed the 'top prospect' label in Pittsburgh",
-          "publisher": "WTOP (Associated Press)",
-          "url": "https://wtop.com/mlb/2026/04/konnor-griffin-a-big-leaguer-at-19-is-eager-to-shed-the-top-prospect-label-in-pittsburgh/"
+        metric: 'heightIn',
+        value: 75,
+        quality: 'ESTIMATED',
+        asOf: '2026-04',
+        category: 'bio',
+        context: 'AP coverage of MLB debut',
+        source: {
+          title: 'Konnor Griffin, a big leaguer at 19, is eager to shed the \'top prospect\' label in Pittsburgh',
+          publisher: 'WTOP (Associated Press)',
+          url: 'https://wtop.com/mlb/2026/04/konnor-griffin-a-big-leaguer-at-19-is-eager-to-shed-the-top-prospect-label-in-pittsburgh/',
         },
-        "note": "AP coverage of MLB debut. Reported by WTOP (Associated Press); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: 'AP coverage of MLB debut. Sources disagree: RotoWire describes him as 6-foot-4 (76 in), 225 lb. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Konnor Griffin player page',
+          publisher: 'Pirates Prospects',
+          url: 'https://piratesprospects.com/players/804606-konnor-griffin/',
+        },
+      },
+    ],
   },
   {
-    "id": "rafael-betancourt",
-    "name": "Rafael Betancourt",
-    "league": "MLB",
-    "position": "RP",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2000s-2010s",
-    "facts": [
+    id: 'rafael-betancourt',
+    name: 'Rafael Betancourt',
+    league: 'MLB',
+    position: 'RP',
+    team: 'Retired',
+    status: 'legend',
+    era: '2000s-2010s',
+    facts: [
       {
-        "metric": "spinRateRpm",
-        "value": 2553.0,
-        "quality": "ESTIMATED",
-        "asOf": "2015",
-        "category": "arm",
-        "context": "2015 regular season, four-seam fastball, Statcast",
-        "source": {
-          "title": "The spectrum of Statcast: Spin vs. velocity",
-          "publisher": "MLB.com",
-          "url": "https://www.mlb.com/news/statcast-spin-rate-compared-to-velocity-c160896926"
+        metric: 'spinRateRpm',
+        value: 2553,
+        quality: 'ESTIMATED',
+        asOf: '2015',
+        category: 'arm',
+        context: '2015 regular season, four-seam fastball, Statcast',
+        source: {
+          title: 'The spectrum of Statcast: Spin vs. velocity',
+          publisher: 'MLB.com',
+          url: 'https://www.mlb.com/news/statcast-spin-rate-compared-to-velocity-c160896926',
         },
-        "note": "2015 regular season, four-seam fastball, Statcast. Reported by MLB.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is MLB.com's own and was not independently checked.",
-        "rank": "the highest four-seam spin (2015)"
-      }
-    ]
+        note: '2015 regular season, four-seam fastball, Statcast. Reported by MLB.com; no independent second source turned up, so it is not marked VERIFIED.',
+      },
+    ],
   },
   {
-    "id": "tacko-fall",
-    "name": "Tacko Fall",
-    "league": "NBA",
-    "position": "C",
-    "team": "Cleveland Cavaliers",
-    "status": "free-agent",
-    "facts": [
+    id: 'tacko-fall',
+    name: 'Tacko Fall',
+    league: 'NBA',
+    position: 'C',
+    team: 'Cleveland Cavaliers',
+    status: 'free-agent',
+    facts: [
       {
-        "metric": "wingspanIn",
-        "value": 98.25,
-        "quality": "ESTIMATED",
-        "asOf": "2019-05",
-        "category": "arm",
-        "context": "2019 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine top measurements prospects",
-          "publisher": "NBA.com",
-          "url": "https://www.nba.com/news/nba-draft-combine-top-measurements-prospects"
+        metric: 'wingspanIn',
+        value: 98.25,
+        quality: 'VERIFIED',
+        asOf: '2019-05',
+        category: 'arm',
+        context: '2019 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine top measurements prospects',
+          publisher: 'NBA.com',
+          url: 'https://www.nba.com/news/nba-draft-combine-top-measurements-prospects',
         },
-        "note": "2019 NBA Draft Combine. Reported by NBA.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NBA.com's own and was not independently checked.",
-        "rank": "posted the highest marks ever for wingspan (8 feet, 2.25 inches)"
+        note: '2019 NBA Draft Combine. Reported by NBA.com and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Tacko Fall',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Tacko_Fall',
+        },
+        rank: 'posted the highest marks ever for wingspan (8 feet, 2.25 inches)',
       },
       {
-        "metric": "standingReachIn",
-        "value": 122.5,
-        "quality": "ESTIMATED",
-        "asOf": "2019-05",
-        "category": "build",
-        "context": "2019 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine top measurements prospects",
-          "publisher": "NBA.com",
-          "url": "https://www.nba.com/news/nba-draft-combine-top-measurements-prospects"
+        metric: 'standingReachIn',
+        value: 122.5,
+        quality: 'VERIFIED',
+        asOf: '2019-05',
+        category: 'build',
+        context: '2019 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine top measurements prospects',
+          publisher: 'NBA.com',
+          url: 'https://www.nba.com/news/nba-draft-combine-top-measurements-prospects',
         },
-        "note": "2019 NBA Draft Combine. Reported by NBA.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NBA.com's own and was not independently checked.",
-        "rank": "posted the highest marks ever for ... standing reach (10 feet, 2.5 inches)"
+        note: '2019 NBA Draft Combine. Reported by NBA.com and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: 'Tacko Fall',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Tacko_Fall',
+        },
+        rank: 'posted the highest marks ever for ... standing reach (10 feet, 2.5 inches)',
       },
       {
-        "metric": "heightIn",
-        "value": 89.25,
-        "quality": "ESTIMATED",
-        "asOf": "2019-05",
-        "category": "bio",
-        "context": "2019 NBA Draft Combine, without shoes",
-        "source": {
-          "title": "NBA Draft Combine measurements: What to make of Tacko Fall's incredible height and other takeaways",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nba/news/nba-draft-combine-measurements-what-to-make-of-tacko-falls-incredible-height-and-other-takeaways/"
+        metric: 'heightIn',
+        value: 89.25,
+        quality: 'VERIFIED',
+        asOf: '2019-05',
+        category: 'bio',
+        context: '2019 NBA Draft Combine, without shoes',
+        source: {
+          title: 'NBA Draft Combine measurements: What to make of Tacko Fall\'s incredible height and other takeaways',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/nba-draft-combine-measurements-what-to-make-of-tacko-falls-incredible-height-and-other-takeaways/',
         },
-        "note": "2019 NBA Draft Combine, without shoes. Reported by CBS Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2019 NBA Draft Combine, without shoes. Reported by CBS Sports and confirmed by Stadium Astro.',
+        confirmedBy: {
+          title: 'Here\'s how Tacko Fall could find role in NBA',
+          publisher: 'Stadium Astro',
+          url: 'https://english.stadiumastro.com/news-sports/heres-how-tacko-fall-could-find-role-nba-138129',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 289.0,
-        "quality": "ESTIMATED",
-        "asOf": "2019-05",
-        "category": "bio",
-        "context": "2019 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine measurements: What to make of Tacko Fall's incredible height and other takeaways",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nba/news/nba-draft-combine-measurements-what-to-make-of-tacko-falls-incredible-height-and-other-takeaways/"
+        metric: 'weightLb',
+        value: 289,
+        quality: 'VERIFIED',
+        asOf: '2019-05',
+        category: 'bio',
+        context: '2019 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine measurements: What to make of Tacko Fall\'s incredible height and other takeaways',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/nba-draft-combine-measurements-what-to-make-of-tacko-falls-incredible-height-and-other-takeaways/',
         },
-        "note": "2019 NBA Draft Combine. Reported by CBS Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2019 NBA Draft Combine. Reported by CBS Sports and confirmed by Bleacher Report.',
+        confirmedBy: {
+          title: 'Tacko Fall Measures at 7\'7", 289 Lbs at 2019 NBA Draft Scouting Combine',
+          publisher: 'Bleacher Report',
+          url: 'https://syndication.bleacherreport.com/amp/2836444-tacko-fall-measures-at-77-289-lbs-at-2019-nba-draft-scouting-combine.amp.html',
+        },
+      },
+    ],
   },
   {
-    "id": "zach-edey",
-    "name": "Zach Edey",
-    "league": "NBA",
-    "position": "C",
-    "team": "Memphis Grizzlies",
-    "status": "active",
-    "facts": [
+    id: 'zach-edey',
+    name: 'Zach Edey',
+    league: 'NBA',
+    position: 'C',
+    team: 'Memphis Grizzlies',
+    status: 'active',
+    facts: [
       {
-        "metric": "wingspanIn",
-        "value": 94.75,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "arm",
-        "context": "2024 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine largest wingspans",
-          "publisher": "NBA.com",
-          "url": "https://www.nba.com/news/nba-draft-combine-largest-wingspans"
+        metric: 'wingspanIn',
+        value: 94.75,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'arm',
+        context: '2024 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine largest wingspans',
+          publisher: 'NBA.com',
+          url: 'https://www.nba.com/news/nba-draft-combine-largest-wingspans',
         },
-        "note": "2024 NBA Draft Combine. Reported by NBA.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NBA.com's own and was not independently checked.",
-        "rank": "No. 2 on NBA.com's list of largest wingspans in combine history, behind Tacko Fall"
+        note: '2024 NBA Draft Combine. Reported by NBA.com and confirmed by AOL (USA Today Network). The rank wording is NBA.com\'s own and was not independently checked.',
+        confirmedBy: {
+          title: 'Zach Edey draft profile, scouting report: How will Purdue big man translate to NBA?',
+          publisher: 'AOL (USA Today Network)',
+          url: 'https://aol.com/zach-edey-draft-profile-scouting-124808147.html',
+        },
+        rank: 'No. 2 on NBA.com\'s list of largest wingspans in combine history, behind Tacko Fall',
       },
       {
-        "metric": "heightIn",
-        "value": 87.75,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "bio",
-        "context": "2024 NBA Draft Combine, without shoes",
-        "source": {
-          "title": "Zach Edey mock draft: Where will star Purdue basketball center go in 2024 NBA Draft?",
-          "publisher": "USA TODAY via Yahoo Sports",
-          "url": "https://uk.sports.yahoo.com/news/zach-edey-mock-draft-where-121105874.html"
+        metric: 'heightIn',
+        value: 87.75,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'bio',
+        context: '2024 NBA Draft Combine, without shoes',
+        source: {
+          title: 'Zach Edey mock draft: Where will star Purdue basketball center go in 2024 NBA Draft?',
+          publisher: 'USA TODAY via Yahoo Sports',
+          url: 'https://uk.sports.yahoo.com/news/zach-edey-mock-draft-where-121105874.html',
         },
-        "note": "2024 NBA Draft Combine, without shoes. Reported by USA TODAY via Yahoo Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is USA TODAY via Yahoo Sports's own and was not independently checked.",
-        "rank": "tallest player at the combine"
+        note: '2024 NBA Draft Combine, without shoes. Reported by USA TODAY via Yahoo Sports and confirmed by CBS Sports. The rank wording is USA TODAY via Yahoo Sports\'s own and was not independently checked.',
+        confirmedBy: {
+          title: '2024 NBA Draft Combine: Reed Sheppard, Zach Edey among biggest stock-risers',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/2024-nba-draft-combine-reed-sheppard-zach-edey-among-biggest-stock-risers',
+        },
+        rank: 'tallest player at the combine',
       },
       {
-        "metric": "standingReachIn",
-        "value": 115.0,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "build",
-        "context": "2024 NBA Draft Combine",
-        "source": {
-          "title": "Zach Edey mock draft: Where will star Purdue basketball center go in 2024 NBA Draft?",
-          "publisher": "USA TODAY via Yahoo Sports",
-          "url": "https://uk.sports.yahoo.com/news/zach-edey-mock-draft-where-121105874.html"
+        metric: 'standingReachIn',
+        value: 115,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'build',
+        context: '2024 NBA Draft Combine',
+        source: {
+          title: 'Zach Edey mock draft: Where will star Purdue basketball center go in 2024 NBA Draft?',
+          publisher: 'USA TODAY via Yahoo Sports',
+          url: 'https://uk.sports.yahoo.com/news/zach-edey-mock-draft-where-121105874.html',
         },
-        "note": "2024 NBA Draft Combine. Reported by USA TODAY via Yahoo Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is USA TODAY via Yahoo Sports's own and was not independently checked.",
-        "rank": "tied for the longest standing reach (with Donovan Clingan) at the 2024 combine"
+        note: '2024 NBA Draft Combine. Reported by USA TODAY via Yahoo Sports and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2024 NBA Draft Combine measurements: Bronny James comes up short on height but aces shooting drills',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/2024-nba-draft-combine-measurements-bronny-james-comes-up-short-on-height-but-aces-shooting-drills/',
+        },
+        rank: 'tied for the longest standing reach (with Donovan Clingan) at the 2024 combine',
       },
       {
-        "metric": "draftPick",
-        "value": 9.0,
-        "quality": "ESTIMATED",
-        "asOf": "2024-06",
-        "category": "bio",
-        "context": "2024 NBA Draft, Memphis Grizzlies",
-        "source": {
-          "title": "NBA Draft Combine largest wingspans",
-          "publisher": "NBA.com",
-          "url": "https://www.nba.com/news/nba-draft-combine-largest-wingspans"
+        metric: 'draftPick',
+        value: 9,
+        quality: 'VERIFIED',
+        asOf: '2024-06',
+        category: 'bio',
+        context: '2024 NBA Draft, Memphis Grizzlies',
+        source: {
+          title: 'NBA Draft Combine largest wingspans',
+          publisher: 'NBA.com',
+          url: 'https://www.nba.com/news/nba-draft-combine-largest-wingspans',
         },
-        "note": "2024 NBA Draft, Memphis Grizzlies. Reported by NBA.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2024 NBA Draft, Memphis Grizzlies. Reported by NBA.com and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2024 NBA Draft: Grizzles select Zach Edey with No. 9 pick landing 7-foot-4 star, two-time player of the year',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/2024-nba-draft-grizzles-select-zach-edey-with-no-9-pick-landing-7-foot-4-star-two-time-player-of-the-year',
+        },
+      },
+    ],
   },
   {
-    "id": "mo-bamba",
-    "name": "Mo Bamba",
-    "league": "NBA",
-    "position": "C",
-    "team": "Utah Jazz",
-    "status": "active",
-    "facts": [
+    id: 'mo-bamba',
+    name: 'Mo Bamba',
+    league: 'NBA',
+    position: 'C',
+    team: 'Utah Jazz',
+    status: 'active',
+    facts: [
       {
-        "metric": "wingspanIn",
-        "value": 94.0,
-        "quality": "ESTIMATED",
-        "asOf": "2018-05",
-        "category": "arm",
-        "context": "2018 NBA Draft Combine",
-        "source": {
-          "title": "NBA combine results, measurements: Mohamed Bamba sets record with 7-10 wingspan",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nba/news/nba-combine-results-measurements-mohamed-bamba-sets-record-with-7-10-wingspan"
+        metric: 'wingspanIn',
+        value: 94,
+        quality: 'VERIFIED',
+        asOf: '2018-05',
+        category: 'arm',
+        context: '2018 NBA Draft Combine',
+        source: {
+          title: 'NBA combine results, measurements: Mohamed Bamba sets record with 7-10 wingspan',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/nba-combine-results-measurements-mohamed-bamba-sets-record-with-7-10-wingspan',
         },
-        "note": "2018 NBA Draft Combine. Reported by CBS Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is CBS Sports's own and was not independently checked.",
-        "rank": "sets record with 7-10 wingspan; longest all-time among players who have participated at the combine (as of 2018)"
+        note: '2018 NBA Draft Combine. Reported by CBS Sports and confirmed by theScore.',
+        confirmedBy: {
+          title: 'Bamba breaks NBA combine record with 7-10 wingspan',
+          publisher: 'theScore',
+          url: 'https://www.thescore.com/news/1546035',
+        },
+        rank: 'sets record with 7-10 wingspan; longest all-time among players who have participated at the combine (as of 2018)',
       },
       {
-        "metric": "standingReachIn",
-        "value": 115.5,
-        "quality": "ESTIMATED",
-        "asOf": "2018-05",
-        "category": "build",
-        "context": "2018 NBA Draft Combine",
-        "source": {
-          "title": "NBA combine results, measurements: Mohamed Bamba sets record with 7-10 wingspan",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nba/news/nba-combine-results-measurements-mohamed-bamba-sets-record-with-7-10-wingspan"
+        metric: 'standingReachIn',
+        value: 115.5,
+        quality: 'VERIFIED',
+        asOf: '2018-05',
+        category: 'build',
+        context: '2018 NBA Draft Combine',
+        source: {
+          title: 'NBA combine results, measurements: Mohamed Bamba sets record with 7-10 wingspan',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/nba-combine-results-measurements-mohamed-bamba-sets-record-with-7-10-wingspan',
         },
-        "note": "2018 NBA Draft Combine. Reported by CBS Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is CBS Sports's own and was not independently checked.",
-        "rank": "longest among the combine participants in the current draft class"
+        note: '2018 NBA Draft Combine. Reported by CBS Sports and confirmed by NBADraft.net.',
+        confirmedBy: {
+          title: '2018 NBA Draft Combine Measurement Analysis',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2018-nba-draft-combine-measurement-analysis',
+        },
+        rank: 'longest among the combine participants in the current draft class',
       },
       {
-        "metric": "heightIn",
-        "value": 83.25,
-        "quality": "ESTIMATED",
-        "asOf": "2018-05",
-        "category": "bio",
-        "context": "2018 NBA Draft Combine, without shoes",
-        "source": {
-          "title": "Bamba dominates NBA Draft Combine",
-          "publisher": "Richmond Free Press",
-          "url": "https://m.richmondfreepress.com/news/2018/may/27/bamba-dominates-nba-draft-combine",
-          "published": "2018-05-27"
+        metric: 'heightIn',
+        value: 83.25,
+        quality: 'ESTIMATED',
+        asOf: '2018-05',
+        category: 'bio',
+        context: '2018 NBA Draft Combine, without shoes',
+        source: {
+          title: 'Bamba dominates NBA Draft Combine',
+          publisher: 'Richmond Free Press',
+          url: 'https://m.richmondfreepress.com/news/2018/may/27/bamba-dominates-nba-draft-combine',
+          published: '2018-05-27',
         },
-        "note": "2018 NBA Draft Combine, without shoes. Reported by Richmond Free Press; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2018 NBA Draft Combine, without shoes. Reported by Richmond Free Press; no independent second source turned up, so it is not marked VERIFIED.',
+      },
+    ],
   },
   {
-    "id": "aday-mara",
-    "name": "Aday Mara",
-    "league": "NBA",
-    "position": "C",
-    "team": "Oklahoma City Thunder",
-    "status": "rookie",
-    "facts": [
+    id: 'aday-mara',
+    name: 'Aday Mara',
+    league: 'NBA',
+    position: 'C',
+    team: 'Oklahoma City Thunder',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "standingReachIn",
-        "value": 117.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "build",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "Aday Mara absurd measurements at NBA Combine",
-          "publisher": "Larry Brown Sports",
-          "url": "https://larrybrownsports.com/basketball/aday-mara-absurd-measurements-nba-combine/753925"
+        metric: 'standingReachIn',
+        value: 117,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'build',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: 'Aday Mara absurd measurements at NBA Combine',
+          publisher: 'Larry Brown Sports',
+          url: 'https://larrybrownsports.com/basketball/aday-mara-absurd-measurements-nba-combine/753925',
         },
-        "note": "2026 NBA Draft Combine. Reported by Larry Brown Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Larry Brown Sports's own and was not independently checked.",
-        "rank": "tied Mara for the second-longest in Combine history, trailing only Tacko Fall"
+        note: '2026 NBA Draft Combine. Reported by Larry Brown Sports and confirmed by College Football Network.',
+        confirmedBy: {
+          title: 'Michigan\'s Aday Mara makes NBA Draft combine history with absolutely absurd measurements',
+          publisher: 'College Football Network',
+          url: 'https://collegefootballnetwork.com/mens-college-basketball/michigans-aday-mara-makes-nba-draft-combine-history-with-absolutely-absurd-measurements/',
+        },
+        rank: 'tied Mara for the second-longest in Combine history, trailing only Tacko Fall',
       },
       {
-        "metric": "wingspanIn",
-        "value": 90.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "arm",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "2026 NBA Draft Combine Measurements: Winners and Losers",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/2026-nba-draft-combine-measurements-winners-and-losers/"
+        metric: 'wingspanIn',
+        value: 90,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'arm',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: '2026 NBA Draft Combine Measurements: Winners and Losers',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2026-nba-draft-combine-measurements-winners-and-losers/',
         },
-        "note": "2026 NBA Draft Combine. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by NBADraft.net and confirmed by Larry Brown Sports.',
+        confirmedBy: {
+          title: 'Aday Mara absurd measurements at NBA combine',
+          publisher: 'Larry Brown Sports',
+          url: 'https://larrybrownsports.com/basketball/aday-mara-absurd-measurements-nba-combine/753925',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 87.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "bio",
-        "context": "2026 NBA Draft Combine, barefoot",
-        "source": {
-          "title": "Aday Mara absurd measurements at NBA Combine",
-          "publisher": "Larry Brown Sports",
-          "url": "https://larrybrownsports.com/basketball/aday-mara-absurd-measurements-nba-combine/753925"
+        metric: 'heightIn',
+        value: 87,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'bio',
+        context: '2026 NBA Draft Combine, barefoot',
+        source: {
+          title: 'Aday Mara absurd measurements at NBA Combine',
+          publisher: 'Larry Brown Sports',
+          url: 'https://larrybrownsports.com/basketball/aday-mara-absurd-measurements-nba-combine/753925',
         },
-        "note": "2026 NBA Draft Combine, barefoot. Reported by Larry Brown Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine, barefoot. Reported by Larry Brown Sports and confirmed by NBADraft.net.',
+        confirmedBy: {
+          title: '2026 NBA Draft Combine Measurements: Winners and Losers',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2026-nba-draft-combine-measurements-winners-and-losers/',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 260.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "bio",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "Aday Mara absurd measurements at NBA Combine",
-          "publisher": "Larry Brown Sports",
-          "url": "https://larrybrownsports.com/basketball/aday-mara-absurd-measurements-nba-combine/753925"
+        metric: 'weightLb',
+        value: 260,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'bio',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: 'Aday Mara absurd measurements at NBA Combine',
+          publisher: 'Larry Brown Sports',
+          url: 'https://larrybrownsports.com/basketball/aday-mara-absurd-measurements-nba-combine/753925',
         },
-        "note": "2026 NBA Draft Combine. Reported by Larry Brown Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by Larry Brown Sports and confirmed by Babcock Hoops.',
+        confirmedBy: {
+          title: '2026 NBA Draft Combine Measurements: Height, Weight, Wingspan and Standing Reach',
+          publisher: 'Babcock Hoops',
+          url: 'https://www.babcockhoops.com/post/2026-nba-draft-combine-measurements-height-weight-wingspan-and-standing-reach',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 12.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-06",
-        "category": "rising",
-        "context": "2026 NBA Draft, Oklahoma City Thunder",
-        "source": {
-          "title": "2026 NBA Draft Scouting Report: Oklahoma City Thunder's No. 12 Pick Aday Mara",
-          "publisher": "Bleacher Report",
-          "url": "https://bleacherreport.com/articles/25433181-2026-nba-draft-scouting-report-oklahoma-city-thunders-no-12-pick-aday-mara"
+        metric: 'draftPick',
+        value: 12,
+        quality: 'VERIFIED',
+        asOf: '2026-06',
+        category: 'rising',
+        context: '2026 NBA Draft, Oklahoma City Thunder',
+        source: {
+          title: '2026 NBA Draft Scouting Report: Oklahoma City Thunder\'s No. 12 Pick Aday Mara',
+          publisher: 'Bleacher Report',
+          url: 'https://bleacherreport.com/articles/25433181-2026-nba-draft-scouting-report-oklahoma-city-thunders-no-12-pick-aday-mara',
         },
-        "note": "2026 NBA Draft, Oklahoma City Thunder. Reported by Bleacher Report; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2026 NBA Draft, Oklahoma City Thunder. Reported by Bleacher Report and confirmed by Eurohoops.',
+        confirmedBy: {
+          title: 'Mara heading to Thunder with the 12th draft pick',
+          publisher: 'Eurohoops',
+          url: 'https://www.eurohoops.net/en/nba-news/1983885/aday-mara-selected-with-12th-draft-pick-oklahoma-city-thunder-nba/',
+        },
+      },
+    ],
   },
   {
-    "id": "keon-johnson",
-    "name": "Keon Johnson",
-    "league": "NBA",
-    "position": "G",
-    "team": "Brooklyn Nets",
-    "status": "free-agent",
-    "facts": [
+    id: 'keon-johnson',
+    name: 'Keon Johnson',
+    league: 'NBA',
+    position: 'G',
+    team: 'Brooklyn Nets',
+    status: 'free-agent',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 48.0,
-        "quality": "ESTIMATED",
-        "asOf": "2021-06",
-        "category": "explosive",
-        "context": "2021 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine highest max vertical leaps",
-          "publisher": "NBA.com",
-          "url": "https://www.nba.com/news/nba-draft-combine-highest-max-vertical-leaps"
+        metric: 'maxVerticalIn',
+        value: 48,
+        quality: 'VERIFIED',
+        asOf: '2021-06',
+        category: 'explosive',
+        context: '2021 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine highest max vertical leaps',
+          publisher: 'NBA.com',
+          url: 'https://www.nba.com/news/nba-draft-combine-highest-max-vertical-leaps',
         },
-        "note": "2021 NBA Draft Combine. Reported by NBA.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NBA.com's own and was not independently checked.",
-        "rank": "1. Keon Johnson: 48.0 Inches (2021) - No. 1 on NBA.com's highest max vertical leaps in combine history"
+        note: '2021 NBA Draft Combine. Reported by NBA.com and confirmed by Sports Illustrated.',
+        confirmedBy: {
+          title: 'Tennessee\'s Keon Johnson Shatters Vertical Jump Record at NBA Draft Combine',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/nba/2021/06/24/keon-john-breaks-vertical-jump-record-nba-draft-combine',
+        },
+        rank: '1. Keon Johnson: 48.0 Inches (2021) - No. 1 on NBA.com\'s highest max vertical leaps in combine history',
       },
       {
-        "metric": "standingVerticalIn",
-        "value": 41.5,
-        "quality": "ESTIMATED",
-        "asOf": "2021-06",
-        "category": "explosive",
-        "context": "2021 NBA Draft Combine",
-        "source": {
-          "title": "Keon Johnson scouting report: 2021 NBA Draft profile",
-          "publisher": "Rocky Top Talk",
-          "url": "https://www.rockytoptalk.com/2021/7/26/22577860/keon-johnson-scouting-report-2021-nba-draft-profile-tennessee-vols-basketball",
-          "published": "2021-07-26"
+        metric: 'standingVerticalIn',
+        value: 41.5,
+        quality: 'VERIFIED',
+        asOf: '2021-06',
+        category: 'explosive',
+        context: '2021 NBA Draft Combine',
+        source: {
+          title: 'Keon Johnson scouting report: 2021 NBA Draft profile',
+          publisher: 'Rocky Top Talk',
+          url: 'https://www.rockytoptalk.com/2021/7/26/22577860/keon-johnson-scouting-report-2021-nba-draft-profile-tennessee-vols-basketball',
+          published: '2021-07-26',
         },
-        "note": "2021 NBA Draft Combine. Reported by Rocky Top Talk; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Rocky Top Talk's own and was not independently checked.",
-        "rank": "41.5 standing vertical set a new NBA Combine record"
+        note: '2021 NBA Draft Combine. Reported by Rocky Top Talk and confirmed by Sports Illustrated.',
+        confirmedBy: {
+          title: 'Tennessee\'s Keon Johnson Shatters Vertical Jump Record at NBA Draft Combine',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/nba/2021/06/24/keon-john-breaks-vertical-jump-record-nba-draft-combine',
+        },
+        rank: '41.5 standing vertical set a new NBA Combine record',
       },
       {
-        "metric": "weightLb",
-        "value": 184.8,
-        "quality": "ESTIMATED",
-        "asOf": "2021-06",
-        "category": "bio",
-        "context": "2021 NBA Draft Combine",
-        "source": {
-          "title": "Keon Johnson scouting report: 2021 NBA Draft profile",
-          "publisher": "Rocky Top Talk",
-          "url": "https://www.rockytoptalk.com/2021/7/26/22577860/keon-johnson-scouting-report-2021-nba-draft-profile-tennessee-vols-basketball",
-          "published": "2021-07-26"
+        metric: 'weightLb',
+        value: 184.8,
+        quality: 'VERIFIED',
+        asOf: '2021-06',
+        category: 'bio',
+        context: '2021 NBA Draft Combine',
+        source: {
+          title: 'Keon Johnson scouting report: 2021 NBA Draft profile',
+          publisher: 'Rocky Top Talk',
+          url: 'https://www.rockytoptalk.com/2021/7/26/22577860/keon-johnson-scouting-report-2021-nba-draft-profile-tennessee-vols-basketball',
+          published: '2021-07-26',
         },
-        "note": "2021 NBA Draft Combine. Reported by Rocky Top Talk; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2021 NBA Draft Combine. Reported by Rocky Top Talk and confirmed by Heavy.',
+        confirmedBy: {
+          title: 'NBA Draft Watch: Record-Setting Wing Set to Work Out for Warriors',
+          publisher: 'Heavy',
+          url: 'https://heavy.com/sports/nba/golden-state-warriors/keon-johnson-nba-draft-prospect/',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 21.0,
-        "quality": "ESTIMATED",
-        "asOf": "2021-07",
-        "category": "bio",
-        "context": "2021 NBA Draft (New York Knicks, rights traded to LA Clippers on draft night)",
-        "source": {
-          "title": "Keon Johnson (basketball, born 2002)",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Keon_Johnson_(basketball,_born_2002)"
+        metric: 'draftPick',
+        value: 21,
+        quality: 'VERIFIED',
+        asOf: '2021-07',
+        category: 'bio',
+        context: '2021 NBA Draft (New York Knicks, rights traded to LA Clippers on draft night)',
+        source: {
+          title: 'Keon Johnson (basketball, born 2002)',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Keon_Johnson_(basketball,_born_2002)',
         },
-        "note": "2021 NBA Draft (New York Knicks, rights traded to LA Clippers on draft night). Reported by Wikipedia; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2021 NBA Draft (New York Knicks, rights traded to LA Clippers on draft night). Reported by Wikipedia and confirmed by NBA.com (LA Clippers).',
+        confirmedBy: {
+          title: 'LA Clippers Acquire Draft Rights to Keon Johnson',
+          publisher: 'NBA.com (LA Clippers)',
+          url: 'https://www.nba.com/clippers/news/la-clippers-acquire-draft-rights-keon-johnson',
+        },
+      },
+    ],
   },
   {
-    "id": "tobi-lawal",
-    "name": "Tobi Lawal",
-    "league": "NBA",
-    "position": "F",
-    "team": "Dallas Mavericks",
-    "status": "two-way",
-    "facts": [
+    id: 'tobi-lawal',
+    name: 'Tobi Lawal',
+    league: 'NBA',
+    position: 'F',
+    team: 'Dallas Mavericks',
+    status: 'two-way',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 45.5,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "explosive",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "Tobi Lawal selected by the Dallas Mavericks Wednesday night in 2026 NBA Draft",
-          "publisher": "Virginia Tech Athletics (hokiesports.com)",
-          "url": "https://hokiesports.com/news/2026/06/24/tobi-lawal-selected-by-the-dallas-mavericks-wednesday-night-in-2026-nba-draft",
-          "published": "2026-06-24"
+        metric: 'maxVerticalIn',
+        value: 45.5,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'explosive',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: 'Tobi Lawal selected by the Dallas Mavericks Wednesday night in 2026 NBA Draft',
+          publisher: 'Virginia Tech Athletics (hokiesports.com)',
+          url: 'https://hokiesports.com/news/2026/06/24/tobi-lawal-selected-by-the-dallas-mavericks-wednesday-night-in-2026-nba-draft',
+          published: '2026-06-24',
         },
-        "note": "2026 NBA Draft Combine. Reported by Virginia Tech Athletics (hokiesports.com); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by Virginia Tech Athletics (hokiesports.com) and confirmed by TechSideline.',
+        confirmedBy: {
+          title: 'Hokies forward Tobi Lawal drafted by Dallas Mavericks',
+          publisher: 'TechSideline',
+          url: 'https://techsideline.com/article/2026/06/24/hokies-forward-tobi-lawal-drafted-dallas-mavericks',
+        },
       },
       {
-        "metric": "standingVerticalIn",
-        "value": 40.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "explosive",
-        "context": "2026 NBA Draft Combine (no-step vertical)",
-        "source": {
-          "title": "Tobi Lawal",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/?p=1271478"
+        metric: 'standingVerticalIn',
+        value: 40,
+        quality: 'ESTIMATED',
+        asOf: '2026-05',
+        category: 'explosive',
+        context: '2026 NBA Draft Combine (no-step vertical)',
+        source: {
+          title: 'Tobi Lawal',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/?p=1271478',
         },
-        "note": "2026 NBA Draft Combine (no-step vertical). Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine (no-step vertical). Sources disagree: 40.5 in per TechSideline and Roundtable, both calling it the second-highest standing vertical in combine history; NBADraft.net (the researcher\'s source) gives 40. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Mavs rookie Tobi Lawal is NBA\'s best jumper: will he make an impact?',
+          publisher: 'Roundtable',
+          url: 'https://roundtable.io/sports/nba/mavericks/news/mavs-rookie-tobi-lawal-is-nbas-best-jumper-will-he-make-an-impact',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 79.25,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "bio",
-        "context": "2026 NBA Draft Combine (source does not state with or without shoes)",
-        "source": {
-          "title": "2026 NBA Draft Scouting Report: Dallas Mavericks' No. 48 Pick Tobi Lawal",
-          "publisher": "Bleacher Report",
-          "url": "https://bleacherreport.com/articles/25433455-2026-nba-draft-scouting-report-dallas-mavericks-no-48-pick-tobi-lawal"
+        metric: 'heightIn',
+        value: 79.25,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'bio',
+        context: '2026 NBA Draft Combine (source does not state with or without shoes)',
+        source: {
+          title: '2026 NBA Draft Scouting Report: Dallas Mavericks\' No. 48 Pick Tobi Lawal',
+          publisher: 'Bleacher Report',
+          url: 'https://bleacherreport.com/articles/25433455-2026-nba-draft-scouting-report-dallas-mavericks-no-48-pick-tobi-lawal',
         },
-        "note": "2026 NBA Draft Combine (source does not state with or without shoes). Reported by Bleacher Report; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine (source does not state with or without shoes). Reported by Bleacher Report and confirmed by NBADraft.net.',
+        confirmedBy: {
+          title: '2026 NBA Draft Combine Measurements',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2026-nba-draft-combine-measurements/',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 214.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "bio",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "2026 NBA Draft Scouting Report: Dallas Mavericks' No. 48 Pick Tobi Lawal",
-          "publisher": "Bleacher Report",
-          "url": "https://bleacherreport.com/articles/25433455-2026-nba-draft-scouting-report-dallas-mavericks-no-48-pick-tobi-lawal"
+        metric: 'weightLb',
+        value: 214,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'bio',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: '2026 NBA Draft Scouting Report: Dallas Mavericks\' No. 48 Pick Tobi Lawal',
+          publisher: 'Bleacher Report',
+          url: 'https://bleacherreport.com/articles/25433455-2026-nba-draft-scouting-report-dallas-mavericks-no-48-pick-tobi-lawal',
         },
-        "note": "2026 NBA Draft Combine. Reported by Bleacher Report; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by Bleacher Report and confirmed by NBADraft.net.',
+        confirmedBy: {
+          title: '2026 NBA Draft Combine Measurements',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2026-nba-draft-combine-measurements/',
+        },
       },
       {
-        "metric": "wingspanIn",
-        "value": 82.5,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "arm",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "2026 NBA Draft Scouting Report: Dallas Mavericks' No. 48 Pick Tobi Lawal",
-          "publisher": "Bleacher Report",
-          "url": "https://bleacherreport.com/articles/25433455-2026-nba-draft-scouting-report-dallas-mavericks-no-48-pick-tobi-lawal"
+        metric: 'wingspanIn',
+        value: 82.5,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'arm',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: '2026 NBA Draft Scouting Report: Dallas Mavericks\' No. 48 Pick Tobi Lawal',
+          publisher: 'Bleacher Report',
+          url: 'https://bleacherreport.com/articles/25433455-2026-nba-draft-scouting-report-dallas-mavericks-no-48-pick-tobi-lawal',
         },
-        "note": "2026 NBA Draft Combine. Reported by Bleacher Report; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by Bleacher Report and confirmed by NBADraft.net.',
+        confirmedBy: {
+          title: '2026 NBA Draft Combine Measurements',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2026-nba-draft-combine-measurements/',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 48.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-06-24",
-        "category": "rising",
-        "context": "2026 NBA Draft, Dallas Mavericks",
-        "source": {
-          "title": "Tobi Lawal selected by the Dallas Mavericks Wednesday night in 2026 NBA Draft",
-          "publisher": "Virginia Tech Athletics (hokiesports.com)",
-          "url": "https://hokiesports.com/news/2026/06/24/tobi-lawal-selected-by-the-dallas-mavericks-wednesday-night-in-2026-nba-draft",
-          "published": "2026-06-24"
+        metric: 'draftPick',
+        value: 48,
+        quality: 'VERIFIED',
+        asOf: '2026-06-24',
+        category: 'rising',
+        context: '2026 NBA Draft, Dallas Mavericks',
+        source: {
+          title: 'Tobi Lawal selected by the Dallas Mavericks Wednesday night in 2026 NBA Draft',
+          publisher: 'Virginia Tech Athletics (hokiesports.com)',
+          url: 'https://hokiesports.com/news/2026/06/24/tobi-lawal-selected-by-the-dallas-mavericks-wednesday-night-in-2026-nba-draft',
+          published: '2026-06-24',
         },
-        "note": "2026 NBA Draft, Dallas Mavericks. Reported by Virginia Tech Athletics (hokiesports.com); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2026 NBA Draft, Dallas Mavericks. Reported by Virginia Tech Athletics (hokiesports.com) and confirmed by TechSideline.',
+        confirmedBy: {
+          title: 'Hokies forward Tobi Lawal drafted by Dallas Mavericks',
+          publisher: 'TechSideline',
+          url: 'https://techsideline.com/article/2026/06/24/hokies-forward-tobi-lawal-drafted-dallas-mavericks',
+        },
+      },
+    ],
   },
   {
-    "id": "devin-carter",
-    "name": "Devin Carter",
-    "league": "NBA",
-    "position": "G",
-    "team": "Boston Celtics",
-    "status": "active",
-    "facts": [
+    id: 'devin-carter',
+    name: 'Devin Carter',
+    league: 'NBA',
+    position: 'G',
+    team: 'Boston Celtics',
+    status: 'active',
+    facts: [
       {
-        "metric": "threeQuarterSprintS",
-        "value": 2.87,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "fastest",
-        "context": "2024 NBA Draft Combine",
-        "source": {
-          "title": "2024 Fitness Tests for the NBA Draft (Combine)",
-          "publisher": "Top End Sports",
-          "url": "https://www.topendsports.com/sport/basketball/testing-draft-results-2024.htm"
+        metric: 'threeQuarterSprintS',
+        value: 2.87,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'fastest',
+        context: '2024 NBA Draft Combine',
+        source: {
+          title: '2024 Fitness Tests for the NBA Draft (Combine)',
+          publisher: 'Top End Sports',
+          url: 'https://www.topendsports.com/sport/basketball/testing-draft-results-2024.htm',
         },
-        "note": "2024 NBA Draft Combine. Reported by Top End Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Top End Sports's own and was not independently checked.",
-        "rank": "the fastest recorded at the combine since 2000"
+        note: '2024 NBA Draft Combine. Reported by Top End Sports and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2024 NBA Draft Combine measurements: Bronny James comes up short on height but aces shooting drills',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/2024-nba-draft-combine-measurements-bronny-james-comes-up-short-on-height-but-aces-shooting-drills/',
+        },
+        rank: 'the fastest recorded at the combine since 2000',
       },
       {
-        "metric": "maxVerticalIn",
-        "value": 42.0,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "explosive",
-        "context": "2024 NBA Draft Combine",
-        "source": {
-          "title": "2024 NBA Draft: Devin Carter and Enrique Freeman Shine At NBA Combine",
-          "publisher": "Sports Illustrated",
-          "url": "https://www.si.com/nba/draft/newsfeed/2024-nba-draft-devin-carter-and-enrique-freeman-shine-at-nba-combine-01hy4ej1vctn"
+        metric: 'maxVerticalIn',
+        value: 42,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'explosive',
+        context: '2024 NBA Draft Combine',
+        source: {
+          title: '2024 NBA Draft: Devin Carter and Enrique Freeman Shine At NBA Combine',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/nba/draft/newsfeed/2024-nba-draft-devin-carter-and-enrique-freeman-shine-at-nba-combine-01hy4ej1vctn',
         },
-        "note": "2024 NBA Draft Combine. Reported by Sports Illustrated; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Sports Illustrated's own and was not independently checked.",
-        "rank": "tied for first among all participants"
+        note: '2024 NBA Draft Combine. Reported by Sports Illustrated and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2024 NBA Draft Combine measurements: Bronny James comes up short on height but aces shooting drills',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/2024-nba-draft-combine-measurements-bronny-james-comes-up-short-on-height-but-aces-shooting-drills/',
+        },
+        rank: 'tied for first among all participants',
       },
       {
-        "metric": "laneAgilityS",
-        "value": 10.63,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "fastest",
-        "context": "2024 NBA Draft Combine",
-        "source": {
-          "title": "2024 NBA Draft: Devin Carter and Enrique Freeman Shine At NBA Combine",
-          "publisher": "Sports Illustrated",
-          "url": "https://www.si.com/nba/draft/newsfeed/2024-nba-draft-devin-carter-and-enrique-freeman-shine-at-nba-combine-01hy4ej1vctn"
+        metric: 'laneAgilityS',
+        value: 10.63,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'fastest',
+        context: '2024 NBA Draft Combine',
+        source: {
+          title: '2024 NBA Draft: Devin Carter and Enrique Freeman Shine At NBA Combine',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/nba/draft/newsfeed/2024-nba-draft-devin-carter-and-enrique-freeman-shine-at-nba-combine-01hy4ej1vctn',
         },
-        "note": "2024 NBA Draft Combine. Reported by Sports Illustrated; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Sports Illustrated's own and was not independently checked.",
-        "rank": "third best among players at the combine"
+        note: '2024 NBA Draft Combine. Reported by Sports Illustrated and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2024 NBA Draft Combine measurements: Bronny James comes up short on height but aces shooting drills',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/2024-nba-draft-combine-measurements-bronny-james-comes-up-short-on-height-but-aces-shooting-drills/',
+        },
+        rank: 'third best among players at the combine',
       },
       {
-        "metric": "wingspanIn",
-        "value": 80.75,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "arm",
-        "context": "2024 NBA Draft Combine",
-        "source": {
-          "title": "2024 NBA Draft Combine measurements: Bronny James comes up short on height but aces shooting drills",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nba/news/2024-nba-draft-combine-measurements-bronny-james-comes-up-short-on-height-but-aces-shooting-drills/"
+        metric: 'wingspanIn',
+        value: 80.75,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'arm',
+        context: '2024 NBA Draft Combine',
+        source: {
+          title: '2024 NBA Draft Combine measurements: Bronny James comes up short on height but aces shooting drills',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/2024-nba-draft-combine-measurements-bronny-james-comes-up-short-on-height-but-aces-shooting-drills/',
         },
-        "note": "2024 NBA Draft Combine. Reported by CBS Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is CBS Sports's own and was not independently checked.",
-        "rank": "the longest wingspan (6-8.75) among all point guards at the combine"
+        note: '2024 NBA Draft Combine. Reported by CBS Sports and confirmed by NBADraft.net. The rank wording is CBS Sports\'s own and was not independently checked.',
+        confirmedBy: {
+          title: 'Devin Carter player profile (NBA Comparison: Ayo Dosunmu)',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/players/devin-carter',
+        },
+        rank: 'the longest wingspan (6-8.75) among all point guards at the combine',
       },
       {
-        "metric": "heightIn",
-        "value": 74.25,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "bio",
-        "context": "2024 NBA Draft Combine, without shoes",
-        "source": {
-          "title": "2024 NBA Draft Combine measurements: Bronny James comes up short on height but aces shooting drills",
-          "publisher": "CBS Sports",
-          "url": "https://www.cbssports.com/nba/news/2024-nba-draft-combine-measurements-bronny-james-comes-up-short-on-height-but-aces-shooting-drills/"
+        metric: 'heightIn',
+        value: 74.25,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'bio',
+        context: '2024 NBA Draft Combine, without shoes',
+        source: {
+          title: '2024 NBA Draft Combine measurements: Bronny James comes up short on height but aces shooting drills',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/2024-nba-draft-combine-measurements-bronny-james-comes-up-short-on-height-but-aces-shooting-drills/',
         },
-        "note": "2024 NBA Draft Combine, without shoes. Reported by CBS Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2024 NBA Draft Combine, without shoes. Reported by CBS Sports and confirmed by NBADraft.net.',
+        confirmedBy: {
+          title: 'Devin Carter player profile (NBA Comparison: Ayo Dosunmu)',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/players/devin-carter',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 13.0,
-        "quality": "ESTIMATED",
-        "asOf": "2024-06",
-        "category": "bio",
-        "context": "2024 NBA Draft, Sacramento Kings",
-        "source": {
-          "title": "Who is Devin Carter? Here's a look at the Sacramento Kings' first-round 2024 NBA draft pick",
-          "publisher": "AOL",
-          "url": "https://aol.com/news/devin-carter-look-sacramento-kings-022419566.html"
+        metric: 'draftPick',
+        value: 13,
+        quality: 'VERIFIED',
+        asOf: '2024-06',
+        category: 'bio',
+        context: '2024 NBA Draft, Sacramento Kings',
+        source: {
+          title: 'Who is Devin Carter? Here\'s a look at the Sacramento Kings\' first-round 2024 NBA draft pick',
+          publisher: 'AOL',
+          url: 'https://aol.com/news/devin-carter-look-sacramento-kings-022419566.html',
         },
-        "note": "2024 NBA Draft, Sacramento Kings. Reported by AOL; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2024 NBA Draft, Sacramento Kings. Reported by AOL and confirmed by GoLocalProv.',
+        confirmedBy: {
+          title: 'PC Star Devin Carter Selected #13 By Sacramento Kings',
+          publisher: 'GoLocalProv',
+          url: 'https://www.golocalprov.com/sports/PC-Star-Devin-Carter-Selected-13-By-Sacramento-Kings',
+        },
+      },
+    ],
   },
   {
-    "id": "reed-sheppard",
-    "name": "Reed Sheppard",
-    "league": "NBA",
-    "position": "G",
-    "team": "Houston Rockets",
-    "status": "active",
-    "facts": [
+    id: 'reed-sheppard',
+    name: 'Reed Sheppard',
+    league: 'NBA',
+    position: 'G',
+    team: 'Houston Rockets',
+    status: 'active',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 42.0,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "explosive",
-        "context": "2024 NBA Draft Combine",
-        "source": {
-          "title": "Reed Sheppard posts best vertical at NBA Draft Combine",
-          "publisher": "WYMT",
-          "url": "https://www.wymt.com/2024/05/14/reed-sheppard-posts-best-vertical-nba-draft-combine",
-          "published": "2024-05-14"
+        metric: 'maxVerticalIn',
+        value: 42,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'explosive',
+        context: '2024 NBA Draft Combine',
+        source: {
+          title: 'Reed Sheppard posts best vertical at NBA Draft Combine',
+          publisher: 'WYMT',
+          url: 'https://www.wymt.com/2024/05/14/reed-sheppard-posts-best-vertical-nba-draft-combine',
+          published: '2024-05-14',
         },
-        "note": "2024 NBA Draft Combine. Reported by WYMT; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is WYMT's own and was not independently checked.",
-        "rank": "the best recorded by all prospects at the combine (matched by three others)"
+        note: '2024 NBA Draft Combine. Reported by WYMT and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2024 NBA Draft Combine: Reed Sheppard, Zach Edey among biggest stock-risers',
+          publisher: 'CBS Sports',
+          url: 'https://www.cbssports.com/nba/news/2024-nba-draft-combine-reed-sheppard-zach-edey-among-biggest-stock-risers',
+        },
+        rank: 'the best recorded by all prospects at the combine (matched by three others)',
       },
       {
-        "metric": "heightIn",
-        "value": 73.75,
-        "quality": "ESTIMATED",
-        "asOf": "2024-05",
-        "category": "bio",
-        "context": "2024 NBA Draft Combine, without shoes",
-        "source": {
-          "title": "Jazz 'Intrigued' by Kentucky Draft Prospect at Combine per Insider",
-          "publisher": "Sports Illustrated",
-          "url": "https://www.si.com/nba/jazz/news/jazz-intrigued-by-kentucky-draft-prospect-combine"
+        metric: 'heightIn',
+        value: 73.75,
+        quality: 'VERIFIED',
+        asOf: '2024-05',
+        category: 'bio',
+        context: '2024 NBA Draft Combine, without shoes',
+        source: {
+          title: 'Jazz \'Intrigued\' by Kentucky Draft Prospect at Combine per Insider',
+          publisher: 'Sports Illustrated',
+          url: 'https://www.si.com/nba/jazz/news/jazz-intrigued-by-kentucky-draft-prospect-combine',
         },
-        "note": "2024 NBA Draft Combine, without shoes. Reported by Sports Illustrated; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2024 NBA Draft Combine, without shoes. Reported by Sports Illustrated and confirmed by NBADraft.net.',
+        confirmedBy: {
+          title: '2024 NBA Draft Combine Tale of the Tape',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2024-nba-draft-combine-tale-of-the-tape/',
+        },
+      },
+    ],
   },
   {
-    "id": "drake-powell",
-    "name": "Drake Powell",
-    "league": "NBA",
-    "position": "F",
-    "team": "Brooklyn Nets",
-    "status": "active",
-    "facts": [
+    id: 'drake-powell',
+    name: 'Drake Powell',
+    league: 'NBA',
+    position: 'F',
+    team: 'Brooklyn Nets',
+    status: 'active',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 43.0,
-        "quality": "ESTIMATED",
-        "asOf": "2025-05",
-        "category": "explosive",
-        "context": "2025 NBA Draft Combine",
-        "source": {
-          "title": "2025 NBA Draft Combine: Measurement & Athletic Testing Winners and Losers",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/?p=1268565"
+        metric: 'maxVerticalIn',
+        value: 43,
+        quality: 'VERIFIED',
+        asOf: '2025-05',
+        category: 'explosive',
+        context: '2025 NBA Draft Combine',
+        source: {
+          title: '2025 NBA Draft Combine: Measurement & Athletic Testing Winners and Losers',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/?p=1268565',
         },
-        "note": "2025 NBA Draft Combine. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NBADraft.net's own and was not independently checked.",
-        "rank": "led the entire Combine in both no-step vertical (37.5\") and max vertical (43.0\")"
+        note: '2025 NBA Draft Combine. Reported by NBADraft.net and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2025 NBA Draft Combine measurements: Cooper Flagg reaches new height; Ace Bailey comes up short',
+          publisher: 'CBS Sports',
+          url: 'https://picks-s6.cbssports.com/nba/news/2025-nba-draft-combine-measurements-cooper-flagg-reaches-new-height-ace-bailey-comes-up-short/',
+        },
+        rank: 'led the entire Combine in both no-step vertical (37.5") and max vertical (43.0")',
       },
       {
-        "metric": "standingVerticalIn",
-        "value": 37.5,
-        "quality": "ESTIMATED",
-        "asOf": "2025-05",
-        "category": "explosive",
-        "context": "2025 NBA Draft Combine (no-step vertical)",
-        "source": {
-          "title": "2025 NBA Draft Combine: Measurement & Athletic Testing Winners and Losers",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/?p=1268565"
+        metric: 'standingVerticalIn',
+        value: 37.5,
+        quality: 'VERIFIED',
+        asOf: '2025-05',
+        category: 'explosive',
+        context: '2025 NBA Draft Combine (no-step vertical)',
+        source: {
+          title: '2025 NBA Draft Combine: Measurement & Athletic Testing Winners and Losers',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/?p=1268565',
         },
-        "note": "2025 NBA Draft Combine (no-step vertical). Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NBADraft.net's own and was not independently checked.",
-        "rank": "led the entire Combine in both no-step vertical (37.5\") and max vertical (43.0\")"
+        note: '2025 NBA Draft Combine (no-step vertical). Reported by NBADraft.net and confirmed by CBS Sports.',
+        confirmedBy: {
+          title: '2025 NBA Draft Combine measurements: Cooper Flagg reaches new height; Ace Bailey comes up short',
+          publisher: 'CBS Sports',
+          url: 'https://picks-s6.cbssports.com/nba/news/2025-nba-draft-combine-measurements-cooper-flagg-reaches-new-height-ace-bailey-comes-up-short/',
+        },
+        rank: 'led the entire Combine in both no-step vertical (37.5") and max vertical (43.0")',
       },
       {
-        "metric": "heightIn",
-        "value": 77.25,
-        "quality": "ESTIMATED",
-        "asOf": "2025-05",
-        "category": "bio",
-        "context": "2025 NBA Draft Combine, barefoot",
-        "source": {
-          "title": "2025 NBA Draft Combine: Measurement & Athletic Testing Winners and Losers",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/?p=1268565"
+        metric: 'heightIn',
+        value: 77.25,
+        quality: 'VERIFIED',
+        asOf: '2025-05',
+        category: 'bio',
+        context: '2025 NBA Draft Combine, barefoot',
+        source: {
+          title: '2025 NBA Draft Combine: Measurement & Athletic Testing Winners and Losers',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/?p=1268565',
         },
-        "note": "2025 NBA Draft Combine, barefoot. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2025 NBA Draft Combine, barefoot. Reported by NBADraft.net and confirmed by Liberty Ballers (SB Nation).',
+        confirmedBy: {
+          title: '2025 NBA Draft profile: Drake Powell, North Carolina',
+          publisher: 'Liberty Ballers (SB Nation)',
+          url: 'https://www.libertyballers.com/2025/6/12/24439525/2025-nba-draft-profile-drake-powell-north-carolina-sixers',
+        },
       },
       {
-        "metric": "wingspanIn",
-        "value": 84.0,
-        "quality": "ESTIMATED",
-        "asOf": "2025-05",
-        "category": "arm",
-        "context": "2025 NBA Draft Combine",
-        "source": {
-          "title": "2025 NBA Draft Combine: Measurement & Athletic Testing Winners and Losers",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/?p=1268565"
+        metric: 'wingspanIn',
+        value: 84,
+        quality: 'VERIFIED',
+        asOf: '2025-05',
+        category: 'arm',
+        context: '2025 NBA Draft Combine',
+        source: {
+          title: '2025 NBA Draft Combine: Measurement & Athletic Testing Winners and Losers',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/?p=1268565',
         },
-        "note": "2025 NBA Draft Combine. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2025 NBA Draft Combine. Reported by NBADraft.net and confirmed by Floor and Ceiling (Substack).',
+        confirmedBy: {
+          title: '2025 NBA Draft: Drake Powell Scouting Report',
+          publisher: 'Floor and Ceiling (Substack)',
+          url: 'https://floorandceiling.substack.com/p/drake-powell-scouting-report',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 200.4,
-        "quality": "ESTIMATED",
-        "asOf": "2025-05",
-        "category": "bio",
-        "context": "2025 NBA Draft Combine",
-        "source": {
-          "title": "Drake Powell",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/players/drake-powell/"
+        metric: 'weightLb',
+        value: 200.4,
+        quality: 'VERIFIED',
+        asOf: '2025-05',
+        category: 'bio',
+        context: '2025 NBA Draft Combine',
+        source: {
+          title: 'Drake Powell',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/players/drake-powell/',
         },
-        "note": "2025 NBA Draft Combine. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2025 NBA Draft Combine. Reported by NBADraft.net and confirmed by Liberty Ballers (SB Nation).',
+        confirmedBy: {
+          title: '2025 NBA Draft profile: Drake Powell, North Carolina',
+          publisher: 'Liberty Ballers (SB Nation)',
+          url: 'https://www.libertyballers.com/2025/6/12/24439525/2025-nba-draft-profile-drake-powell-north-carolina-sixers',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 22.0,
-        "quality": "ESTIMATED",
-        "asOf": "2025-06-25",
-        "category": "bio",
-        "context": "2025 NBA Draft (Atlanta Hawks pick, traded to Brooklyn)",
-        "source": {
-          "title": "Men's Basketball: Drake Powell Drafted",
-          "publisher": "University of North Carolina Athletics",
-          "url": "https://goheels.com/news/2025/6/25/mens-basketball-drake-powell-drafted",
-          "published": "2025-06-25"
+        metric: 'draftPick',
+        value: 22,
+        quality: 'VERIFIED',
+        asOf: '2025-06-25',
+        category: 'bio',
+        context: '2025 NBA Draft (Atlanta Hawks pick, traded to Brooklyn)',
+        source: {
+          title: 'Men\'s Basketball: Drake Powell Drafted',
+          publisher: 'University of North Carolina Athletics',
+          url: 'https://goheels.com/news/2025/6/25/mens-basketball-drake-powell-drafted',
+          published: '2025-06-25',
         },
-        "note": "2025 NBA Draft (Atlanta Hawks pick, traded to Brooklyn). Reported by University of North Carolina Athletics; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2025 NBA Draft (Atlanta Hawks pick, traded to Brooklyn). Reported by University of North Carolina Athletics and confirmed by YES Network.',
+        confirmedBy: {
+          title: 'Brooklyn Nets acquire Terance Mann and draft rights to Drake Powell in three-team trade',
+          publisher: 'YES Network',
+          url: 'https://www.yesnetwork.com/nets/news/brooklyn-nets-acquire-terance-mann-and-draft-rights-to-drake-powell-in-three-team-trade',
+        },
+      },
+    ],
   },
   {
-    "id": "aj-dybantsa",
-    "name": "AJ Dybantsa",
-    "league": "NBA",
-    "position": "F",
-    "team": "Washington Wizards",
-    "status": "rookie",
-    "facts": [
+    id: 'aj-dybantsa',
+    name: 'AJ Dybantsa',
+    league: 'NBA',
+    position: 'F',
+    team: 'Washington Wizards',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 42.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "explosive",
-        "context": "2026 NBA Draft Combine (per NBA.com, as cited)",
-        "source": {
-          "title": "AJ Dybantsa 2026 NBA Draft Profile: Combine Measurements, Potential Landing Spots",
-          "publisher": "Fadeaway World",
-          "url": "https://fadeawayworld.net/aj-dybantsa-2026-nba-draft-profile-combine-measurements-potential-landing-spots"
+        metric: 'maxVerticalIn',
+        value: 42,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'explosive',
+        context: '2026 NBA Draft Combine (per NBA.com, as cited)',
+        source: {
+          title: 'AJ Dybantsa 2026 NBA Draft Profile: Combine Measurements, Potential Landing Spots',
+          publisher: 'Fadeaway World',
+          url: 'https://fadeawayworld.net/aj-dybantsa-2026-nba-draft-profile-combine-measurements-potential-landing-spots',
         },
-        "note": "2026 NBA Draft Combine (per NBA.com, as cited). Reported by Fadeaway World; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine (per NBA.com, as cited). Reported by Fadeaway World and confirmed by Hoops HQ.',
+        confirmedBy: {
+          title: 'Hoops HQ (AJ Dybantsa combine coverage)',
+          publisher: 'Hoops HQ',
+          url: 'https://www.hoopshq.com/?p=23825',
+        },
       },
       {
-        "metric": "standingVerticalIn",
-        "value": 35.5,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "explosive",
-        "context": "2026 NBA Draft Combine (per NBA.com, as cited)",
-        "source": {
-          "title": "AJ Dybantsa 2026 NBA Draft Profile: Combine Measurements, Potential Landing Spots",
-          "publisher": "Fadeaway World",
-          "url": "https://fadeawayworld.net/aj-dybantsa-2026-nba-draft-profile-combine-measurements-potential-landing-spots"
+        metric: 'standingVerticalIn',
+        value: 35.5,
+        quality: 'ESTIMATED',
+        asOf: '2026-05',
+        category: 'explosive',
+        context: '2026 NBA Draft Combine (per NBA.com, as cited)',
+        source: {
+          title: 'AJ Dybantsa 2026 NBA Draft Profile: Combine Measurements, Potential Landing Spots',
+          publisher: 'Fadeaway World',
+          url: 'https://fadeawayworld.net/aj-dybantsa-2026-nba-draft-profile-combine-measurements-potential-landing-spots',
         },
-        "note": "2026 NBA Draft Combine (per NBA.com, as cited). Reported by Fadeaway World; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine (per NBA.com, as cited). Sources disagree: 33.5 in per CBS Sports\' combine data and a Nordot draft analysis; 35.5 appears only in the researcher\'s source (Fadeaway World). Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'AJ Dybantsa drafted by Washington Wizards: Analysis, contract details, more',
+          publisher: 'Nordot',
+          url: 'https://nordot.app/1442311181009305783',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 80.5,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "bio",
-        "context": "2026 NBA Draft Combine, barefoot",
-        "source": {
-          "title": "NBA Draft Combine measurements: Top 5 prospects' height, weight, wingspan and more",
-          "publisher": "College Football Network",
-          "url": "https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/"
+        metric: 'heightIn',
+        value: 80.5,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'bio',
+        context: '2026 NBA Draft Combine, barefoot',
+        source: {
+          title: 'NBA Draft Combine measurements: Top 5 prospects\' height, weight, wingspan and more',
+          publisher: 'College Football Network',
+          url: 'https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/',
         },
-        "note": "2026 NBA Draft Combine, barefoot. Reported by College Football Network; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine, barefoot. Reported by College Football Network and confirmed by Babcock Hoops.',
+        confirmedBy: {
+          title: '2026 NBA Draft Combine Measurements: Height, Weight, Wingspan and Standing Reach',
+          publisher: 'Babcock Hoops',
+          url: 'https://www.babcockhoops.com/post/2026-nba-draft-combine-measurements-height-weight-wingspan-and-standing-reach',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 217.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "bio",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine measurements: Top 5 prospects' height, weight, wingspan and more",
-          "publisher": "College Football Network",
-          "url": "https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/"
+        metric: 'weightLb',
+        value: 217,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'bio',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine measurements: Top 5 prospects\' height, weight, wingspan and more',
+          publisher: 'College Football Network',
+          url: 'https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/',
         },
-        "note": "2026 NBA Draft Combine. Reported by College Football Network; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by College Football Network and confirmed by Babcock Hoops.',
+        confirmedBy: {
+          title: '2026 NBA Draft Combine Measurements: Height, Weight, Wingspan and Standing Reach',
+          publisher: 'Babcock Hoops',
+          url: 'https://www.babcockhoops.com/post/2026-nba-draft-combine-measurements-height-weight-wingspan-and-standing-reach',
+        },
       },
       {
-        "metric": "wingspanIn",
-        "value": 84.25,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "arm",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine measurements: Top 5 prospects' height, weight, wingspan and more",
-          "publisher": "College Football Network",
-          "url": "https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/"
+        metric: 'wingspanIn',
+        value: 84.25,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'arm',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine measurements: Top 5 prospects\' height, weight, wingspan and more',
+          publisher: 'College Football Network',
+          url: 'https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/',
         },
-        "note": "2026 NBA Draft Combine. Reported by College Football Network; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by College Football Network and confirmed by Babcock Hoops.',
+        confirmedBy: {
+          title: '2026 NBA Draft Combine Measurements: Height, Weight, Wingspan and Standing Reach',
+          publisher: 'Babcock Hoops',
+          url: 'https://www.babcockhoops.com/post/2026-nba-draft-combine-measurements-height-weight-wingspan-and-standing-reach',
+        },
       },
       {
-        "metric": "standingReachIn",
-        "value": 106.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "build",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine measurements: Top 5 prospects' height, weight, wingspan and more",
-          "publisher": "College Football Network",
-          "url": "https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/"
+        metric: 'standingReachIn',
+        value: 106,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'build',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine measurements: Top 5 prospects\' height, weight, wingspan and more',
+          publisher: 'College Football Network',
+          url: 'https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/',
         },
-        "note": "2026 NBA Draft Combine. Reported by College Football Network; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by College Football Network and confirmed by Fadeaway World.',
+        confirmedBy: {
+          title: 'AJ Dybantsa 2026 NBA Draft Profile: Combine Measurements, Potential Landing Spots',
+          publisher: 'Fadeaway World',
+          url: 'https://fadeawayworld.net/aj-dybantsa-2026-nba-draft-profile-combine-measurements-potential-landing-spots',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 1.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-06-23",
-        "category": "rising",
-        "context": "2026 NBA Draft, Washington Wizards",
-        "source": {
-          "title": "Wizards select AJ Dybantsa first overall in 2026 NBA Draft",
-          "publisher": "Fox News",
-          "url": "https://www.foxnews.com/sports/wizards-select-aj-dybantsa-first-overall-2026-nba-draft"
+        metric: 'draftPick',
+        value: 1,
+        quality: 'VERIFIED',
+        asOf: '2026-06-23',
+        category: 'rising',
+        context: '2026 NBA Draft, Washington Wizards',
+        source: {
+          title: 'Wizards select AJ Dybantsa first overall in 2026 NBA Draft',
+          publisher: 'Fox News',
+          url: 'https://www.foxnews.com/sports/wizards-select-aj-dybantsa-first-overall-2026-nba-draft',
         },
-        "note": "2026 NBA Draft, Washington Wizards. Reported by Fox News; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Fox News's own and was not independently checked.",
-        "rank": "first overall"
-      }
-    ]
+        note: '2026 NBA Draft, Washington Wizards. Reported by Fox News and confirmed by NBA.com.',
+        confirmedBy: {
+          title: 'Wizards take AJ Dybantsa No. 1 in 2026 Draft',
+          publisher: 'NBA.com',
+          url: 'https://www.nba.com/news/wizards-take-aj-dybantsa-no-1-2026-draft',
+        },
+        rank: 'first overall',
+      },
+    ],
   },
   {
-    "id": "cameron-carr",
-    "name": "Cameron Carr",
-    "league": "NBA",
-    "position": "G",
-    "team": "Los Angeles Lakers",
-    "status": "rookie",
-    "facts": [
+    id: 'cameron-carr',
+    name: 'Cameron Carr',
+    league: 'NBA',
+    position: 'G',
+    team: 'Los Angeles Lakers',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 42.5,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "explosive",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "2026 NBA Draft Scouting Report: Los Angeles Lakers' No. 24 Pick Cameron Carr",
-          "publisher": "Bleacher Report",
-          "url": "https://bleacherreport.com/articles/25433195-2026-nba-draft-scouting-report-los-angeles-lakers-no-24-pick-cameron-carr"
+        metric: 'maxVerticalIn',
+        value: 42.5,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'explosive',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: '2026 NBA Draft Scouting Report: Los Angeles Lakers\' No. 24 Pick Cameron Carr',
+          publisher: 'Bleacher Report',
+          url: 'https://bleacherreport.com/articles/25433195-2026-nba-draft-scouting-report-los-angeles-lakers-no-24-pick-cameron-carr',
         },
-        "note": "2026 NBA Draft Combine. Reported by Bleacher Report; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Bleacher Report's own and was not independently checked.",
-        "rank": "ranked No. 2 among all prospects that participated"
+        note: '2026 NBA Draft Combine. Reported by Bleacher Report and confirmed by Fadeaway World.',
+        confirmedBy: {
+          title: 'Lakers Trade 25th Pick With Knicks To Move Up In The 2026 NBA Draft; Select Cameron Carr At No. 24',
+          publisher: 'Fadeaway World',
+          url: 'https://fadeawayworld.net/nba/los-angeles-lakers/lakers-trade-25th-pick-with-knicks-to-move-up-in-the-2026-nba-draft-select-cameron-carr-at-no-24',
+        },
       },
       {
-        "metric": "laneAgilityS",
-        "value": 10.46,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "fastest",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "2026 NBA Draft Scouting Report: Los Angeles Lakers' No. 24 Pick Cameron Carr",
-          "publisher": "Bleacher Report",
-          "url": "https://bleacherreport.com/articles/25433195-2026-nba-draft-scouting-report-los-angeles-lakers-no-24-pick-cameron-carr"
+        metric: 'laneAgilityS',
+        value: 10.46,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'fastest',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: '2026 NBA Draft Scouting Report: Los Angeles Lakers\' No. 24 Pick Cameron Carr',
+          publisher: 'Bleacher Report',
+          url: 'https://bleacherreport.com/articles/25433195-2026-nba-draft-scouting-report-los-angeles-lakers-no-24-pick-cameron-carr',
         },
-        "note": "2026 NBA Draft Combine. Reported by Bleacher Report; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Bleacher Report's own and was not independently checked.",
-        "rank": "also the second-fastest at the combine"
+        note: '2026 NBA Draft Combine. Reported by Bleacher Report and confirmed by Fadeaway World.',
+        confirmedBy: {
+          title: 'Lakers Trade 25th Pick With Knicks To Move Up In The 2026 NBA Draft; Select Cameron Carr At No. 24',
+          publisher: 'Fadeaway World',
+          url: 'https://fadeawayworld.net/nba/los-angeles-lakers/lakers-trade-25th-pick-with-knicks-to-move-up-in-the-2026-nba-draft-select-cameron-carr-at-no-24',
+        },
+        rank: 'also the second-fastest at the combine',
       },
       {
-        "metric": "heightIn",
-        "value": 76.5,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "bio",
-        "context": "2026 NBA Draft Combine, barefoot",
-        "source": {
-          "title": "2026 NBA Draft Profile: Cameron Carr",
-          "publisher": "NBA.com",
-          "url": "https://www.nba.com/draft/2026/prospects/cameron-carr"
+        metric: 'heightIn',
+        value: 76.5,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'bio',
+        context: '2026 NBA Draft Combine, barefoot',
+        source: {
+          title: '2026 NBA Draft Profile: Cameron Carr',
+          publisher: 'NBA.com',
+          url: 'https://www.nba.com/draft/2026/prospects/cameron-carr',
         },
-        "note": "2026 NBA Draft Combine, barefoot. Reported by NBA.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine, barefoot. Reported by NBA.com and confirmed by NBADraft.net.',
+        confirmedBy: {
+          title: '2026 NBA Draft Combine Measurements: Winners and Losers',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2026-nba-draft-combine-measurements-winners-and-losers/',
+        },
       },
       {
-        "metric": "wingspanIn",
-        "value": 84.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "arm",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "2026 NBA Draft Profile: Cameron Carr",
-          "publisher": "NBA.com",
-          "url": "https://www.nba.com/draft/2026/prospects/cameron-carr"
+        metric: 'wingspanIn',
+        value: 84,
+        quality: 'ESTIMATED',
+        asOf: '2026-05',
+        category: 'arm',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: '2026 NBA Draft Profile: Cameron Carr',
+          publisher: 'NBA.com',
+          url: 'https://www.nba.com/draft/2026/prospects/cameron-carr',
         },
-        "note": "2026 NBA Draft Combine. Reported by NBA.com; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Sources disagree: 7\'0.75" (84.75 in) per Bleacher Report\'s combine listing, The Center Hub scouting report, Nordot and NBADraft.net. ESPN/ABC7 call it \'nearly 7-1\'.. Shown as ESTIMATED until they agree.',
+        confirmedBy: {
+          title: 'Cameron Carr Scouting Report',
+          publisher: 'The Center Hub (Substack)',
+          url: 'https://thecenterhub.substack.com/p/cameron-carr-scouting-report',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 184.4,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "bio",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "2026 NBA Draft Combine Measurements: Winners and Losers",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/2026-nba-draft-combine-measurements-winners-and-losers/"
+        metric: 'weightLb',
+        value: 184.4,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'bio',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: '2026 NBA Draft Combine Measurements: Winners and Losers',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2026-nba-draft-combine-measurements-winners-and-losers/',
         },
-        "note": "2026 NBA Draft Combine. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by NBADraft.net and confirmed by Nordot (syndicated).',
+        confirmedBy: {
+          title: 'Cameron Carr drafted, traded to Los Angeles Lakers: Analysis, contract details, more',
+          publisher: 'Nordot (syndicated)',
+          url: 'https://nordot.app/1442349116289041190',
+        },
       },
       {
-        "metric": "standingReachIn",
-        "value": 104.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "build",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "2026 NBA Draft Combine Measurements: Winners and Losers",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/2026-nba-draft-combine-measurements-winners-and-losers/"
+        metric: 'standingReachIn',
+        value: 104,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'build',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: '2026 NBA Draft Combine Measurements: Winners and Losers',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2026-nba-draft-combine-measurements-winners-and-losers/',
         },
-        "note": "2026 NBA Draft Combine. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by NBADraft.net and confirmed by Nordot (syndicated).',
+        confirmedBy: {
+          title: 'Cameron Carr drafted, traded to Los Angeles Lakers: Analysis, contract details, more',
+          publisher: 'Nordot (syndicated)',
+          url: 'https://nordot.app/1442349116289041190',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 24.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-06",
-        "category": "rising",
-        "context": "2026 NBA Draft (Lakers via Knicks)",
-        "source": {
-          "title": "Lakers draft Cameron Carr after Knicks trade: watch highlights, No. 24 pick 2026 NBA Draft",
-          "publisher": "Bleacher Report",
-          "url": "https://bleacherreport.com/articles/25444849-lakers-draft-cameron-carr-after-knicks-trade-watch-highlights-no-24-pick-2026-nba-draft"
+        metric: 'draftPick',
+        value: 24,
+        quality: 'VERIFIED',
+        asOf: '2026-06',
+        category: 'rising',
+        context: '2026 NBA Draft (Lakers via Knicks)',
+        source: {
+          title: 'Lakers draft Cameron Carr after Knicks trade: watch highlights, No. 24 pick 2026 NBA Draft',
+          publisher: 'Bleacher Report',
+          url: 'https://bleacherreport.com/articles/25444849-lakers-draft-cameron-carr-after-knicks-trade-watch-highlights-no-24-pick-2026-nba-draft',
         },
-        "note": "2026 NBA Draft (Lakers via Knicks). Reported by Bleacher Report; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2026 NBA Draft (Lakers via Knicks). Reported by Bleacher Report and confirmed by Fadeaway World.',
+        confirmedBy: {
+          title: 'Lakers Trade 25th Pick With Knicks To Move Up In The 2026 NBA Draft; Select Cameron Carr At No. 24',
+          publisher: 'Fadeaway World',
+          url: 'https://fadeawayworld.net/nba/los-angeles-lakers/lakers-trade-25th-pick-with-knicks-to-move-up-in-the-2026-nba-draft-select-cameron-carr-at-no-24',
+        },
+      },
+    ],
   },
   {
-    "id": "kingston-flemings",
-    "name": "Kingston Flemings",
-    "league": "NBA",
-    "position": "PG",
-    "team": "Atlanta Hawks",
-    "status": "rookie",
-    "facts": [
+    id: 'kingston-flemings',
+    name: 'Kingston Flemings',
+    league: 'NBA',
+    position: 'PG',
+    team: 'Atlanta Hawks',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 40.5,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "explosive",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "2026 NBA Draft Scouting Report: Atlanta Hawks' No. 8 Pick Kingston Flemings",
-          "publisher": "Bleacher Report",
-          "url": "https://bleacherreport.com/articles/25407564-2026-nba-draft-scouting-report-atlanta-hawks-no-8-pick-kingston-flemings"
+        metric: 'maxVerticalIn',
+        value: 40.5,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'explosive',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: '2026 NBA Draft Scouting Report: Atlanta Hawks\' No. 8 Pick Kingston Flemings',
+          publisher: 'Bleacher Report',
+          url: 'https://bleacherreport.com/articles/25407564-2026-nba-draft-scouting-report-atlanta-hawks-no-8-pick-kingston-flemings',
         },
-        "note": "2026 NBA Draft Combine. Reported by Bleacher Report; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Bleacher Report's own and was not independently checked.",
-        "rank": "ranked No. 3 among all guards that participated"
+        note: '2026 NBA Draft Combine. Reported by Bleacher Report and confirmed by Roundtable.',
+        confirmedBy: {
+          title: 'Kings draft prospects praised as combine winners',
+          publisher: 'Roundtable',
+          url: 'https://roundtable.io/sports/nba/kings/news/kings-draft-prospects-praised-as-combine-winners',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 8.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-06-23",
-        "category": "rising",
-        "context": "2026 NBA Draft, Atlanta Hawks (pick via New Orleans)",
-        "source": {
-          "title": "NBA draft: Atlanta Hawks select Kingston Flemings eighth overall",
-          "publisher": "FOX 5 Atlanta",
-          "url": "https://www.fox5atlanta.com/sports/nba-draft-atlanta-hawks-select-kingston-flemings-eighth-overall"
+        metric: 'draftPick',
+        value: 8,
+        quality: 'VERIFIED',
+        asOf: '2026-06-23',
+        category: 'rising',
+        context: '2026 NBA Draft, Atlanta Hawks (pick via New Orleans)',
+        source: {
+          title: 'NBA draft: Atlanta Hawks select Kingston Flemings eighth overall',
+          publisher: 'FOX 5 Atlanta',
+          url: 'https://www.fox5atlanta.com/sports/nba-draft-atlanta-hawks-select-kingston-flemings-eighth-overall',
         },
-        "note": "2026 NBA Draft, Atlanta Hawks (pick via New Orleans). Reported by FOX 5 Atlanta; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2026 NBA Draft, Atlanta Hawks (pick via New Orleans). Reported by FOX 5 Atlanta and confirmed by CBS News Atlanta.',
+        confirmedBy: {
+          title: 'Atlanta Hawks select Kingston Flemings with No. 8 pick in 2026 NBA Draft',
+          publisher: 'CBS News Atlanta',
+          url: 'https://www.cbsnews.com/atlanta/news/atlanta-hawks-select-kingston-flemings-with-no-8-pick-in-2026-nba-draft/',
+        },
+      },
+    ],
   },
   {
-    "id": "cameron-boozer",
-    "name": "Cameron Boozer",
-    "league": "NBA",
-    "position": "F",
-    "team": "Memphis Grizzlies",
-    "status": "rookie",
-    "facts": [
+    id: 'cameron-boozer',
+    name: 'Cameron Boozer',
+    league: 'NBA',
+    position: 'F',
+    team: 'Memphis Grizzlies',
+    status: 'rookie',
+    facts: [
       {
-        "metric": "heightIn",
-        "value": 80.25,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "bio",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine measurements: Top 5 prospects' height, weight, wingspan and more",
-          "publisher": "College Football Network",
-          "url": "https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/"
+        metric: 'heightIn',
+        value: 80.25,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'bio',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine measurements: Top 5 prospects\' height, weight, wingspan and more',
+          publisher: 'College Football Network',
+          url: 'https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/',
         },
-        "note": "2026 NBA Draft Combine. Reported by College Football Network; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by College Football Network and confirmed by Newsweek.',
+        confirmedBy: {
+          title: 'Duke\'s Cameron Boozer did what he had to do at the NBA combine',
+          publisher: 'Newsweek',
+          url: 'https://newsweek.com/sports/nba/dukes-cameron-boozer-did-what-he-had-to-do-at-the-nba-combine-11961332',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 252.8,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "bio",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine measurements: Top 5 prospects' height, weight, wingspan and more",
-          "publisher": "College Football Network",
-          "url": "https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/"
+        metric: 'weightLb',
+        value: 252.8,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'bio',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine measurements: Top 5 prospects\' height, weight, wingspan and more',
+          publisher: 'College Football Network',
+          url: 'https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/',
         },
-        "note": "2026 NBA Draft Combine. Reported by College Football Network; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by College Football Network and confirmed by NBADraft.net.',
+        confirmedBy: {
+          title: 'Cameron Boozer player profile',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/players/cameron-boozer/',
+        },
       },
       {
-        "metric": "wingspanIn",
-        "value": 85.5,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "arm",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine measurements: Top 5 prospects' height, weight, wingspan and more",
-          "publisher": "College Football Network",
-          "url": "https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/"
+        metric: 'wingspanIn',
+        value: 85.5,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'arm',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine measurements: Top 5 prospects\' height, weight, wingspan and more',
+          publisher: 'College Football Network',
+          url: 'https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/',
         },
-        "note": "2026 NBA Draft Combine. Reported by College Football Network; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by College Football Network and confirmed by Newsweek.',
+        confirmedBy: {
+          title: 'Duke\'s Cameron Boozer did what he had to do at the NBA combine',
+          publisher: 'Newsweek',
+          url: 'https://newsweek.com/sports/nba/dukes-cameron-boozer-did-what-he-had-to-do-at-the-nba-combine-11961332',
+        },
       },
       {
-        "metric": "standingReachIn",
-        "value": 108.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-05",
-        "category": "build",
-        "context": "2026 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine measurements: Top 5 prospects' height, weight, wingspan and more",
-          "publisher": "College Football Network",
-          "url": "https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/"
+        metric: 'standingReachIn',
+        value: 108,
+        quality: 'VERIFIED',
+        asOf: '2026-05',
+        category: 'build',
+        context: '2026 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine measurements: Top 5 prospects\' height, weight, wingspan and more',
+          publisher: 'College Football Network',
+          url: 'https://collegefootballnetwork.com/nba/nba-draft-combine-measurements-top-5-prospects-height-weight-wingspan-and-more/',
         },
-        "note": "2026 NBA Draft Combine. Reported by College Football Network; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2026 NBA Draft Combine. Reported by College Football Network and confirmed by Babcock Hoops.',
+        confirmedBy: {
+          title: '2026 NBA Draft Combine Measurements: height, weight, wingspan and standing reach',
+          publisher: 'Babcock Hoops',
+          url: 'https://www.babcockhoops.com/post/2026-nba-draft-combine-measurements-height-weight-wingspan-and-standing-reach',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 3.0,
-        "quality": "ESTIMATED",
-        "asOf": "2026-06-23",
-        "category": "rising",
-        "context": "2026 NBA Draft, Memphis Grizzlies",
-        "source": {
-          "title": "Wizards select BYU F Dybantsa first overall in 2026 NBA Draft",
-          "publisher": "Associated Press (via AM800 CKLW)",
-          "url": "https://www.am800cklw.com/news/wizards-select-byu-f-dybantsa-first-overall-in-2026-nba-draft/"
+        metric: 'draftPick',
+        value: 3,
+        quality: 'VERIFIED',
+        asOf: '2026-06-23',
+        category: 'rising',
+        context: '2026 NBA Draft, Memphis Grizzlies',
+        source: {
+          title: 'Wizards select BYU F Dybantsa first overall in 2026 NBA Draft',
+          publisher: 'Associated Press (via AM800 CKLW)',
+          url: 'https://www.am800cklw.com/news/wizards-select-byu-f-dybantsa-first-overall-in-2026-nba-draft/',
         },
-        "note": "2026 NBA Draft, Memphis Grizzlies. Reported by Associated Press (via AM800 CKLW); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2026 NBA Draft, Memphis Grizzlies. Reported by Associated Press (via AM800 CKLW) and confirmed by Bleacher Report.',
+        confirmedBy: {
+          title: '2026 NBA Draft Scouting Report: Memphis Grizzlies No. 3 pick Cameron Boozer',
+          publisher: 'Bleacher Report',
+          url: 'https://bleacherreport.com/articles/25407542-2026-nba-draft-scouting-report-memphis-grizzlies-no-3-pick-cameron-boozer',
+        },
+      },
+    ],
   },
   {
-    "id": "zach-lavine",
-    "name": "Zach LaVine",
-    "league": "NBA",
-    "position": "G",
-    "team": "Sacramento Kings",
-    "status": "active",
-    "facts": [
+    id: 'zach-lavine',
+    name: 'Zach LaVine',
+    league: 'NBA',
+    position: 'G',
+    team: 'Sacramento Kings',
+    status: 'active',
+    facts: [
       {
-        "metric": "laneAgilityS",
-        "value": 10.42,
-        "quality": "ESTIMATED",
-        "asOf": "2014-05",
-        "category": "fastest",
-        "context": "2014 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine: Athleticism Test Results",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/2014-nba-draft-combine-athleticism-test-analysis/"
+        metric: 'laneAgilityS',
+        value: 10.42,
+        quality: 'VERIFIED',
+        asOf: '2014-05',
+        category: 'fastest',
+        context: '2014 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine: Athleticism Test Results',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2014-nba-draft-combine-athleticism-test-analysis/',
         },
-        "note": "2014 NBA Draft Combine. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NBADraft.net's own and was not independently checked.",
-        "rank": "picked up the top lane agility at this years combine by over 1/3 of a second"
+        note: '2014 NBA Draft Combine. Reported by NBADraft.net and confirmed by NBA.com (Lakers).',
+        confirmedBy: {
+          title: '2014 NBA Draft Profile: Zach LaVine',
+          publisher: 'NBA.com (Lakers)',
+          url: 'https://www.nba.com/lakers/news/14draftprofile_lavine',
+        },
+        rank: 'picked up the top lane agility at this years combine by over 1/3 of a second',
       },
       {
-        "metric": "maxVerticalIn",
-        "value": 41.5,
-        "quality": "ESTIMATED",
-        "asOf": "2014-05",
-        "category": "explosive",
-        "context": "2014 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine: Athleticism Test Results",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/2014-nba-draft-combine-athleticism-test-analysis/"
+        metric: 'maxVerticalIn',
+        value: 41.5,
+        quality: 'VERIFIED',
+        asOf: '2014-05',
+        category: 'explosive',
+        context: '2014 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine: Athleticism Test Results',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2014-nba-draft-combine-athleticism-test-analysis/',
         },
-        "note": "2014 NBA Draft Combine. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is NBADraft.net's own and was not independently checked.",
-        "rank": "max vertical rank of T-3rd (ESPN); finished in the top 10 in all five categories"
+        note: '2014 NBA Draft Combine. Reported by NBADraft.net and confirmed by NBA.com (Lakers).',
+        confirmedBy: {
+          title: '2014 NBA Draft Profile: Zach LaVine',
+          publisher: 'NBA.com (Lakers)',
+          url: 'https://www.nba.com/lakers/news/14draftprofile_lavine',
+        },
+        rank: 'max vertical rank of T-3rd (ESPN); finished in the top 10 in all five categories',
       },
       {
-        "metric": "standingVerticalIn",
-        "value": 33.5,
-        "quality": "ESTIMATED",
-        "asOf": "2014-05",
-        "category": "explosive",
-        "context": "2014 NBA Draft Combine (no-step vertical)",
-        "source": {
-          "title": "NBA Draft Combine: Athleticism Test Results",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/2014-nba-draft-combine-athleticism-test-analysis/"
+        metric: 'standingVerticalIn',
+        value: 33.5,
+        quality: 'VERIFIED',
+        asOf: '2014-05',
+        category: 'explosive',
+        context: '2014 NBA Draft Combine (no-step vertical)',
+        source: {
+          title: 'NBA Draft Combine: Athleticism Test Results',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2014-nba-draft-combine-athleticism-test-analysis/',
         },
-        "note": "2014 NBA Draft Combine (no-step vertical). Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2014 NBA Draft Combine (no-step vertical). Reported by NBADraft.net and confirmed by NBA.com (Lakers).',
+        confirmedBy: {
+          title: '2014 NBA Draft Profile: Zach LaVine',
+          publisher: 'NBA.com (Lakers)',
+          url: 'https://www.nba.com/lakers/news/14draftprofile_lavine',
+        },
       },
       {
-        "metric": "threeQuarterSprintS",
-        "value": 3.19,
-        "quality": "ESTIMATED",
-        "asOf": "2014-05",
-        "category": "fastest",
-        "context": "2014 NBA Draft Combine",
-        "source": {
-          "title": "NBA Draft Combine: Athleticism Test Results",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/2014-nba-draft-combine-athleticism-test-analysis/"
+        metric: 'threeQuarterSprintS',
+        value: 3.19,
+        quality: 'VERIFIED',
+        asOf: '2014-05',
+        category: 'fastest',
+        context: '2014 NBA Draft Combine',
+        source: {
+          title: 'NBA Draft Combine: Athleticism Test Results',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/2014-nba-draft-combine-athleticism-test-analysis/',
         },
-        "note": "2014 NBA Draft Combine. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2014 NBA Draft Combine. Reported by NBADraft.net and confirmed by Top End Sports.',
+        confirmedBy: {
+          title: '2014 Fitness Tests for the NBA Draft (Combine)',
+          publisher: 'Top End Sports',
+          url: 'https://www.topendsports.com/sport/basketball/testing-draft-results-2014.htm',
+        },
+      },
+    ],
   },
   {
-    "id": "andre-jackson-jr",
-    "name": "Andre Jackson Jr.",
-    "league": "NBA",
-    "position": "G",
-    "team": "Milwaukee Bucks",
-    "status": "active",
-    "facts": [
+    id: 'andre-jackson-jr',
+    name: 'Andre Jackson Jr.',
+    league: 'NBA',
+    position: 'G',
+    team: 'Toronto Raptors',
+    status: 'active',
+    facts: [
       {
-        "metric": "avgSpeedMph",
-        "value": 4.83,
-        "quality": "ESTIMATED",
-        "asOf": "2024-25",
-        "category": "fastest",
-        "context": "2024-25 regular season, NBA.com player tracking (min. 41 games)",
-        "source": {
-          "title": "Which NBA Player Is Fastest on Every Team? 2024-25 Speed Rankings",
-          "publisher": "RotoWire",
-          "url": "https://www-sss-gov-phwww.rotowire.com/basketball/article/nba-fastest-player-2024-25-team-ranking-93001"
+        metric: 'avgSpeedMph',
+        value: 4.83,
+        quality: 'ESTIMATED',
+        asOf: '2024-25',
+        category: 'fastest',
+        context: '2024-25 regular season, NBA.com player tracking (min. 41 games)',
+        source: {
+          title: 'Which NBA Player Is Fastest on Every Team? 2024-25 Speed Rankings',
+          publisher: 'RotoWire',
+          url: 'https://www-sss-gov-phwww.rotowire.com/basketball/article/nba-fastest-player-2024-25-team-ranking-93001',
         },
-        "note": "2024-25 regular season, NBA.com player tracking (min. 41 games). Reported by RotoWire; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is RotoWire's own and was not independently checked.",
-        "rank": "fastest player on the Milwaukee Bucks (team-by-team ranking); highest figure in the excerpt shown"
+        note: '2024-25 regular season, NBA.com player tracking (min. 41 games). Reported by RotoWire; no independent second source turned up, so it is not marked VERIFIED. The rank wording is RotoWire\'s own and was not independently checked.',
+        rank: 'fastest player on the Milwaukee Bucks (team-by-team ranking); highest figure in the excerpt shown',
       },
       {
-        "metric": "heightIn",
-        "value": 78.0,
-        "quality": "ESTIMATED",
-        "asOf": "2025-26",
-        "category": "bio",
-        "context": "ESPN listed height (not a combine barefoot measurement)",
-        "source": {
-          "title": "Andre Jackson Jr. news",
-          "publisher": "ESPN",
-          "url": "https://africa.espn.com/nba/player/news/_/id/4432190/andre-jackson-jr"
+        metric: 'heightIn',
+        value: 78,
+        quality: 'VERIFIED',
+        asOf: '2025-26',
+        category: 'bio',
+        context: 'ESPN listed height (not a combine barefoot measurement)',
+        source: {
+          title: 'Andre Jackson Jr. news',
+          publisher: 'ESPN',
+          url: 'https://africa.espn.com/nba/player/news/_/id/4432190/andre-jackson-jr',
         },
-        "note": "ESPN listed height (not a combine barefoot measurement). Reported by ESPN; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: 'ESPN listed height (not a combine barefoot measurement). Reported by ESPN and confirmed by NBA.com.',
+        confirmedBy: {
+          title: 'Andre Jackson Jr. player bio',
+          publisher: 'NBA.com',
+          url: 'https://www.nba.com/player/1641748/andre-jackson-jr/bio',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 209.0,
-        "quality": "ESTIMATED",
-        "asOf": "2025-26",
-        "category": "bio",
-        "context": "ESPN listed weight",
-        "source": {
-          "title": "Andre Jackson Jr. news",
-          "publisher": "ESPN",
-          "url": "https://africa.espn.com/nba/player/news/_/id/4432190/andre-jackson-jr"
+        metric: 'weightLb',
+        value: 209,
+        quality: 'VERIFIED',
+        asOf: '2025-26',
+        category: 'bio',
+        context: 'ESPN listed weight',
+        source: {
+          title: 'Andre Jackson Jr. news',
+          publisher: 'ESPN',
+          url: 'https://africa.espn.com/nba/player/news/_/id/4432190/andre-jackson-jr',
         },
-        "note": "ESPN listed weight. Reported by ESPN; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: 'ESPN listed weight. Reported by ESPN and confirmed by NBA.com.',
+        confirmedBy: {
+          title: 'Andre Jackson Jr. player bio',
+          publisher: 'NBA.com',
+          url: 'https://www.nba.com/player/1641748/andre-jackson-jr/bio',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 36.0,
-        "quality": "ESTIMATED",
-        "asOf": "2023-06",
-        "category": "bio",
-        "context": "2023 NBA Draft (ESPN listing)",
-        "source": {
-          "title": "Andre Jackson Jr. news",
-          "publisher": "ESPN",
-          "url": "https://africa.espn.com/nba/player/news/_/id/4432190/andre-jackson-jr"
+        metric: 'draftPick',
+        value: 36,
+        quality: 'VERIFIED',
+        asOf: '2023-06',
+        category: 'bio',
+        context: '2023 NBA Draft (ESPN listing)',
+        source: {
+          title: 'Andre Jackson Jr. news',
+          publisher: 'ESPN',
+          url: 'https://africa.espn.com/nba/player/news/_/id/4432190/andre-jackson-jr',
         },
-        "note": "2023 NBA Draft (ESPN listing). Reported by ESPN; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2023 NBA Draft (ESPN listing). Reported by ESPN and confirmed by The UConn Blog (SB Nation).',
+        confirmedBy: {
+          title: 'Andre Jackson picked No. 36 in the NBA Draft, heading to the Milwaukee Bucks',
+          publisher: 'The UConn Blog (SB Nation)',
+          url: 'https://www.theuconnblog.com/2023/6/23/23768259/andre-jackson-picked-no-36-in-the-nba-draft-heading-to-the-milwaukee-bucks',
+        },
+      },
+    ],
   },
   {
-    "id": "derrick-rose",
-    "name": "Derrick Rose",
-    "league": "NBA",
-    "position": "PG",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2000s-2020s",
-    "facts": [
+    id: 'derrick-rose',
+    name: 'Derrick Rose',
+    league: 'NBA',
+    position: 'PG',
+    team: 'Retired',
+    status: 'legend',
+    era: '2000s-2020s',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 40.0,
-        "quality": "ESTIMATED",
-        "asOf": "2008-05",
-        "category": "explosive",
-        "context": "2008 NBA Pre-Draft Camp (Orlando)",
-        "source": {
-          "title": "Entire NBA Pre-Draft Camp Measurements, Combine Results Released",
-          "publisher": "DraftExpress",
-          "url": "https://www.draftexpress.com/amp/article/Entire-NBA-Pre-Draft-Camp-Measurements,-Combine-Results-Released-2911/"
+        metric: 'maxVerticalIn',
+        value: 40,
+        quality: 'VERIFIED',
+        asOf: '2008-05',
+        category: 'explosive',
+        context: '2008 NBA Pre-Draft Camp (Orlando)',
+        source: {
+          title: 'Entire NBA Pre-Draft Camp Measurements, Combine Results Released',
+          publisher: 'DraftExpress',
+          url: 'https://www.draftexpress.com/amp/article/Entire-NBA-Pre-Draft-Camp-Measurements,-Combine-Results-Released-2911/',
         },
-        "note": "2008 NBA Pre-Draft Camp (Orlando). Reported by DraftExpress; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2008 NBA Pre-Draft Camp (Orlando). Reported by DraftExpress and confirmed by Top End Sports.',
+        confirmedBy: {
+          title: '2008 Fitness Tests for the NBA Draft (Combine)',
+          publisher: 'Top End Sports',
+          url: 'https://www.topendsports.com/sport/basketball/testing-draft-results-2008.htm',
+        },
       },
       {
-        "metric": "threeQuarterSprintS",
-        "value": 3.05,
-        "quality": "ESTIMATED",
-        "asOf": "2008-05",
-        "category": "fastest",
-        "context": "2008 NBA Pre-Draft Camp (Orlando)",
-        "source": {
-          "title": "Entire NBA Pre-Draft Camp Measurements, Combine Results Released",
-          "publisher": "DraftExpress",
-          "url": "https://www.draftexpress.com/amp/article/Entire-NBA-Pre-Draft-Camp-Measurements,-Combine-Results-Released-2911/"
+        metric: 'threeQuarterSprintS',
+        value: 3.05,
+        quality: 'VERIFIED',
+        asOf: '2008-05',
+        category: 'fastest',
+        context: '2008 NBA Pre-Draft Camp (Orlando)',
+        source: {
+          title: 'Entire NBA Pre-Draft Camp Measurements, Combine Results Released',
+          publisher: 'DraftExpress',
+          url: 'https://www.draftexpress.com/amp/article/Entire-NBA-Pre-Draft-Camp-Measurements,-Combine-Results-Released-2911/',
         },
-        "note": "2008 NBA Pre-Draft Camp (Orlando). Reported by DraftExpress; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2008 NBA Pre-Draft Camp (Orlando). Reported by DraftExpress and confirmed by Rush the Court.',
+        confirmedBy: {
+          title: 'DJ Augustin Has Little Wee Arms (pre-draft camp numbers are here)',
+          publisher: 'Rush the Court',
+          url: 'https://rushthecourt.net/2008/06/03/predraft-camp-numbers-are-here/',
+        },
       },
       {
-        "metric": "heightIn",
-        "value": 73.5,
-        "quality": "ESTIMATED",
-        "asOf": "2008-05",
-        "category": "bio",
-        "context": "2008 NBA Pre-Draft Camp, in socks",
-        "source": {
-          "title": "Entire NBA Pre-Draft Camp Measurements, Combine Results Released",
-          "publisher": "DraftExpress",
-          "url": "https://www.draftexpress.com/amp/article/Entire-NBA-Pre-Draft-Camp-Measurements,-Combine-Results-Released-2911/"
+        metric: 'heightIn',
+        value: 73.5,
+        quality: 'ESTIMATED',
+        asOf: '2008-05',
+        category: 'bio',
+        context: '2008 NBA Pre-Draft Camp, in socks',
+        source: {
+          title: 'Entire NBA Pre-Draft Camp Measurements, Combine Results Released',
+          publisher: 'DraftExpress',
+          url: 'https://www.draftexpress.com/amp/article/Entire-NBA-Pre-Draft-Camp-Measurements,-Combine-Results-Released-2911/',
         },
-        "note": "2008 NBA Pre-Draft Camp, in socks. Reported by DraftExpress; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2008 NBA Pre-Draft Camp, in socks. Reported by DraftExpress; no independent second source turned up, so it is not marked VERIFIED.',
       },
       {
-        "metric": "wingspanIn",
-        "value": 80.0,
-        "quality": "ESTIMATED",
-        "asOf": "2008-05",
-        "category": "arm",
-        "context": "2008 NBA Pre-Draft Camp",
-        "source": {
-          "title": "Entire NBA Pre-Draft Camp Measurements, Combine Results Released",
-          "publisher": "DraftExpress",
-          "url": "https://www.draftexpress.com/amp/article/Entire-NBA-Pre-Draft-Camp-Measurements,-Combine-Results-Released-2911/"
+        metric: 'wingspanIn',
+        value: 80,
+        quality: 'VERIFIED',
+        asOf: '2008-05',
+        category: 'arm',
+        context: '2008 NBA Pre-Draft Camp',
+        source: {
+          title: 'Entire NBA Pre-Draft Camp Measurements, Combine Results Released',
+          publisher: 'DraftExpress',
+          url: 'https://www.draftexpress.com/amp/article/Entire-NBA-Pre-Draft-Camp-Measurements,-Combine-Results-Released-2911/',
         },
-        "note": "2008 NBA Pre-Draft Camp. Reported by DraftExpress; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2008 NBA Pre-Draft Camp. Reported by DraftExpress and confirmed by Sportskeeda.',
+        confirmedBy: {
+          title: 'How tall is Derrick Rose?',
+          publisher: 'Sportskeeda',
+          url: 'https://www.sportskeeda.com/basketball/derrick-rose-height',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 1.0,
-        "quality": "ESTIMATED",
-        "asOf": "2008-06",
-        "category": "bio",
-        "context": "2008 NBA Draft, Chicago Bulls",
-        "source": {
-          "title": "Derrick Rose, a No. 1 overall pick in 2008 and the 2011 NBA MVP, announces retirement",
-          "publisher": "WDIV ClickOnDetroit (AP)",
-          "url": "https://www.clickondetroit.com/topic/Derrick_Rose",
-          "published": "2024-09-26"
+        metric: 'draftPick',
+        value: 1,
+        quality: 'VERIFIED',
+        asOf: '2008-06',
+        category: 'bio',
+        context: '2008 NBA Draft, Chicago Bulls',
+        source: {
+          title: 'Derrick Rose, a No. 1 overall pick in 2008 and the 2011 NBA MVP, announces retirement',
+          publisher: 'WDIV ClickOnDetroit (AP)',
+          url: 'https://www.clickondetroit.com/topic/Derrick_Rose',
+          published: '2024-09-26',
         },
-        "note": "2008 NBA Draft, Chicago Bulls. Reported by WDIV ClickOnDetroit (AP); the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is WDIV ClickOnDetroit (AP)'s own and was not independently checked.",
-        "rank": "No. 1 overall pick in 2008"
-      }
-    ]
+        note: '2008 NBA Draft, Chicago Bulls. Reported by WDIV ClickOnDetroit (AP) and confirmed by Wikipedia.',
+        confirmedBy: {
+          title: '2008 NBA draft',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/2008_NBA_draft',
+        },
+        rank: 'No. 1 overall pick in 2008',
+      },
+    ],
   },
   {
-    "id": "blake-griffin",
-    "name": "Blake Griffin",
-    "league": "NBA",
-    "position": "PF",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2010s-2020s",
-    "facts": [
+    id: 'blake-griffin',
+    name: 'Blake Griffin',
+    league: 'NBA',
+    position: 'PF',
+    team: 'Retired',
+    status: 'legend',
+    era: '2010s-2020s',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 35.5,
-        "quality": "ESTIMATED",
-        "asOf": "2009-05",
-        "category": "explosive",
-        "context": "2009 NBA Draft Combine",
-        "source": {
-          "title": "2009 NBA Draft Combine: Athleticism Test Results",
-          "publisher": "NBADraft.net",
-          "url": "https://www.nbadraft.net/?p=83823"
+        metric: 'maxVerticalIn',
+        value: 35.5,
+        quality: 'ESTIMATED',
+        asOf: '2009-05',
+        category: 'explosive',
+        context: '2009 NBA Draft Combine',
+        source: {
+          title: '2009 NBA Draft Combine: Athleticism Test Results',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/?p=83823',
         },
-        "note": "2009 NBA Draft Combine. Reported by NBADraft.net; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2009 NBA Draft Combine. Reported by NBADraft.net; no independent second source turned up, so it is not marked VERIFIED.',
       },
       {
-        "metric": "wingspanIn",
-        "value": 83.0,
-        "quality": "ESTIMATED",
-        "asOf": "2009-05",
-        "category": "arm",
-        "context": "2009 NBA Draft Combine (pre-draft measurements)",
-        "source": {
-          "title": "2009 Pre-Draft Measurements Released",
-          "publisher": "SLAM",
-          "url": "https://www.slamonline.com/?p=34938"
+        metric: 'wingspanIn',
+        value: 83,
+        quality: 'VERIFIED',
+        asOf: '2009-05',
+        category: 'arm',
+        context: '2009 NBA Draft Combine (pre-draft measurements)',
+        source: {
+          title: '2009 Pre-Draft Measurements Released',
+          publisher: 'SLAM',
+          url: 'https://www.slamonline.com/?p=34938',
         },
-        "note": "2009 NBA Draft Combine (pre-draft measurements). Reported by SLAM; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2009 NBA Draft Combine (pre-draft measurements). Reported by SLAM and confirmed by Bleacher Report.',
+        confirmedBy: {
+          title: 'The Myth of Tyler Hansbrough',
+          publisher: 'Bleacher Report',
+          url: 'https://bleacherreport.com/articles/204280-they-myth-of-tyler-hansbrough',
+        },
       },
       {
-        "metric": "weightLb",
-        "value": 248.0,
-        "quality": "ESTIMATED",
-        "asOf": "2009-05",
-        "category": "bio",
-        "context": "2009 NBA Draft Combine (pre-draft measurements)",
-        "source": {
-          "title": "2009 Pre-Draft Measurements Released",
-          "publisher": "SLAM",
-          "url": "https://www.slamonline.com/?p=34938"
+        metric: 'weightLb',
+        value: 248,
+        quality: 'VERIFIED',
+        asOf: '2009-05',
+        category: 'bio',
+        context: '2009 NBA Draft Combine (pre-draft measurements)',
+        source: {
+          title: '2009 Pre-Draft Measurements Released',
+          publisher: 'SLAM',
+          url: 'https://www.slamonline.com/?p=34938',
         },
-        "note": "2009 NBA Draft Combine (pre-draft measurements). Reported by SLAM; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2009 NBA Draft Combine (pre-draft measurements). Reported by SLAM and confirmed by Top End Sports.',
+        confirmedBy: {
+          title: '2009 Fitness Tests for the NBA Draft (Combine)',
+          publisher: 'Top End Sports',
+          url: 'https://www.topendsports.com/sport/basketball/testing-draft-results-2009.htm',
+        },
       },
       {
-        "metric": "standingReachIn",
-        "value": 105.0,
-        "quality": "ESTIMATED",
-        "asOf": "2009-05",
-        "category": "build",
-        "context": "2009 NBA Draft Combine (pre-draft measurements)",
-        "source": {
-          "title": "2009 Pre-Draft Measurements Released",
-          "publisher": "SLAM",
-          "url": "https://www.slamonline.com/?p=34938"
+        metric: 'standingReachIn',
+        value: 105,
+        quality: 'VERIFIED',
+        asOf: '2009-05',
+        category: 'build',
+        context: '2009 NBA Draft Combine (pre-draft measurements)',
+        source: {
+          title: '2009 Pre-Draft Measurements Released',
+          publisher: 'SLAM',
+          url: 'https://www.slamonline.com/?p=34938',
         },
-        "note": "2009 NBA Draft Combine (pre-draft measurements). Reported by SLAM; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
+        note: '2009 NBA Draft Combine (pre-draft measurements). Reported by SLAM and confirmed by NBADraft.net.',
+        confirmedBy: {
+          title: 'NBA Draft Combine Measurement Analysis',
+          publisher: 'NBADraft.net',
+          url: 'https://www.nbadraft.net/nba-draft-combine-measurement-analysis',
+        },
       },
       {
-        "metric": "draftPick",
-        "value": 1.0,
-        "quality": "ESTIMATED",
-        "asOf": "2009-06",
-        "category": "bio",
-        "context": "2009 NBA Draft, LA Clippers",
-        "source": {
-          "title": "Blake Griffin announces retirement from NBA after 14 years",
-          "publisher": "ESPN",
-          "url": "https://africa.espn.com/nba/story/_/id/39955194/blake-griffin-announces-retirement-nba-14-years",
-          "published": "2024-04-16"
+        metric: 'draftPick',
+        value: 1,
+        quality: 'VERIFIED',
+        asOf: '2009-06',
+        category: 'bio',
+        context: '2009 NBA Draft, LA Clippers',
+        source: {
+          title: 'Blake Griffin announces retirement from NBA after 14 years',
+          publisher: 'ESPN',
+          url: 'https://africa.espn.com/nba/story/_/id/39955194/blake-griffin-announces-retirement-nba-14-years',
+          published: '2024-04-16',
         },
-        "note": "2009 NBA Draft, LA Clippers. Reported by ESPN; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is ESPN's own and was not independently checked.",
-        "rank": "selected first overall"
-      }
-    ]
+        note: '2009 NBA Draft, LA Clippers. Reported by ESPN and confirmed by AFPBB News.',
+        confirmedBy: {
+          title: 'クリッパーズ ブレイク・グリフィンを1巡目1位指名、NBAドラフト',
+          publisher: 'AFPBB News',
+          url: 'https://www.afpbb.com/articles/fp/2615214',
+        },
+        rank: 'selected first overall',
+      },
+    ],
   },
   {
-    "id": "nate-robinson",
-    "name": "Nate Robinson",
-    "league": "NBA",
-    "position": "PG",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2000s-2010s",
-    "facts": [
+    id: 'nate-robinson',
+    name: 'Nate Robinson',
+    league: 'NBA',
+    position: 'PG',
+    team: 'Retired',
+    status: 'legend',
+    era: '2000s-2010s',
+    facts: [
       {
-        "metric": "maxVerticalIn",
-        "value": 43.5,
-        "quality": "ESTIMATED",
-        "asOf": "2004",
-        "category": "explosive",
-        "context": "2004 NBA Pre-Draft Camp/Combine (Robinson withdrew from the 2004 draft; drafted 2005)",
-        "source": {
-          "title": "2004 Fitness Tests for the NBA Draft (Combine)",
-          "publisher": "Top End Sports",
-          "url": "https://www.topendsports.com/sport/basketball/testing-draft-results-2004.htm"
+        metric: 'maxVerticalIn',
+        value: 43.5,
+        quality: 'ESTIMATED',
+        asOf: '2004',
+        category: 'explosive',
+        context: '2004 NBA Pre-Draft Camp/Combine (Robinson withdrew from the 2004 draft; drafted 2005)',
+        source: {
+          title: '2004 Fitness Tests for the NBA Draft (Combine)',
+          publisher: 'Top End Sports',
+          url: 'https://www.topendsports.com/sport/basketball/testing-draft-results-2004.htm',
         },
-        "note": "2004 NBA Pre-Draft Camp/Combine (Robinson withdrew from the 2004 draft; drafted 2005). Reported by Top End Sports; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED. The rank wording is Top End Sports's own and was not independently checked.",
-        "rank": "tied with Tim Bowers for the top mark in that category"
+        note: '2004 NBA Pre-Draft Camp/Combine (Robinson withdrew from the 2004 draft; drafted 2005). Reported by Top End Sports; no independent second source turned up, so it is not marked VERIFIED.',
       },
       {
-        "metric": "draftPick",
-        "value": 21.0,
-        "quality": "ESTIMATED",
-        "asOf": "2005-06",
-        "category": "bio",
-        "context": "2005 NBA Draft",
-        "source": {
-          "title": "Nate Robinson",
-          "publisher": "Wikipedia",
-          "url": "https://en.wikipedia.org/wiki/Nate_Robinson"
+        metric: 'draftPick',
+        value: 21,
+        quality: 'VERIFIED',
+        asOf: '2005-06',
+        category: 'bio',
+        context: '2005 NBA Draft',
+        source: {
+          title: 'Nate Robinson',
+          publisher: 'Wikipedia',
+          url: 'https://en.wikipedia.org/wiki/Nate_Robinson',
         },
-        "note": "2005 NBA Draft. Reported by Wikipedia; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
+        note: '2005 NBA Draft. Reported by Wikipedia and confirmed by Washington Huskies (gohuskies.com).',
+        confirmedBy: {
+          title: 'Nate Robinson Picked in First Round of NBA Draft',
+          publisher: 'Washington Huskies (gohuskies.com)',
+          url: 'https://gohuskies.com/sports/2005/6/28/208015244',
+        },
+      },
+    ],
   },
   {
-    "id": "chris-paul",
-    "name": "Chris Paul",
-    "league": "NBA",
-    "position": "PG",
-    "team": "Retired",
-    "status": "legend",
-    "era": "2000s-2020s",
-    "facts": [
+    id: 'chris-paul',
+    name: 'Chris Paul',
+    league: 'NBA',
+    position: 'PG',
+    team: 'Retired',
+    status: 'legend',
+    era: '2000s-2020s',
+    facts: [
       {
-        "metric": "laneAgilityS",
-        "value": 11.09,
-        "quality": "ESTIMATED",
-        "asOf": "2005",
-        "category": "fastest",
-        "context": "2005 NBA Draft Combine (cited as a comparison point)",
-        "source": {
-          "title": "Historical analysis of NBA draft combine",
-          "publisher": "ESPN Stats & Info",
-          "url": "https://www.espn.com/blog/statsinfo/post/_/id/89876/historical-analysis-of-nba-draft-combine"
+        metric: 'laneAgilityS',
+        value: 11.09,
+        quality: 'ESTIMATED',
+        asOf: '2005',
+        category: 'fastest',
+        context: '2005 NBA Draft Combine (cited as a comparison point)',
+        source: {
+          title: 'Historical analysis of NBA draft combine',
+          publisher: 'ESPN Stats & Info',
+          url: 'https://www.espn.com/blog/statsinfo/post/_/id/89876/historical-analysis-of-nba-draft-combine',
         },
-        "note": "2005 NBA Draft Combine (cited as a comparison point). Reported by ESPN Stats & Info; the cross-check ran out of searches before reaching it, so it is not marked VERIFIED."
-      }
-    ]
-  }
+        note: '2005 NBA Draft Combine (cited as a comparison point). Reported by ESPN Stats & Info; no independent second source turned up, so it is not marked VERIFIED.',
+      },
+    ],
+  },
 ]
