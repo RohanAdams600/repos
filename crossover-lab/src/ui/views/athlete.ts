@@ -40,6 +40,11 @@ export interface AthleteScope {
   motion: MotionId
   /** Cleanup registered by the active tab. */
   onLeave(fn: () => void): void
+  /**
+   * Rebuild the figure from the athlete with `override` applied (e.g. an appearance edit), keeping
+   * the current motion. `scope.athlete` stays the stored profile; the override is cosmetic.
+   */
+  rebuild(override?: Partial<Athlete>): void
 }
 
 export function athleteView(ctx: AppContext, id: string, tab: AthleteTab): View {
@@ -49,6 +54,7 @@ export function athleteView(ctx: AppContext, id: string, tab: AthleteTab): View 
   }
   const leave: (() => void)[] = []
   let motion: MotionId = signatureMotion(athlete)
+  let shown: Athlete = athlete
   const scope: AthleteScope = {
     athlete,
     ctx,
@@ -57,7 +63,7 @@ export function athleteView(ctx: AppContext, id: string, tab: AthleteTab): View 
     setStage(m, ghost, viewYaw) {
       motion = m
       scope.motion = m
-      const stage = new ShowcaseStage(ctx.viewer.scene, athlete, m, ghost, viewYaw)
+      const stage = new ShowcaseStage(ctx.viewer.scene, shown, m, ghost, viewYaw)
       ctx.viewer.setEnvironment(['bench', 'squat', 'deadlift', 'clean'].includes(m) ? 'gym' : 'studio')
       ctx.viewer.setController(stage)
       scope.stage = stage
@@ -72,6 +78,10 @@ export function athleteView(ctx: AppContext, id: string, tab: AthleteTab): View 
     },
     onLeave(fn) {
       leave.push(fn)
+    },
+    rebuild(override) {
+      shown = override ? { ...athlete, ...override } : athlete
+      scope.setStage(motion)
     },
   }
 
