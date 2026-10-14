@@ -73,7 +73,7 @@ function weightTable(): { group: string; label: string; rows: { label: string; s
 }
 
 export function methodologyView(ctx: AppContext): View {
-  const stage = new LineupStage(ctx.viewer.scene, [...BUILT_IN], () => 'tpose', 1.9)
+  const stage = new LineupStage(ctx.viewer.scene, [...BUILT_IN], () => 'idle', 1.9)
   ctx.viewer.setEnvironment('studio')
   ctx.viewer.setController(stage)
   ctx.hud.bind(stage, { presets: ['broadcast', 'behind', 'overhead'] })
@@ -270,6 +270,7 @@ export function methodologyView(ctx: AppContext): View {
           ' from one publisher or where publishers disagree. Figures a check found wrong are left out, as are minor-league, spring-training and college figures, which are not comparable with league numbers.',
         ),
         topPublishers.length ? item(h('strong', null, 'Most-cited publishers: '), topPublishers.map(([p, n]) => `${p} (${plural(n, 'figure')})`).join(', '), '.') : null,
+        item(h('a', { href: '#about' }, 'Every source on file'), ', athlete by athlete, with links and dates. ', h('a', { href: '#import' }, 'Import a roster'), ' from a file or licensed feed export.'),
       ),
       h('h3', null, 'Licensing'),
       h(

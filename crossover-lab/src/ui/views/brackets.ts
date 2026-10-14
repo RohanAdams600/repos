@@ -27,6 +27,7 @@ import {
   type SharedLadder,
 } from '../../data/ladder-store'
 import { canChallenge, LADDER_REACH, type BracketMatch, type Ladder } from '../../sim/brackets'
+import { shortName } from '../../stage/event-stages'
 import { LineupStage } from '../../stage/lineup'
 import { signatureMotion, type MotionId } from '../../stage/motion-library'
 import { qualityChip, selectField } from '../components'
@@ -148,6 +149,7 @@ export function bracketsView(ctx: AppContext, hash: string = typeof location ===
     const seedInput = h('input', {
       id: 'br-seed',
       type: 'number',
+      style: { width: '14ch' },
       inputmode: 'numeric',
       min: '0',
       step: '1',
@@ -308,9 +310,9 @@ export function bracketsView(ctx: AppContext, hash: string = typeof location ===
     ctx.viewer.setController(stage)
     ctx.hud.bind(stage, { presets: ['broadcast', 'behind', 'overhead'], record: true })
     athletes.forEach((a, i) =>
-      ctx.viewer.addLabel(`br${i}`, h('div', { style: { '--swatch': athleteColor(i) } }, `${cast[i]?.role ?? ''} · ${a.name}`), (o) => {
+      ctx.viewer.addLabel(`br${i}`, h('div', { style: { '--swatch': athleteColor(i) }, title: a.name }, `${cast[i]?.role ?? ''} · ${shortName(a)}`), (o) => {
         stage.rigs[i]!.jointWorld('head', o)
-        o.y += 0.34
+        o.y += i % 2 ? 0.6 : 0.34
         return o
       }),
     )
