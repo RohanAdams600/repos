@@ -1,0 +1,38 @@
+name: Crossover Lab weekly standouts
+
+# The standouts lists are rebuilt for the current week every Monday from the figures on file,
+# checked against the rules (simulated values never qualify, every rank names its sample), and
+# saved as a run artifact. The job warns when the research log needs a refresh.
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: crossover-lab
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: crossover-lab/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - name: Rebuild this week's standouts
+        run: npm run standouts:report
+        env:
+          STANDOUTS_OUT: standouts-week.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: standouts-week
+          path: crossover-lab/standouts-week.json
+          retention-days: 90
