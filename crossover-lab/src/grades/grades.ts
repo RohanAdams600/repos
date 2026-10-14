@@ -58,6 +58,8 @@ export interface Grade {
   formula: string
   terms: TermResult[]
   normGroup: string
+  /** False when no input exists and the position baseline stands in (always SIMULATED). */
+  measured: boolean
 }
 
 const metric =
@@ -245,6 +247,7 @@ export function computeGrade(def: GradeDef, a: Athlete, year?: number): Grade {
     formula,
     terms,
     normGroup: GROUP_LABEL[group] ?? group,
+    measured: terms.length > 0,
   }
 }
 
@@ -302,6 +305,7 @@ function movementGrade(a: Athlete): Grade | undefined {
     formula: `${GRADE_BASE} + ${GRADE_SPREAD} × z, with z = usage-weighted movement z across ${a.pitches.length} pitches.`,
     terms: [],
     normGroup: 'MLB pitchers',
+    measured: true,
   }
 }
 
@@ -314,11 +318,33 @@ export function gradesFor(a: Athlete, year?: number): Grade[] {
   return list
 }
 
+/**
+ * How much each grade counts toward the overall, by position group. These weights are the app's
+ * own judgement of what matters at each position (documented on the methodology page), not a
+ * league formula.
+ */
 const OVERALL_WEIGHTS: Record<string, Record<string, number>> = {
+  QB: { throwAccuracy: 0.2, throwPower: 0.16, awareness: 0.14, durability: 0.08, speed: 0.06, agility: 0.06, elusiveness: 0.06, athleticism: 0.06, acceleration: 0.04, stamina: 0.04, strength: 0.04, vertical: 0.02 },
   RB: { speed: 0.14, acceleration: 0.1, agility: 0.08, elusiveness: 0.12, tackleBreaking: 0.12, strength: 0.06, catching: 0.08, routeRunning: 0.04, blocking: 0.04, awareness: 0.08, durability: 0.05, stamina: 0.04, vertical: 0.02, athleticism: 0.03 },
+  WR: { catching: 0.16, speed: 0.14, routeRunning: 0.14, acceleration: 0.1, agility: 0.1, vertical: 0.07, elusiveness: 0.06, awareness: 0.06, durability: 0.05, athleticism: 0.05, stamina: 0.04, strength: 0.03 },
+  TE: { catching: 0.14, blocking: 0.12, routeRunning: 0.1, strength: 0.1, speed: 0.08, athleticism: 0.07, acceleration: 0.06, agility: 0.06, tackleBreaking: 0.06, awareness: 0.06, durability: 0.06, vertical: 0.05, stamina: 0.04 },
+  OL: { blocking: 0.3, strength: 0.2, awareness: 0.1, agility: 0.08, durability: 0.08, acceleration: 0.06, stamina: 0.06, athleticism: 0.06, speed: 0.03, bodyComposition: 0.03 },
+  DL: { passRush: 0.26, strength: 0.18, acceleration: 0.12, agility: 0.08, awareness: 0.08, durability: 0.07, athleticism: 0.07, speed: 0.06, stamina: 0.05, vertical: 0.03 },
+  LB: { speed: 0.12, coverage: 0.12, passRush: 0.12, acceleration: 0.1, agility: 0.1, strength: 0.1, awareness: 0.1, athleticism: 0.07, durability: 0.06, stamina: 0.05, vertical: 0.04 },
+  DB: { coverage: 0.24, speed: 0.16, agility: 0.12, acceleration: 0.1, vertical: 0.08, awareness: 0.08, athleticism: 0.08, durability: 0.06, stamina: 0.05, strength: 0.03 },
+  ST: { awareness: 0.2, durability: 0.2, strength: 0.15, speed: 0.1, stamina: 0.1, athleticism: 0.1, flexibility: 0.1, agility: 0.05 },
+  H: { contact: 0.18, power: 0.18, plateDiscipline: 0.14, baserunning: 0.1, fielding: 0.08, armStrength: 0.07, speed: 0.06, durability: 0.06, awareness: 0.05, athleticism: 0.05, strength: 0.03 },
+  P: { velocity: 0.26, command: 0.22, movement: 0.22, durability: 0.1, stamina: 0.08, armStrength: 0.04, athleticism: 0.04, strength: 0.04 },
   TWP: { power: 0.14, contact: 0.12, plateDiscipline: 0.1, baserunning: 0.06, velocity: 0.1, command: 0.08, movement: 0.14, armStrength: 0.04, speed: 0.04, durability: 0.06, awareness: 0.04, strength: 0.03, athleticism: 0.03, fielding: 0.02 },
   G: { threePoint: 0.13, midRange: 0.07, finishing: 0.1, ballHandling: 0.1, passing: 0.08, perimeterDefense: 0.08, speed: 0.07, acceleration: 0.06, vertical: 0.06, agility: 0.05, awareness: 0.06, durability: 0.05, stamina: 0.04, rebounding: 0.03, blockSteal: 0.02 },
+  W: { threePoint: 0.12, perimeterDefense: 0.1, finishing: 0.1, midRange: 0.07, ballHandling: 0.07, rebounding: 0.07, passing: 0.06, speed: 0.06, vertical: 0.06, awareness: 0.06, agility: 0.05, durability: 0.05, stamina: 0.04, blockSteal: 0.04 },
+  B: { rebounding: 0.16, interiorDefense: 0.16, finishing: 0.14, blockSteal: 0.08, strength: 0.07, vertical: 0.06, midRange: 0.05, threePoint: 0.05, passing: 0.05, awareness: 0.05, durability: 0.05, stamina: 0.04, perimeterDefense: 0.04 },
 }
+
+/** An overall needs at least this share of its weight on measured grades to be shown as a number. */
+export const OVERALL_MIN_COVERAGE = 0.4
+
+const LEAGUE_DEFAULT: Record<League, string> = { NFL: 'RB', MLB: 'H', NBA: 'G' }
 
 export const OVERALL_STRETCH = 1.5
 
@@ -327,17 +353,21 @@ export interface Overall {
   quality: Quality
   /** Share of the overall's weight resting on each quality of input. */
   mix: Record<Quality, number>
-  weights: { id: string; label: string; weight: number; value: number; quality: Quality }[]
+  weights: { id: string; label: string; weight: number; value: number; quality: Quality; measured: boolean }[]
   formula: string
+  /** Share of the weight resting on grades with real inputs (not position baselines). */
+  coverage: number
+  /** False when coverage is below OVERALL_MIN_COVERAGE: show "not enough data", not a number. */
+  enough: boolean
 }
 
 export function overall(a: Athlete, grades = gradesFor(a)): Overall {
   const group = groupFor(a.positionGroup, a.league)
-  const weights = OVERALL_WEIGHTS[group] ?? {}
+  const weights: Record<string, number> = OVERALL_WEIGHTS[group] ?? OVERALL_WEIGHTS[LEAGUE_DEFAULT[a.league]] ?? {}
   const rows: Overall['weights'] = []
   for (const [id, weight] of Object.entries(weights)) {
     const g = grades.find((x) => x.id === id)
-    if (g) rows.push({ id, label: g.label, weight, value: g.value, quality: g.quality })
+    if (g) rows.push({ id, label: g.label, weight, value: g.value, quality: g.quality, measured: g.measured })
   }
   const total = rows.reduce((s, r) => s + r.weight, 0) || 1
   const average = rows.reduce((s, r) => s + (r.weight / total) * r.value, 0)
@@ -349,10 +379,13 @@ export function overall(a: Athlete, grades = gradesFor(a)): Overall {
   // VERIFIED only when at least 80% of the weight rests on verified grades; SIMULATED as soon as
   // a fifth of it rests on simulated ones.
   const quality: Quality = mix.SIMULATED >= 0.2 ? 'SIMULATED' : mix.SIMULATED + mix.ESTIMATED >= 0.2 ? 'ESTIMATED' : 'VERIFIED'
+  const coverage = rows.reduce((s, r) => s + (r.measured ? r.weight / total : 0), 0)
   return {
     value,
     quality,
     mix,
+    coverage,
+    enough: coverage >= OVERALL_MIN_COVERAGE,
     weights: rows,
     formula: `${GRADE_BASE} + ${OVERALL_STRETCH} × (weighted average − ${GRADE_BASE}) over ${rows.length} grades with ${GROUP_LABEL[group] ?? group} weights: ${rows
       .slice()
